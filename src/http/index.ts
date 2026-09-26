@@ -22,9 +22,12 @@ import {
   evaluate,
   levelUp,
   levelUpOptions,
+  previewChange,
   removeLastLevel,
   STEP_TITLES,
   setChoice,
+  setLevelClass,
+  setLevelHp,
 } from "../services/builder";
 import {
   isAlive,
@@ -79,6 +82,14 @@ const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(
 const LevelUpRequest = BuildRequest.extend({
   class_id: z.string(),
   hp: z.int().nullable().default(null),
+});
+const LevelClassRequest = BuildRequest.extend({ level: z.int().min(1), class_id: z.string() });
+const LevelHpRequest = BuildRequest.extend({ level: z.int().min(2), hp: z.int().nullable() });
+const PreviewRequest = BuildRequest.extend({
+  key: z.string().optional(),
+  values: z.array(z.string()).optional(),
+  level: z.int().min(1).optional(),
+  class_id: z.string().optional(),
 });
 const SpellStatsRequest = z.object({
   caster: CharacterSchema,
@@ -261,8 +272,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
             level: c.level,
             step: c.step,
             step_title: STEP_TITLES[c.step],
-            count: c.definition.count,
+            count: c.replaces ? 2 : res.countOf(c),
             required: res.required(c),
+            // A replacement: answer [old, new]; `options` are the possible new picks.
+            replaces: c.replaces ? { family: c.replaces.id, label: c.replaces.label } : null,
+            replace_old_options: c.replaces ? res.replaceOld(c) : null,
             hint: c.definition.hint,
             source: c.source.name,
             fixed: c.fixed,
@@ -286,6 +300,41 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       handle: ({ body }) => {
         const req = LevelUpRequest.parse(body);
         return levelUp(parseBuild(req.build), getCatalog(), req.class_id, req.hp);
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/set-level-class$/,
+      handle: ({ body }) => {
+        const req = LevelClassRequest.parse(body);
+        return setLevelClass(parseBuild(req.build), getCatalog(), req.level, req.class_id);
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/set-level-hp$/,
+      handle: ({ body }) => {
+        const req = LevelHpRequest.parse(body);
+        return setLevelHp(parseBuild(req.build), getCatalog(), req.level, req.hp);
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/preview$/,
+      handle: ({ body }) => {
+        // Preview a set-choice or set-level-class change without applying it.
+        const req = PreviewRequest.parse(body);
+        const build = parseBuild(req.build);
+        const cat = getCatalog();
+        if (req.key !== undefined) {
+          const { key, values } = req;
+          return previewChange(build, cat, (b) => setChoice(b, cat, key, values ?? []), key);
+        }
+        if (req.level !== undefined && req.class_id !== undefined) {
+          const { level, class_id } = req;
+          return previewChange(build, cat, (b) => setLevelClass(b, cat, level, class_id));
+        }
+        throw new HttpError(422, "Give either `key` and `values`, or `level` and `class_id`");
       },
     },
     {

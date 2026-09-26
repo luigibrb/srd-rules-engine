@@ -590,7 +590,7 @@ function spellcastingSummary(
     // A choice that others prepare from (a spellbook) isn't itself prepared.
     const tag = choice.definition.tag;
     const isPool = tag !== null && res.choices.some((c) => c.definition.subset_of === tag);
-    for (const id of res.selected(choice)) {
+    for (const id of res.contributed(choice)) {
       if (isPool) spellbook.push(id);
       else add(id, choice.source.name, choice.definition.always_prepared);
     }

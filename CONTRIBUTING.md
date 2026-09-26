@@ -16,6 +16,10 @@ Node 22.18 or newer is required (`.nvmrc` pins 24).
 
 1. Edit or add YAML under `content/srd-5.2.1/` (a class is `classes/<id>.yaml`). Transcribe
    from the SRD 5.2.1. Don't copy text from any other source, and summarize long trait text.
+   Class levels 2–20, subclasses, invocations and Metamagic are generated: change their
+   mechanics in the overlay tables of `scripts/import-srd-classes.py` and run
+   `npm run content:import-classes` (needs Python 3 + PyYAML and the SRD Markdown in
+   `data/srd-5-2-1/`), not the generated YAML. Spells come from `npm run content:import-spells`.
 2. Run `npm run content`. It validates everything (schemas and cross-references) and
    regenerates the bundled JSON and JSON Schemas. Commit the generated files too.
 3. Add a test with a concrete character in `tests/sheet.test.ts`, e.g. "a level 1 Wizard with

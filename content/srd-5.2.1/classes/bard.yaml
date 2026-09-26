@@ -72,6 +72,8 @@ features:
       spell_level: 0
       spell_list: bard
       hint: Dancing Lights and Vicious Mockery are recommended.
+      tag: bard-cantrips
+      swap: class_level
     - id: prepared
       label: Bard prepared spells
       kind: spell
@@ -79,6 +81,8 @@ features:
       spell_level: 1
       spell_list: bard
       hint: Charm Person, Color Spray, Dissonant Whispers, and Healing Word are recommended.
+      tag: bard-prepared
+      swap: class_level
   '2':
     traits:
     - name: Expertise
@@ -98,6 +102,8 @@ features:
       count: 1
       max_spell_level: 1
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
     - {id: expertise, label: Bard Expertise, kind: expertise, count: 2}
     effects:
     - {target: skill.unproficient, value: half_prof}
@@ -116,6 +122,8 @@ features:
       count: 1
       max_spell_level: 2
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '4':
     traits:
     - name: Ability Score Improvement
@@ -132,12 +140,16 @@ features:
       count: 1
       spell_level: 0
       spell_list: bard
+      tag: bard-cantrips
+      swap: class_level
     - id: prepared
       label: Bard prepared spells
       kind: spell
       count: 1
       max_spell_level: 2
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '5':
     traits:
     - name: Font of Inspiration
@@ -152,6 +164,8 @@ features:
       count: 2
       max_spell_level: 3
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '6':
     choices:
     - id: prepared
@@ -160,6 +174,8 @@ features:
       count: 1
       max_spell_level: 3
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '7':
     traits:
     - name: Countercharm
@@ -174,6 +190,8 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '8':
     choices:
     - id: feat
@@ -186,6 +204,8 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
   '9':
     choices:
     - id: prepared
@@ -194,6 +214,8 @@ features:
       count: 2
       max_spell_level: 5
       spell_list: bard
+      tag: bard-prepared
+      swap: class_level
     - {id: expertise, label: Bard Expertise, kind: expertise, count: 2}
   '10':
     traits:
@@ -211,6 +233,8 @@ features:
       count: 1
       spell_level: 0
       spell_list: bard
+      tag: bard-cantrips
+      swap: class_level
     - id: prepared
       label: Bard prepared spells
       kind: spell
@@ -218,6 +242,8 @@ features:
       max_spell_level: 5
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '11':
     choices:
     - id: prepared
@@ -227,6 +253,8 @@ features:
       max_spell_level: 6
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '12':
     choices:
     - id: feat
@@ -242,6 +270,8 @@ features:
       max_spell_level: 7
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '15':
     choices:
     - id: prepared
@@ -251,6 +281,8 @@ features:
       max_spell_level: 8
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '16':
     choices:
     - id: feat
@@ -266,6 +298,8 @@ features:
       max_spell_level: 9
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '18':
     traits:
     - name: Superior Inspiration
@@ -279,6 +313,8 @@ features:
       max_spell_level: 9
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '19':
     traits:
     - name: Epic Boon
@@ -297,6 +333,8 @@ features:
       max_spell_level: 9
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
   '20':
     traits:
     - name: Words of Creation
@@ -312,4 +350,6 @@ features:
       max_spell_level: 9
       spell_list: [bard, cleric, druid, wizard]
       hint: 'Magical Secrets: from the Bard, Cleric, Druid, or Wizard list.'
+      tag: bard-prepared
+      swap: class_level
     spells: [power-word-heal, power-word-kill]

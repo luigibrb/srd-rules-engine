@@ -19,6 +19,20 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Replacements on level-up, following each SRD rule: "whenever you gain a level, you can
+  replace one…" features (cantrips and prepared spells of Bards, Sorcerers and Warlocks; Cleric
+  and Druid cantrips; Invocations; Metamagic; Mystic Arcanum; the Fighter's Fighting Style;
+  Blessed and Druidic Warrior cantrips; Magical Discoveries; Magic Initiate on any level-up)
+  get one optional `[old, new]` replacement per level. "After a Long Rest" lists (Cleric,
+  Druid, Paladin, Ranger and Wizard prepared spells, Wizard cantrips, Weapon Mastery) are
+  single lists that grow with the class and can be changed at any time.
+- Override mode: change any past choice, a past level's class (`setLevelClass`) or its Hit
+  Points. Picks are judged as of their own level, so later picks that stop fitting are
+  removed and asked again while the rest is kept; `previewChange` shows the effect first; every
+  setter refuses a change that would leave the character illegal. CLI `edit`; HTTP `preview`,
+  `set-level-class`, `set-level-hp`.
+- `scripts/import-srd-classes.py` (`npm run content:import-classes`): the generator of class
+  levels 2–20, subclasses, invocations, Metamagic and feats.
 - Level-up to 20, in the style of Baldur's Gate 3: `levelUp`, `setLevelHp`, `removeLastLevel`,
   `levelUpOptions`; builds store `levels: [{ class_id, hp }]`. Multiclassing with its
   prerequisites, partial proficiencies, combined spell slots and separate Pact Magic.

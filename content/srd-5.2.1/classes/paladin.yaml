@@ -71,9 +71,11 @@ features:
       label: Paladin prepared spells
       kind: spell
       count: 2
-      spell_level: 1
       spell_list: paladin
-      hint: Heroism and Searing Smite are recommended.
+      hint: Heroism and Searing Smite are recommended. You can change these after a Long Rest.
+      scaling:
+        count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
+        max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
@@ -89,13 +91,8 @@ features:
     - name: Paladin's Smite
       text: You always have the _Divine Smite_ spell prepared. In addition, you can cast it without expending
         a spell slot, but you must finish a Long Rest before you can cast it in this way again.
+    spells: [divine-smite]
     choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: paladin
     - id: fighting_style
       label: Fighting Style
       kind: option
@@ -118,7 +115,8 @@ features:
             spell_level: 0
             spell_list: cleric
             hint: Guidance and Sacred Flame are recommended.
-    spells: [divine-smite]
+            tag: paladin-blessed-warrior
+            swap: class_level
   '3':
     traits:
     - name: Channel Divinity
@@ -144,12 +142,6 @@ features:
         Paladin level or lower.
     choices:
     - {id: subclass, label: Paladin subclass, kind: subclass}
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: paladin
   '4':
     traits:
     - name: Ability Score Improvement
@@ -160,12 +152,6 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: paladin
   '5':
     traits:
     - name: Extra Attack
@@ -175,13 +161,6 @@ features:
         You can call on the aid of an otherworldly steed. You always have the _Find Steed_ spell prepared.
 
         You can also cast the spell once without expending a spell slot, and you regain the ability to do so when you finish a Long Rest.
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: paladin
     effects:
     - {target: attacks, op: max, value: 2}
     spells: [find-steed]
@@ -196,14 +175,6 @@ features:
         If another Paladin is present, a creature can benefit from only one Aura of Protection at a time; the creature chooses which aura while in them.
     effects:
     - {target: saves, value: cha, min: 1}
-  '7':
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: paladin
   '8':
     choices:
     - id: feat
@@ -219,13 +190,6 @@ features:
         Each target must succeed on a Wisdom saving throw or have the Frightened condition for 1 minute
         or until it takes any damage. While Frightened in this way, a target can do only one of the following
         on its turns: move, take an action, or take a Bonus Action.'
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 3
-      spell_list: paladin
   '10':
     traits:
     - name: Aura of Courage
@@ -236,27 +200,12 @@ features:
     - name: Radiant Strikes
       text: Your strikes now carry supernatural power. When you hit a target with an attack roll using
         a Melee weapon or an Unarmed Strike, the target takes an extra 1d8 Radiant damage.
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 3
-      spell_list: paladin
   '12':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '13':
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: paladin
   '14':
     traits:
     - name: Restoring Touch
@@ -264,28 +213,12 @@ features:
         conditions from the creature: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. You
         must expend 5 Hit Points from the healing pool of Lay On Hands for each of these conditions you
         remove; those points don''t also restore Hit Points to the creature.'
-  '15':
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: paladin
   '16':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '17':
-    choices:
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 5
-      spell_list: paladin
   '18':
     traits:
     - name: Aura Expansion
@@ -301,9 +234,3 @@ features:
       kind: feat
       category: [epic_boon, general, origin, fighting_style]
       hint: An Epic Boon feat, or another feat you qualify for.
-    - id: prepared
-      label: Paladin prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 5
-      spell_list: paladin

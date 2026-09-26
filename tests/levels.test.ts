@@ -79,6 +79,8 @@ describe("level-up basics", () => {
     const ev = evaluate(three, catalog);
     expect(ev.resolution.choicesForLevel(3).map((c) => c.key)).toEqual([
       "class:fighter:3#subclass",
+      // Optional: "Whenever you gain a Fighter level, you can replace the feat you chose".
+      "class:fighter:3#replace:fighter:fighter-style",
     ]);
     expect(issuesForLevel(ev.report, 3).map((i) => i.message)).toEqual([
       "Fighter subclass: choose 1 more",

@@ -701,6 +701,75 @@
             "null"
           ]
         },
+        "scaling": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "minItems": 20,
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "max_spell_level": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "minItems": 20,
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "swap": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "class_level",
+                "any_level"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "same_level": {
+          "default": false,
+          "type": "boolean"
+        },
         "weapon_kind": {
           "default": null,
           "anyOf": [

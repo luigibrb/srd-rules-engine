@@ -11,7 +11,7 @@ import {
   skillName,
   titleCase,
 } from "../models/content";
-import type { ActiveSource } from "../rules/build-resolution";
+import { type ActiveSource, entityName } from "../rules/build-resolution";
 import { issuesForLevel, issuesForStep } from "../rules/build-validation";
 import { abilityModifier, signed } from "../rules/dice";
 import { explainStat } from "../rules/sheet";
@@ -172,8 +172,10 @@ export function levelSummary(ev: Evaluation, level: number): string {
     .filter((s) => s.level === level && s.feat === null)
     .flatMap((s) => s.grants.traits.map((t) => t.name));
   const picks = ev.resolution.choicesForLevel(level).flatMap((c) => {
-    const views = new Map(ev.resolution.options(c).map((v) => [v.id, v.name]));
-    return ev.resolution.selected(c).map((v) => views.get(v) ?? v);
+    const catalog = ev.resolution.catalog;
+    const picks = ev.resolution.selected(c).map((v) => entityName(catalog, v) ?? v);
+    if (c.replaces) return picks.length === 2 ? [picks.join(" → ")] : [];
+    return picks;
   });
   return [...new Set([...names, ...picks])].join(", ");
 }

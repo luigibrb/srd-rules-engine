@@ -85,6 +85,8 @@ features:
             kind: spell
             spell_level: 0
             spell_list: druid
+            tag: druid-cantrips
+            swap: class_level
       - id: warden
         name: Warden
         description: Trained for battle, you gain proficiency with Martial weapons and training with Medium
@@ -99,13 +101,18 @@ features:
       spell_level: 0
       spell_list: druid
       hint: Druidcraft and Produce Flame are recommended.
+      tag: druid-cantrips
+      swap: class_level
     - id: prepared
       label: Druid prepared spells
       kind: spell
       count: 4
-      spell_level: 1
       spell_list: druid
-      hint: Animal Friendship, Cure Wounds, Faerie Fire, and Thunderwave are recommended.
+      hint: Animal Friendship, Cure Wounds, Faerie Fire, and Thunderwave are recommended. You can change
+        these after a Long Rest.
+      scaling:
+        count: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22]
+        max_spell_level: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
   '2':
     traits:
     - name: Wild Shape
@@ -169,13 +176,6 @@ features:
         You can summon a nature spirit that assumes an animal form to aid you. As a Magic action, you can expend a spell slot or a use of Wild Shape to cast the _Find Familiar_ spell without Material components.
 
         When you cast the spell in this way, the familiar is Fey and disappears when you finish a Long Rest.
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: druid
   '3':
     traits:
     - name: Druid Subclass
@@ -185,12 +185,6 @@ features:
         Druid level or lower.
     choices:
     - {id: subclass, label: Druid subclass, kind: subclass}
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: druid
   '4':
     traits:
     - name: Ability Score Improvement
@@ -207,12 +201,8 @@ features:
       count: 1
       spell_level: 0
       spell_list: druid
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: druid
+      tag: druid-cantrips
+      swap: class_level
   '5':
     traits:
     - name: Wild Resurgence
@@ -220,21 +210,6 @@ features:
         Once on each of your turns, if you have no uses of Wild Shape left, you can give yourself one use by expending a spell slot (no action required).
 
         In addition, you can expend one use of Wild Shape (no action required) to give yourself a level 1 spell slot, but you can't do so again until you finish a Long Rest.
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 3
-      spell_list: druid
-  '6':
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 3
-      spell_list: druid
   '7':
     traits:
     - name: Elemental Fury
@@ -245,12 +220,6 @@ features:
 
         _Primal Strike._ Once on each of your turns when you hit a creature with an attack roll using a weapon or a Beast form's attack in Wild Shape, you can cause the target to take an extra 1d8 Cold, Fire, Lightning, or Thunder damage (choose when you hit).
     choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: druid
     - id: elemental_fury
       label: Elemental Fury
       kind: option
@@ -268,20 +237,6 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: druid
-  '9':
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 5
-      spell_list: druid
   '10':
     choices:
     - id: cantrips
@@ -290,34 +245,14 @@ features:
       count: 1
       spell_level: 0
       spell_list: druid
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 5
-      spell_list: druid
-  '11':
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 6
-      spell_list: druid
+      tag: druid-cantrips
+      swap: class_level
   '12':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '13':
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 7
-      spell_list: druid
   '15':
     traits:
     - name: Improved Elemental Fury
@@ -327,39 +262,17 @@ features:
         _Potent Spellcasting._ When you cast a Druid cantrip with a range of 10 feet or greater, the spell's range increases by 300 feet.
 
         _Primal Strike._ The extra damage of your Primal Strike increases to 2d8.
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 8
-      spell_list: druid
   '16':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '17':
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: druid
   '18':
     traits:
     - name: Beast Spells
       text: While using Wild Shape, you can cast spells in Beast form, except for any spell that has a
         Material component with a cost specified or that consumes its Material component.
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: druid
   '19':
     traits:
     - name: Epic Boon
@@ -371,12 +284,6 @@ features:
       kind: feat
       category: [epic_boon, general, origin, fighting_style]
       hint: An Epic Boon feat, or another feat you qualify for.
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: druid
   '20':
     traits:
     - name: Archdruid
@@ -388,10 +295,3 @@ features:
         _Nature Magician._ You can convert uses of Wild Shape into a spell slot (no action required). Choose a number of your unexpended uses of Wild Shape and convert them into a single spell slot, with each use contributing 2 spell levels. For example, if you convert two uses of Wild Shape, you produce a level 4 spell slot. Once you use this benefit, you can't do so again until you finish a Long Rest.
 
         _Longevity._ The primal magic that you wield causes you to age more slowly. For every ten years that pass, your body ages only one year.
-    choices:
-    - id: prepared
-      label: Druid prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: druid

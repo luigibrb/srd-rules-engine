@@ -18,7 +18,7 @@
  * - feature source: `feature:<feature id>@<choice key>` (Eldritch Invocations, Metamagic)
  */
 
-import { type Catalog, lookup } from "../content/catalog";
+import { type Catalog, lookup, TABLE_NAMES } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import {
   ABILITIES,
@@ -73,6 +73,21 @@ export interface ActiveChoice {
   readonly level: number;
   /** Answer pre-filled by the granting source (e.g. Acolyte's Magic Initiate list). */
   readonly fixed: readonly string[] | null;
+  /**
+   * For a replacement ("whenever you gain a level, you can replace one…"): the family it
+   * replaces from. Its answer is `[old, new]`, or nothing to keep everything.
+   */
+  readonly replaces: SwapFamily | null;
+}
+
+/** Choices whose picks can be replaced one at a time (same `tag`, same class or feat). */
+export interface SwapFamily {
+  readonly id: string;
+  readonly tag: string;
+  readonly label: string;
+  /** Keys of the family's own choices (not the replacements). */
+  readonly members: readonly string[];
+  readonly same_level: boolean;
 }
 
 /** One level of the character: which class it went into. */
@@ -125,6 +140,7 @@ function activeChoice(src: ActiveSource, definition: ChoiceDef): ActiveChoice {
     step: choiceStep(definition),
     level: src.level,
     fixed: value !== undefined ? [value] : null,
+    replaces: null,
   };
 }
 
@@ -152,7 +168,74 @@ export class Resolution {
     readonly choices: readonly ActiveChoice[],
     /** Every character level with the class it went into, in order. */
     readonly levels: readonly ClassLevel[],
+    /** Replays the picks and replacements of each swap family. */
+    private readonly ledger: SwapLedger = new SwapLedger([]),
   ) {}
+
+  // --- effective picks (after replacements) -----------------------------------------------
+
+  /**
+   * What a choice contributes to the character as of `atLevel`: its picks, minus any replaced
+   * at a later level; for a replacement, the new pick. Aggregations use this; `selected()` is
+   * the raw stored answer.
+   */
+  contributed(choice: ActiveChoice, atLevel = Number.POSITIVE_INFINITY): readonly string[] {
+    if (choice.level > atLevel) return [];
+    return this.ledger.owned(choice.key, atLevel) ?? this.selected(choice);
+  }
+
+  /** Final values of a swap-family choice by key (`undefined` outside families). */
+  ownedByKey(key: string): readonly string[] | undefined {
+    return this.ledger.owned(key);
+  }
+
+  /** The family's picks you have just before a replacement's level: what you may replace. */
+  replaceOld(choice: ActiveChoice): OptionView[] {
+    const family = choice.replaces;
+    if (!family) return [];
+    const before = choice.level - 1;
+    const values = this.ledger.familyValues(family.id, before);
+    const required = new Map<string, string>();
+    for (const src of this.featureSources(before)) {
+      for (const id of src.feature.prerequisite?.requires ?? []) required.set(id, src.name);
+    }
+    return values.map((id) => {
+      const name = entityName(this.catalog, id) ?? id;
+      const needed = required.get(id);
+      return view(id, name, "", needed ? `${needed} requires it` : null);
+    });
+  }
+
+  /** What can replace `old` (all replacements when `old` isn't chosen yet). */
+  replaceNew(choice: ActiveChoice, old?: string): OptionView[] {
+    const oldLevel = old !== undefined ? lookup(this.catalog.spells, old)?.level : undefined;
+    return this.options(choice).filter(
+      (o) =>
+        o.id !== old &&
+        (!choice.replaces?.same_level ||
+          oldLevel === undefined ||
+          lookup(this.catalog.spells, o.id)?.level === oldLevel),
+    );
+  }
+
+  /** How many picks a choice has: its `count`, or its size at the class's current level. */
+  countOf(choice: ActiveChoice): number {
+    const byLevel = choice.definition.scaling?.count;
+    if (!byLevel) return choice.definition.count;
+    return byLevel[this.currentClassLevel(choice) - 1] ?? choice.definition.count;
+  }
+
+  /** The highest spell level a spell choice allows right now. */
+  maxSpellLevelOf(choice: ActiveChoice): number | null {
+    const byLevel = choice.definition.scaling?.max_spell_level;
+    if (!byLevel) return choice.definition.max_spell_level;
+    return byLevel[this.currentClassLevel(choice) - 1] ?? choice.definition.max_spell_level;
+  }
+
+  private currentClassLevel(choice: ActiveChoice): number {
+    const id = choice.source.class_id;
+    return (id && this.classLevels().get(id)) || 1;
+  }
 
   get characterLevel(): number {
     return 1 + this.build.levels.length;
@@ -171,7 +254,9 @@ export class Resolution {
    * A spell choice whose list depends on an unanswered choice still needs its full count.
    */
   required(choice: ActiveChoice): number {
-    const { count, kind, spell_list } = choice.definition;
+    if (choice.replaces) return 0;
+    const count = this.countOf(choice);
+    const { kind, spell_list } = choice.definition;
     if (kind !== "expertise" && kind !== "spell") return count;
     if (kind === "spell" && spell_list?.some((l) => this.resolveRef(choice.source, l) === null)) {
       return count;
@@ -197,7 +282,9 @@ export class Resolution {
     const order: Step[] = ["features", "spells", "proficiencies", "languages"];
     const rank = (c: ActiveChoice) => (order.includes(c.step) ? order.indexOf(c.step) : -1);
     const atLevel = this.choices.filter((c) => c.level === level && c.fixed === null);
-    return expertiseLast([...atLevel].sort((a, b) => rank(a) - rank(b)));
+    const sorted = expertiseLast([...atLevel].sort((a, b) => rank(a) - rank(b)));
+    // New picks first, then the optional replacements.
+    return [...sorted.filter((c) => !c.replaces), ...sorted.filter((c) => c.replaces)];
   }
 
   /** Another choice declared by the same source, by its id (e.g. Magic Initiate's `spell_list`). */
@@ -218,12 +305,17 @@ export class Resolution {
   private *selections(
     kinds: readonly ChoiceKind[],
     exclude?: string,
+    atLevel = Number.POSITIVE_INFINITY,
   ): Generator<[string, ActiveChoice]> {
     for (const c of this.choices) {
-      if (kinds.includes(c.definition.kind) && c.key !== exclude) {
-        for (const value of this.selected(c)) yield [value, c];
+      if (kinds.includes(c.definition.kind) && c.key !== exclude && c.level <= atLevel) {
+        for (const value of this.contributed(c, atLevel)) yield [value, c];
       }
     }
+  }
+
+  private sourcesAt(atLevel: number): ActiveSource[] {
+    return this.sources.filter((s) => s.level <= atLevel);
   }
 
   // --- classes and levels -----------------------------------------------------------------
@@ -313,8 +405,8 @@ export class Resolution {
       }
     }
     const owned = new Set(
-      this.sources
-        .filter((s) => s.level <= level && !s.key.endsWith(`@${excludeChoice}`))
+      this.sourcesAt(level)
+        .filter((s) => !s.key.endsWith(`@${excludeChoice}`))
         .flatMap((s) => [s.feat?.id, s.feature?.id])
         .filter((id): id is string => id !== undefined),
     );
@@ -332,7 +424,7 @@ export class Resolution {
       if (!has) return `requires the ${pre.trait} feature`;
     }
     if (pre.spells.length) {
-      const known = this.spells(new Set(excludeChoice ? [excludeChoice] : []));
+      const known = this.spells(new Set(excludeChoice ? [excludeChoice] : []), level);
       if (!pre.spells.some((id) => known.has(id))) {
         const names = pre.spells.map((id) => lookup(this.catalog.spells, id)?.name ?? id);
         return `requires knowing ${names.join(" or ")}`;
@@ -347,37 +439,40 @@ export class Resolution {
 
   // --- aggregated grants (fixed + selected) ---------------------------------------------
 
-  /** Skill → name of the source that made you proficient. */
-  skills(excludeChoice?: string): Map<Skill, string> {
+  /**
+   * Skill → name of the source that made you proficient. With `atLevel`, only what you had at
+   * that character level: a choice is judged against the character as it was when it was made.
+   */
+  skills(excludeChoice?: string, atLevel = Number.POSITIVE_INFINITY): Map<Skill, string> {
     const owned = new Map<Skill, string>();
-    for (const src of this.sources) {
+    for (const src of this.sourcesAt(atLevel)) {
       for (const skill of src.grants.skills) setDefault(owned, skill, src.name);
     }
-    for (const [value, c] of this.selections(["skill", "skill_or_tool"], excludeChoice)) {
+    for (const [value, c] of this.selections(["skill", "skill_or_tool"], excludeChoice, atLevel)) {
       if (isSkill(value)) setDefault(owned, value, c.source.name);
     }
     return owned;
   }
 
   /** Tool id → name of the source that made you proficient. */
-  tools(excludeChoice?: string): Map<string, string> {
+  tools(excludeChoice?: string, atLevel = Number.POSITIVE_INFINITY): Map<string, string> {
     const owned = new Map<string, string>();
-    for (const src of this.sources) {
+    for (const src of this.sourcesAt(atLevel)) {
       for (const tool of src.grants.tools) setDefault(owned, tool, src.name);
     }
-    for (const [value, c] of this.selections(["tool", "skill_or_tool"], excludeChoice)) {
+    for (const [value, c] of this.selections(["tool", "skill_or_tool"], excludeChoice, atLevel)) {
       if (lookup(this.catalog.tools, value)) setDefault(owned, value, c.source.name);
     }
     return owned;
   }
 
   /** Language id → name of the source that taught it. */
-  languages(excludeChoice?: string): Map<string, string> {
+  languages(excludeChoice?: string, atLevel = Number.POSITIVE_INFINITY): Map<string, string> {
     const owned = new Map<string, string>();
-    for (const src of this.sources) {
+    for (const src of this.sourcesAt(atLevel)) {
       for (const lang of src.grants.languages) setDefault(owned, lang, src.name);
     }
-    for (const [value, c] of this.selections(["language"], excludeChoice)) {
+    for (const [value, c] of this.selections(["language"], excludeChoice, atLevel)) {
       setDefault(owned, value, c.source.name);
     }
     return owned;
@@ -387,9 +482,12 @@ export class Resolution {
    * Spell id → name of the source that gives it: granted cantrips and always-prepared spells,
    * plus every spell choice (except the given choice keys).
    */
-  spells(excludeChoices: ReadonlySet<string> = new Set()): Map<string, string> {
+  spells(
+    excludeChoices: ReadonlySet<string> = new Set(),
+    atLevel = Number.POSITIVE_INFINITY,
+  ): Map<string, string> {
     const owned = new Map<string, string>();
-    for (const src of this.sources) {
+    for (const src of this.sourcesAt(atLevel)) {
       for (const id of [...src.grants.cantrips, ...src.grants.spells]) {
         setDefault(owned, id, src.name);
       }
@@ -398,26 +496,30 @@ export class Resolution {
       // A known_only choice points at spells you already have; it doesn't teach one.
       if (c.definition.kind !== "spell" || c.definition.known_only || excludeChoices.has(c.key))
         continue;
-      for (const value of this.selected(c)) setDefault(owned, value, c.source.name);
+      for (const value of this.contributed(c, atLevel)) setDefault(owned, value, c.source.name);
     }
     return owned;
   }
 
   /** Skill → name of the source that gave you Expertise in it. */
-  expertise(excludeChoice?: string): Map<Skill, string> {
+  expertise(excludeChoice?: string, atLevel = Number.POSITIVE_INFINITY): Map<Skill, string> {
     const owned = new Map<Skill, string>();
-    for (const [value, c] of this.selections(["expertise"], excludeChoice)) {
+    for (const [value, c] of this.selections(["expertise"], excludeChoice, atLevel)) {
       if (isSkill(value)) setDefault(owned, value, c.source.name);
     }
     return owned;
   }
 
-  featSources(): (ActiveSource & { feat: FeatDef })[] {
-    return this.sources.filter((s): s is ActiveSource & { feat: FeatDef } => s.feat !== null);
+  featSources(atLevel = Number.POSITIVE_INFINITY): (ActiveSource & { feat: FeatDef })[] {
+    return this.sourcesAt(atLevel).filter(
+      (s): s is ActiveSource & { feat: FeatDef } => s.feat !== null,
+    );
   }
 
-  featureSources(): (ActiveSource & { feature: FeatDef })[] {
-    return this.sources.filter((s): s is ActiveSource & { feature: FeatDef } => s.feature !== null);
+  featureSources(atLevel = Number.POSITIVE_INFINITY): (ActiveSource & { feature: FeatDef })[] {
+    return this.sourcesAt(atLevel).filter(
+      (s): s is ActiveSource & { feature: FeatDef } => s.feature !== null,
+    );
   }
 
   weaponMasteries(): string[] {
@@ -456,6 +558,14 @@ export function classLevelKey(classId: string, classLevel: number): string {
 }
 
 export function resolve(build: CharacterBuild, catalog: Catalog): Resolution {
+  const first = resolvePass(build, catalog, null);
+  // Replacements can remove a pick that created sources (an invocation and its choices) and
+  // add new ones, so when any is stored, resolve again with the first pass's effective picks.
+  const swapped = first.choices.some((c) => c.replaces && answers(build, c.key).length);
+  return swapped ? resolvePass(build, catalog, first) : first;
+}
+
+function resolvePass(build: CharacterBuild, catalog: Catalog, prev: Resolution | null): Resolution {
   const sources: ActiveSource[] = [];
   const choices: ActiveChoice[] = [];
 
@@ -502,34 +612,43 @@ export function resolve(build: CharacterBuild, catalog: Catalog): Resolution {
     for (const definition of src.grants.choices) {
       const choice = activeChoice(src, definition);
       choices.push(choice);
-      const picked = choice.fixed ?? answers(build, choice.key);
-      const inherit = { level: src.level, class_id: src.class_id };
-      if (definition.kind === "option") {
-        for (const optId of picked) {
-          const opt = definition.options.find((o) => o.id === optId);
-          if (opt) {
-            addSource(
-              source(`${choice.key}=${optId}`, `${opt.name} (${src.name})`, opt.grants, {
-                description: opt.description,
-                ...inherit,
-              }),
-            );
-          }
+      const raw = choice.fixed ?? answers(build, choice.key);
+      expandPicks(choice, prev?.ownedByKey(choice.key) ?? raw);
+    }
+  };
+
+  /** Sources created by a choice's picks (options, feats, features). */
+  const expandPicks = (choice: ActiveChoice, picked: readonly string[]) => {
+    const src = choice.source;
+    const definition = choice.definition;
+    const inherit = { level: choice.level, class_id: src.class_id };
+    if (definition.kind === "option") {
+      for (const optId of picked) {
+        const opt = definition.options.find((o) => o.id === optId);
+        if (opt) {
+          addSource(
+            source(`${choice.key}=${optId}`, `${opt.name} (${src.name})`, opt.grants, {
+              description: opt.description,
+              ...inherit,
+            }),
+          );
         }
-      } else if (definition.kind === "feat") {
-        for (const featId of picked) addFeat(featId, `feat:${featId}@${choice.key}`, {}, src);
-      } else if (definition.kind === "feature") {
-        for (const id of picked) {
-          const feature = lookup(catalog.features, id);
-          if (feature) {
-            addSource(
-              source(`feature:${id}@${choice.key}`, feature.name, feature.grants, {
-                feature,
-                granted_by: src.name,
-                ...inherit,
-              }),
-            );
-          }
+      }
+    } else if (definition.kind === "feat") {
+      for (const featId of picked) {
+        addFeat(featId, `feat:${featId}@${choice.key}`, {}, { ...src, level: choice.level });
+      }
+    } else if (definition.kind === "feature") {
+      for (const id of picked) {
+        const feature = lookup(catalog.features, id);
+        if (feature) {
+          addSource(
+            source(`feature:${id}@${choice.key}`, feature.name, feature.grants, {
+              feature,
+              granted_by: src.name,
+              ...inherit,
+            }),
+          );
         }
       }
     }
@@ -591,7 +710,165 @@ export function resolve(build: CharacterBuild, catalog: Catalog): Resolution {
   }
   for (const l of rest) addClassLevel(l);
 
-  return new Resolution(build, catalog, sources, choices, levels);
+  // Swap families and their replacement choices, one per family at each qualifying level.
+  const families = new Map<
+    string,
+    { family: SwapFamily; members: ActiveChoice[]; classId: string | null; mode: string }
+  >();
+  for (const c of choices) {
+    const { swap, tag } = c.definition;
+    if (!swap || !tag) continue;
+    const featRoot = (c.source.feat ?? c.source.feature) ? c.source.key : null;
+    const scope = featRoot ?? c.source.class_id ?? c.source.key;
+    const id = `${scope}:${tag}`;
+    let entry = families.get(id);
+    if (!entry) {
+      entry = {
+        family: { id, tag, label: c.label, members: [], same_level: c.definition.same_level },
+        members: [],
+        classId: featRoot ? null : c.source.class_id,
+        mode: swap,
+      };
+      families.set(id, entry);
+    }
+    entry.members.push(c);
+  }
+  const events: SwapEvent[] = [];
+  for (const { family, members, classId, mode } of families.values()) {
+    (family.members as string[]).push(...members.map((m) => m.key));
+    for (const m of members) {
+      events.push({
+        family: family.id,
+        level: m.level,
+        key: m.key,
+        picks: m.fixed ?? answers(build, m.key),
+      });
+    }
+    const firstLevel = Math.min(...members.map((m) => m.level));
+    for (const l of levels) {
+      if (l.level <= firstLevel || (mode === "class_level" && l.class_id !== classId)) continue;
+      const latest = members.filter((m) => m.level <= l.level).at(-1) as ActiveChoice;
+      const same = family.same_level;
+      const definition: ChoiceDef = {
+        ...latest.definition,
+        id: `replace:${family.id}`,
+        label: `Replace one: ${family.label}`,
+        count: 2,
+        scaling: null,
+        swap: null,
+        tag: null,
+        spell_level: same ? null : latest.definition.spell_level,
+        max_spell_level: same ? null : latest.definition.max_spell_level,
+      };
+      const key = `${classLevelKey(l.class_id, l.class_level)}#replace:${family.id}`;
+      const choice: ActiveChoice = {
+        key,
+        source: latest.source,
+        definition,
+        label: definition.label,
+        step: latest.step,
+        level: l.level,
+        fixed: null,
+        replaces: family,
+      };
+      choices.push(choice);
+      const pair = answers(build, key);
+      events.push({
+        family: family.id,
+        level: l.level,
+        key,
+        picks: [],
+        replace: pair.length === 2 ? [pair[0] as string, pair[1] as string] : undefined,
+      });
+      // A replacement feat or feature brings its own source (second pass only).
+      const added = prev?.ownedByKey(key);
+      if (added?.length) expandPicks(choice, added);
+    }
+  }
+
+  return new Resolution(build, catalog, sources, choices, levels, new SwapLedger(events));
+}
+
+interface SwapEvent {
+  family: string;
+  level: number;
+  key: string;
+  picks: readonly string[];
+  /** For a replacement: [old, new]. */
+  replace?: [string, string];
+}
+
+/**
+ * Replays each swap family in level order: picks add values, a replacement moves `old` out of
+ * whichever choice holds it and adds `new` under its own key. A replacement whose `old` isn't
+ * held (or whose `new` is already held) does nothing; validation reports it.
+ */
+class SwapLedger {
+  private readonly families = new Map<string, SwapEvent[]>();
+  private readonly familyOf = new Map<string, string>();
+  private readonly cache = new Map<string, Map<string, string[]>>();
+
+  constructor(events: SwapEvent[]) {
+    for (const e of events) {
+      const list = this.families.get(e.family) ?? [];
+      list.push(e);
+      this.families.set(e.family, list);
+      this.familyOf.set(e.key, e.family);
+    }
+    for (const list of this.families.values()) {
+      // Picks before replacements at the same level: you replace what you had before.
+      list.sort((a, b) => a.level - b.level || Number(!!a.replace) - Number(!!b.replace));
+    }
+  }
+
+  private replay(family: string, atLevel: number): Map<string, string[]> {
+    const cacheKey = `${family}|${atLevel}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+    const owned = new Map<string, string[]>();
+    for (const e of this.families.get(family) ?? []) {
+      if (e.level > atLevel) break;
+      if (!e.replace) {
+        owned.set(e.key, [...e.picks]);
+        continue;
+      }
+      owned.set(e.key, []);
+      const [oldId, newId] = e.replace;
+      const holder = [...owned].find(([key, values]) => key !== e.key && values.includes(oldId));
+      const held = [...owned.values()].some((values) => values.includes(newId));
+      if (holder && !held && oldId !== newId) {
+        owned.set(
+          holder[0],
+          holder[1].filter((v) => v !== oldId),
+        );
+        owned.set(e.key, [newId]);
+      }
+    }
+    this.cache.set(cacheKey, owned);
+    return owned;
+  }
+
+  /** Values a family choice (or replacement) holds at a level, or `undefined` if not in a family. */
+  owned(key: string, atLevel = Number.POSITIVE_INFINITY): string[] | undefined {
+    const family = this.familyOf.get(key);
+    if (!family) return undefined;
+    return this.replay(family, atLevel).get(key) ?? [];
+  }
+
+  /** Every value the family holds at a level, in pick order. */
+  familyValues(family: string, atLevel: number): string[] {
+    return [...this.replay(family, atLevel).values()].flat();
+  }
+}
+
+/** The display name of any skill or catalog entity with this id, if there is one. */
+export function entityName(catalog: Catalog, id: string): string | null {
+  if (isSkill(id)) return skillName(id);
+  for (const table of TABLE_NAMES) {
+    const entity = lookup(catalog[table] as Readonly<Record<string, { name: string }>>, id);
+    if (entity) return entity.name;
+  }
+  return null;
 }
 
 const EMPTY_GRANTS = Object.freeze({
@@ -622,7 +899,17 @@ function expertiseLast(choices: ActiveChoice[]): ActiveChoice[] {
   return [...choices].sort((a, b) => last(a) - last(b));
 }
 
-// --- options ------------------------------------------------------------------------------
+// --- options ---
+
+/**
+ * The character level a choice is judged at: its own level (history: "as you were when you
+ * chose it"), or now for a list you can change freely (`scaling` pools).
+ */
+function at(choice: ActiveChoice): number {
+  return choice.definition.scaling ? Number.POSITIVE_INFINITY : choice.level;
+}
+
+// ------------------------------------------------------------------------------
 
 function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
   const d = choice.definition;
@@ -662,7 +949,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
     case "skill_or_tool":
       return [...skillViews(res, choice, ok), ...toolViews(res, choice, ok)];
     case "language": {
-      const known = res.languages(choice.key);
+      const known = res.languages(choice.key, at(choice));
       return Object.values(cat.languages)
         .filter((lang) => ok(lang.id) && inCategory(lang.category))
         .map((lang) => view(lang.id, lang.name, "", knownFrom(known.get(lang.id))));
@@ -672,8 +959,8 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
       const isFeat = d.kind === "feat";
       const owned = new Map(
         (isFeat
-          ? res.featSources().map((s) => [s.feat.id, s] as const)
-          : res.featureSources().map((s) => [s.feature.id, s] as const)
+          ? res.featSources(at(choice)).map((s) => [s.feat.id, s] as const)
+          : res.featureSources(at(choice)).map((s) => [s.feature.id, s] as const)
         )
           .filter(([, s]) => !s.key.endsWith(`@${choice.key}`))
           .map(([id, s]) => [id, s.name]),
@@ -717,8 +1004,8 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
     case "spell":
       return spellViews(res, choice, ok);
     case "expertise": {
-      const proficient = res.skills();
-      const expert = res.expertise(choice.key);
+      const proficient = res.skills(undefined, at(choice));
+      const expert = res.expertise(choice.key, at(choice));
       return SKILLS.filter(ok).map((s) => {
         let reason: string | null = null;
         if (!proficient.has(s)) reason = "not proficient";
@@ -740,11 +1027,12 @@ function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
       lists.push(list);
     }
   }
+  const maxLevel = res.maxSpellLevelOf(choice);
   let spells = Object.values(res.catalog.spells).filter(
     (s) =>
       ok(s.id) &&
       (d.spell_level === null || s.level === d.spell_level) &&
-      (d.max_spell_level === null || (s.level >= 1 && s.level <= d.max_spell_level)) &&
+      (maxLevel === null || (s.level >= 1 && s.level <= maxLevel)) &&
       (lists === null || s.lists.some((l) => lists.includes(l))) &&
       (!d.ritual || s.ritual) &&
       (d.school === null || s.school === d.school),
@@ -753,7 +1041,7 @@ function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
   const linked = new Set([choice.key]);
   if (d.subset_of !== null) {
     const pool = res.choices.filter((c) => c.definition.tag === d.subset_of);
-    const picked = new Set(pool.flatMap((c) => res.selected(c)));
+    const picked = new Set(pool.flatMap((c) => res.contributed(c, at(choice))));
     for (const c of pool) linked.add(c.key);
     spells = spells.filter((s) => picked.has(s.id));
   }
@@ -761,7 +1049,7 @@ function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
     for (const other of res.choices)
       if (other.definition.subset_of === d.tag) linked.add(other.key);
   }
-  const known = res.spells(linked);
+  const known = res.spells(linked, at(choice));
   if (d.known_only) {
     return spells.filter((s) => known.has(s.id)).map((s) => view(s.id, s.name, s.description));
   }
@@ -780,7 +1068,7 @@ function knownFrom(src: string | undefined): string | null {
 }
 
 function skillViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => boolean) {
-  const owned = res.skills(choice.key);
+  const owned = res.skills(choice.key, at(choice));
   return SKILLS.filter(ok).map((s) =>
     view(
       s,
@@ -792,7 +1080,7 @@ function skillViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
 }
 
 function toolViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => boolean) {
-  const owned = res.tools(choice.key);
+  const owned = res.tools(choice.key, at(choice));
   const category = choice.definition.category;
   return Object.values(res.catalog.tools)
     .filter((t) => ok(t.id) && (category === null || category.includes(t.category)))

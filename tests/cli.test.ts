@@ -88,8 +88,8 @@ it("the sheet renders every section", async () => {
 it("levels up, rolls Hit Points, picks a subclass, and removes a level", async () => {
   // biome-ignore format: one line per step
   const answers = [
-    "up", "5", "1",           // Fighter 2, fixed HP
-    "up", "5", "2", "1",      // Fighter 3, roll HP, Champion
+    "up", "5", "1", "",       // Fighter 2, fixed HP, keep the Fighting Style
+    "up", "5", "2", "1", "",  // Fighter 3, roll HP, Champion, keep the Fighting Style
     "sheet",
     "up", "12",               // Wizard: not allowed (Int 8)
     "back",
@@ -103,4 +103,26 @@ it("levels up, rolls Hit Points, picks a subclass, and removes a level", async (
   expect(output).toContain("Wizard needs Intelligence 13+");
   expect(output).toContain("Removed level 3.");
   expect(build.levels).toEqual([{ class_id: "fighter", hp: null }]);
+});
+
+it("replaces a Fighting Style on level-up, then edits a past level's class with a preview", async () => {
+  // biome-ignore format: one line per step
+  const answers = [
+    "up", "5", "1",           // Fighter 2, fixed HP
+    "2", "1",                 // replace Defense… with Archery
+    "edit", "2", "1", "9",    // edit level 2: its class → Rogue
+    "y",                      // confirm after the preview
+    "sheet",
+    "quit", "n",
+  ];
+  const { build, output } = await runScript(answers, fighterBuild());
+  expect(output).toContain("Replace one: Fighting Style");
+  expect(output).toContain("Replace Defense with:");
+  // Level 2 is no longer a Fighter level, so its replacement goes away (previewed first).
+  expect(output).toContain(
+    "Level 2 · Replace one: Fighting Style: Defense → Archery will be removed",
+  );
+  expect(output).toContain("Changed.");
+  expect(output).toContain("Level 2 Human Fighter 1 / Rogue 1");
+  expect(build.levels).toEqual([{ class_id: "rogue", hp: null }]);
 });

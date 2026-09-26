@@ -254,6 +254,19 @@ export interface ChoiceDef {
   school: string | null;
   /** `kind: spell`: the picks are always prepared (they don't count against a class's limit). */
   always_prepared: boolean;
+  /**
+   * A list that grows with the class and can be changed freely (SRD: "after a Long Rest"):
+   * `count` / `max_spell_level` by the source class's current level (20 values each).
+   */
+  scaling: { count: number[] | null; max_spell_level: number[] | null } | null;
+  /**
+   * The picks can be replaced one at a time later (SRD: "whenever you gain a level, you can
+   * replace one…"): `class_level` at each later level in the source's class, `any_level` at every
+   * later character level (Magic Initiate). Choices with the same `tag` form one family.
+   */
+  swap: "class_level" | "any_level" | null;
+  /** A replacement spell must be of the same level as the one it replaces. */
+  same_level: boolean;
   /** Options are limited to what the choices with this `tag` picked (Wizard: prepare from the spellbook). */
   subset_of: string | null;
   /** `kind: weapon_mastery`: only melee or ranged weapons. */
@@ -338,7 +351,20 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
         school: z.string().nullable().default(null),
         always_prepared: z.boolean().default(false),
         subset_of: z.string().nullable().default(null),
+        scaling: z
+          .strictObject({
+            count: z.array(z.int().min(0)).length(20).nullable().default(null),
+            max_spell_level: z.array(z.int().min(0).max(9)).length(20).nullable().default(null),
+          })
+          .nullable()
+          .default(null),
+        swap: z.enum(["class_level", "any_level"]).nullable().default(null),
+        same_level: z.boolean().default(false),
         weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
+      })
+      .refine((c) => c.swap === null || c.tag !== null, {
+        error: (issue) =>
+          `choice '${(issue.input as { id?: string }).id}': a choice with \`swap\` needs a \`tag\` (its family)`,
       })
       .refine((c) => (c.kind === "option") === c.options.length > 0, {
         error: (issue) =>

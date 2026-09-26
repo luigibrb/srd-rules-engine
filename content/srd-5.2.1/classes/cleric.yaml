@@ -83,6 +83,8 @@ features:
             kind: spell
             spell_level: 0
             spell_list: cleric
+            tag: cleric-cantrips
+            swap: class_level
     - id: cantrips
       label: Cleric cantrips
       kind: spell
@@ -90,13 +92,18 @@ features:
       spell_level: 0
       spell_list: cleric
       hint: Guidance, Sacred Flame, and Thaumaturgy are recommended.
+      tag: cleric-cantrips
+      swap: class_level
     - id: prepared
       label: Cleric prepared spells
       kind: spell
       count: 4
-      spell_level: 1
       spell_list: cleric
-      hint: Bless, Cure Wounds, Guiding Bolt, and Shield of Faith are recommended.
+      hint: Bless, Cure Wounds, Guiding Bolt, and Shield of Faith are recommended. You can change these
+        after a Long Rest.
+      scaling:
+        count: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22]
+        max_spell_level: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
   '2':
     traits:
     - name: Channel Divinity
@@ -112,13 +119,6 @@ features:
         You roll an additional d8 when you reach Cleric levels 7 (2d8), 13 (3d8), and 18 (4d8).
 
         _Turn Undead._ As a Magic action, you present your Holy Symbol and censure Undead creatures. Each Undead of your choice within 30 feet of you must make a Wisdom saving throw. If the creature fails its save, it has the Frightened and Incapacitated conditions for 1 minute. For that duration, it tries to move as far from you as it can on its turns. This effect ends early on the creature if it takes any damage, if you have the Incapacitated condition, or if you die.
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: cleric
   '3':
     traits:
     - name: Cleric Subclass
@@ -128,12 +128,6 @@ features:
         Cleric level or lower.
     choices:
     - {id: subclass, label: Cleric subclass, kind: subclass}
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: cleric
   '4':
     traits:
     - name: Ability Score Improvement
@@ -150,33 +144,14 @@ features:
       count: 1
       spell_level: 0
       spell_list: cleric
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: cleric
+      tag: cleric-cantrips
+      swap: class_level
   '5':
     traits:
     - name: Sear Undead
       text: Whenever you use Turn Undead, you can roll a number of d8s equal to your Wisdom modifier (minimum
         of 1d8) and add the rolls together. Each Undead that fails its saving throw against that use of
         Turn Undead takes Radiant damage equal to the roll's total. This damage doesn't end the turn effect.
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 3
-      spell_list: cleric
-  '6':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 3
-      spell_list: cleric
   '7':
     traits:
     - name: Blessed Strikes
@@ -187,12 +162,6 @@ features:
 
         _Potent Spellcasting._ Add your Wisdom modifier to the damage you deal with any Cleric cantrip.
     choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: cleric
     - id: blessed_strikes
       label: Blessed Strikes
       kind: option
@@ -209,20 +178,6 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: cleric
-  '9':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 5
-      spell_list: cleric
   '10':
     traits:
     - name: Divine Intervention
@@ -237,34 +192,14 @@ features:
       count: 1
       spell_level: 0
       spell_list: cleric
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 5
-      spell_list: cleric
-  '11':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 6
-      spell_list: cleric
+      tag: cleric-cantrips
+      swap: class_level
   '12':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '13':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 7
-      spell_list: cleric
   '14':
     traits:
     - name: Improved Blessed Strikes
@@ -274,36 +209,12 @@ features:
         _Divine Strike._ The extra damage of your Divine Strike increases to 2d8.
 
         _Potent Spellcasting._ When you cast a Cleric cantrip and deal damage to a creature with it, you can give vitality to yourself or another creature within 60 feet of yourself, granting a number of Temporary Hit Points equal to twice your Wisdom modifier.
-  '15':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 8
-      spell_list: cleric
   '16':
     choices:
     - id: feat
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-  '17':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: cleric
-  '18':
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: cleric
   '19':
     traits:
     - name: Epic Boon
@@ -315,22 +226,9 @@ features:
       kind: feat
       category: [epic_boon, general, origin, fighting_style]
       hint: An Epic Boon feat, or another feat you qualify for.
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: cleric
   '20':
     traits:
     - name: Greater Divine Intervention
       text: You can call on even more powerful divine intervention. When you use your Divine Intervention
         feature, you can choose _Wish_ when you select a spell. If you do so, you can't use Divine Intervention
         again until you finish 2d4 Long Rests.
-    choices:
-    - id: prepared
-      label: Cleric prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      spell_list: cleric

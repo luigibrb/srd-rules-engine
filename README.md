@@ -102,6 +102,11 @@ evaluate(build, catalog).resolution.choicesForLevel(3);       // [class:fighter:
 
 The build stores each level as `{ class_id, hp }`, so it stays small and replayable.
 
+Changing the past uses the same setters: any past choice with `setChoice`, a past level's class
+with `setLevelClass`, its Hit Points with `setLevelHp`. `previewChange(build, catalog, change)`
+reports what a change would remove and what new choices it creates, before you apply it. Every
+setter refuses (`BuildError`) a change that would leave the character illegal.
+
 Builds are frozen, JSON-serializable objects: save them with `JSON.stringify` and load them
 with `parseBuild(json)`. Choice keys (`class:fighter#skills`,
 `feat:skilled@species:human#versatile#proficiencies`) are explained in
@@ -146,8 +151,17 @@ unchanged.
 Once level 1 is complete, `up` levels up the character, like in Baldur's Gate 3: pick a class
 (your own, or a new one if you meet the multiclass prerequisites, with the reason shown when
 you don't), take the fixed Hit Points or roll, then answer that level's choices (subclass, feat
-or Ability Score Improvement, new spells, invocations…). `L5` revisits level 5, and `down`
-removes the last level.
+or Ability Score Improvement, new spells, invocations…). Where the rules allow it, each
+level-up also offers optional replacements ("Replace one: Bard cantrips", Eldritch Invocations,
+Metamagic, the Fighter's Fighting Style…). `L5` revisits level 5, and `down` removes the last
+level.
+
+`edit` changes the past without rebuilding: pick a level, then its class, Hit Points or any
+choice (say, the subclass you chose at level 3 on a level 7 character). Before anything
+changes you see a preview: which later picks no longer fit and will be removed (and asked
+again), and which new questions appear. Picks that still fit are kept. A change that would
+make a later level illegal (a multiclass prerequisite no longer met, say) is refused, with the
+reason.
 
 ## HTTP API
 
@@ -169,7 +183,8 @@ export default { fetch: handler };                // Cloudflare Workers
 | `GET /health` | Liveness check |
 | `GET /v1/content` · `/v1/content/{table}` · `/v1/content/{table}/{id}` | Browse the catalog |
 | `POST /v1/builds/evaluate` | Build → validation report, derived sheet, level-up options, and every choice with its options |
-| `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` | Change a build the same way the builder does (validated, repaired, with notes) |
+| `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` · `/v1/builds/set-level-class` · `/v1/builds/set-level-hp` | Change a build the same way the builder does (validated, repaired, with notes) |
+| `POST /v1/builds/preview` | What a `set-choice` or `set-level-class` change would remove and add, without applying it |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
 | `POST /v1/characters/{name}/passive-perception` | Passive Perception (`?proficient=true`) |
@@ -225,7 +240,8 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells; the rest is shown as the SRD text |
 | Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
-| Not yet | Swapping spells or options when you level up, shopping with starting gold, conditions and session state, the full Effect engine |
+| Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
+| Not yet | Shopping with starting gold, conditions and session state, the full Effect engine |
 
 The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -252,6 +268,7 @@ npm test               # vitest
 npm run check          # content up to date + lint + typecheck + tests (what CI runs)
 npm run builder        # run the CLI builder from source
 npm run content        # recompile content/ YAML → bundled JSON + JSON Schemas
+npm run content:import-classes   # regenerate class levels 2–20 from the SRD Markdown (Python)
 npm run build          # build dist/
 ```
 

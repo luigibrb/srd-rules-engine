@@ -75,6 +75,9 @@ features:
       count: 2
       weapon_kind: melee
       hint: Greataxes and Handaxes come with your starting equipment.
+      scaling:
+        count: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+        max_spell_level: null
   '2':
     traits:
     - name: Danger Sense
@@ -114,11 +117,6 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: weapon_mastery
-      label: Weapon Mastery
-      kind: weapon_mastery
-      count: 1
-      weapon_kind: melee
   '5':
     traits:
     - name: Extra Attack
@@ -148,13 +146,6 @@ features:
 
         _Forceful Blow._ The target is pushed 15 feet straight away from you. You can then move up to half your Speed straight toward the target without provoking Opportunity Attacks.
         _Hamstring Blow._ The target's Speed is reduced by 15 feet until the start of your next turn. A target can be affected by only one Hamstring Blow at a time—the most recent one.
-  '10':
-    choices:
-    - id: weapon_mastery
-      label: Weapon Mastery
-      kind: weapon_mastery
-      count: 1
-      weapon_kind: melee
   '11':
     traits:
     - name: Relentless Rage

@@ -161,6 +161,21 @@ Spell choices grow with the class: `max_spell_level` (spells of level 1 up to it
 `spellbook` choice has `tag: wizard-spellbook`, prepared choices use `subset_of:
 wizard-spellbook`), `school` (Evoker), `known_only` (Agonizing Blast: one of your cantrips).
 
+Choices that can change later:
+
+```yaml
+  - id: cantrips                  # "Whenever you gain a Bard level, you can replace one…"
+    kind: spell
+    tag: bard-cantrips            # the family: every Bard cantrip choice shares it
+    swap: class_level             # one replacement per Bard level (any_level: per character level)
+    same_level: false             # true: the replacement must be the same spell level
+  - id: prepared                  # "After a Long Rest, you can change your list…"
+    kind: spell
+    scaling:                      # one list that grows; count and max spell level by class level
+      count: [4, 5, 6, 7, 9, …]
+      max_spell_level: [1, 1, 2, 2, 3, …]
+```
+
 Feats and features can have a `prerequisite`:
 
 ```yaml

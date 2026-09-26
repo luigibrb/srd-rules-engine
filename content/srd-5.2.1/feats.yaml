@@ -38,12 +38,18 @@
       count: 2
       spell_level: 0
       spell_list: $spell_list
+      tag: magic-initiate
+      swap: any_level
+      same_level: true
     - id: spell
       label: Magic Initiate level 1 spell
       kind: spell
       spell_level: 1
       spell_list: $spell_list
       always_prepared: true
+      tag: magic-initiate
+      swap: any_level
+      same_level: true
 - id: savage-attacker
   name: Savage Attacker
   category: origin

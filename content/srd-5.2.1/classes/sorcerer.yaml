@@ -64,6 +64,8 @@ features:
       spell_level: 0
       spell_list: sorcerer
       hint: Light, Prestidigitation, Shocking Grasp, and Sorcerous Burst are recommended.
+      tag: sorcerer-cantrips
+      swap: class_level
     - id: prepared
       label: Sorcerer prepared spells
       kind: spell
@@ -71,6 +73,8 @@ features:
       spell_level: 1
       spell_list: sorcerer
       hint: Burning Hands and Detect Magic are recommended.
+      tag: sorcerer-prepared
+      swap: class_level
   '2':
     traits:
     - name: Font of Magic
@@ -139,11 +143,15 @@ features:
       count: 2
       max_spell_level: 1
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
     - id: metamagic
       label: Metamagic options
       kind: feature
       count: 2
       category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
   '3':
     traits:
     - name: Sorcerer Subclass
@@ -159,6 +167,8 @@ features:
       count: 2
       max_spell_level: 2
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '4':
     traits:
     - name: Ability Score Improvement
@@ -175,12 +185,16 @@ features:
       count: 1
       spell_level: 0
       spell_list: sorcerer
+      tag: sorcerer-cantrips
+      swap: class_level
     - id: prepared
       label: Sorcerer prepared spells
       kind: spell
       count: 1
       max_spell_level: 2
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '5':
     traits:
     - name: Sorcerous Restoration
@@ -194,6 +208,8 @@ features:
       count: 2
       max_spell_level: 3
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '6':
     choices:
     - id: prepared
@@ -202,6 +218,8 @@ features:
       count: 1
       max_spell_level: 3
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '7':
     traits:
     - name: Sorcery Incarnate
@@ -216,6 +234,8 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '8':
     choices:
     - id: feat
@@ -228,6 +248,8 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '9':
     choices:
     - id: prepared
@@ -236,6 +258,8 @@ features:
       count: 2
       max_spell_level: 5
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '10':
     choices:
     - id: cantrips
@@ -244,17 +268,23 @@ features:
       count: 1
       spell_level: 0
       spell_list: sorcerer
+      tag: sorcerer-cantrips
+      swap: class_level
     - id: prepared
       label: Sorcerer prepared spells
       kind: spell
       count: 1
       max_spell_level: 5
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
     - id: metamagic
       label: Metamagic options
       kind: feature
       count: 2
       category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
   '11':
     choices:
     - id: prepared
@@ -263,6 +293,8 @@ features:
       count: 1
       max_spell_level: 6
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '12':
     choices:
     - id: feat
@@ -277,6 +309,8 @@ features:
       count: 1
       max_spell_level: 7
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '15':
     choices:
     - id: prepared
@@ -285,6 +319,8 @@ features:
       count: 1
       max_spell_level: 8
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '16':
     choices:
     - id: feat
@@ -299,11 +335,15 @@ features:
       count: 1
       max_spell_level: 9
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
     - id: metamagic
       label: Metamagic options
       kind: feature
       count: 2
       category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
   '18':
     choices:
     - id: prepared
@@ -312,6 +352,8 @@ features:
       count: 1
       max_spell_level: 9
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '19':
     traits:
     - name: Epic Boon
@@ -329,6 +371,8 @@ features:
       count: 1
       max_spell_level: 9
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
   '20':
     traits:
     - name: Arcane Apotheosis
@@ -341,3 +385,5 @@ features:
       count: 1
       max_spell_level: 9
       spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level

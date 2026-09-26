@@ -65,6 +65,8 @@
         label: Magical Discoveries
         kind: spell
         count: 2
+        tag: lore-discoveries
+        swap: class_level
         spell_list: [cleric, druid, wizard]
         max_spell_level: 3
         always_prepared: true

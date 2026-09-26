@@ -229,9 +229,34 @@ export function multiclassBlockers(
   return out;
 }
 
+/** Problems with a replacement's `[old, new]` answer (empty means no replacement). */
+export function replaceErrors(
+  res: Resolution,
+  choice: ActiveChoice,
+  picked: readonly string[] = res.selected(choice),
+): string[] {
+  if (!picked.length) return [];
+  if (picked.length !== 2) return ["choose what to replace and its replacement"];
+  const [oldId, newId] = picked as [string, string];
+  const errors: string[] = [];
+  const old = res.replaceOld(choice).find((o) => o.id === oldId);
+  if (!old) errors.push(`you don't have '${oldId}' to replace`);
+  else if (old.unavailable) errors.push(`${old.name} can't be replaced: ${old.unavailable}`);
+  const replacement = res.replaceNew(choice, oldId).find((o) => o.id === newId);
+  if (!replacement) errors.push(`'${newId}' can't replace ${old?.name ?? oldId}`);
+  else if (replacement.unavailable) errors.push(`${replacement.name}: ${replacement.unavailable}`);
+  return errors;
+}
+
 export function choiceIssues(res: Resolution, choice: ActiveChoice): Issue[] {
   const { step, key, label, level } = choice;
-  const { count, kind } = choice.definition;
+  if (choice.replaces) {
+    return replaceErrors(res, choice).map((e) =>
+      issue(step, "error", `${label}: ${e}`, key, level),
+    );
+  }
+  const { kind } = choice.definition;
+  const count = res.countOf(choice);
   const selected = res.selected(choice);
   const views = new Map(res.options(choice).map((v) => [v.id, v]));
   const issues: Issue[] = [];

@@ -22,7 +22,9 @@ src/
   cli/             # srd-rules bin: build (interactive builder), serve, validate
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
-scripts/           # compile-content.ts; import-srd-spells.ts (one-off SRD Markdown → spells.yaml)
+scripts/           # compile-content.ts; import-srd-spells.ts (SRD Markdown → spells.yaml);
+                   #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
+                   #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
 data/srd-5-2-1/    # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide)
@@ -49,6 +51,11 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   level up). Class content = `grants` (core) + `multiclass` + `features` by level; sources are
   `class:<id>` (first level in it), `class:<id>:<n>`, `subclass:<id>:<n>`. Every source/choice
   has `level` (character level); use `choicesForLevel(n)` / `issuesForLevel`.
+- Changing choices: "gain a level → replace one" families = same `tag` + `swap`; the engine adds
+  optional `#replace:<scope>:<tag>` choices answered `[old, new]`. "After a rest" lists use
+  `scaling`. Aggregations must use `Resolution.contributed()`, not `selected()`.
+- Override: choices are judged as of their own level (`at(choice)` in option views); every
+  setter returns through `commit()` (refuses new validation errors); `previewChange` diffs.
 - Character builder: a `CharacterBuild` stores only choices, keyed by choice key
   (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
   recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.
@@ -89,7 +96,8 @@ npm run serve            # HTTP API on localhost:8000
 `GET /health` — liveness check  
 `GET /v1/content` — table names and counts; `/v1/content/{table}`, `/v1/content/{table}/{id}`  
 `POST /v1/builds/evaluate` — build → `{ report, sheet, levels, level_up_options, choices (with options) }`  
-`POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` — workflow setters  
+`POST /v1/builds/set-choice` · `/level-up` · `/remove-level` · `/set-level-class` · `/set-level-hp` — workflow setters  
+`POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  
 `POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  

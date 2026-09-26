@@ -106,9 +106,8 @@ picks as `kind: spell` choices:
 - Starting gold (Fighter option C, background option B): shopping isn't automated.
 - AC assumes you wear the best armor you own and are trained with. Equipping comes with the
   inventory milestone.
-- Level-up replacements aren't modeled: swapping a cantrip, prepared spell, invocation,
-  Metamagic option or Weapon Mastery when you gain a level. Clerics, Druids, Paladins and
-  Rangers can change prepared spells after a Long Rest; the build stores one set.
+- Replacements and "after a rest" lists store the character's current state; rest-by-rest
+  history (which spells were prepared on which day) belongs to session state, not the build.
 - Features that roll dice or depend on the situation (Rage damage, Sneak Attack, Divine Strike,
   Potent Spellcasting) are shown as text and class resources, not added to attack lines.
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
@@ -157,6 +156,48 @@ other feats or features, a trait (Fighting Style feats need the Fighting Style f
 Spellcasting, or knowing one of some spells. Eldritch Invocations and Metamagic options have the
 same shape as feats but live in their own `features` table, so an Ability Score Improvement
 ("any feat you qualify for") can't pick one.
+
+### Changing choices: replacements and lists
+
+The SRD has two kinds of "change it later" rule, modeled differently:
+
+- **"Whenever you gain a level, you can replace one…"** (history matters: you can't swap
+  everything at once, and a spell swapped in at level 5 may be of a level you didn't have at
+  level 1). The family's choices share a `tag` and have `swap: class_level` (or `any_level` for
+  Magic Initiate). At each later qualifying level the engine adds an optional replacement choice
+  (`<level source>#replace:<scope>:<tag>`) whose answer is `[old, new]`. Its new options are
+  those of the family's latest choice at that level (so level and list upgrades apply);
+  `same_level` keeps the spell level (Mystic Arcanum, Magic Initiate). A replaced Eldritch
+  Invocation can't be one another invocation requires.
+- **"After a Long Rest you can change…"** lists are one choice with `scaling`: count (and
+  maximum spell level) by class level. You can re-pick them at any time; a level-up just makes
+  them bigger.
+
+A `SwapLedger` replays each family in level order (picks, then replacements) and
+`Resolution.contributed(choice, atLevel)` gives what each choice really provides. When any
+replacement is stored, `resolve` runs twice so that a replaced invocation's feature source (and
+its own choices) disappears and the new one appears at the replacement's level.
+
+### Changing the past (override mode)
+
+Every setter works on any level, and three rules keep the result a legal character without
+wiping everything after the edited level:
+
+1. **A pick is judged as of its own level.** "Already proficient / known / have this feat" only
+   counts what the character had at that level (choices at the same level count both ways;
+   "after a rest" lists are judged now). So an edit to level 3 can take something a later level
+   also took, and the *later* pick gives way.
+2. **Repair, don't wipe.** `normalize` walks choices in level order and removes only picks
+   whose source disappeared or that became illegal; everything else is kept, and the removed
+   picks show up again as pending questions.
+3. **Refuse what repair can't fix.** After applying and repairing, `commit` validates the whole
+   build; any error that wasn't there before (a later multiclass level whose prerequisite is no
+   longer met, say) makes the change fail with the validator's own message, and the build is
+   unchanged. The guard has no rules of its own, so anything the validator checks is enforced.
+
+`previewChange` runs a change and diffs the result (picks removed, new pending questions) so
+UIs can ask for confirmation. `setLevelClass` changes a past level's class: class features follow
+the Nth level *in* a class (`class:fighter:3`), so they move along with their choices.
 
 ### Interpretations (flagged, not invented)
 

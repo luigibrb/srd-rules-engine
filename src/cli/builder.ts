@@ -107,7 +107,7 @@ export class BuilderApp {
     const fallback = next ? STEP_TITLES[next] : nextLevel ? `Level ${nextLevel}` : "Review & save";
     const levelCmds =
       ev.sheet.level > 1
-        ? "'up'/'down' to add/remove a level, 'L2'… to revisit"
+        ? "'up'/'down' to add/remove a level, 'L2'… to revisit, 'edit' to change the past"
         : "'up' to level up";
     let answer: string;
     try {
@@ -127,6 +127,8 @@ export class BuilderApp {
       else await this.review();
     } else if (cmd === "up" || cmd === "level up" || cmd === "levelup") {
       await this.guard(() => this.levelUpFlow());
+    } else if (cmd === "edit") {
+      await this.guard(() => this.editFlow());
     } else if (cmd === "down") {
       await this.guard(async () => {
         if (await this.con.confirm(`Remove level ${ev.sheet.level} and its choices?`, false)) {
@@ -209,6 +211,117 @@ export class BuilderApp {
     }
     if (this.apply(svc.levelUp, classId as string, hp)) {
       await this.runLevel(ev.sheet.level + 1);
+    }
+  }
+
+  // --- override mode ----------------------------------------------------------------------
+
+  /**
+   * Change something decided at an earlier level. Every change is previewed: later picks it
+   * makes illegal are removed (and asked again), and a change that would leave a later level
+   * illegal is refused with the reason.
+   */
+  private async editFlow(): Promise<void> {
+    const con = this.con;
+    const ev = evaluate(this.build, this.catalog);
+    con.title("Edit a past choice");
+    con.info("Later picks that no longer fit are removed and asked again; changes that would");
+    con.info("make a later level illegal are refused. Nothing changes until you confirm.");
+    const levelRows: Row[] = ev.resolution.levels.map((l) => ({
+      id: String(l.level),
+      label: `Level ${l.level}`,
+      extra: `${lookup(this.catalog.classes, l.class_id)?.name ?? l.class_id} ${l.class_level}`,
+    }));
+    const [picked] = await this.select(levelRows, 1);
+    const level = Number(picked);
+    const entry = ev.resolution.levels.find((l) => l.level === level);
+    const items: Row[] = [];
+    if (level > 1 && entry) {
+      const cls = lookup(this.catalog.classes, entry.class_id);
+      items.push({
+        id: "#class",
+        label: "Class",
+        extra: `${cls?.name ?? entry.class_id} ${entry.class_level}`,
+      });
+      items.push({
+        id: "#hp",
+        label: "Hit Points",
+        extra: entry.hp === null ? "fixed" : `rolled ${entry.hp}`,
+      });
+    }
+    const res = ev.resolution;
+    for (const c of res.choices) {
+      if (c.level !== level || c.fixed !== null) continue;
+      const names = new Map(res.options(c).map((v) => [v.id, v.name]));
+      const picks = res.selected(c).map((v) => names.get(v) ?? v);
+      const summary = c.replaces
+        ? picks.length
+          ? picks.join(" → ")
+          : "no replacement"
+        : picks.join(", ");
+      items.push({ id: c.key, label: c.label, extra: summary || "not chosen" });
+    }
+    if (level === 1)
+      con.info("Class, species, background and ability scores: use steps 1–4 (same checks).");
+    if (!items.length) {
+      con.info("Nothing to change at this level.");
+      return;
+    }
+    const [item] = await this.select(items, 1);
+    if (item === "#hp") {
+      const cls = lookup(this.catalog.classes, entry?.class_id);
+      const die = cls?.hit_die ?? 6;
+      const [how] = await this.select(
+        [
+          { id: "fixed", label: "Fixed", extra: `${svc.fixedHitPoints(die)} + Con` },
+          { id: "roll", label: `Roll 1d${die}` },
+        ],
+        1,
+      );
+      const hp = how === "roll" ? this.rng.int(1, die) : null;
+      if (hp !== null) con.say(`  You rolled ${con.style(String(hp), "bold")} on the d${die}.`);
+      this.apply(svc.setLevelHp, level, hp);
+      return;
+    }
+    let change: (b: CharacterBuild) => svc.BuildResult;
+    let edited: string | undefined;
+    if (item === "#class") {
+      const current = entry?.class_id;
+      const rows: Row[] = Object.values(this.catalog.classes).map((c) => ({
+        id: c.id,
+        label: c.name,
+        extra: c.id === current ? "current" : `d${c.hit_die}`,
+      }));
+      const [classId] = await this.select(rows, 1, current ? [current] : []);
+      change = (b) => svc.setLevelClass(b, this.catalog, level, classId as string);
+    } else {
+      const choice = res.choice(item as string) as ActiveChoice;
+      const answer = await this.pickAnswer(choice);
+      change = (b) => svc.setChoice(b, this.catalog, choice.key, answer);
+      edited = choice.key;
+    }
+    let preview: svc.ChangePreview;
+    try {
+      preview = svc.previewChange(this.build, this.catalog, change, edited);
+    } catch (error) {
+      if (!(error instanceof BuildError)) throw error;
+      con.error("This change isn't allowed:");
+      for (const m of error.messages) con.error(m);
+      return;
+    }
+    con.say();
+    if (!preview.removed.length && !preview.pending.length) {
+      con.info("No other choices are affected.");
+    }
+    for (const r of preview.removed) {
+      con.warn(`Level ${r.level} · ${r.label}: ${r.values.join(", ")} will be removed`);
+    }
+    for (const q of preview.pending) con.info(`Level ${q.level}: new — ${q.message}`);
+    if (await con.confirm("Apply this change?")) {
+      this.build = preview.build;
+      this.dirty = true;
+      for (const note of preview.notes) con.warn(note);
+      con.say(con.style("Changed.", "green"));
     }
   }
 
@@ -390,24 +503,44 @@ export class BuilderApp {
   }
 
   private async runChoice(choice: ActiveChoice): Promise<void> {
+    for (;;) {
+      const picked = await this.pickAnswer(choice);
+      if (this.apply(svc.setChoice, choice.key, picked)) return;
+    }
+  }
+
+  /** Ask for a choice's answer without applying it. */
+  private async pickAnswer(choice: ActiveChoice): Promise<string[]> {
+    if (choice.replaces) return this.pickReplacement(choice);
     const res = resolve(this.build, this.catalog);
     const d = choice.definition;
-    const count = d.count > 1 ? ` (choose ${d.count})` : "";
+    const n = res.countOf(choice);
+    const count = n > 1 ? ` (choose ${n})` : "";
     const src = choice.source;
     const via = src.granted_by ? ` (via ${src.granted_by})` : "";
     this.con.say();
     this.con.say(`${this.con.style(`${choice.label}${count}`, "bold")}  — from ${src.name}${via}`);
     const rows = res.options(choice).map((view) => this.choiceRow(choice, view));
-    for (;;) {
-      const picked = await this.select(
-        rows,
-        d.count,
-        res.selected(choice),
-        d.hint,
-        d.kind === "ability_increase",
-      );
-      if (this.apply(svc.setChoice, choice.key, picked)) return;
-    }
+    return this.select(rows, n, res.selected(choice), d.hint, d.kind === "ability_increase");
+  }
+
+  /** An optional "replace one of your …" choice: keep everything, or pick [old, new]. */
+  private async pickReplacement(choice: ActiveChoice): Promise<string[]> {
+    const con = this.con;
+    const res = resolve(this.build, this.catalog);
+    const current = res.selected(choice);
+    con.say();
+    con.say(`${con.style(`${choice.label}`, "bold")}  — optional, at level ${choice.level}`);
+    const keep: Row = { id: "", label: "Keep them all", extra: "no replacement" };
+    const olds: Row[] = res
+      .replaceOld(choice)
+      .map((o) => ({ ...o, label: o.name, extra: "replace this" }));
+    const [old] = await this.select([keep, ...olds], 1, [current[0] ?? ""]);
+    if (!old) return [];
+    const news = res.replaceNew(choice, old).map((view) => this.choiceRow(choice, view));
+    con.say(`Replace ${olds.find((o) => o.id === old)?.label ?? old} with:`);
+    const [replacement] = await this.select(news, 1, current[0] === old ? [current[1] ?? ""] : []);
+    return [old, replacement as string];
   }
 
   private choiceRow(choice: ActiveChoice, view: OptionView): Row {

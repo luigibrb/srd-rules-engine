@@ -79,9 +79,11 @@ features:
       label: Ranger prepared spells
       kind: spell
       count: 2
-      spell_level: 1
       spell_list: ranger
-      hint: Cure Wounds and Ensnaring Strike are recommended.
+      hint: Cure Wounds and Ensnaring Strike are recommended. You can change these after a Long Rest.
+      scaling:
+        count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
+        max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
@@ -102,12 +104,6 @@ features:
 
         _Druidic Warrior._ You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). _Guidance_ and _Starry Wisp_ are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.
     choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: ranger
     - {id: expertise, label: Deft Explorer Expertise, kind: expertise, count: 1}
     - {id: languages, label: Deft Explorer languages, kind: language, count: 2}
     - id: fighting_style
@@ -132,6 +128,8 @@ features:
             spell_level: 0
             spell_list: druid
             hint: Guidance and Starry Wisp are recommended.
+            tag: ranger-druidic-warrior
+            swap: class_level
   '3':
     traits:
     - name: Ranger Subclass
@@ -141,12 +139,6 @@ features:
         level or lower.
     choices:
     - {id: subclass, label: Ranger subclass, kind: subclass}
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: ranger
   '4':
     traits:
     - name: Ability Score Improvement
@@ -157,23 +149,10 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      spell_list: ranger
   '5':
     traits:
     - name: Extra Attack
       text: You can attack twice instead of once whenever you take the Attack action on your turn.
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: ranger
     effects:
     - {target: attacks, op: max, value: 2}
   '6':
@@ -183,14 +162,6 @@ features:
         Speed and a Swim Speed equal to your Speed.
     effects:
     - {target: speed, value: 10, when: not_wearing_heavy_armor}
-  '7':
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      spell_list: ranger
   '8':
     choices:
     - id: feat
@@ -203,12 +174,6 @@ features:
       text: Choose two of your skill proficiencies with which you lack Expertise. You gain Expertise in
         those skills.
     choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 3
-      spell_list: ranger
     - {id: expertise, label: Ranger Expertise, kind: expertise, count: 2}
   '10':
     traits:
@@ -219,14 +184,6 @@ features:
         _Temporary Hit Points._ As a Magic action, you can give yourself a number of Temporary Hit Points equal to 1d8 plus your Wisdom modifier (minimum of 1). You can use this action a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
 
         _Decrease Exhaustion._ Whenever you finish a Short Rest, your Exhaustion level, if any, decreases by 1.
-  '11':
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 3
-      spell_list: ranger
   '12':
     choices:
     - id: feat
@@ -237,13 +194,6 @@ features:
     traits:
     - name: Relentless Hunter
       text: Taking damage can't break your Concentration on _Hunter's Mark_.
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: ranger
   '14':
     traits:
     - name: Nature's Veil
@@ -251,14 +201,6 @@ features:
         the Invisible condition until the end of your next turn. You can use this feature a number of
         times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you
         finish a Long Rest.
-  '15':
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      spell_list: ranger
   '16':
     choices:
     - id: feat
@@ -270,13 +212,6 @@ features:
     - name: Precise Hunter
       text: You have Advantage on attack rolls against the creature currently marked by your _Hunter's
         Mark_.
-    choices:
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 5
-      spell_list: ranger
   '18':
     traits:
     - name: Feral Senses
@@ -292,12 +227,6 @@ features:
       kind: feat
       category: [epic_boon, general, origin, fighting_style]
       hint: An Epic Boon feat, or another feat you qualify for.
-    - id: prepared
-      label: Ranger prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 5
-      spell_list: ranger
   '20':
     traits:
     - name: Foe Slayer

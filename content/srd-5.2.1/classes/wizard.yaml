@@ -68,6 +68,9 @@ features:
       spell_level: 0
       spell_list: wizard
       hint: Light, Mage Hand, and Ray of Frost are recommended.
+      scaling:
+        count: [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+        max_spell_level: null
     - id: spellbook
       label: Spellbook
       kind: spell
@@ -80,9 +83,11 @@ features:
       label: Wizard prepared spells
       kind: spell
       count: 4
-      spell_level: 1
       subset_of: wizard-spellbook
-      hint: Prepare four spells from your spellbook.
+      hint: Prepare four spells from your spellbook. You can change these after a Long Rest.
+      scaling:
+        count: [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 18, 19, 21, 22, 23, 24, 25]
+        max_spell_level: [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9]
   '2':
     traits:
     - name: Scholar
@@ -97,12 +102,6 @@ features:
       max_spell_level: 1
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 1
-      subset_of: wizard-spellbook
     - id: expertise
       label: Scholar Expertise
       kind: expertise
@@ -132,12 +131,6 @@ features:
       max_spell_level: 2
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      subset_of: wizard-spellbook
   '4':
     traits:
     - name: Ability Score Improvement
@@ -148,12 +141,6 @@ features:
       label: Ability Score Improvement or feat
       kind: feat
       hint: The Ability Score Improvement feat, or another feat you qualify for.
-    - id: cantrips
-      label: Wizard cantrips
-      kind: spell
-      count: 1
-      spell_level: 0
-      spell_list: wizard
     - id: spellbook
       label: Spellbook (new spells)
       kind: spell
@@ -161,12 +148,6 @@ features:
       max_spell_level: 2
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 2
-      subset_of: wizard-spellbook
   '5':
     traits:
     - name: Memorize Spell
@@ -181,12 +162,6 @@ features:
       max_spell_level: 3
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 3
-      subset_of: wizard-spellbook
   '6':
     choices:
     - id: spellbook
@@ -196,12 +171,6 @@ features:
       max_spell_level: 3
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 3
-      subset_of: wizard-spellbook
   '7':
     choices:
     - id: spellbook
@@ -211,12 +180,6 @@ features:
       max_spell_level: 4
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      subset_of: wizard-spellbook
   '8':
     choices:
     - id: feat
@@ -230,12 +193,6 @@ features:
       max_spell_level: 4
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 4
-      subset_of: wizard-spellbook
   '9':
     choices:
     - id: spellbook
@@ -245,20 +202,8 @@ features:
       max_spell_level: 5
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 5
-      subset_of: wizard-spellbook
   '10':
     choices:
-    - id: cantrips
-      label: Wizard cantrips
-      kind: spell
-      count: 1
-      spell_level: 0
-      spell_list: wizard
     - id: spellbook
       label: Spellbook (new spells)
       kind: spell
@@ -266,12 +211,6 @@ features:
       max_spell_level: 5
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 5
-      subset_of: wizard-spellbook
   '11':
     choices:
     - id: spellbook
@@ -281,12 +220,6 @@ features:
       max_spell_level: 6
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 6
-      subset_of: wizard-spellbook
   '12':
     choices:
     - id: feat
@@ -309,12 +242,6 @@ features:
       max_spell_level: 7
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 7
-      subset_of: wizard-spellbook
   '14':
     choices:
     - id: spellbook
@@ -324,12 +251,6 @@ features:
       max_spell_level: 7
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 7
-      subset_of: wizard-spellbook
   '15':
     choices:
     - id: spellbook
@@ -339,12 +260,6 @@ features:
       max_spell_level: 8
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 8
-      subset_of: wizard-spellbook
   '16':
     choices:
     - id: feat
@@ -358,12 +273,6 @@ features:
       max_spell_level: 8
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 2
-      max_spell_level: 8
-      subset_of: wizard-spellbook
   '17':
     choices:
     - id: spellbook
@@ -373,12 +282,6 @@ features:
       max_spell_level: 9
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      subset_of: wizard-spellbook
   '18':
     traits:
     - name: Spell Mastery
@@ -394,12 +297,6 @@ features:
       max_spell_level: 9
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      subset_of: wizard-spellbook
     - id: mastery_1
       label: Spell Mastery (level 1 spell)
       kind: spell
@@ -432,12 +329,6 @@ features:
       max_spell_level: 9
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      subset_of: wizard-spellbook
   '20':
     traits:
     - name: Signature Spells
@@ -453,12 +344,6 @@ features:
       max_spell_level: 9
       spell_list: wizard
       tag: wizard-spellbook
-    - id: prepared
-      label: Wizard prepared spells
-      kind: spell
-      count: 1
-      max_spell_level: 9
-      subset_of: wizard-spellbook
     - id: signature
       label: Signature Spells
       kind: spell

@@ -90,11 +90,15 @@ features:
       spell_level: 0
       spell_list: warlock
       hint: Eldritch Blast and Prestidigitation are recommended.
+      tag: warlock-cantrips
+      swap: class_level
     - id: invocation
       label: Eldritch Invocation
       kind: feature
       category: eldritch_invocation
       hint: Pact of the Tome is recommended.
+      tag: warlock-invocations
+      swap: class_level
     - id: prepared
       label: Warlock prepared spells
       kind: spell
@@ -102,6 +106,8 @@ features:
       spell_level: 1
       spell_list: warlock
       hint: Charm Person and Hex are recommended.
+      tag: warlock-prepared
+      swap: class_level
   '2':
     traits:
     - name: Magical Cunning
@@ -115,11 +121,15 @@ features:
       count: 1
       max_spell_level: 1
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: invocations
       label: Eldritch Invocations
       kind: feature
       category: eldritch_invocation
       count: 2
+      tag: warlock-invocations
+      swap: class_level
   '3':
     traits:
     - name: Warlock Subclass
@@ -135,6 +145,8 @@ features:
       count: 1
       max_spell_level: 2
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
   '4':
     traits:
     - name: Ability Score Improvement
@@ -151,12 +163,16 @@ features:
       count: 1
       spell_level: 0
       spell_list: warlock
+      tag: warlock-cantrips
+      swap: class_level
     - id: prepared
       label: Warlock prepared spells
       kind: spell
       count: 1
       max_spell_level: 2
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
   '5':
     choices:
     - id: prepared
@@ -165,11 +181,15 @@ features:
       count: 1
       max_spell_level: 3
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: invocations
       label: Eldritch Invocations
       kind: feature
       category: eldritch_invocation
       count: 2
+      tag: warlock-invocations
+      swap: class_level
   '6':
     choices:
     - id: prepared
@@ -178,6 +198,8 @@ features:
       count: 1
       max_spell_level: 3
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
   '7':
     choices:
     - id: prepared
@@ -186,11 +208,15 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: invocations
       label: Eldritch Invocations
       kind: feature
       category: eldritch_invocation
       count: 1
+      tag: warlock-invocations
+      swap: class_level
   '8':
     choices:
     - id: feat
@@ -203,6 +229,8 @@ features:
       count: 1
       max_spell_level: 4
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
   '9':
     traits:
     - name: Contact Patron
@@ -217,11 +245,15 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: invocations
       label: Eldritch Invocations
       kind: feature
       category: eldritch_invocation
       count: 1
+      tag: warlock-invocations
+      swap: class_level
     spells: [contact-other-plane]
   '10':
     choices:
@@ -231,6 +263,8 @@ features:
       count: 1
       spell_level: 0
       spell_list: warlock
+      tag: warlock-cantrips
+      swap: class_level
   '11':
     traits:
     - name: Mystic Arcanum
@@ -249,12 +283,17 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: mystic_arcanum
       label: Mystic Arcanum (level 6 spell)
       kind: spell
       spell_level: 6
       spell_list: warlock
       always_prepared: true
+      tag: warlock-arcanum
+      swap: class_level
+      same_level: true
   '12':
     choices:
     - id: feat
@@ -266,6 +305,8 @@ features:
       kind: feature
       category: eldritch_invocation
       count: 1
+      tag: warlock-invocations
+      swap: class_level
   '13':
     choices:
     - id: prepared
@@ -274,12 +315,17 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: mystic_arcanum
       label: Mystic Arcanum (level 7 spell)
       kind: spell
       spell_level: 7
       spell_list: warlock
       always_prepared: true
+      tag: warlock-arcanum
+      swap: class_level
+      same_level: true
   '15':
     choices:
     - id: prepared
@@ -288,17 +334,24 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: invocations
       label: Eldritch Invocations
       kind: feature
       category: eldritch_invocation
       count: 1
+      tag: warlock-invocations
+      swap: class_level
     - id: mystic_arcanum
       label: Mystic Arcanum (level 8 spell)
       kind: spell
       spell_level: 8
       spell_list: warlock
       always_prepared: true
+      tag: warlock-arcanum
+      swap: class_level
+      same_level: true
   '16':
     choices:
     - id: feat
@@ -313,12 +366,17 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
     - id: mystic_arcanum
       label: Mystic Arcanum (level 9 spell)
       kind: spell
       spell_level: 9
       spell_list: warlock
       always_prepared: true
+      tag: warlock-arcanum
+      swap: class_level
+      same_level: true
   '18':
     choices:
     - id: invocations
@@ -326,6 +384,8 @@ features:
       kind: feature
       category: eldritch_invocation
       count: 1
+      tag: warlock-invocations
+      swap: class_level
   '19':
     traits:
     - name: Epic Boon
@@ -343,6 +403,8 @@ features:
       count: 1
       max_spell_level: 5
       spell_list: warlock
+      tag: warlock-prepared
+      swap: class_level
   '20':
     traits:
     - name: Eldritch Master

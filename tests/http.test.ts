@@ -148,6 +148,49 @@ describe("HTTP API", () => {
     });
   });
 
+  it("previews and changes the past over HTTP", async () => {
+    let build = fighterBuild();
+    for (let i = 0; i < 2; i++) {
+      build = (await api.post("/v1/builds/level-up", { build, class_id: "fighter" })).body.build;
+    }
+    build = (
+      await api.post("/v1/builds/set-choice", {
+        build,
+        key: "class:fighter:3#subclass",
+        values: ["champion"],
+      })
+    ).body.build;
+    const preview = await api.post("/v1/builds/preview", {
+      build,
+      key: "class:fighter:3#subclass",
+      values: [],
+    });
+    expect(preview.status).toBe(200);
+    expect(preview.body.pending).toEqual([
+      { level: 3, message: "Fighter subclass: choose 1 more" },
+    ]);
+    const moved = await api.post("/v1/builds/set-level-class", {
+      build,
+      level: 2,
+      class_id: "rogue",
+    });
+    expect(moved.status).toBe(200);
+    expect(moved.body.build.levels.map((l: { class_id: string }) => l.class_id)).toEqual([
+      "rogue",
+      "fighter",
+    ]);
+    const refused = await api.post("/v1/builds/set-level-class", {
+      build,
+      level: 2,
+      class_id: "wizard",
+    });
+    expect(refused.status).toBe(400);
+    const ev = await api.post("/v1/builds/evaluate", build);
+    const swap = ev.body.choices.find((c: { key: string }) => c.key.includes("#replace:"));
+    expect(swap).toMatchObject({ required: 0, replaces: { family: "fighter:fighter-style" } });
+    expect(swap.replace_old_options.map((o: { id: string }) => o.id)).toEqual(["defense"]);
+  });
+
   it("rejects bad requests", async () => {
     expect((await api.get("/nope")).status).toBe(404);
     expect((await api.get("/v1/combat/roll")).status).toBe(405);
