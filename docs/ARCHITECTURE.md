@@ -73,6 +73,9 @@ declarative stand-in for the full Effect engine (milestone 3). It already uses t
 - AC assumes you wear the best armor you own and are trained with. Equipping comes with the
   inventory milestone.
 - Only the Fighter class is defined. Other classes are added as YAML under `classes/`.
+- The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
+  separate, hand-filled snapshot. It isn't derived from a build and sheet yet; bridging the two
+  belongs with the session-state layer.
 
 ## Runtime and packaging (TypeScript)
 
@@ -100,6 +103,9 @@ builder, a VTT client, an edge function and a server.
 - **Dice.** Every rolling function takes an optional `Rng` (`{ int(min, max) }`).
   `seededRng` (mulberry32) gives the same sequence on every platform; `scriptedRng` and
   `fixedRng` are for tests.
+- **Services.** The Python `character_service`, `combat_service` and `spell_service` were
+  merged into `src/services/combat.ts`. Functions that returned tuples now return objects
+  (`{ attack, damage, target }`, `{ build, notes }`).
 - **HTTP.** A Web-standard `fetch` handler with no router dependency. Request bodies are
   validated with the same Zod schemas (422 on failure). The Node adapter limits bodies to
   1 MB, and dice expressions are limited to 1000 dice of up to 1000 sides.

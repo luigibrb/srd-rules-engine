@@ -54,11 +54,42 @@ npm run format           # biome format + safe fixes
 npm run content          # YAML → bundled JSON + JSON Schemas
 npm run build            # dist/
 npm run builder          # interactive builder from source (-- --load x.json --seed N --no-color)
+npx tsx src/cli/main.ts validate examples/homebrew-pack   # validate a content pack
 npm run serve            # HTTP API on localhost:8000
 ```
 
+## Where things go
+
+- New rules logic → `src/rules/` (pure functions, optional `{ rng }`), exported from `src/index.ts`.
+- New content (class, feat, species…) → YAML in `content/srd-5.2.1/` (SRD only; homebrew needs its
+  own `source` and folder), then `npm run content` and a concrete-character test in `tests/sheet.test.ts`.
+- New content field or table → Zod schema in `src/models/content.ts` (+ `TABLE_SCHEMAS` in
+  `src/content/catalog.ts` for a new table), then `npm run content` to regenerate `schemas/`.
+- New HTTP route → `routes` in `src/http/index.ts` (validate the body with a Zod schema) + a test
+  in `tests/http.test.ts` + the route table in README.md.
+- Node-only code (fs, `node:*`) → `src/content/load.ts`, `src/http/node-server.ts` or `src/cli/`;
+  export it from `src/node.ts`, never from `src/index.ts`.
+
+## Generated files (don't edit by hand)
+
+- `src/content/data/srd-5.2.1.json` and `schemas/*.schema.json`: from `npm run content`.
+  CI fails (`npm run content -- --check`) if they're out of date, so commit them.
+- `dist/`: from `npm run build` (git-ignored).
+
 ## API base
 
-See the route table in README.md (`src/http/index.ts`). Includes `GET /health`,
-`/v1/content/...`, `POST /v1/builds/evaluate`, `/v1/characters/...`, `/v1/combat/...`,
-`/v1/spells/...`.
+`GET /health` — liveness check  
+`GET /v1/content` — table names and counts; `/v1/content/{table}`, `/v1/content/{table}/{id}`  
+`POST /v1/builds/evaluate` — build → `{ report, sheet, choices (with options) }`  
+`POST /v1/characters/` — validate a `Character`  
+`POST /v1/characters/{name}/alive` — is the character above 0 HP  
+`POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  
+`POST /v1/combat/roll` — roll any dice expression (`{"expression": "2d6+3"}`)  
+`POST /v1/combat/attack` — full attack resolution  
+`POST /v1/combat/saving-throw` — saving throw  
+`POST /v1/spells/stats` — spell save DC + attack bonus  
+`POST /v1/spells/attack` — spell attack  
+`POST /v1/spells/save` — save-based spell (also returns `damage_dealt`)
+
+Errors: 422 invalid body (Zod), 400 bad JSON or dice expression, 404 unknown route/entity,
+405 wrong method. `createHandler({ catalog, rng, basePath, cors })` configures it.
