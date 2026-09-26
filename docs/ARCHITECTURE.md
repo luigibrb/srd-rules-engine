@@ -4,7 +4,7 @@
 
 ### Step order
 
-`Step` in `app/models/content.py` defines the order, based on dependencies. Each step only
+`STEPS` in `src/models/content.ts` defines the order, based on dependencies. Each step only
 uses what earlier steps decided, and nothing important is asked before the facts that
 constrain it are known. The order follows the 2024 rules (Class → Origin → Ability Scores →
 Details) and Baldur's Gate 3, which lets you move freely between tabs.
@@ -25,20 +25,20 @@ Details) and Baldur's Gate 3, which lets you move freely between tabs.
 9. **Name & alignment** is last because nothing depends on it (BG3 also asks for it last).
 
 You can jump to any step. If a change upstream makes a later choice invalid,
-`builder_service.normalize` removes it and says why. For example, switching to Criminal
+`normalize` in `src/services/builder.ts` removes it and says why. For example, switching to Criminal
 removes Stealth from Skilled.
 
 ### Layers
 
 | Layer | Module | Responsibility |
 |---|---|---|
-| Content | `content/*.yaml`, `app/content/catalog.py` | Static rules data, schema + cross-reference validation at load |
-| Build | `app/models/build.py` | The player's choices only; immutable |
-| Resolution | `app/rules/build_resolution.py` | Build + catalog → active sources, pending choices, option availability |
-| Validation | `app/rules/build_validation.py` | Errors (illegal), pending (missing), notes (not automated) |
-| Sheet | `app/rules/sheet.py` | Derived numbers with contributions (`AC 17 = 16 Chain Mail + 1 Defense`) |
-| Workflow | `app/services/builder_service.py` | Validated setters + normalization |
-| UI | `app/cli/` | Interactive shell; no rules logic |
+| Content | `content/**/*.yaml`, `src/content/` | Static rules data; schema + cross-reference validation at load |
+| Build | `src/models/build.ts` | The player's choices only; immutable |
+| Resolution | `src/rules/build-resolution.ts` | Build + catalog → active sources, pending choices, option availability |
+| Validation | `src/rules/build-validation.ts` | Errors (illegal), pending (missing), notes (not automated) |
+| Sheet | `src/rules/sheet.ts` | Derived numbers with contributions (`AC 17 = 16 Chain Mail + 1 Defense`) |
+| Workflow | `src/services/builder.ts` | Validated setters + normalization |
+| UI | `src/cli/`, `src/http/` | Interactive shell and HTTP API; no rules logic |
 
 ### Sources and choices
 
@@ -73,3 +73,33 @@ declarative stand-in for the full Effect engine (milestone 3). It already uses t
 - AC assumes you wear the best armor you own and are trained with. Equipping comes with the
   inventory milestone.
 - Only the Fighter class is defined. Other classes are added as YAML under `classes/`.
+
+## Runtime and packaging (TypeScript)
+
+The engine was ported from Python to TypeScript so the same code can run in a browser
+builder, a VTT client, an edge function and a server.
+
+- **Isomorphic core.** `src/index.ts` and `src/http/` import no Node built-ins. The SRD is
+  compiled from YAML to JSON at build time (`scripts/compile-content.ts`) and bundled, so no
+  filesystem or YAML parser is needed at runtime. Node-only code (reading content
+  directories, the `node:http` adapter, the CLI) is in `src/content/load.ts`,
+  `src/http/node-server.ts` and `src/cli/`.
+- **Schemas: Zod.** Content, builds and API payloads are Zod schemas. The TypeScript types
+  are inferred from them, except for the recursive `Grants`/`ChoiceDef`/`ChoiceOption`,
+  which are written by hand. The same schemas generate `schemas/*.schema.json` for content
+  authors and for other languages.
+- **snake_case data.** Fields keep the YAML/JSON names (`class_id`, `base_ac`), so content,
+  saved builds, sheets and HTTP payloads share one format, and builds saved by the Python
+  version still load. Functions are camelCase.
+- **Immutability.** Catalogs are deep-frozen and builds are frozen. `updateBuild` replaces
+  Pydantic's `model_copy`. Lookups by id go through `lookup()` (an `Object.hasOwn` check),
+  so ids like `constructor` can't hit the prototype.
+- **Content packs.** `createCatalog(...packs)` layers packs in order: a later pack adds
+  entities and replaces earlier ones with the same id. Duplicate ids within one pack are
+  errors. Cross-references are checked after layering.
+- **Dice.** Every rolling function takes an optional `Rng` (`{ int(min, max) }`).
+  `seededRng` (mulberry32) gives the same sequence on every platform; `scriptedRng` and
+  `fixedRng` are for tests.
+- **HTTP.** A Web-standard `fetch` handler with no router dependency. Request bodies are
+  validated with the same Zod schemas (422 on failure). The Node adapter limits bodies to
+  1 MB, and dice expressions are limited to 1000 dice of up to 1000 sides.

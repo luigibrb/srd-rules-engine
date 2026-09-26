@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=../../schemas/backgrounds.schema.json
+- id: gambler
+  name: Gambler
+  source: homebrew
+  description: You lived by the dice, and the dice mostly loved you back.
+  ability_scores: [dex, int, cha]
+  grants:
+    feats: [{feat: lucky-streak}]
+    skills: [deception, insight]
+    tools: [dice-set]
+    choices:
+      - id: equipment
+        label: Gambler equipment
+        kind: option
+        step: equipment
+        options:
+          - id: a
+            name: Package
+            description: Dice Set, Lucky Coin, Traveler's Clothes, 20 GP
+            grants:
+              items: [{item: dice-set}, {item: lucky-coin}, {item: travelers-clothes}]
+              gp: 20
+          - {id: b, name: Gold, description: 50 GP, grants: {gp: 50}}

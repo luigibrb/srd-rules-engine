@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/species.schema.json
 # SRD 5.2.1 — "Character Origins" > "Character Species".
 # Level 3+ spells and level 5+ traits are listed as text only (the builder targets level 1).
 - id: dragonborn

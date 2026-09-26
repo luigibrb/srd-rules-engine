@@ -1,63 +1,64 @@
-# D&D Rules Engine — Claude Guide
+# SRD Rules Engine — Claude Guide
 
 ## Stack
-- Python 3.12+, managed with **uv**
-- **FastAPI** for the HTTP API
-- **Pydantic v2** for all data models
-- **pytest** for tests, **ruff** for linting/formatting
+- TypeScript (strict, `noUncheckedIndexedAccess`), Node ≥ 22.18 for development, ESM-first
+- **Zod v4** for all schemas (content, builds, API payloads); types are inferred from schemas
+- **vitest** for tests, **Biome** for lint + format, **tsdown** for the build (ESM + CJS + d.ts)
+- No runtime dependencies besides `zod` and `yaml`
 
 ## Project layout
 
 ```
-app/
-  main.py          # FastAPI app + /health
-  api/v1/          # Route handlers (thin — delegate to services)
-  cli/             # Interactive character builder shell (builder.py, render.py, console.py)
-  content/         # catalog.py — loads + cross-validates content/ YAML into a Catalog
-  models/          # Pydantic models: character, combat, spell, content (schemas), build
-  rules/           # Pure D&D logic: dice, combat, spells, ability_scores,
-                   #   build_resolution (sources/choices), build_validation, sheet
-  services/        # Stateless orchestration: character, combat, spell, builder_service
-content/srd-5.2.1/ # Rules content as YAML (species, backgrounds, classes/, feats, items...)
+src/
+  index.ts         # public API (platform-neutral: no node:* imports)
+  node.ts          # index + loadContentPack/loadCatalog + serveNode
+  models/          # Zod schemas + types: content, build, character, combat, spell
+  content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
+  content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
+  rules/           # pure logic: dice, rng, ability-scores, combat, spells,
+                   #   build-resolution, build-validation, sheet
+  services/        # builder.ts (setters + normalize + evaluate), combat.ts (HP, attacks, spells)
+  http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
+  cli/             # srd-rules bin: build (interactive builder), serve, validate
+content/srd-5.2.1/ # rules content as YAML (source of truth)
+schemas/           # GENERATED JSON Schemas for content files and builds
+scripts/           # compile-content.ts
+examples/          # homebrew-pack (tested in tests/content.test.ts)
 data/srd-5-2-1/    # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
-docs/              # ARCHITECTURE.md — design decisions
-tests/             # pytest; mirrors app/ structure
-main.py            # Dev entry point — uvicorn with reload
+docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide)
+tests/             # vitest; *.test.ts
 ```
 
 ## Key conventions
 
-- **rules/** is pure logic, no FastAPI types. Services compose rules into workflows.
-- Models are **immutable**; mutations return `model_copy(update={...})`.
-- All dice functions accept an optional `rng: random.Random` for deterministic tests.
-- D&D 5e rule: critical hits double all dice (not just the first); nat-1 always misses; nat-20 always hits.
-- Saving throw damage: half on success, full on failure (standard 5e).
-- Rules content is data: YAML in `content/`, every entity has a slug `id` and a `source`
-  (`srd-5.2.1`, `homebrew`, ...). Add classes as `content/srd-5.2.1/classes/<id>.yaml`.
-- Character builder: a `CharacterBuild` stores only choices; `choices` is keyed by choice key
-  (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values (HP, AC, ...) are
-  always recomputed by `rules/sheet.py`, never stored. See `docs/ARCHITECTURE.md`.
+- **rules/** is pure logic: no I/O. `src/index.ts` and `src/http/` must stay platform-neutral.
+- Data is **immutable** and **snake_case** (shared wire/file format); functions are camelCase.
+  Builds change via `updateBuild(build, {...})`; setters return `{ build, notes }`.
+- Look up catalog ids with `lookup(table, id)` (never `table[id]` / `id in table`).
+- All dice functions take an optional `Rng` (`{ rng }` options bag); tests use
+  `seededRng`, `scriptedRng`, `fixedRng`.
+- D&D 5e rule: critical hits double all dice (not the modifier); nat-1 always misses; nat-20 always hits.
+- Saving throw damage: half (rounded down) on success, full on failure.
+- Rules content is data: every entity has a slug `id` and a `source`. After editing
+  `content/`, run `npm run content` and commit the generated files.
+- Character builder: a `CharacterBuild` stores only choices, keyed by choice key
+  (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
+  recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.
 
 ## Common commands
 
 ```bash
-uv run pytest              # run tests
-uv run ruff check .        # lint
-uv run ruff format .       # format
-uv run python main.py      # dev server (localhost:8000)
-uv run python -m app.cli.builder   # interactive level 1 character builder
-                                   #   --load characters/x.json · --seed N · --no-color
+npm test                 # run tests
+npm run check            # content up to date + lint + typecheck + tests (CI)
+npm run format           # biome format + safe fixes
+npm run content          # YAML → bundled JSON + JSON Schemas
+npm run build            # dist/
+npm run builder          # interactive builder from source (-- --load x.json --seed N --no-color)
+npm run serve            # HTTP API on localhost:8000
 ```
 
 ## API base
 
-`GET /health` — liveness check  
-`POST /v1/characters/` — echo/validate a `Character`  
-`POST /v1/characters/{name}/alive` — is the character above 0 HP  
-`POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  
-`POST /v1/combat/roll` — roll any dice expression (`{"expression": "2d6+3"}`)  
-`POST /v1/combat/attack` — full attack resolution  
-`POST /v1/combat/saving-throw` — saving throw  
-`POST /v1/spells/stats` — spell save DC + attack bonus  
-`POST /v1/spells/attack` — spell attack  
-`POST /v1/spells/save` — save-based spell  
+See the route table in README.md (`src/http/index.ts`). Includes `GET /health`,
+`/v1/content/...`, `POST /v1/builds/evaluate`, `/v1/characters/...`, `/v1/combat/...`,
+`/v1/spells/...`.

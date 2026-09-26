@@ -1,6 +1,8 @@
 # Data Sources
 
-Every rules entity in `content/` carries a `source` field. Current sources:
+Every rules entity in `content/` carries a `source` field. The bundled JSON
+(`src/content/data/srd-5.2.1.json`, published as `srd-rules-engine/srd-5.2.1.json`) is generated
+from these files. Current sources:
 
 | `source` | Where | License |
 |---|---|---|

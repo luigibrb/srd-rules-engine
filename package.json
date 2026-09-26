@@ -1,0 +1,101 @@
+{
+  "name": "srd-rules-engine",
+  "version": "0.1.0",
+  "description": "A 5th-edition (SRD 5.2.1) rules engine and character builder: content as data, derived sheets with explanations, deterministic dice.",
+  "keywords": [
+    "srd",
+    "5e",
+    "srd-5.2.1",
+    "ttrpg",
+    "rules-engine",
+    "character-builder",
+    "dice"
+  ],
+  "license": "MIT AND CC-BY-4.0",
+  "author": "Luigi Barba",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist",
+    "content",
+    "schemas",
+    "DATA-SOURCES.md"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/node.cjs"
+      }
+    },
+    "./http": {
+      "import": {
+        "types": "./dist/http.d.ts",
+        "default": "./dist/http.js"
+      },
+      "require": {
+        "types": "./dist/http.d.cts",
+        "default": "./dist/http.cjs"
+      }
+    },
+    "./srd-5.2.1.json": "./dist/srd-5.2.1.json",
+    "./schemas/*": "./schemas/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "srd-rules": "./dist/cli.mjs"
+  },
+  "scripts": {
+    "build": "npm run content && tsdown",
+    "content": "tsx scripts/compile-content.ts",
+    "builder": "tsx src/cli/main.ts build",
+    "serve": "tsx src/cli/main.ts serve",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "npm run content -- --check && npm run lint && npm run typecheck && npm test",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^22.20.4",
+    "tsdown": "^0.23.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/srd-rules-engine.git"
+  },
+  "homepage": "https://github.com/OWNER/srd-rules-engine#readme",
+  "bugs": {
+    "url": "https://github.com/OWNER/srd-rules-engine/issues"
+  }
+}

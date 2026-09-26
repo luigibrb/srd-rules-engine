@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/backgrounds.schema.json
 # SRD 5.2.1 — "Character Origins" > "Character Backgrounds".
 - id: acolyte
   name: Acolyte

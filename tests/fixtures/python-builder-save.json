@@ -1,0 +1,33 @@
+{
+  "name": "Provus",
+  "alignment": "LG",
+  "class_id": "fighter",
+  "species_id": "human",
+  "background_id": "soldier",
+  "ability_method": "point_buy",
+  "rolled_pool": [],
+  "base_scores": {
+    "str": 15,
+    "dex": 14,
+    "con": 14,
+    "int": 10,
+    "wis": 10,
+    "cha": 8
+  },
+  "background_bonus": {
+    "dex": 2,
+    "str": 1
+  },
+  "choices": {
+    "species:human#size": ["medium"],
+    "class:fighter#equipment": ["b"],
+    "background:soldier#equipment": ["a"],
+    "class:fighter#fighting_style": ["two-weapon-fighting"],
+    "class:fighter#weapon_mastery": ["club", "dagger", "greatclub"],
+    "species:human#versatile": ["alert"],
+    "class:fighter#skills": ["acrobatics", "animal-handling"],
+    "species:human#skillful": ["nature"],
+    "background:soldier#tool": ["dice-set"],
+    "creation#languages": ["common-sign-language", "draconic"]
+  }
+}

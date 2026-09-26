@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "name": {
+      "default": "",
+      "type": "string"
+    },
+    "alignment": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "LG",
+            "NG",
+            "CG",
+            "LN",
+            "N",
+            "CN",
+            "LE",
+            "NE",
+            "CE"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "class_id": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "species_id": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "background_id": {
+      "default": null,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "ability_method": {
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "standard_array",
+            "point_buy",
+            "roll"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rolled_pool": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "base_scores": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "background_bonus": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha"
+        ]
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "choices": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "title": "Character build"
+}

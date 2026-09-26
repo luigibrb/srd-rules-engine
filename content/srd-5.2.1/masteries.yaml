@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/masteries.schema.json
 # SRD 5.2.1 — "Equipment" > "Mastery Properties" (summarized).
 - {id: cleave, name: Cleave, description: "On a melee hit, attack a second creature within 5 ft of the first (no ability modifier to damage). Once per turn."}
 - {id: graze, name: Graze, description: "On a miss, deal damage equal to the ability modifier used for the attack."}

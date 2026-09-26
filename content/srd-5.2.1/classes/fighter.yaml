@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
 # SRD 5.2.1 — "Classes" > "Fighter" (level 1 only).
 id: fighter
 name: Fighter

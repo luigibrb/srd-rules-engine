@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/armor.schema.json
 # Generated from the SRD 5.2.1 tables in data/srd-5-2-1/equipment.md, then reviewed by hand.
 - id: padded-armor
   name: Padded Armor

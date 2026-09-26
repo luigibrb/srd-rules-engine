@@ -1,0 +1,17 @@
+name: Rules or content error
+description: A number, option or text doesn't match the SRD 5.2.1
+labels: [content]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong?
+      placeholder: Chain Mail should give AC 16, the sheet shows 17.
+    validations: { required: true }
+  - type: input
+    id: srd
+    attributes:
+      label: SRD 5.2.1 reference
+      description: Section and, if you can, page.
+      placeholder: Equipment › Armor table, p. 92
+    validations: { required: true }

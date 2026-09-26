@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/feats.schema.json
 # SRD 5.2.1 — "Feats". Only Origin and Fighting Style feats are needed at level 1.
 - id: alert
   name: Alert

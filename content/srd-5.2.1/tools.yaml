@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/tools.schema.json
 # SRD 5.2.1 — "Equipment" > "Tools". Gaming sets and instruments: one proficiency per variant.
 - {id: alchemists-supplies, name: "Alchemist's Supplies", category: artisan}
 - {id: brewers-supplies, name: "Brewer's Supplies", category: artisan}

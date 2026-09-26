@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/gear.schema.json
 # SRD 5.2.1 — "Equipment" > "Adventuring Gear" (only items referenced by starting equipment so far).
 - {id: arrow, name: Arrow}
 - {id: book-history, name: Book (history)}
