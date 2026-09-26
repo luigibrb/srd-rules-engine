@@ -1,0 +1,471 @@
+# Generated from the SRD 5.2.1 tables in data/srd-5-2-1/equipment.md, then reviewed by hand.
+- id: club
+  name: Club
+  category: simple
+  kind: melee
+  damage: 1d4
+  damage_type: bludgeoning
+  mastery: slow
+  properties:
+  - light
+  weight: 2 lb.
+  cost: 1 SP
+- id: dagger
+  name: Dagger
+  category: simple
+  kind: melee
+  damage: 1d4
+  damage_type: piercing
+  mastery: nick
+  range: 20/60
+  properties:
+  - finesse
+  - light
+  - thrown
+  weight: 1 lb.
+  cost: 2 GP
+- id: greatclub
+  name: Greatclub
+  category: simple
+  kind: melee
+  damage: 1d8
+  damage_type: bludgeoning
+  mastery: push
+  properties:
+  - two-handed
+  weight: 10 lb.
+  cost: 2 SP
+- id: handaxe
+  name: Handaxe
+  category: simple
+  kind: melee
+  damage: 1d6
+  damage_type: slashing
+  mastery: vex
+  range: 20/60
+  properties:
+  - light
+  - thrown
+  weight: 2 lb.
+  cost: 5 GP
+- id: javelin
+  name: Javelin
+  category: simple
+  kind: melee
+  damage: 1d6
+  damage_type: piercing
+  mastery: slow
+  range: 30/120
+  properties:
+  - thrown
+  weight: 2 lb.
+  cost: 5 SP
+- id: light-hammer
+  name: Light Hammer
+  category: simple
+  kind: melee
+  damage: 1d4
+  damage_type: bludgeoning
+  mastery: nick
+  range: 20/60
+  properties:
+  - light
+  - thrown
+  weight: 2 lb.
+  cost: 2 GP
+- id: mace
+  name: Mace
+  category: simple
+  kind: melee
+  damage: 1d6
+  damage_type: bludgeoning
+  mastery: sap
+  weight: 4 lb.
+  cost: 5 GP
+- id: quarterstaff
+  name: Quarterstaff
+  category: simple
+  kind: melee
+  damage: 1d6
+  damage_type: bludgeoning
+  mastery: topple
+  versatile_damage: 1d8
+  properties:
+  - versatile
+  weight: 4 lb.
+  cost: 2 SP
+- id: sickle
+  name: Sickle
+  category: simple
+  kind: melee
+  damage: 1d4
+  damage_type: slashing
+  mastery: nick
+  properties:
+  - light
+  weight: 2 lb.
+  cost: 1 GP
+- id: spear
+  name: Spear
+  category: simple
+  kind: melee
+  damage: 1d6
+  damage_type: piercing
+  mastery: sap
+  range: 20/60
+  versatile_damage: 1d8
+  properties:
+  - thrown
+  - versatile
+  weight: 3 lb.
+  cost: 1 GP
+- id: dart
+  name: Dart
+  category: simple
+  kind: ranged
+  damage: 1d4
+  damage_type: piercing
+  mastery: vex
+  range: 20/60
+  properties:
+  - finesse
+  - thrown
+  weight: 1/4 lb.
+  cost: 5 CP
+- id: light-crossbow
+  name: Light Crossbow
+  category: simple
+  kind: ranged
+  damage: 1d8
+  damage_type: piercing
+  mastery: slow
+  range: 80/320
+  properties:
+  - ammunition
+  - loading
+  - two-handed
+  weight: 5 lb.
+  cost: 25 GP
+- id: shortbow
+  name: Shortbow
+  category: simple
+  kind: ranged
+  damage: 1d6
+  damage_type: piercing
+  mastery: vex
+  range: 80/320
+  properties:
+  - ammunition
+  - two-handed
+  weight: 2 lb.
+  cost: 25 GP
+- id: sling
+  name: Sling
+  category: simple
+  kind: ranged
+  damage: 1d4
+  damage_type: bludgeoning
+  mastery: slow
+  range: 30/120
+  properties:
+  - ammunition
+  weight: "\u2014"
+  cost: 1 SP
+- id: battleaxe
+  name: Battleaxe
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: slashing
+  mastery: topple
+  versatile_damage: 1d10
+  properties:
+  - versatile
+  weight: 4 lb.
+  cost: 10 GP
+- id: flail
+  name: Flail
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: bludgeoning
+  mastery: sap
+  weight: 2 lb.
+  cost: 10 GP
+- id: glaive
+  name: Glaive
+  category: martial
+  kind: melee
+  damage: 1d10
+  damage_type: slashing
+  mastery: graze
+  properties:
+  - heavy
+  - reach
+  - two-handed
+  weight: 6 lb.
+  cost: 20 GP
+- id: greataxe
+  name: Greataxe
+  category: martial
+  kind: melee
+  damage: 1d12
+  damage_type: slashing
+  mastery: cleave
+  properties:
+  - heavy
+  - two-handed
+  weight: 7 lb.
+  cost: 30 GP
+- id: greatsword
+  name: Greatsword
+  category: martial
+  kind: melee
+  damage: 2d6
+  damage_type: slashing
+  mastery: graze
+  properties:
+  - heavy
+  - two-handed
+  weight: 6 lb.
+  cost: 50 GP
+- id: halberd
+  name: Halberd
+  category: martial
+  kind: melee
+  damage: 1d10
+  damage_type: slashing
+  mastery: cleave
+  properties:
+  - heavy
+  - reach
+  - two-handed
+  weight: 6 lb.
+  cost: 20 GP
+- id: lance
+  name: Lance
+  category: martial
+  kind: melee
+  damage: 1d10
+  damage_type: piercing
+  mastery: topple
+  properties:
+  - heavy
+  - reach
+  - two-handed
+  weight: 6 lb.
+  cost: 10 GP
+- id: longsword
+  name: Longsword
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: slashing
+  mastery: sap
+  versatile_damage: 1d10
+  properties:
+  - versatile
+  weight: 3 lb.
+  cost: 15 GP
+- id: maul
+  name: Maul
+  category: martial
+  kind: melee
+  damage: 2d6
+  damage_type: bludgeoning
+  mastery: topple
+  properties:
+  - heavy
+  - two-handed
+  weight: 10 lb.
+  cost: 10 GP
+- id: morningstar
+  name: Morningstar
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: piercing
+  mastery: sap
+  weight: 4 lb.
+  cost: 15 GP
+- id: pike
+  name: Pike
+  category: martial
+  kind: melee
+  damage: 1d10
+  damage_type: piercing
+  mastery: push
+  properties:
+  - heavy
+  - reach
+  - two-handed
+  weight: 18 lb.
+  cost: 5 GP
+- id: rapier
+  name: Rapier
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: piercing
+  mastery: vex
+  properties:
+  - finesse
+  weight: 2 lb.
+  cost: 25 GP
+- id: scimitar
+  name: Scimitar
+  category: martial
+  kind: melee
+  damage: 1d6
+  damage_type: slashing
+  mastery: nick
+  properties:
+  - finesse
+  - light
+  weight: 3 lb.
+  cost: 25 GP
+- id: shortsword
+  name: Shortsword
+  category: martial
+  kind: melee
+  damage: 1d6
+  damage_type: piercing
+  mastery: vex
+  properties:
+  - finesse
+  - light
+  weight: 2 lb.
+  cost: 10 GP
+- id: trident
+  name: Trident
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: piercing
+  mastery: topple
+  range: 20/60
+  versatile_damage: 1d10
+  properties:
+  - thrown
+  - versatile
+  weight: 4 lb.
+  cost: 5 GP
+- id: warhammer
+  name: Warhammer
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: bludgeoning
+  mastery: push
+  versatile_damage: 1d10
+  properties:
+  - versatile
+  weight: 5 lb.
+  cost: 15 GP
+- id: war-pick
+  name: War Pick
+  category: martial
+  kind: melee
+  damage: 1d8
+  damage_type: piercing
+  mastery: sap
+  versatile_damage: 1d10
+  properties:
+  - versatile
+  weight: 2 lb.
+  cost: 5 GP
+- id: whip
+  name: Whip
+  category: martial
+  kind: melee
+  damage: 1d4
+  damage_type: slashing
+  mastery: slow
+  properties:
+  - finesse
+  - reach
+  weight: 3 lb.
+  cost: 2 GP
+- id: blowgun
+  name: Blowgun
+  category: martial
+  kind: ranged
+  damage: '1'
+  damage_type: piercing
+  mastery: vex
+  range: 25/100
+  properties:
+  - ammunition
+  - loading
+  weight: 1 lb.
+  cost: 10 GP
+- id: hand-crossbow
+  name: Hand Crossbow
+  category: martial
+  kind: ranged
+  damage: 1d6
+  damage_type: piercing
+  mastery: vex
+  range: 30/120
+  properties:
+  - ammunition
+  - light
+  - loading
+  weight: 3 lb.
+  cost: 75 GP
+- id: heavy-crossbow
+  name: Heavy Crossbow
+  category: martial
+  kind: ranged
+  damage: 1d10
+  damage_type: piercing
+  mastery: push
+  range: 100/400
+  properties:
+  - ammunition
+  - heavy
+  - loading
+  - two-handed
+  weight: 18 lb.
+  cost: 50 GP
+- id: longbow
+  name: Longbow
+  category: martial
+  kind: ranged
+  damage: 1d8
+  damage_type: piercing
+  mastery: slow
+  range: 150/600
+  properties:
+  - ammunition
+  - heavy
+  - two-handed
+  weight: 2 lb.
+  cost: 50 GP
+- id: musket
+  name: Musket
+  category: martial
+  kind: ranged
+  damage: 1d12
+  damage_type: piercing
+  mastery: slow
+  range: 40/120
+  properties:
+  - ammunition
+  - loading
+  - two-handed
+  weight: 10 lb.
+  cost: 500 GP
+- id: pistol
+  name: Pistol
+  category: martial
+  kind: ranged
+  damage: 1d10
+  damage_type: piercing
+  mastery: vex
+  range: 30/90
+  properties:
+  - ammunition
+  - loading
+  weight: 3 lb.
+  cost: 250 GP

@@ -1,0 +1,20 @@
+# SRD 5.2.1 — "Character Creation" > "Choose Languages".
+- {id: common, name: Common, category: standard}
+- {id: common-sign-language, name: Common Sign Language, category: standard}
+- {id: draconic, name: Draconic, category: standard}
+- {id: dwarvish, name: Dwarvish, category: standard}
+- {id: elvish, name: Elvish, category: standard}
+- {id: giant, name: Giant, category: standard}
+- {id: gnomish, name: Gnomish, category: standard}
+- {id: goblin, name: Goblin, category: standard}
+- {id: halfling, name: Halfling, category: standard}
+- {id: orc, name: Orc, category: standard}
+- {id: abyssal, name: Abyssal, category: rare}
+- {id: celestial, name: Celestial, category: rare}
+- {id: deep-speech, name: Deep Speech, category: rare}
+- {id: druidic, name: Druidic, category: rare}
+- {id: infernal, name: Infernal, category: rare}
+- {id: primordial, name: Primordial, category: rare}
+- {id: sylvan, name: Sylvan, category: rare}
+- {id: thieves-cant, name: "Thieves' Cant", category: rare}
+- {id: undercommon, name: Undercommon, category: rare}

@@ -1,0 +1,9 @@
+# SRD 5.2.1 — "Equipment" > "Mastery Properties" (summarized).
+- {id: cleave, name: Cleave, description: "On a melee hit, attack a second creature within 5 ft of the first (no ability modifier to damage). Once per turn."}
+- {id: graze, name: Graze, description: "On a miss, deal damage equal to the ability modifier used for the attack."}
+- {id: nick, name: Nick, description: "Make the Light property's extra attack as part of the Attack action instead of a Bonus Action. Once per turn."}
+- {id: push, name: Push, description: "On a hit, push a Large or smaller creature up to 10 ft straight away from you."}
+- {id: sap, name: Sap, description: "On a hit, the creature has Disadvantage on its next attack roll before your next turn."}
+- {id: slow, name: Slow, description: "On a hit that deals damage, reduce the creature's Speed by 10 ft until your next turn."}
+- {id: topple, name: Topple, description: "On a hit, the creature makes a Con save (DC 8 + ability mod + PB) or falls Prone."}
+- {id: vex, name: Vex, description: "On a hit that deals damage, you have Advantage on your next attack roll against it before the end of your next turn."}

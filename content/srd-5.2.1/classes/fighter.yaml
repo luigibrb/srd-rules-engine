@@ -1,0 +1,77 @@
+# SRD 5.2.1 — "Classes" > "Fighter" (level 1 only).
+id: fighter
+name: Fighter
+description: A master of martial combat, skilled with a variety of weapons and armor.
+primary_abilities: [str, dex]
+primary_mode: any
+hit_die: 10
+complexity: Low
+standard_array: {str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12}
+grants:
+  saving_throws: [str, con]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, heavy, shield]
+  traits:
+    - name: Second Wind
+      text: >-
+        Bonus Action: regain 1d10 + Fighter level HP. 2 uses; regain one on a Short Rest,
+        all on a Long Rest.
+    - name: Weapon Mastery
+      text: >-
+        Use the mastery properties of three kinds of Simple or Martial weapons. After a Long Rest
+        you can swap one choice.
+    - name: Fighting Style
+      text: >-
+        Gain a Fighting Style feat. Whenever you gain a Fighter level you can replace it.
+  choices:
+    - id: skills
+      label: Fighter skills
+      kind: skill
+      count: 2
+      allowed: [acrobatics, animal-handling, athletics, history, insight, intimidation,
+                persuasion, perception, survival]
+    - id: fighting_style
+      label: Fighting Style
+      kind: feat
+      category: fighting_style
+      hint: Defense is recommended.
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 3
+      hint: Pick weapons you will actually carry — check your starting equipment.
+    - id: equipment
+      label: Fighter equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Heavy (Chain Mail)
+          description: Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer's Pack, 4 GP
+          grants:
+            items:
+              - {item: chain-mail}
+              - {item: greatsword}
+              - {item: flail}
+              - {item: javelin, qty: 8}
+              - {item: dungeoneers-pack}
+            gp: 4
+        - id: b
+          name: Light (Studded Leather)
+          description: >-
+            Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver,
+            Dungeoneer's Pack, 11 GP
+          grants:
+            items:
+              - {item: studded-leather-armor}
+              - {item: scimitar}
+              - {item: shortsword}
+              - {item: longbow}
+              - {item: arrow, qty: 20}
+              - {item: quiver}
+              - {item: dungeoneers-pack}
+            gp: 11
+        - id: c
+          name: Gold
+          description: 155 GP to buy your own gear (shopping is not automated yet)
+          grants: {gp: 155}

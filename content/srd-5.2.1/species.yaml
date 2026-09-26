@@ -1,0 +1,301 @@
+# SRD 5.2.1 — "Character Origins" > "Character Species".
+# Level 3+ spells and level 5+ traits are listed as text only (the builder targets level 1).
+- id: dragonborn
+  name: Dragonborn
+  description: Descendants of dragons, with a breath weapon and resistance tied to their ancestor.
+  grants:
+    size: medium
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 60}
+    traits:
+      - name: Breath Weapon
+        text: >-
+          Replace one attack of the Attack action with a 15-ft Cone or 30-ft Line (5 ft wide).
+          Dex save (DC 8 + Con mod + PB), 1d10 damage of your ancestry's type, half on success.
+          Uses = Proficiency Bonus per Long Rest.
+      - name: Damage Resistance
+        text: Resistance to the damage type of your Draconic Ancestry.
+      - name: Darkvision
+        text: 60 feet.
+      - name: Draconic Flight (level 5)
+        text: Bonus Action to gain a Fly Speed equal to your Speed for 10 minutes, once per Long Rest.
+    choices:
+      - id: ancestry
+        label: Draconic Ancestry
+        kind: option
+        step: species
+        options:
+          - {id: black, name: Black (Acid), grants: {resistances: [acid]}}
+          - {id: blue, name: Blue (Lightning), grants: {resistances: [lightning]}}
+          - {id: brass, name: Brass (Fire), grants: {resistances: [fire]}}
+          - {id: bronze, name: Bronze (Lightning), grants: {resistances: [lightning]}}
+          - {id: copper, name: Copper (Acid), grants: {resistances: [acid]}}
+          - {id: gold, name: Gold (Fire), grants: {resistances: [fire]}}
+          - {id: green, name: Green (Poison), grants: {resistances: [poison]}}
+          - {id: red, name: Red (Fire), grants: {resistances: [fire]}}
+          - {id: silver, name: Silver (Cold), grants: {resistances: [cold]}}
+          - {id: white, name: White (Cold), grants: {resistances: [cold]}}
+
+- id: dwarf
+  name: Dwarf
+  description: Hardy folk of stone and forge; tough, poison-resistant, with long darkvision.
+  grants:
+    size: medium
+    resistances: [poison]
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 120}
+      - {target: hp_per_level, op: add, value: 1}
+    traits:
+      - name: Darkvision
+        text: 120 feet.
+      - name: Dwarven Resilience
+        text: Resistance to Poison damage; Advantage on saves to avoid or end the Poisoned condition.
+      - name: Dwarven Toughness
+        text: Hit Point maximum +1, and +1 again whenever you gain a level.
+      - name: Stonecunning
+        text: >-
+          Bonus Action: Tremorsense 60 ft for 10 minutes while on or touching stone.
+          Uses = Proficiency Bonus per Long Rest.
+
+- id: elf
+  name: Elf
+  description: Long-lived fey-touched people who trance instead of sleeping.
+  grants:
+    size: medium
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 60}
+    traits:
+      - name: Darkvision
+        text: 60 feet.
+      - name: Fey Ancestry
+        text: Advantage on saves to avoid or end the Charmed condition.
+      - name: Keen Senses
+        text: Proficiency in Insight, Perception, or Survival.
+      - name: Trance
+        text: You don't need to sleep; a Long Rest takes 4 hours of trancelike meditation.
+    choices:
+      - id: lineage
+        label: Elven Lineage
+        kind: option
+        step: species
+        options:
+          - id: drow
+            name: Drow
+            description: Darkvision 120 ft; Dancing Lights cantrip. Faerie Fire (lvl 3), Darkness (lvl 5).
+            grants:
+              cantrips: [dancing-lights]
+              effects: [{target: darkvision, op: max, value: 120}]
+          - id: high-elf
+            name: High Elf
+            description: >-
+              Prestidigitation cantrip (swappable for any Wizard cantrip on a Long Rest).
+              Detect Magic (lvl 3), Misty Step (lvl 5).
+            grants:
+              cantrips: [prestidigitation]
+          - id: wood-elf
+            name: Wood Elf
+            description: Speed 35 ft; Druidcraft cantrip. Longstrider (lvl 3), Pass without Trace (lvl 5).
+            grants:
+              cantrips: [druidcraft]
+              effects: [{target: speed, op: max, value: 35}]
+      - id: spellcasting_ability
+        label: Lineage spellcasting ability
+        kind: ability
+        step: species
+        allowed: [int, wis, cha]
+      - id: keen_senses
+        label: Keen Senses skill
+        kind: skill
+        allowed: [insight, perception, survival]
+
+- id: gnome
+  name: Gnome
+  description: Small, clever tinkerers and illusionists with a knack for resisting magic.
+  grants:
+    size: small
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 60}
+    traits:
+      - name: Darkvision
+        text: 60 feet.
+      - name: Gnomish Cunning
+        text: Advantage on Intelligence, Wisdom, and Charisma saving throws.
+    choices:
+      - id: lineage
+        label: Gnomish Lineage
+        kind: option
+        step: species
+        options:
+          - id: forest-gnome
+            name: Forest Gnome
+            description: >-
+              Minor Illusion cantrip; Speak with Animals always prepared,
+              castable without a slot PB times per Long Rest.
+            grants:
+              cantrips: [minor-illusion]
+          - id: rock-gnome
+            name: Rock Gnome
+            description: >-
+              Mending and Prestidigitation cantrips; can craft Tiny clockwork devices
+              with Prestidigitation.
+            grants:
+              cantrips: [mending, prestidigitation]
+      - id: spellcasting_ability
+        label: Lineage spellcasting ability
+        kind: ability
+        step: species
+        allowed: [int, wis, cha]
+
+- id: goliath
+  name: Goliath
+  description: Towering descendants of giants, with a supernatural boon from their ancestry.
+  grants:
+    size: medium
+    effects:
+      - {target: speed, op: set, value: 35}
+    traits:
+      - name: Large Form (level 5)
+        text: Bonus Action to become Large for 10 minutes, once per Long Rest.
+      - name: Powerful Build
+        text: >-
+          Advantage on checks to end the Grappled condition; count as one size larger
+          for carrying capacity.
+    choices:
+      - id: giant_ancestry
+        label: Giant Ancestry (uses = Proficiency Bonus per Long Rest)
+        kind: option
+        step: species
+        options:
+          - id: cloud
+            name: Cloud's Jaunt
+            description: Bonus Action to teleport up to 30 ft to an unoccupied space you can see.
+          - id: fire
+            name: Fire's Burn
+            description: When you hit with an attack roll and deal damage, deal an extra 1d10 Fire.
+          - id: frost
+            name: Frost's Chill
+            description: On a hit that deals damage, deal an extra 1d6 Cold and reduce Speed by 10 ft.
+          - id: hill
+            name: Hill's Tumble
+            description: On a hit that deals damage to a Large or smaller creature, knock it Prone.
+          - id: stone
+            name: Stone's Endurance
+            description: Reaction when you take damage; reduce it by 1d12 + Con mod.
+          - id: storm
+            name: Storm's Thunder
+            description: Reaction when damaged by a creature within 60 ft; deal 1d8 Thunder to it.
+
+- id: halfling
+  name: Halfling
+  description: Small, brave, and uncommonly lucky.
+  grants:
+    size: small
+    effects:
+      - {target: speed, op: set, value: 30}
+    traits:
+      - name: Brave
+        text: Advantage on saves to avoid or end the Frightened condition.
+      - name: Halfling Nimbleness
+        text: Move through the space of any creature a size larger than you.
+      - name: Luck
+        text: When you roll a 1 on the d20 of a D20 Test, reroll it and use the new roll.
+      - name: Naturally Stealthy
+        text: You can Hide when obscured only by a creature at least one size larger than you.
+
+- id: human
+  name: Human
+  description: Adaptable and ambitious; an extra skill and an extra Origin feat.
+  grants:
+    effects:
+      - {target: speed, op: set, value: 30}
+    traits:
+      - name: Resourceful
+        text: You gain Heroic Inspiration whenever you finish a Long Rest.
+      - name: Skillful
+        text: Proficiency in one skill of your choice.
+      - name: Versatile
+        text: An Origin feat of your choice (Skilled is recommended).
+    choices:
+      - id: size
+        label: Size
+        kind: option
+        step: species
+        options:
+          - {id: medium, name: Medium (about 4-7 feet tall), grants: {size: medium}}
+          - {id: small, name: Small (about 2-4 feet tall), grants: {size: small}}
+      - id: skillful
+        label: Skillful skill
+        kind: skill
+      - id: versatile
+        label: Versatile Origin feat
+        kind: feat
+        category: origin
+        hint: Skilled is recommended.
+
+- id: orc
+  name: Orc
+  description: Relentless, enduring warriors who surge forward in battle.
+  grants:
+    size: medium
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 120}
+    traits:
+      - name: Adrenaline Rush
+        text: >-
+          Dash as a Bonus Action and gain Temporary HP equal to your Proficiency Bonus.
+          Uses = Proficiency Bonus per Short or Long Rest.
+      - name: Darkvision
+        text: 120 feet.
+      - name: Relentless Endurance
+        text: When reduced to 0 HP but not killed outright, drop to 1 HP instead. Once per Long Rest.
+
+- id: tiefling
+  name: Tiefling
+  description: Bearers of a fiendish legacy that grants resistance and innate magic.
+  grants:
+    effects:
+      - {target: speed, op: set, value: 30}
+      - {target: darkvision, op: max, value: 60}
+    cantrips: [thaumaturgy]
+    traits:
+      - name: Darkvision
+        text: 60 feet.
+      - name: Otherworldly Presence
+        text: You know Thaumaturgy, using your Fiendish Legacy spellcasting ability.
+    choices:
+      - id: size
+        label: Size
+        kind: option
+        step: species
+        options:
+          - {id: medium, name: Medium (about 4-7 feet tall), grants: {size: medium}}
+          - {id: small, name: Small (about 3-4 feet tall), grants: {size: small}}
+      - id: legacy
+        label: Fiendish Legacy
+        kind: option
+        step: species
+        options:
+          - id: abyssal
+            name: Abyssal
+            description: Resistance to Poison; Poison Spray cantrip. Ray of Sickness (lvl 3), Hold Person (lvl 5).
+            grants: {resistances: [poison], cantrips: [poison-spray]}
+          - id: chthonic
+            name: Chthonic
+            description: >-
+              Resistance to Necrotic; Chill Touch cantrip. False Life (lvl 3),
+              Ray of Enfeeblement (lvl 5).
+            grants: {resistances: [necrotic], cantrips: [chill-touch]}
+          - id: infernal
+            name: Infernal
+            description: Resistance to Fire; Fire Bolt cantrip. Hellish Rebuke (lvl 3), Darkness (lvl 5).
+            grants: {resistances: [fire], cantrips: [fire-bolt]}
+      - id: spellcasting_ability
+        label: Legacy spellcasting ability
+        kind: ability
+        step: species
+        allowed: [int, wis, cha]

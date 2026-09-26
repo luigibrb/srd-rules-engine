@@ -1,0 +1,38 @@
+# SRD 5.2.1 — "Equipment" > "Tools". Gaming sets and instruments: one proficiency per variant.
+- {id: alchemists-supplies, name: "Alchemist's Supplies", category: artisan}
+- {id: brewers-supplies, name: "Brewer's Supplies", category: artisan}
+- {id: calligraphers-supplies, name: "Calligrapher's Supplies", category: artisan}
+- {id: carpenters-tools, name: "Carpenter's Tools", category: artisan}
+- {id: cartographers-tools, name: "Cartographer's Tools", category: artisan}
+- {id: cobblers-tools, name: "Cobbler's Tools", category: artisan}
+- {id: cooks-utensils, name: "Cook's Utensils", category: artisan}
+- {id: glassblowers-tools, name: "Glassblower's Tools", category: artisan}
+- {id: jewelers-tools, name: "Jeweler's Tools", category: artisan}
+- {id: leatherworkers-tools, name: "Leatherworker's Tools", category: artisan}
+- {id: masons-tools, name: "Mason's Tools", category: artisan}
+- {id: painters-supplies, name: "Painter's Supplies", category: artisan}
+- {id: potters-tools, name: "Potter's Tools", category: artisan}
+- {id: smiths-tools, name: "Smith's Tools", category: artisan}
+- {id: tinkers-tools, name: "Tinker's Tools", category: artisan}
+- {id: weavers-tools, name: "Weaver's Tools", category: artisan}
+- {id: woodcarvers-tools, name: "Woodcarver's Tools", category: artisan}
+- {id: disguise-kit, name: Disguise Kit, category: other}
+- {id: forgery-kit, name: Forgery Kit, category: other}
+- {id: dice-set, name: Dice Set, category: gaming-set}
+- {id: dragonchess-set, name: Dragonchess Set, category: gaming-set}
+- {id: playing-card-set, name: Playing Card Set, category: gaming-set}
+- {id: three-dragon-ante-set, name: Three-Dragon Ante Set, category: gaming-set}
+- {id: herbalism-kit, name: Herbalism Kit, category: other}
+- {id: bagpipes, name: Bagpipes, category: musical-instrument}
+- {id: drum, name: Drum, category: musical-instrument}
+- {id: dulcimer, name: Dulcimer, category: musical-instrument}
+- {id: flute, name: Flute, category: musical-instrument}
+- {id: horn, name: Horn, category: musical-instrument}
+- {id: lute, name: Lute, category: musical-instrument}
+- {id: lyre, name: Lyre, category: musical-instrument}
+- {id: pan-flute, name: Pan Flute, category: musical-instrument}
+- {id: shawm, name: Shawm, category: musical-instrument}
+- {id: viol, name: Viol, category: musical-instrument}
+- {id: navigators-tools, name: "Navigator's Tools", category: other}
+- {id: poisoners-kit, name: "Poisoner's Kit", category: other}
+- {id: thieves-tools, name: "Thieves' Tools", category: other}

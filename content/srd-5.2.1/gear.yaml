@@ -1,0 +1,18 @@
+# SRD 5.2.1 — "Equipment" > "Adventuring Gear" (only items referenced by starting equipment so far).
+- {id: arrow, name: Arrow}
+- {id: book-history, name: Book (history)}
+- {id: book-prayers, name: Book (prayers)}
+- {id: crowbar, name: Crowbar}
+- id: dungeoneers-pack
+  name: "Dungeoneer's Pack"
+  description: >-
+    Backpack, Caltrops, Crowbar, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox,
+    10 Torches, and Waterskin.
+- {id: gaming-set, name: Gaming Set (same as your tool proficiency)}
+- {id: healers-kit, name: "Healer's Kit"}
+- {id: holy-symbol, name: Holy Symbol}
+- {id: parchment, name: Parchment (sheet)}
+- {id: pouch, name: Pouch}
+- {id: quiver, name: Quiver}
+- {id: robe, name: Robe}
+- {id: travelers-clothes, name: "Traveler's Clothes"}
