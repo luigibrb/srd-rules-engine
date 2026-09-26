@@ -78,6 +78,13 @@ features:
       scaling:
         count: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
         max_spell_level: null
+      rest_change: long
+    resources:
+    - id: rage
+      name: Rage
+      max: {progression: Rages}
+      recharge: long
+      short_rest_regain: 1
   '2':
     traits:
     - name: Danger Sense

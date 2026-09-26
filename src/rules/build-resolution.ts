@@ -886,6 +886,8 @@ const EMPTY_GRANTS = Object.freeze({
   spellcasting: null,
   ac_calculations: [],
   ability_bonuses: [],
+  resources: [],
+  on_long_rest: [],
   effects: [],
   items: [],
   gp: 0,

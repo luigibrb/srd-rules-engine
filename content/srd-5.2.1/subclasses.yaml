@@ -376,6 +376,11 @@
           You can cast one of the level 1+ spells that you have prepared from your Circle Spells feature without expending a spell slot, and you must finish a Long Rest before you do so again.
 
           In addition, when you finish a Short Rest, you can choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your Druid level (round up), and none of them can be level 6+. For example, if you're a level 6 Druid, you can recover up to three levels' worth of spell slots. You can recover a level 3 spell slot, a level 2 and a level 1 spell slot, or three level 1 spell slots. Once you recover spell slots with this feature, you can't do so again until you finish a Long Rest.
+      resources:
+      - id: natural-recovery
+        name: Natural Recovery
+        max: {value: 1}
+        recharge: long
     '10':
       traits:
       - name: Nature's Ward
@@ -487,6 +492,11 @@
           You gain the ability to heal yourself. As a Bonus Action, you can roll your Martial Arts die. You regain a number of Hit Points equal to the number rolled plus your Wisdom modifier (minimum of 1 Hit Point regained).
 
           You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
+      resources:
+      - id: wholeness-of-body
+        name: Wholeness of Body
+        max: {ability: wis, min: 1}
+        recharge: long
     '11':
       traits:
       - name: Fleet Step
@@ -617,6 +627,7 @@
       - id: hunters_prey
         label: Hunter's Prey
         kind: option
+        rest_change: short
         options:
         - id: colossus-slayer
           name: Colossus Slayer
@@ -638,6 +649,7 @@
       - id: defensive_tactics
         label: Defensive Tactics
         kind: option
+        rest_change: short
         options:
         - id: escape-the-horde
           name: Escape the Horde
@@ -812,6 +824,11 @@
           As a Bonus Action, you can cause draconic wings to appear on your back. The wings last for 1 hour or until you dismiss them (no action required). For the duration, you have a Fly Speed of 60 feet.
 
           Once you use this feature, you can't use it again until you finish a Long Rest unless you spend 3 Sorcery Points (no action required) to restore your use of it.
+      resources:
+      - id: dragon-wings
+        name: Dragon Wings
+        max: {value: 1}
+        recharge: long
     '18':
       traits:
       - name: Dragon Companion
@@ -883,6 +900,11 @@
           You can call on your fiendish patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to add 1d10 to your roll. You can do so after seeing the roll but before any of the roll's effects occur.
 
           You can use this feature a number of times equal to your Charisma modifier (minimum of once), but you can use it no more than once per roll. You regain all expended uses when you finish a Long Rest.
+      resources:
+      - id: dark-ones-own-luck
+        name: Dark One's Own Luck
+        max: {ability: cha, min: 1}
+        recharge: long
     '10':
       traits:
       - name: Fiendish Resilience
@@ -895,6 +917,11 @@
           Once per turn when you hit a creature with an attack roll, you can try to instantly transport the target through the Lower Planes. The target must succeed on a Charisma saving throw against your spell save DC, or the target disappears and hurtles through a nightmare landscape. The target takes 8d10 Psychic damage if it isn't a Fiend, and it has the Incapacitated condition until the end of your next turn, when it returns to the space it previously occupied or the nearest unoccupied space.
 
           Once you use this feature, you can't use it again until you finish a Long Rest unless you expend a Pact Magic spell slot (no action required) to restore your use of it.
+      resources:
+      - id: hurl-through-hell
+        name: Hurl Through Hell
+        max: {value: 1}
+        recharge: long
 - id: evoker
   name: Evoker
   class: wizard

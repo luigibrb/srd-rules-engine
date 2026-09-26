@@ -19,6 +19,15 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Play state (`CharacterState`, `applyAction`, `computePlaySheet`, `createState`,
+  `validateState`, `reconcileState`): HP and temporary HP, dying and death saves, massive damage,
+  Short and Long Rests with Hit Dice, spell and Pact slots, limited-use features (`resources` in
+  content), conditions and Exhaustion with their sheet effects, Concentration, Heroic
+  Inspiration, inventory, equipment, Attunement, charges, coins, and today's picks for "after a
+  rest" choices (`rest_change`). CLI `srd-rules play`; HTTP `/v1/state/*`.
+- All 275 SRD magic items and the 15 conditions (`scripts/import-srd-items.ts`,
+  `npm run content:import-items`). Magic weapons, armor, AC and save bonuses, ability score
+  floors and resistances change the sheet.
 - Replacements on level-up, following each SRD rule: "whenever you gain a level, you can
   replace one…" features (cantrips and prepared spells of Bards, Sorcerers and Warlocks; Cleric
   and Druid cantrips; Invocations; Metamagic; Mystic Arcanum; the Fighter's Fighting Style;

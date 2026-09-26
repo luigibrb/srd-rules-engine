@@ -199,6 +199,39 @@ wiping everything after the edited level:
 UIs can ask for confirmation. `setLevelClass` changes a past level's class: class features follow
 the Nth level *in* a class (`class:fighter:3`), so they move along with their choices.
 
+## Play state
+
+The build holds characteristics; a separate `CharacterState` (`src/models/state.ts`) holds what
+changes at the table: HP (`current: null` = at the maximum, so it follows level-ups), temporary
+HP, spent Hit Dice, death saves, conditions, Exhaustion, Concentration, Heroic Inspiration, spent
+slots and uses, the inventory, coins, and `choices`: today's picks for choices marked
+`rest_change` (prepared spells, Weapon Mastery…). The state stores only what's *spent* or
+*chosen*; maxima always come from the build, so they never go stale.
+
+- **Actions** (`PlayActionSchema`, plain JSON) go through `applyAction(build, state, catalog,
+  action, { rng })` → `{ state, notes }`, or throw `PlayError`. After every action the result is
+  passed through `reconcileState`, so an accepted action can't leave an invalid state.
+- **The played build.** `playBuild` overlays `state.choices` on the build (only for
+  `rest_change` choices); `computePlaySheet` computes the sheet from it with a `PlayContext`
+  (carried items, active conditions, Exhaustion), then adds the live `play` block. A
+  rest-change pick is validated by running the builder's `setChoice` on the played build, so it
+  follows exactly the same rules as a build pick.
+- **Items.** An inventory entry points at a catalog item; magic items made from a mundane one
+  store its `base` (Weapon, +1 → `longsword`) and kinds a `variant`. A magic item is *active*
+  when worn/held (or carried, per `active_when`) and attuned if required; active items become
+  sources, so their grants use the same machinery as feats. A magic weapon's bonus applies to
+  its attack line whenever attunement allows (you wield it to attack). With a play context, AC
+  comes from the equipped armor and Shield instead of the best armor owned.
+- **Conditions** are data: `implies` (Unconscious → Incapacitated, Prone) and `speed_zero`.
+  Exhaustion is a level on the state; the sheet applies −2 per level to d20 tests and −5 ft per
+  level to speed. Incapacitated ends Concentration.
+- **Build changes** don't touch the state; `reconcileState` clamps spent resources, drops
+  rest-change picks that no longer fit and ends attunements that are no longer allowed.
+
+Interpretations: a Long Rest doesn't remove conditions (the SRD ties them to their source);
+attuning is recorded immediately, with a note that it takes a Short Rest; damage while Petrified
+is halved (Resistance to all damage).
+
 ### Interpretations (flagged, not invented)
 
 - **A spell or Expertise choice needs no more picks than there are options left.** With the

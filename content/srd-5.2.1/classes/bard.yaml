@@ -83,6 +83,11 @@ features:
       hint: Charm Person, Color Spray, Dissonant Whispers, and Healing Word are recommended.
       tag: bard-prepared
       swap: class_level
+    resources:
+    - id: bardic-inspiration
+      name: Bardic Inspiration
+      max: {ability: cha, min: 1}
+      recharge: long
   '2':
     traits:
     - name: Expertise
@@ -166,6 +171,11 @@ features:
       spell_list: bard
       tag: bard-prepared
       swap: class_level
+    resources:
+    - id: bardic-inspiration
+      name: Bardic Inspiration
+      max: {ability: cha, min: 1}
+      recharge: short
   '6':
     choices:
     - id: prepared

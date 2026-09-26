@@ -197,6 +197,31 @@ export const AbilityBonusSchema = z.strictObject({
 });
 export type AbilityBonus = z.infer<typeof AbilityBonusSchema>;
 
+/**
+ * A limited-use feature (Rage, Channel Divinity, Sorcery Points…). The maximum is one of:
+ * `value`, a class table column (`progression`), an ability modifier (`ability`, with `min`),
+ * the Proficiency Bonus (`proficiency`), or `per_class_level` × the class level. A later source
+ * with the same `id` in the same class replaces the earlier definition (Action Surge: 2 uses at
+ * level 17).
+ */
+export const ResourceSchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  max: z.strictObject({
+    value: z.int().nullable().default(null),
+    progression: z.string().nullable().default(null),
+    ability: z.enum(ABILITIES).nullable().default(null),
+    proficiency: z.boolean().default(false),
+    per_class_level: z.int().nullable().default(null),
+    min: z.int().default(0),
+  }),
+  /** `short`: all uses back on a Short or Long Rest; `long`: on a Long Rest. */
+  recharge: z.enum(["short", "long"]),
+  /** For `long` resources that also regain some uses on a Short Rest (Rage: 1). */
+  short_rest_regain: z.int().nullable().default(null),
+});
+export type ResourceDef = z.infer<typeof ResourceSchema>;
+
 export const ItemGrantSchema = z.strictObject({
   item: z.string(),
   qty: z.int().min(1).default(1),
@@ -267,6 +292,11 @@ export interface ChoiceDef {
   swap: "class_level" | "any_level" | null;
   /** A replacement spell must be of the same level as the one it replaces. */
   same_level: boolean;
+  /**
+   * The picks can be changed after a rest (SRD: "whenever you finish a Long Rest, you can
+   * change…"). The build holds a starting set; the play state holds today's picks.
+   */
+  rest_change: "short" | "long" | null;
   /** Options are limited to what the choices with this `tag` picked (Wizard: prepare from the spellbook). */
   subset_of: string | null;
   /** `kind: weapon_mastery`: only melee or ranged weapons. */
@@ -289,6 +319,10 @@ export interface Grants {
   spellcasting: Spellcasting | null;
   ac_calculations: AcCalculation[];
   ability_bonuses: AbilityBonus[];
+  /** Limited-use features tracked in play (Rage, Second Wind…). */
+  resources: ResourceDef[];
+  /** Things a Long Rest gives besides recovery (Human: Heroic Inspiration). */
+  on_long_rest: "heroic_inspiration"[];
   effects: Effect[];
   items: ItemGrant[];
   gp: number;
@@ -360,6 +394,7 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
           .default(null),
         swap: z.enum(["class_level", "any_level"]).nullable().default(null),
         same_level: z.boolean().default(false),
+        rest_change: z.enum(["short", "long"]).nullable().default(null),
         weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
       })
       .refine((c) => c.swap === null || c.tag !== null, {
@@ -391,6 +426,8 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       spellcasting: SpellcastingSchema.nullable().default(null),
       ac_calculations: z.array(AcCalculationSchema).default([]),
       ability_bonuses: z.array(AbilityBonusSchema).default([]),
+      resources: z.array(ResourceSchema).default([]),
+      on_long_rest: z.array(z.enum(["heroic_inspiration"])).default([]),
       effects: z.array(EffectSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),
@@ -564,6 +601,83 @@ export const SpellDefSchema = z.strictObject({
   concentration: z.boolean().default(false),
 });
 export type SpellDef = z.infer<typeof SpellDefSchema>;
+
+/** A condition (SRD Rules Glossary). Exhaustion has levels; others are on or off. */
+export const ConditionSchema = z.strictObject({
+  ...entity,
+  /** Your Speed is 0 and can't increase. */
+  speed_zero: z.boolean().default(false),
+  /** Conditions this one includes (Unconscious: Incapacitated and Prone). */
+  implies: z.array(z.string()).default([]),
+  /** Stacks in levels (Exhaustion: 1–6). */
+  levels: z.boolean().default(false),
+});
+export type ConditionDef = z.infer<typeof ConditionSchema>;
+
+export const MAGIC_ITEM_CATEGORIES = [
+  "armor",
+  "weapon",
+  "ammunition",
+  "potion",
+  "ring",
+  "rod",
+  "scroll",
+  "staff",
+  "wand",
+  "wondrous",
+] as const;
+
+/**
+ * A magic item. Armor, weapons and some staffs are magic versions of a mundane item: `base`
+ * says which ones, and each item in an inventory records the one it is. While the item is
+ * active (worn or held, and attuned if it requires Attunement) its `grants` apply, and `bonus`
+ * adds to the base weapon's attacks or the base armor's AC.
+ */
+export const MagicItemSchema = z.strictObject({
+  ...entity,
+  category: z.enum(MAGIC_ITEM_CATEGORIES),
+  rarity: z.string(),
+  attunement: z.boolean().default(false),
+  /** Who can attune, as the SRD words it ("a Paladin", "a Spellcaster"). */
+  attunement_by: z.string().nullable().default(null),
+  /** Classes allowed to attune, parsed from `attunement_by` (empty: anyone, or see the text). */
+  attunement_classes: z.array(z.string()).default([]),
+  /** Attunement needs a Spellcasting or Pact Magic feature. */
+  attunement_spellcaster: z.boolean().default(false),
+  base: z
+    .strictObject({
+      kind: z.enum(["weapon", "armor", "shield", "ammunition"]),
+      ids: z.array(z.string()).nullable().default(null),
+      categories: z.array(z.string()).nullable().default(null),
+      except: z.array(z.string()).default([]),
+      /** For weapons: only melee (Flame Tongue: "Any Melee Weapon") or only ranged. */
+      weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
+    })
+    .nullable()
+    .default(null),
+  bonus: z
+    .strictObject({
+      attack: z.int().default(0),
+      damage: z.int().default(0),
+      ac: z.int().default(0),
+      spell_attack: z.int().default(0),
+    })
+    .prefault({}),
+  grants: GrantsSchema.prefault({}),
+  /** `equipped` (worn or held) or `carried` ("while it is on your person"). */
+  active_when: z.enum(["equipped", "carried"]).default("equipped"),
+  charges: z.int().nullable().default(null),
+  consumable: z.boolean().default(false),
+  /** The base armor loses its Strength requirement and Stealth Disadvantage (Mithral). */
+  ignores_armor_penalties: z.boolean().default(false),
+  /** Hit Points regained when used (potions), as dice: `2d4+2`. */
+  heal: z.string().nullable().default(null),
+  /** Kinds of this item; each inventory item picks one (Ring of Resistance: the damage type). */
+  variants: z
+    .array(z.strictObject({ id: z.string(), name: z.string(), grants: GrantsSchema.prefault({}) }))
+    .default([]),
+});
+export type MagicItemDef = z.infer<typeof MagicItemSchema>;
 
 export const PointBuySchema = z.strictObject({
   budget: z.int(),

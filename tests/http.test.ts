@@ -207,3 +207,38 @@ describe("HTTP API", () => {
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
   });
 });
+
+describe("HTTP play state", () => {
+  it("creates a state, applies actions and returns the play sheet", async () => {
+    const build = fighterBuild();
+    const created = await api.post("/v1/state/new", { build });
+    expect(created.status).toBe(200);
+    const applied = await api.post("/v1/state/apply", {
+      build,
+      state: created.body,
+      action: [
+        { type: "damage", amount: 5 },
+        { type: "add_condition", condition: "poisoned" },
+      ],
+    });
+    expect(applied.status).toBe(200);
+    const sheet = await api.post("/v1/state/sheet", { build, state: applied.body.state });
+    expect(sheet.body.sheet.play.hp).toEqual({ current: 7, max: 12, temp: 0 });
+    expect(sheet.body.sheet.play.conditions.map((c: { id: string }) => c.id)).toEqual(["poisoned"]);
+    expect(sheet.body.issues).toEqual([]);
+  });
+
+  it("refuses impossible actions and malformed ones", async () => {
+    const build = fighterBuild();
+    const state = (await api.post("/v1/state/new", { build })).body;
+    const refused = await api.post("/v1/state/apply", {
+      build,
+      state,
+      action: { type: "spend_slot", level: 1 },
+    });
+    expect(refused.status).toBe(400);
+    expect(refused.body.detail).toEqual(["No level 1 spell slots left"]);
+    const bad = await api.post("/v1/state/apply", { build, state, action: { type: "fly" } });
+    expect(bad.status).toBe(422);
+  });
+});

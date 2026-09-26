@@ -16,6 +16,8 @@ import {
   BackgroundSchema,
   type ClassDef,
   ClassSchema,
+  type ConditionDef,
+  ConditionSchema,
   type CreationRules,
   CreationSchema,
   type FeatDef,
@@ -25,6 +27,8 @@ import {
   type Grants,
   type LanguageDef,
   LanguageSchema,
+  type MagicItemDef,
+  MagicItemSchema,
   type MasteryDef,
   MasterySchema,
   type SpeciesDef,
@@ -40,7 +44,7 @@ import {
 } from "../models/content";
 
 export type Table<T> = Readonly<Record<string, T>>;
-export type Item = WeaponDef | ArmorDef | GearDef | ToolDef;
+export type Item = WeaponDef | ArmorDef | GearDef | ToolDef | MagicItemDef;
 
 export interface Catalog {
   readonly creation: CreationRules;
@@ -58,6 +62,8 @@ export interface Catalog {
   readonly subclasses: Table<SubclassDef>;
   /** Selectable class features (Eldritch Invocations, Metamagic): feats in shape, not in kind. */
   readonly features: Table<FeatDef>;
+  readonly magic_items: Table<MagicItemDef>;
+  readonly conditions: Table<ConditionDef>;
 }
 
 /** Raw, unvalidated content: what a YAML/JSON content directory parses to. */
@@ -78,6 +84,8 @@ export interface ContentPack {
   spells?: unknown[];
   subclasses?: unknown[];
   features?: unknown[];
+  magic_items?: unknown[];
+  conditions?: unknown[];
 }
 
 export const TABLE_SCHEMAS = {
@@ -94,6 +102,8 @@ export const TABLE_SCHEMAS = {
   spells: SpellDefSchema,
   subclasses: SubclassSchema,
   features: FeatSchema,
+  magic_items: MagicItemSchema,
+  conditions: ConditionSchema,
 } as const;
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
@@ -115,6 +125,7 @@ export function catalogItem(catalog: Catalog, itemId: string): Item {
     catalog.armor,
     catalog.gear,
     catalog.tools,
+    catalog.magic_items,
   ] as Table<Item>[]) {
     const item = lookup(table, itemId);
     if (item) return item;
@@ -241,6 +252,14 @@ export function validateReferences(catalog: Catalog): void {
       }
     }
   }
+  for (const item of Object.values(catalog.magic_items)) {
+    const ids = [...(item.base?.ids ?? []), ...(item.base?.except ?? [])];
+    check(ids, { ...catalog.weapons, ...catalog.armor, ...catalog.gear }, "base item", item.id);
+    check(item.attunement_classes, catalog.classes, "class", item.id);
+  }
+  for (const condition of Object.values(catalog.conditions)) {
+    check(condition.implies, catalog.conditions, "condition", condition.id);
+  }
   check(
     Object.values(catalog.subclasses).map((s) => s.class),
     catalog.classes,
@@ -268,6 +287,10 @@ function* allGrants(catalog: Catalog): Generator<[string, Grants]> {
   yield* walk("creation", catalog.creation.base_grants);
   for (const table of [catalog.species, catalog.backgrounds, catalog.feats, catalog.features]) {
     for (const entity of Object.values(table)) yield* walk(entity.id, entity.grants);
+  }
+  for (const item of Object.values(catalog.magic_items)) {
+    yield* walk(item.id, item.grants);
+    for (const v of item.variants) yield* walk(`${item.id}.${v.id}`, v.grants);
   }
   for (const cls of Object.values(catalog.classes)) {
     yield* walk(cls.id, cls.grants);

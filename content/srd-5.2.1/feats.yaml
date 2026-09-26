@@ -50,6 +50,11 @@
       tag: magic-initiate
       swap: any_level
       same_level: true
+    resources:
+    - id: free-cast
+      name: Magic Initiate (free level 1 spell)
+      max: {value: 1}
+      recharge: long
 - id: savage-attacker
   name: Savage Attacker
   category: origin

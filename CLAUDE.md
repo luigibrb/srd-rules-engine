@@ -12,17 +12,19 @@
 src/
   index.ts         # public API (platform-neutral: no node:* imports)
   node.ts          # index + loadContentPack/loadCatalog + serveNode
-  models/          # Zod schemas + types: content, build, character, combat, spell
+  models/          # Zod schemas + types: content, build, state (play), character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, combat, spells,
                    #   build-resolution, build-validation, sheet
-  services/        # builder.ts (setters + normalize + evaluate), combat.ts (HP, attacks, spells)
+  services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
+                   #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
-  cli/             # srd-rules bin: build (interactive builder), serve, validate
+  cli/             # srd-rules bin: build (interactive builder), play, serve, validate
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
 scripts/           # compile-content.ts; import-srd-spells.ts (SRD Markdown → spells.yaml);
+                   #   import-srd-items.ts (→ magic-items.yaml, conditions.yaml);
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
@@ -56,6 +58,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   `scaling`. Aggregations must use `Resolution.contributed()`, not `selected()`.
 - Override: choices are judged as of their own level (`at(choice)` in option views); every
   setter returns through `commit()` (refuses new validation errors); `previewChange` diffs.
+- Play state: `CharacterState` (separate JSON) stores only what's spent/chosen at the table;
+  maxima come from the build. Change it only via `applyAction` (JSON actions, `PlayError` on
+  refusal); every result goes through `reconcileState`. `rest_change` choices can be re-picked
+  in play (`state.choices`, overlaid by `playBuild`). Limited uses = `resources` in grants.
 - Character builder: a `CharacterBuild` stores only choices, keyed by choice key
   (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
   recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.
@@ -70,6 +76,7 @@ npm run content          # YAML → bundled JSON + JSON Schemas
 npm run build            # dist/
 npm run builder          # interactive builder from source (-- --load x.json --seed N --no-color)
 npx tsx src/cli/main.ts validate examples/homebrew-pack   # validate a content pack
+npx tsx src/cli/main.ts play --load characters/x.json [--state x.state.json]   # play mode
 npm run serve            # HTTP API on localhost:8000
 ```
 
@@ -98,6 +105,7 @@ npm run serve            # HTTP API on localhost:8000
 `POST /v1/builds/evaluate` — build → `{ report, sheet, levels, level_up_options, choices (with options) }`  
 `POST /v1/builds/set-choice` · `/level-up` · `/remove-level` · `/set-level-class` · `/set-level-hp` — workflow setters  
 `POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  
+`POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  
 `POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  
@@ -108,5 +116,5 @@ npm run serve            # HTTP API on localhost:8000
 `POST /v1/spells/attack` — spell attack  
 `POST /v1/spells/save` — save-based spell (also returns `damage_dealt`)
 
-Errors: 422 invalid body (Zod), 400 bad JSON or dice expression, 404 unknown route/entity,
+Errors: 422 invalid body (Zod), 400 bad JSON, dice expression, or a refused setter/action (`detail`: messages), 404 unknown route/entity,
 405 wrong method. `createHandler({ catalog, rng, basePath, cors })` configures it.

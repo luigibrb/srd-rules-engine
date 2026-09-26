@@ -14,6 +14,7 @@ export * from "./models/character";
 export type * from "./models/combat";
 export * from "./models/content";
 export * from "./models/spell";
+export * from "./models/state";
 // Rules
 export * from "./rules/ability-scores";
 export * from "./rules/build-resolution";
@@ -33,3 +34,12 @@ export {
   STEP_TITLES,
 } from "./services/builder";
 export * from "./services/combat";
+export {
+  applyAction,
+  computePlaySheet,
+  createState,
+  PlayError,
+  type PlaySheet,
+  reconcileState,
+  validateState,
+} from "./services/play";

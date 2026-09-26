@@ -13,7 +13,9 @@ import {
   ABILITY_NAMES,
   type Ability,
   type ArmorDef,
+  type Effect,
   type EffectOp,
+  type MagicItemDef,
   type Size,
   SKILL_ABILITY,
   SKILLS,
@@ -21,7 +23,7 @@ import {
   type WeaponDef,
 } from "../models/content";
 import { finalScores } from "./ability-scores";
-import { type ActiveSource, type Resolution, resolve } from "./build-resolution";
+import { type ActiveSource, mergeGrants, type Resolution, resolve } from "./build-resolution";
 import { abilityModifier, proficiencyBonus, signed } from "./dice";
 import { isMonkWeapon, isWeaponProficient } from "./weapons";
 
@@ -83,6 +85,40 @@ export interface TraitLine {
   readonly level: number;
 }
 
+/** A limited-use feature, with its maximum at the character's current level. */
+export interface UsesLine {
+  /** Stable key: `<class>:<id>` for class features, `<source key>:<id>` otherwise. */
+  readonly key: string;
+  readonly name: string;
+  readonly max: number;
+  readonly recharge: "short" | "long";
+  readonly short_rest_regain: number | null;
+}
+
+/** An item the character carries (play state), resolved against the catalog. */
+export interface CarriedItem {
+  /** Inventory entry id. */
+  readonly id: string;
+  readonly name: string;
+  /** The mundane weapon, armor or gear this item is (or is a magic version of). */
+  readonly base: string | null;
+  readonly magic: MagicItemDef | null;
+  readonly qty: number;
+  readonly equipped: boolean;
+  /** Its magic applies: worn or held (or carried, for some), and attuned if it must be. */
+  readonly active: boolean;
+  readonly attuned: boolean;
+  readonly variant: string | null;
+}
+
+/** What play state changes on the sheet: carried items, conditions, Exhaustion. */
+export interface PlayContext {
+  readonly items: readonly CarriedItem[];
+  /** Active condition ids, including implied ones (Unconscious → Prone, Incapacitated). */
+  readonly conditions: ReadonlySet<string>;
+  readonly exhaustion: number;
+}
+
 export interface DerivedSheet {
   /** Total character level. */
   readonly level: number;
@@ -125,6 +161,8 @@ export interface DerivedSheet {
   /** Spells in your spellbook (Wizard), prepared or not. */
   readonly spellbook: readonly string[];
   readonly resources: readonly ResourceLine[];
+  /** Limited uses (Rage, Second Wind…) and how they recharge. */
+  readonly limited_uses: readonly UsesLine[];
   readonly armor_training: readonly string[];
   readonly weapon_proficiencies: readonly string[];
   readonly feats: readonly string[];
@@ -154,6 +192,20 @@ export function explainStat(s: Stat): string {
 }
 
 type ResolvedEffect = [op: EffectOp, value: number, source: string, from: ActiveSource];
+
+/** Template for the sources that stand in for active magic items. */
+const itemSource: ActiveSource = {
+  key: "",
+  name: "",
+  grants: {} as ActiveSource["grants"],
+  params: {},
+  feat: null,
+  feature: null,
+  description: "",
+  granted_by: "",
+  level: 1,
+  class_id: null,
+};
 type Conditions = ReadonlyMap<string, boolean>;
 
 export interface SpellcastingLine {
@@ -181,20 +233,46 @@ export function computeSheet(
   build: CharacterBuild,
   catalog: Catalog,
   res: Resolution = resolve(build, catalog),
+  play?: PlayContext,
 ): DerivedSheet {
   const level = res.characterLevel;
   const pb = proficiencyBonus(level);
   const known = finalScores(build.base_scores, build.background_bonus);
-  const scores = res.abilityScores();
+  const scores = { ...res.abilityScores() };
+  // Active magic items act as extra sources (Ring of Protection, Gauntlets of Ogre Power…).
+  const itemSources: ActiveSource[] = (play?.items ?? [])
+    .filter((i) => i.active && i.magic)
+    .map((i) => {
+      const magic = i.magic as MagicItemDef;
+      const variant = magic.variants.find((v) => v.id === i.variant);
+      const grants = variant ? mergeGrants(magic.grants, variant.grants) : magic.grants;
+      return { ...itemSource, key: `item:${i.id}`, name: i.name, grants, level };
+    });
+  for (const src of itemSources) {
+    for (const e of src.grants.effects) {
+      const ability = /^score\.(\w+)$/.exec(e.target)?.[1] as Ability | undefined;
+      if (ability && typeof e.value === "number" && (e.op === "max" || e.op === "set")) {
+        scores[ability] = e.op === "set" ? e.value : Math.max(scores[ability], e.value);
+      }
+    }
+  }
   const mod = mapAbilities((a) => abilityModifier(scores[a]));
   const classLevels = res.classLevels();
   const warnings: string[] = [];
 
-  // Equipment: fixed item grants plus chosen packages (both are option sources).
+  // Equipment: what the character carries in play, or else the starting equipment (fixed item
+  // grants plus chosen packages).
   const equipment: Record<string, number> = {};
-  for (const src of res.sources) {
-    for (const grant of src.grants.items) {
-      equipment[grant.item] = (equipment[grant.item] ?? 0) + grant.qty;
+  if (play) {
+    for (const i of play.items) {
+      const id = i.magic?.id ?? i.base ?? i.id;
+      equipment[id] = (equipment[id] ?? 0) + i.qty;
+    }
+  } else {
+    for (const src of res.sources) {
+      for (const grant of src.grants.items) {
+        equipment[grant.item] = (equipment[grant.item] ?? 0) + grant.qty;
+      }
     }
   }
   const gp = res.sources.reduce((sum, src) => sum + src.grants.gp, 0);
@@ -202,7 +280,11 @@ export function computeSheet(
 
   const effectsFor = (target: string, conditions: Conditions): ResolvedEffect[] => {
     const out: ResolvedEffect[] = [];
-    for (const [effect, source] of res.effects()) {
+    const all = [
+      ...res.effects(),
+      ...itemSources.flatMap((s) => s.grants.effects.map((e): [Effect, ActiveSource] => [e, s])),
+    ];
+    for (const [effect, source] of all) {
       if (effect.target !== target) continue;
       if (effect.when !== null && !conditions.get(effect.when)) continue;
       let value: number;
@@ -217,12 +299,21 @@ export function computeSheet(
   };
 
   // Armor Class: the best of every legal way to compute it (see `bestArmorClass`).
-  const ac = bestArmorClass(equipment, training, res, catalog, mod, effectsFor);
+  const ac = bestArmorClass(equipment, training, res, catalog, mod, effectsFor, play);
+  if (play && ac.armor && !training.includes(ac.armor.category)) {
+    warnings.push(
+      `You aren't trained with ${ac.armor.name}: Disadvantage on Str and Dex tests and attacks, and no spellcasting.`,
+    );
+  }
   const { armor, shield } = ac;
   const conditions = armorConditions(armor, shield);
   const effects = (target: string) => effectsFor(target, conditions);
   const sum = (list: ResolvedEffect[]) =>
     list.reduce((total, [op, v]) => total + (op === "add" ? v : 0), 0);
+  // Exhaustion: every D20 Test is reduced by 2 per level (SRD Rules Glossary).
+  const exhaustion = play?.exhaustion ?? 0;
+  const d20Penalty = -2 * exhaustion;
+  const checks = sum(effects("checks"));
 
   // Classes
   const classes: ClassLine[] = [...classLevels].flatMap(([id, lvl]) => {
@@ -285,6 +376,8 @@ export function computeSheet(
     ...effects("initiative")
       .filter(([op]) => op === "add")
       .map(([, value, source]) => ({ source, value })),
+    ...effects("checks").map(([, value, source]) => ({ source, value })),
+    ...(exhaustion ? [{ source: `Exhaustion ${exhaustion}`, value: d20Penalty }] : []),
   ]);
 
   // Speed: base from `set`, raised by `max`, then flat adjustments.
@@ -310,6 +403,13 @@ export function computeSheet(
   if (armor?.stealth_disadvantage) {
     warnings.push(`${armor.name} gives Disadvantage on Dexterity (Stealth) checks.`);
   }
+  if (exhaustion) speedParts.push({ source: `Exhaustion ${exhaustion}`, value: -5 * exhaustion });
+  const stopped = [...(play?.conditions ?? [])]
+    .map((id) => lookup(catalog.conditions, id))
+    .find((c) => c?.speed_zero);
+  const speedSoFar = speedParts.reduce((total, p) => total + p.value, 0);
+  if (stopped) speedParts.push({ source: `${stopped.name} (Speed 0)`, value: -speedSoFar });
+  else if (speedSoFar < 0) speedParts.push({ source: "minimum 0", value: -speedSoFar });
 
   const darkvision = Math.max(0, ...effects("darkvision").map(([, v]) => v));
 
@@ -317,7 +417,8 @@ export function computeSheet(
   const saveProfs = res.savingThrows();
   const allSaves = sum(effects("saves"));
   const savingThrows = mapAbilities((a) => ({
-    modifier: mod[a] + (saveProfs.has(a) ? pb : 0) + allSaves + sum(effects(`save.${a}`)),
+    modifier:
+      mod[a] + (saveProfs.has(a) ? pb : 0) + allSaves + sum(effects(`save.${a}`)) + d20Penalty,
     proficient: saveProfs.has(a),
   }));
   const ownedSkills = res.skills();
@@ -327,7 +428,8 @@ export function computeSheet(
     const ability = SKILL_ABILITY[skill];
     const proficient = ownedSkills.has(skill);
     const expert = proficient && expertise.has(skill);
-    const bonus = sum(effects(`skill.${skill}`)) + (proficient ? 0 : unproficientBonus);
+    const bonus =
+      sum(effects(`skill.${skill}`)) + (proficient ? 0 : unproficientBonus) + checks + d20Penalty;
     return {
       skill,
       ability,
@@ -360,13 +462,45 @@ export function computeSheet(
     warnings.push("Martial Arts doesn't work while you wear armor or wield a Shield.");
   }
   const attacks: AttackLine[] = [unarmedStrike(attackContext)];
-  for (const itemId of Object.keys(equipment)) {
-    const weapon = lookup(catalog.weapons, itemId);
-    if (weapon) attacks.push(attackLine(weapon, attackContext));
+  if (play) {
+    // Every weapon carried (you wield it to attack); a magic weapon adds its bonus if you're
+    // attuned to it when it needs Attunement.
+    for (const item of play.items) {
+      const weapon = lookup(catalog.weapons, item.base);
+      if (!weapon) continue;
+      const works = item.magic && (!item.magic.attunement || item.attuned);
+      const bonus = works && item.magic ? item.magic.bonus : { attack: 0, damage: 0 };
+      attacks.push(
+        attackLine(weapon, attackContext, {
+          name: item.name,
+          attack: bonus.attack,
+          damage: bonus.damage,
+        }),
+      );
+    }
+  } else {
+    for (const itemId of Object.keys(equipment)) {
+      const weapon = lookup(catalog.weapons, itemId);
+      if (weapon) attacks.push(attackLine(weapon, attackContext));
+    }
+  }
+  if (d20Penalty) {
+    for (const [i, a] of attacks.entries()) {
+      attacks[i] = {
+        ...a,
+        attack_bonus: a.attack_bonus + d20Penalty,
+        notes: [...a.notes, `Exhaustion ${d20Penalty}`],
+      };
+    }
   }
 
   // Spells
-  const magic = spellcastingSummary(res, catalog, mod, pb, classLevels);
+  const spellAttackBonus =
+    (play?.items ?? []).reduce(
+      (total, i) => total + (i.active && i.magic ? i.magic.bonus.spell_attack : 0),
+      0,
+    ) + d20Penalty;
+  const magic = spellcastingSummary(res, catalog, mod, pb, classLevels, spellAttackBonus);
 
   // Class table columns (Rages, Sneak Attack…) at the character's level in each class.
   const resources: ResourceLine[] = [];
@@ -410,7 +544,12 @@ export function computeSheet(
     attacks,
     tools: Object.fromEntries(res.tools()),
     languages: Object.fromEntries(res.languages()),
-    resistances: res.granted("resistances"),
+    resistances: [
+      ...new Set([
+        ...res.granted("resistances"),
+        ...itemSources.flatMap((s) => s.grants.resistances),
+      ]),
+    ],
     cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),
     spellcasting: magic.spellcasting,
     spell_slots: magic.slots,
@@ -418,6 +557,7 @@ export function computeSheet(
     spells: magic.spells,
     spellbook: magic.spellbook,
     resources,
+    limited_uses: limitedUses(res, catalog, mod, pb, classLevels),
     armor_training: training,
     weapon_proficiencies: weaponProfs,
     feats: res.featSources().map((s) => s.name),
@@ -473,7 +613,9 @@ function bestArmorClass(
   catalog: Catalog,
   mod: Record<Ability, number>,
   effectsFor: (target: string, conditions: Conditions) => ResolvedEffect[],
+  play?: PlayContext,
 ): ArmorClassOption {
+  if (play) return wornArmorClass(res, catalog, mod, effectsFor, play);
   const owned = Object.keys(equipment)
     .map((id) => lookup(catalog.armor, id))
     .filter((a): a is ArmorDef => a !== undefined);
@@ -534,12 +676,130 @@ function bestArmorClass(
   return best as ArmorClassOption;
 }
 
+/**
+ * In play, AC comes from what the character actually wears: the equipped armor (or no armor,
+ * with the best unarmored calculation) and the equipped Shield, plus magic bonuses.
+ */
+function wornArmorClass(
+  res: Resolution,
+  catalog: Catalog,
+  mod: Record<Ability, number>,
+  effectsFor: (target: string, conditions: Conditions) => ResolvedEffect[],
+  play: PlayContext,
+): ArmorClassOption {
+  const worn = (category: (c: string) => boolean) => {
+    const item = play.items.find((i) => {
+      const a = lookup(catalog.armor, i.base);
+      return i.equipped && a && category(a.category);
+    });
+    if (!item) return null;
+    let def = lookup(catalog.armor, item.base) as ArmorDef;
+    if (item.magic?.ignores_armor_penalties)
+      def = { ...def, strength: null, stealth_disadvantage: false };
+    const bonus = item.magic && item.active ? item.magic.bonus.ac : 0;
+    return { def: { ...def, name: item.name }, bonus };
+  };
+  const body = worn((c) => c !== "shield");
+  const shield = worn((c) => c === "shield");
+  const options: { parts: Contribution[]; ok: boolean }[] = [];
+  if (body) {
+    const parts: Contribution[] = [{ source: body.def.name, value: body.def.base_ac + body.bonus }];
+    if (body.def.dex_cap !== 0) {
+      const dex = body.def.dex_cap === null ? mod.dex : Math.min(mod.dex, body.def.dex_cap);
+      parts.push({
+        source: `Dex${body.def.dex_cap === null ? "" : ` (max ${body.def.dex_cap})`}`,
+        value: dex,
+      });
+    }
+    options.push({ parts, ok: true });
+  } else {
+    options.push({
+      parts: [
+        { source: "base (unarmored)", value: 10 },
+        { source: "Dex", value: mod.dex },
+      ],
+      ok: true,
+    });
+    for (const src of res.sources) {
+      for (const calc of src.grants.ac_calculations) {
+        options.push({
+          parts: [
+            { source: calc.name, value: calc.base },
+            ...calc.abilities.map((a) => ({ source: ABBREVIATIONS[a], value: mod[a] })),
+          ],
+          ok: calc.shield || !shield,
+        });
+      }
+    }
+  }
+  const conditions = armorConditions(body?.def ?? null, shield?.def ?? null);
+  let best: ArmorClassOption | null = null;
+  let bestTotal = Number.NEGATIVE_INFINITY;
+  for (const option of options.filter((o) => o.ok)) {
+    const parts = [...option.parts];
+    if (shield) parts.push({ source: shield.def.name, value: shield.def.base_ac + shield.bonus });
+    for (const [op, value, source] of effectsFor("ac", conditions)) {
+      if (op === "add") parts.push({ source, value });
+    }
+    const total = parts.reduce((sum, p) => sum + p.value, 0);
+    if (total > bestTotal) {
+      best = { parts, armor: body?.def ?? null, shield: shield?.def ?? null };
+      bestTotal = total;
+    }
+  }
+  return best as ArmorClassOption;
+}
+
+/** Limited-use features with their maximum now; a later definition of the same key wins. */
+function limitedUses(
+  res: Resolution,
+  catalog: Catalog,
+  mod: Record<Ability, number>,
+  pb: number,
+  classLevels: ReadonlyMap<string, number>,
+): UsesLine[] {
+  const byKey = new Map<string, { line: UsesLine; level: number }>();
+  for (const src of res.sources) {
+    for (const r of src.grants.resources) {
+      const scope =
+        src.feat === null && src.feature === null && src.class_id ? src.class_id : src.key;
+      const key = `${scope}:${r.id}`;
+      const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
+      let max = 0;
+      if (r.max.value !== null) max = r.max.value;
+      else if (r.max.progression !== null) {
+        const cls = lookup(catalog.classes, src.class_id);
+        const value = cls?.progression[r.max.progression]?.[classLevel - 1];
+        max = typeof value === "number" ? value : 0;
+      } else if (r.max.ability !== null) max = mod[r.max.ability];
+      else if (r.max.proficiency) max = pb;
+      else if (r.max.per_class_level !== null) max = r.max.per_class_level * classLevel;
+      max = Math.max(max, r.max.min);
+      const previous = byKey.get(key);
+      if (!previous || src.level >= previous.level) {
+        byKey.set(key, {
+          line: {
+            key,
+            name: r.name,
+            max,
+            recharge: r.recharge,
+            short_rest_regain: r.short_rest_regain,
+          },
+          level: src.level,
+        });
+      }
+    }
+  }
+  return [...byKey.values()].map((v) => v.line);
+}
+
 function spellcastingSummary(
   res: Resolution,
   catalog: Catalog,
   mod: Record<Ability, number>,
   pb: number,
   classLevels: ReadonlyMap<string, number>,
+  spellAttackBonus = 0,
 ): {
   spellcasting: SpellcastingLine[];
   slots: number[];
@@ -559,7 +819,7 @@ function spellcastingSummary(
       list: sc.list === null ? null : res.resolveRef(src, sc.list),
       ability,
       save_dc: ability ? 8 + pb + mod[ability] : null,
-      attack_bonus: ability ? pb + mod[ability] : null,
+      attack_bonus: ability ? pb + mod[ability] + spellAttackBonus : null,
       progression: sc.progression,
     });
     const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
@@ -634,7 +894,11 @@ function unarmedStrike(ctx: AttackContext): AttackLine {
   };
 }
 
-function attackLine(w: WeaponDef, ctx: AttackContext): AttackLine {
+function attackLine(
+  w: WeaponDef,
+  ctx: AttackContext,
+  magic: { name: string; attack: number; damage: number } = { name: w.name, attack: 0, damage: 0 },
+): AttackLine {
   const strMod = abilityModifier(ctx.scores.str);
   const dexMod = abilityModifier(ctx.scores.dex);
   const martialArts = ctx.martialArtsDie > 0 && isMonkWeapon(w);
@@ -663,14 +927,15 @@ function attackLine(w: WeaponDef, ctx: AttackContext): AttackLine {
     const sides = Number(/^1d(\d+)$/.exec(w.damage)?.[1] ?? 0);
     if (sides < ctx.martialArtsDie) die = `1d${ctx.martialArtsDie}`;
   }
-  let damage = withMod(die, abilityMod);
-  if (w.versatile_damage) damage += ` (${withMod(w.versatile_damage, abilityMod)} two-handed)`;
+  const damageMod = abilityMod + magic.damage;
+  let damage = withMod(die, damageMod);
+  if (w.versatile_damage) damage += ` (${withMod(w.versatile_damage, damageMod)} two-handed)`;
   const mastery = ctx.masteries.includes(w.id)
     ? (lookup(ctx.catalog.masteries, w.mastery)?.name ?? null)
     : null;
   return {
-    name: w.name,
-    attack_bonus: bonus,
+    name: magic.name,
+    attack_bonus: bonus + magic.attack,
     damage,
     damage_type: w.damage_type,
     mastery,

@@ -352,6 +352,7 @@
       count: 3
       spell_level: 0
       always_prepared: true
+      rest_change: short
     - id: rituals
       label: Book of Shadows rituals
       kind: spell
@@ -359,6 +360,7 @@
       spell_level: 1
       ritual: true
       always_prepared: true
+      rest_change: short
 - id: repelling-blast
   name: Repelling Blast
   category: eldritch_invocation

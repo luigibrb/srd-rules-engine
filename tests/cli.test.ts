@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { expect, it } from "vitest";
 import { BuilderApp } from "../src/cli/builder";
 import { Console, scriptedInput } from "../src/cli/console";
-import { type CharacterBuild, parseBuild, seededRng } from "../src/index";
+import { PlayApp } from "../src/cli/play";
+import { type CharacterBuild, parseBuild, parseState, seededRng } from "../src/index";
 import { catalog, fighterBuild } from "./helpers";
 
 async function runScript(answers: string[], build?: CharacterBuild) {
@@ -125,4 +126,24 @@ it("replaces a Fighting Style on level-up, then edits a past level's class with 
   expect(output).toContain("Changed.");
   expect(output).toContain("Level 2 Human Fighter 1 / Rogue 1");
   expect(build.levels).toEqual([{ class_id: "rogue", hp: null }]);
+});
+
+it("play mode tracks HP, slots and items, and saves a state file", async () => {
+  const out: string[] = [];
+  const saveDir = mkdtempSync(join(tmpdir(), "play-"));
+  const input = scriptedInput(
+    ["dmg 5", "use 1", "cond prone", "add potion-of-healing", "items", "save", "quit"],
+    (prompt) => out.push(prompt),
+  );
+  const con = new Console({ input, output: (text) => out.push(text), color: false });
+  const app = new PlayApp(con, catalog, fighterBuild(), { rng: seededRng(1), saveDir });
+  const state = await app.run();
+  const output = out.join("\n");
+  expect(output).toContain("HP 7/12");
+  expect(output).toContain("1. Second Wind 1/2");
+  expect(output).toContain("Prone");
+  expect(output).toContain("Potion of Healing");
+  const saved = parseState(JSON.parse(readFileSync(join(saveDir, "brakka.state.json"), "utf-8")));
+  expect(saved).toEqual(state);
+  expect(saved.hp.current).toBe(7);
 });

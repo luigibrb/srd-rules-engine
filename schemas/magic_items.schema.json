@@ -19,24 +19,222 @@
           "default": "",
           "type": "string"
         },
-        "class": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "armor",
+            "weapon",
+            "ammunition",
+            "potion",
+            "ring",
+            "rod",
+            "scroll",
+            "staff",
+            "wand",
+            "wondrous"
+          ]
+        },
+        "rarity": {
           "type": "string"
         },
-        "features": {
+        "attunement": {
+          "default": false,
+          "type": "boolean"
+        },
+        "attunement_by": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attunement_classes": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attunement_spellcaster": {
+          "default": false,
+          "type": "boolean"
+        },
+        "base": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "weapon",
+                    "armor",
+                    "shield",
+                    "ammunition"
+                  ]
+                },
+                "ids": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "categories": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "except": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "weapon_kind": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "melee",
+                        "ranged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bonus": {
+          "default": {},
           "type": "object",
-          "propertyNames": {
-            "type": "string",
-            "pattern": "^([1-9]|1[0-9]|20)$"
+          "properties": {
+            "attack": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "damage": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "ac": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "spell_attack": {
+              "default": 0,
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
           },
-          "additionalProperties": {
-            "$ref": "#/$defs/Grants"
+          "additionalProperties": false
+        },
+        "grants": {
+          "default": {},
+          "$ref": "#/$defs/Grants"
+        },
+        "active_when": {
+          "default": "equipped",
+          "type": "string",
+          "enum": [
+            "equipped",
+            "carried"
+          ]
+        },
+        "charges": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "consumable": {
+          "default": false,
+          "type": "boolean"
+        },
+        "ignores_armor_penalties": {
+          "default": false,
+          "type": "boolean"
+        },
+        "heal": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "grants": {
+                "default": {},
+                "$ref": "#/$defs/Grants"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
           }
         }
       },
       "required": [
         "id",
         "name",
-        "class"
+        "category",
+        "rarity"
       ],
       "additionalProperties": false
     },
@@ -60,24 +258,222 @@
             "default": "",
             "type": "string"
           },
-          "class": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "armor",
+              "weapon",
+              "ammunition",
+              "potion",
+              "ring",
+              "rod",
+              "scroll",
+              "staff",
+              "wand",
+              "wondrous"
+            ]
+          },
+          "rarity": {
             "type": "string"
           },
-          "features": {
+          "attunement": {
+            "default": false,
+            "type": "boolean"
+          },
+          "attunement_by": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attunement_classes": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attunement_spellcaster": {
+            "default": false,
+            "type": "boolean"
+          },
+          "base": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "weapon",
+                      "armor",
+                      "shield",
+                      "ammunition"
+                    ]
+                  },
+                  "ids": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "categories": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "except": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "weapon_kind": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "melee",
+                          "ranged"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bonus": {
+            "default": {},
             "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "pattern": "^([1-9]|1[0-9]|20)$"
+            "properties": {
+              "attack": {
+                "default": 0,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "damage": {
+                "default": 0,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "ac": {
+                "default": 0,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "spell_attack": {
+                "default": 0,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
             },
-            "additionalProperties": {
-              "$ref": "#/$defs/Grants"
+            "additionalProperties": false
+          },
+          "grants": {
+            "default": {},
+            "$ref": "#/$defs/Grants"
+          },
+          "active_when": {
+            "default": "equipped",
+            "type": "string",
+            "enum": [
+              "equipped",
+              "carried"
+            ]
+          },
+          "charges": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consumable": {
+            "default": false,
+            "type": "boolean"
+          },
+          "ignores_armor_penalties": {
+            "default": false,
+            "type": "boolean"
+          },
+          "heal": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "grants": {
+                  "default": {},
+                  "$ref": "#/$defs/Grants"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "additionalProperties": false
             }
           }
         },
         "required": [
           "id",
           "name",
-          "class"
+          "category",
+          "rarity"
         ],
         "additionalProperties": false
       }
@@ -953,5 +1349,5 @@
       "additionalProperties": false
     }
   },
-  "title": "subclasses content"
+  "title": "magic_items content"
 }

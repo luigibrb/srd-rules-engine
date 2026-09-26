@@ -611,6 +611,126 @@
             "additionalProperties": false
           }
         },
+        "resources": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "max": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "progression": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "ability": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "str",
+                          "dex",
+                          "con",
+                          "int",
+                          "wis",
+                          "cha"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "proficiency": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "per_class_level": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "min": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              },
+              "recharge": {
+                "type": "string",
+                "enum": [
+                  "short",
+                  "long"
+                ]
+              },
+              "short_rest_regain": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "max",
+              "recharge"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "on_long_rest": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "heroic_inspiration"
+            ]
+          }
+        },
         "effects": {
           "default": [],
           "type": "array",
@@ -1017,6 +1137,21 @@
         "same_level": {
           "default": false,
           "type": "boolean"
+        },
+        "rest_change": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "short",
+                "long"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "weapon_kind": {
           "default": null,

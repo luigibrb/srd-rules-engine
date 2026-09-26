@@ -84,11 +84,18 @@ features:
       scaling:
         count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
         max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      rest_change: long
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
       count: 2
       hint: Longbows and Shortswords are a classic pair.
+      rest_change: long
+    resources:
+    - id: favored-enemy
+      name: Favored Enemy (free Hunter's Mark)
+      max: {progression: Favored Enemy}
+      recharge: long
   '2':
     traits:
     - name: Deft Explorer

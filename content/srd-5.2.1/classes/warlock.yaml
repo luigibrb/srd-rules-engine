@@ -130,6 +130,11 @@ features:
       count: 2
       tag: warlock-invocations
       swap: class_level
+    resources:
+    - id: magical-cunning
+      name: Magical Cunning
+      max: {value: 1}
+      recharge: long
   '3':
     traits:
     - name: Warlock Subclass
@@ -255,6 +260,11 @@ features:
       tag: warlock-invocations
       swap: class_level
     spells: [contact-other-plane]
+    resources:
+    - id: contact-patron
+      name: Contact Patron
+      max: {value: 1}
+      recharge: long
   '10':
     choices:
     - id: cantrips
@@ -294,6 +304,11 @@ features:
       tag: warlock-arcanum
       swap: class_level
       same_level: true
+    resources:
+    - id: mystic-arcanum-6
+      name: Mystic Arcanum (level 6)
+      max: {value: 1}
+      recharge: long
   '12':
     choices:
     - id: feat
@@ -326,6 +341,11 @@ features:
       tag: warlock-arcanum
       swap: class_level
       same_level: true
+    resources:
+    - id: mystic-arcanum-7
+      name: Mystic Arcanum (level 7)
+      max: {value: 1}
+      recharge: long
   '15':
     choices:
     - id: prepared
@@ -352,6 +372,11 @@ features:
       tag: warlock-arcanum
       swap: class_level
       same_level: true
+    resources:
+    - id: mystic-arcanum-8
+      name: Mystic Arcanum (level 8)
+      max: {value: 1}
+      recharge: long
   '16':
     choices:
     - id: feat
@@ -377,6 +402,11 @@ features:
       tag: warlock-arcanum
       swap: class_level
       same_level: true
+    resources:
+    - id: mystic-arcanum-9
+      name: Mystic Arcanum (level 9)
+      max: {value: 1}
+      recharge: long
   '18':
     choices:
     - id: invocations

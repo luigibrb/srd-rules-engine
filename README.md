@@ -112,6 +112,32 @@ with `parseBuild(json)`. Choice keys (`class:fighter#skills`,
 `feat:skilled@species:human#versatile#proficiencies`) are explained in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+### Playing: HP, slots, conditions, inventory
+
+The build is the character's characteristics; what changes at the table lives in a separate
+`CharacterState` (its own JSON). Every change is an action, checked against the rules:
+
+```ts
+import { applyAction, computePlaySheet, createState } from "srd-rules-engine";
+
+let state = createState(build, catalog);        // full HP, starting gear (armor worn), gold
+({ state } = applyAction(build, state, catalog, { type: "damage", amount: 9, damage_type: "fire" }));
+({ state } = applyAction(build, state, catalog, { type: "add_item", item: "weapon-1", base: "longsword" }));
+const { notes } = applyAction(build, state, catalog, { type: "short_rest", hit_dice: [{ die: 10 }] });
+computePlaySheet(build, state, catalog).play;   // hp, hit dice, slots, uses, conditions, inventory…
+```
+
+Actions cover damage (resistances, temporary HP, dropping to 0, death saves, massive damage,
+Concentration DCs), healing, Short and Long Rests, spell and Pact slots, limited-use features
+(Rage, Channel Divinity, Second Wind…), conditions and Exhaustion (their effects show on the
+sheet), Heroic Inspiration, items (equip, attune up to 3 with class restrictions, potions,
+charges), coins, and today's picks for "after a rest" choices such as prepared spells: those
+live in the state, so the build keeps its starting picks. An impossible action throws
+`PlayError` with the reason. Magic items change the sheet: +1 weapons and armor, Ring of
+Protection, Gauntlets of Ogre Power, Bracers of Defense, resistances…
+
+After the build changes (a level-up, an edit), `reconcileState` fits the state to it again.
+
 ### Dice and combat
 
 ```ts
@@ -135,6 +161,7 @@ Without an `rng`, rolls use `Math.random()`.
 ```bash
 npx srd-rules build                    # interactive level 1 character builder
 npx srd-rules build --load characters/aerin.json --seed 7
+npx srd-rules play --load characters/aerin.json   # track HP, slots, items in play
 npx srd-rules serve --port 8000        # HTTP API
 npx srd-rules validate my-homebrew/    # check a content pack
 npx srd-rules build --content my-homebrew/   # build with homebrew layered over the SRD
@@ -163,6 +190,11 @@ again), and which new questions appear. Picks that still fit are kept. A change 
 make a later level illegal (a multiclass prerequisite no longer met, say) is refused, with the
 reason.
 
+`play` tracks a built character at the table with short commands: `dmg 7 fire`, `heal 5`,
+`short 10 10`, `long`, `slot 2`, `use 1`, `cond poisoned`, `exh 1`, `prep 1` (today's prepared
+spells), `add weapon-1 base=longsword`, `equip 3`, `attune 3`, `money +5gp`; `help` lists them.
+`save` writes `characters/<name>.state.json`; resume it with `--state`.
+
 ## HTTP API
 
 `createHandler()` returns a Web-standard `(Request) => Promise<Response>`, so it deploys
@@ -185,6 +217,9 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/builds/evaluate` | Build → validation report, derived sheet, level-up options, and every choice with its options |
 | `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` · `/v1/builds/set-level-class` · `/v1/builds/set-level-hp` | Change a build the same way the builder does (validated, repaired, with notes) |
 | `POST /v1/builds/preview` | What a `set-choice` or `set-level-class` change would remove and add, without applying it |
+| `POST /v1/state/new` | Build → a fresh play state |
+| `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
+| `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
 | `POST /v1/characters/{name}/passive-perception` | Passive Perception (`?proficient=true`) |
@@ -241,7 +276,8 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
-| Not yet | Shopping with starting gold, conditions and session state, the full Effect engine |
+| Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
+| Not yet | Shopping with starting gold, the full Effect engine, most magic items' active powers (shown as text) |
 
 The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -250,11 +286,11 @@ The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | Path | Contents |
 |---|---|
 | `src/rules/` | Pure rules logic: dice, combat, spells, ability scores, build resolution and validation, sheet |
-| `src/services/` | Workflows: the character builder (setters, normalization), combat and spell resolution |
+| `src/services/` | Workflows: the character builder (setters, normalization), play state (actions), combat and spell resolution |
 | `src/models/` | Zod schemas and types for content, builds, characters and spells |
 | `src/content/` | Catalog creation and validation, the bundled SRD, loading content from disk |
 | `src/http/` | HTTP API (`fetch` handler) and the Node server adapter |
-| `src/cli/` | The `srd-rules` command: interactive builder, `serve`, `validate` |
+| `src/cli/` | The `srd-rules` command: interactive builder, `play`, `serve`, `validate` |
 | `content/srd-5.2.1/` | Rules content as YAML: the source of truth |
 | `schemas/`, `src/content/data/` | Generated by `npm run content` (JSON Schemas, bundled SRD JSON) |
 | `examples/homebrew-pack/` | A sample content pack layered over the SRD |

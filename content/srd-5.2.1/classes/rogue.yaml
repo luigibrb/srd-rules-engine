@@ -90,6 +90,7 @@ features:
       kind: weapon_mastery
       count: 2
       hint: Daggers and Shortbows come with your starting equipment.
+      rest_change: long
   '2':
     traits:
     - name: Cunning Action
@@ -218,3 +219,8 @@ features:
         You have a marvelous knack for succeeding when you need to. If you fail a D20 Test, you can turn the roll into a 20.
 
         Once you use this feature, you can't use it again until you finish a Short or Long Rest.
+    resources:
+    - id: stroke-of-luck
+      name: Stroke of Luck
+      max: {value: 1}
+      recharge: short

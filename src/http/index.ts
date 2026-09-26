@@ -13,6 +13,7 @@ import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
 import { SpellSchema } from "../models/spell";
+import { CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { savingThrow } from "../rules/combat";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
@@ -36,6 +37,14 @@ import {
   resolveSpellAttack,
   resolveSpellSave,
 } from "../services/combat";
+import {
+  applyAction,
+  computePlaySheet,
+  createState,
+  PlayError,
+  reconcileState,
+  validateState,
+} from "../services/play";
 
 export interface HandlerOptions {
   /** Content to serve and build against. Defaults to the bundled SRD 5.2.1. */
@@ -78,6 +87,10 @@ const SpellCastRequest = z.object({
   spellcasting_ability: AbilityFullNameSchema,
 });
 const BuildRequest = z.object({ build: z.unknown() });
+const StateRequest = z.object({ build: z.unknown(), state: CharacterStateSchema });
+const ApplyRequest = StateRequest.extend({
+  action: z.union([PlayActionSchema, z.array(PlayActionSchema)]),
+});
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
   class_id: z.string(),
@@ -343,6 +356,50 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       handle: ({ body }) =>
         removeLastLevel(parseBuild(BuildRequest.parse(body).build), getCatalog()),
     },
+
+    // --- play state (HP, slots, conditions, inventory…) ---
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/new$/,
+      handle: ({ body }) => createState(parseBuild(BuildRequest.parse(body).build), getCatalog()),
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/sheet$/,
+      handle: ({ body }) => {
+        const req = StateRequest.parse(body);
+        const build = parseBuild(req.build);
+        return {
+          sheet: computePlaySheet(build, req.state, getCatalog()),
+          issues: validateState(build, req.state, getCatalog()),
+        };
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/apply$/,
+      handle: ({ body }) => {
+        // One action or a list, applied in order; all or nothing.
+        const req = ApplyRequest.parse(body);
+        const build = parseBuild(req.build);
+        let state = req.state;
+        const notes: string[] = [];
+        for (const action of Array.isArray(req.action) ? req.action : [req.action]) {
+          const result = applyAction(build, state, getCatalog(), action, { rng });
+          state = result.state;
+          notes.push(...result.notes);
+        }
+        return { state, notes };
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/reconcile$/,
+      handle: ({ body }) => {
+        const req = StateRequest.parse(body);
+        return reconcileState(parseBuild(req.build), req.state, getCatalog());
+      },
+    },
   ];
 
   return async (request) => {
@@ -368,6 +425,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       }
       if (error instanceof RangeError) return json(400, { detail: error.message }, cors);
       if (error instanceof BuildError) return json(400, { detail: error.messages }, cors);
+      if (error instanceof PlayError) return json(400, { detail: error.messages }, cors);
       return json(500, { detail: "Internal Server Error" }, cors);
     }
   };

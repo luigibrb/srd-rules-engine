@@ -75,6 +75,11 @@ features:
       hint: Burning Hands and Detect Magic are recommended.
       tag: sorcerer-prepared
       swap: class_level
+    resources:
+    - id: innate-sorcery
+      name: Innate Sorcery
+      max: {value: 2}
+      recharge: long
   '2':
     traits:
     - name: Font of Magic
@@ -152,6 +157,11 @@ features:
       category: metamagic
       tag: sorcerer-metamagic
       swap: class_level
+    resources:
+    - id: sorcery-points
+      name: Sorcery Points
+      max: {progression: Sorcery Points}
+      recharge: long
   '3':
     traits:
     - name: Sorcerer Subclass

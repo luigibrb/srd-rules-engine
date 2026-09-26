@@ -341,10 +341,10 @@ OVERLAY = {
                                   allowed=["arcana", "history", "investigation", "medicine", "nature", "religion"])]},
         18: {"choices": [
             {"id": "mastery_1", "label": "Spell Mastery (level 1 spell)", "kind": "spell", "spell_level": 1,
-             "subset_of": "wizard-spellbook", "always_prepared": True,
+             "subset_of": "wizard-spellbook", "always_prepared": True, "rest_change": "long",
              "hint": "A level 1 spell in your spellbook with a casting time of an action."},
             {"id": "mastery_2", "label": "Spell Mastery (level 2 spell)", "kind": "spell", "spell_level": 2,
-             "subset_of": "wizard-spellbook", "always_prepared": True,
+             "subset_of": "wizard-spellbook", "always_prepared": True, "rest_change": "long",
              "hint": "A level 2 spell in your spellbook with a casting time of an action."}]},
         20: {"choices": [{"id": "signature", "label": "Signature Spells", "kind": "spell", "count": 2,
                           "spell_level": 3, "subset_of": "wizard-spellbook", "always_prepared": True}]},
@@ -410,12 +410,12 @@ SUBCLASS_OVERLAY = {
     "warrior-of-the-open-hand": {},
     "oath-of-devotion": {3: spell_grants(DEVOTION)},
     "hunter": {
-        3: {"choices": [{"id": "hunters_prey", "label": "Hunter's Prey", "kind": "option", "options": [
+        3: {"choices": [{"id": "hunters_prey", "label": "Hunter's Prey", "kind": "option", "rest_change": "short", "options": [
             {"id": "colossus-slayer", "name": "Colossus Slayer",
              "description": "Once per turn, +1d8 damage to a creature that's missing any of its Hit Points."},
             {"id": "horde-breaker", "name": "Horde Breaker",
              "description": "Once per turn, attack another creature within 5 ft of the first target and within reach."}]}]},
-        7: {"choices": [{"id": "defensive_tactics", "label": "Defensive Tactics", "kind": "option", "options": [
+        7: {"choices": [{"id": "defensive_tactics", "label": "Defensive Tactics", "kind": "option", "rest_change": "short", "options": [
             {"id": "escape-the-horde", "name": "Escape the Horde",
              "description": "Opportunity Attacks have Disadvantage against you."},
             {"id": "multiattack-defense", "name": "Multiattack Defense",
@@ -491,6 +491,53 @@ SWAP_FAMILIES = {
 SAME_LEVEL_TAGS = {"warlock-arcanum"}  # "another Warlock spell of the same level"
 
 
+# Limited-use features tracked in play. A later level's entry with the same id replaces the
+# earlier one (Action Surge: 2 uses at 17). `short`: all back on a Short Rest; `long` with
+# `short_rest_regain`: one back on a Short Rest, all on a Long Rest.
+def res(id, name, recharge, short=None, **max_spec):
+    r = {"id": id, "name": name, "max": max_spec, "recharge": recharge}
+    if short:
+        r["short_rest_regain"] = short
+    return r
+
+
+CHANNEL = res("channel-divinity", "Channel Divinity", "long", short=1, progression="Channel Divinity")
+RESOURCES = {
+    "barbarian": {1: [res("rage", "Rage", "long", short=1, progression="Rages")]},
+    "bard": {1: [res("bardic-inspiration", "Bardic Inspiration", "long", ability="cha", min=1)],
+             5: [res("bardic-inspiration", "Bardic Inspiration", "short", ability="cha", min=1)]},
+    "cleric": {2: [CHANNEL], 10: [res("divine-intervention", "Divine Intervention", "long", value=1)]},
+    "druid": {2: [res("wild-shape", "Wild Shape", "long", short=1, progression="Wild Shape")]},
+    "fighter": {1: [res("second-wind", "Second Wind", "long", short=1, progression="Second Wind")],
+                2: [res("action-surge", "Action Surge", "short", value=1)],
+                9: [res("indomitable", "Indomitable", "long", value=1)],
+                13: [res("indomitable", "Indomitable", "long", value=2)],
+                17: [res("action-surge", "Action Surge", "short", value=2),
+                     res("indomitable", "Indomitable", "long", value=3)]},
+    "monk": {2: [res("focus-points", "Focus Points", "short", progression="Focus Points"),
+                 res("uncanny-metabolism", "Uncanny Metabolism", "long", value=1)]},
+    "paladin": {1: [res("lay-on-hands", "Lay On Hands (Hit Point pool)", "long", per_class_level=5)],
+                2: [res("paladins-smite", "Paladin's Smite (free Divine Smite)", "long", value=1)],
+                3: [CHANNEL]},
+    "ranger": {1: [res("favored-enemy", "Favored Enemy (free Hunter's Mark)", "long", progression="Favored Enemy")]},
+    "rogue": {20: [res("stroke-of-luck", "Stroke of Luck", "short", value=1)]},
+    "sorcerer": {1: [res("innate-sorcery", "Innate Sorcery", "long", value=2)],
+                 2: [res("sorcery-points", "Sorcery Points", "long", progression="Sorcery Points")]},
+    "warlock": {2: [res("magical-cunning", "Magical Cunning", "long", value=1)],
+                9: [res("contact-patron", "Contact Patron", "long", value=1)],
+                **{lvl: [res(f"mystic-arcanum-{sl}", f"Mystic Arcanum (level {sl})", "long", value=1)]
+                   for lvl, sl in [(11, 6), (13, 7), (15, 8), (17, 9)]}},
+    "wizard": {1: [res("arcane-recovery", "Arcane Recovery", "long", value=1)]},
+}
+SUBCLASS_RESOURCES = {
+    "warrior-of-the-open-hand": {6: [res("wholeness-of-body", "Wholeness of Body", "long", ability="wis", min=1)]},
+    "circle-of-the-land": {6: [res("natural-recovery", "Natural Recovery", "long", value=1)]},
+    "draconic-sorcery": {14: [res("dragon-wings", "Dragon Wings", "long", value=1)]},
+    "fiend-patron": {6: [res("dark-ones-own-luck", "Dark One's Own Luck", "long", ability="cha", min=1)],
+                     14: [res("hurl-through-hell", "Hurl Through Hell", "long", value=1)]},
+}
+
+
 def tag_swaps(choices, class_id):
     """Mark swap families on a list of choices (and the choices nested in their options)."""
     families = SWAP_FAMILIES.get(class_id, {})
@@ -507,6 +554,9 @@ def tag_swaps(choices, class_id):
 
 def make_pools(f1, class_id, table):
     for c in f1.get("choices", []):
+        if c["id"] == "weapon_mastery" or (c["id"] == "prepared" and class_id in PREPARED_POOLS) \
+                or (c["id"] == "cantrips" and class_id in CANTRIP_POOLS):
+            c["rest_change"] = "long"
         if c["id"] == "prepared" and class_id in PREPARED_POOLS:
             c.pop("spell_level", None)
             c.pop("max_spell_level", None)
@@ -556,6 +606,9 @@ def generate_class(class_id):
                                  "category": "eldritch_invocation", "hint": "Pact of the Tome is recommended."})
     make_pools(f1, class_id, table)
     tag_swaps(f1.get("choices", []), class_id)
+    f1.pop("resources", None)
+    if RESOURCES.get(class_id, {}).get(1):
+        f1["resources"] = copy.deepcopy(RESOURCES[class_id][1])
 
     data["progression"] = {
         col: [num(r[col]) for r in table] for col in table[0] if col in RESOURCE_COLUMNS
@@ -606,6 +659,8 @@ def generate_class(class_id):
         if choices:
             g["choices"] = choices
         g = merge(g, OVERLAY.get(class_id, {}).get(level, {}))
+        if RESOURCES.get(class_id, {}).get(level):
+            g["resources"] = copy.deepcopy(RESOURCES[class_id][level])
         tag_swaps(g.get("choices", []), class_id)
         if g:
             features[str(level)] = g
@@ -626,11 +681,13 @@ def generate_class(class_id):
         overlay = SUBCLASS_OVERLAY.get(sid)
         if overlay is None:
             sys.exit(f"no overlay entry for subclass {sid}")
-        for lvl in sorted(set(sfeats) | set(overlay)):
+        for lvl in sorted(set(sfeats) | set(overlay) | set(SUBCLASS_RESOURCES.get(sid, {}))):
             g = {}
             if lvl in sfeats:
                 g["traits"] = [{"name": n, "text": t} for n, t in sfeats[lvl]]
             g = merge(g, overlay.get(lvl, {}))
+            if SUBCLASS_RESOURCES.get(sid, {}).get(lvl):
+                g["resources"] = copy.deepcopy(SUBCLASS_RESOURCES[sid][lvl])
             features_s[str(lvl)] = g
         tagline, _, rest = intro.partition("\n")
         desc = tagline.strip("_ ") + ". " + " ".join(rest.split())
@@ -686,8 +743,10 @@ def invocations(section):
                                                                 "kind": "feat", "category": "origin"}]
     by_id["pact-of-the-chain"]["grants"]["spells"] = ["find-familiar"]
     by_id["pact-of-the-tome"]["grants"]["choices"] = [
-        {"id": "cantrips", "label": "Book of Shadows cantrips", "kind": "spell", "count": 3, "spell_level": 0, "always_prepared": True},
-        {"id": "rituals", "label": "Book of Shadows rituals", "kind": "spell", "count": 2, "spell_level": 1, "ritual": True, "always_prepared": True},
+        {"id": "cantrips", "label": "Book of Shadows cantrips", "kind": "spell", "count": 3, "spell_level": 0,
+         "always_prepared": True, "rest_change": "short"},
+        {"id": "rituals", "label": "Book of Shadows rituals", "kind": "spell", "count": 2, "spell_level": 1, "ritual": True,
+         "always_prepared": True, "rest_change": "short"},
     ]
     return out
 
@@ -719,6 +778,7 @@ def update_feats():
             for c in f["grants"]["choices"]:
                 if c["id"] in ("cantrips", "spell"):
                     c.update({"tag": "magic-initiate", "swap": "any_level", "same_level": True})
+            f["grants"]["resources"] = [res("free-cast", "Magic Initiate (free level 1 spell)", "long", value=1)]
     new = [
         {"id": "ability-score-improvement", "name": "Ability Score Improvement", "category": "general", "repeatable": True,
          "prerequisite": {"level": 4},

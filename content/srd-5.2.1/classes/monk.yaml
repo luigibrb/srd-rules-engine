@@ -100,6 +100,15 @@ features:
         Once you use this feature, you can't use it again until you finish a Long Rest.
     effects:
     - {target: speed, value: 10, when: unarmored}
+    resources:
+    - id: focus-points
+      name: Focus Points
+      max: {progression: Focus Points}
+      recharge: short
+    - id: uncanny-metabolism
+      name: Uncanny Metabolism
+      max: {value: 1}
+      recharge: long
   '3':
     traits:
     - name: Deflect Attacks

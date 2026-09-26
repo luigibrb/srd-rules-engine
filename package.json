@@ -78,6 +78,7 @@
     "check": "npm run content -- --check && npm run lint && npm run typecheck && npm test",
     "prepublishOnly": "npm run check && npm run build",
     "content:import-classes": "python3 scripts/import-srd-classes.py",
+    "content:import-items": "tsx scripts/import-srd-items.ts",
     "content:import-spells": "tsx scripts/import-srd-spells.ts"
   },
   "dependencies": {

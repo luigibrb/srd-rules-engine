@@ -5,6 +5,8 @@
   name: Dragonborn
   description: Descendants of dragons, with a breath weapon and resistance tied to their ancestor.
   grants:
+    resources:
+      - {id: breath-weapon, name: Breath Weapon, max: {proficiency: true}, recharge: long}
     size: medium
     effects:
       - {target: speed, op: set, value: 30}
@@ -42,6 +44,8 @@
   name: Dwarf
   description: Hardy folk of stone and forge; tough, poison-resistant, with long darkvision.
   grants:
+    resources:
+      - {id: stonecunning, name: Stonecunning, max: {proficiency: true}, recharge: long}
     size: medium
     resistances: [poison]
     effects:
@@ -158,6 +162,8 @@
   name: Goliath
   description: Towering descendants of giants, with a supernatural boon from their ancestry.
   grants:
+    resources:
+      - {id: giant-ancestry, name: Giant Ancestry, max: {proficiency: true}, recharge: long}
     size: medium
     effects:
       - {target: speed, op: set, value: 35}
@@ -214,6 +220,7 @@
   name: Human
   description: Adaptable and ambitious; an extra skill and an extra Origin feat.
   grants:
+    on_long_rest: [heroic_inspiration]
     effects:
       - {target: speed, op: set, value: 30}
     traits:
@@ -244,6 +251,9 @@
   name: Orc
   description: Relentless, enduring warriors who surge forward in battle.
   grants:
+    resources:
+      - {id: adrenaline-rush, name: Adrenaline Rush, max: {proficiency: true}, recharge: short}
+      - {id: relentless-endurance, name: Relentless Endurance, max: {value: 1}, recharge: long}
     size: medium
     effects:
       - {target: speed, op: set, value: 30}

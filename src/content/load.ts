@@ -22,7 +22,8 @@ export function loadContentPack(dir: string, name: string = basename(dir)): Cont
   if (creation !== undefined) pack.creation = creation;
   for (const table of TABLE_NAMES) {
     const entries: unknown[] = [];
-    const file = readFirst(dir, table);
+    // `magic_items` → magic-items.yaml (either spelling works).
+    const file = readFirst(dir, table) ?? readFirst(dir, table.replaceAll("_", "-"));
     if (file !== undefined) entries.push(...asList(file));
     const subdir = join(dir, table);
     if (existsSync(subdir)) {

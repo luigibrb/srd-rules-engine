@@ -76,11 +76,18 @@ features:
       scaling:
         count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
         max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      rest_change: long
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
       count: 2
       hint: Longswords and Javelins come with your starting equipment.
+      rest_change: long
+    resources:
+    - id: lay-on-hands
+      name: Lay On Hands (Hit Point pool)
+      max: {per_class_level: 5}
+      recharge: long
   '2':
     traits:
     - name: Fighting Style
@@ -117,6 +124,11 @@ features:
             hint: Guidance and Sacred Flame are recommended.
             tag: paladin-blessed-warrior
             swap: class_level
+    resources:
+    - id: paladins-smite
+      name: Paladin's Smite (free Divine Smite)
+      max: {value: 1}
+      recharge: long
   '3':
     traits:
     - name: Channel Divinity
@@ -142,6 +154,12 @@ features:
         Paladin level or lower.
     choices:
     - {id: subclass, label: Paladin subclass, kind: subclass}
+    resources:
+    - id: channel-divinity
+      name: Channel Divinity
+      max: {progression: Channel Divinity}
+      recharge: long
+      short_rest_regain: 1
   '4':
     traits:
     - name: Ability Score Improvement
