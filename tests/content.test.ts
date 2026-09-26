@@ -21,13 +21,28 @@ const CONTENT_DIR = join(import.meta.dirname, "..", "content", "srd-5.2.1");
 
 describe("SRD catalog", () => {
   it("loads the SRD subset", () => {
-    expect(Object.keys(catalog.classes)).toEqual(["fighter"]);
+    expect(Object.keys(catalog.classes)).toEqual([
+      "barbarian",
+      "bard",
+      "cleric",
+      "druid",
+      "fighter",
+      "monk",
+      "paladin",
+      "ranger",
+      "rogue",
+      "sorcerer",
+      "warlock",
+      "wizard",
+    ]);
     expect(Object.keys(catalog.species)).toHaveLength(9);
     expect(new Set(Object.keys(catalog.backgrounds))).toEqual(
       new Set(["acolyte", "criminal", "sage", "soldier"]),
     );
     expect(Object.keys(catalog.weapons)).toHaveLength(38);
     expect(Object.keys(catalog.armor)).toHaveLength(13);
+    expect(Object.values(catalog.spells).filter((sp) => sp.level === 0)).toHaveLength(27);
+    expect(Object.values(catalog.spells).filter((sp) => sp.level === 1)).toHaveLength(57);
   });
 
   it("the bundled JSON matches the YAML sources", () => {

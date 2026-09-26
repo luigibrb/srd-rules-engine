@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Warlock" (level 1 only). Only invocations without a prerequisite
+# (available at level 1) are listed.
+id: warlock
+name: Warlock
+description: An occultist who wields magic granted by a pact with an otherworldly patron.
+primary_abilities: [cha]
+hit_die: 8
+complexity: High
+standard_array: {str: 8, dex: 14, con: 13, int: 12, wis: 10, cha: 15}
+grants:
+  saving_throws: [wis, cha]
+  weapon_proficiencies: [simple]
+  armor_training: [light]
+  spellcasting: {list: warlock, ability: cha, slots: [1], pact: true}
+  traits:
+    - name: Pact Magic
+      text: >-
+        Charisma is your spellcasting ability. You can use an Arcane Focus as a Spellcasting
+        Focus. Your Pact Magic slots come back when you finish a Short or Long Rest.
+  choices:
+    - id: skills
+      label: Warlock skills
+      kind: skill
+      count: 2
+      allowed: [arcana, deception, history, intimidation, investigation, nature, religion]
+    - id: invocation
+      label: Eldritch Invocation
+      kind: option
+      step: features
+      hint: Pact of the Tome is recommended.
+      options:
+        - id: armor-of-shadows
+          name: Armor of Shadows
+          description: You can cast Mage Armor on yourself without expending a spell slot.
+          grants:
+            spells: [mage-armor]
+            ac_calculations:
+              - {name: Mage Armor, base: 13, abilities: [dex]}
+            traits:
+              - name: Armor of Shadows
+                text: Cast Mage Armor on yourself at will (base AC 13 + Dex while unarmored).
+        - id: eldritch-mind
+          name: Eldritch Mind
+          description: Advantage on Constitution saves to maintain Concentration.
+          grants:
+            traits:
+              - name: Eldritch Mind
+                text: You have Advantage on Constitution saving throws to maintain Concentration.
+        - id: pact-of-the-blade
+          name: Pact of the Blade
+          description: >-
+            Conjure or bond a Simple or Martial Melee pact weapon; attack with Charisma and deal
+            Necrotic, Psychic, or Radiant damage if you like.
+          grants:
+            traits:
+              - name: Pact of the Blade
+                text: >-
+                  Bonus Action: conjure a Simple or Martial Melee weapon (or bond a magic one).
+                  You're proficient with it, can use it as a Spellcasting Focus, can use Charisma
+                  for its attack and damage rolls, and can make it deal Necrotic, Psychic, or
+                  Radiant damage.
+        - id: pact-of-the-chain
+          name: Pact of the Chain
+          description: Learn Find Familiar (castable without a slot); special familiar forms.
+          grants:
+            spells: [find-familiar]
+            traits:
+              - name: Pact of the Chain
+                text: >-
+                  Cast Find Familiar as a Magic action without a spell slot, with special forms
+                  (Imp, Pseudodragon, Quasit, Skeleton, Sphinx of Wonder, Sprite, Venomous Snake).
+                  When you take the Attack action, you can forgo one attack so your familiar
+                  attacks with its Reaction.
+        - id: pact-of-the-tome
+          name: Pact of the Tome
+          description: >-
+            A Book of Shadows with three cantrips and two level 1 Ritual spells from any class's
+            list, prepared while you carry it.
+          grants:
+            traits:
+              - name: Pact of the Tome
+                text: >-
+                  After a Short or Long Rest you conjure a Book of Shadows. While it's on your
+                  person you have its three cantrips and two level 1 Ritual spells prepared (they
+                  count as Warlock spells), and you can use it as a Spellcasting Focus.
+            choices:
+              - id: cantrips
+                label: Book of Shadows cantrips
+                kind: spell
+                count: 3
+                spell_level: 0
+                always_prepared: true
+              - id: rituals
+                label: Book of Shadows rituals
+                kind: spell
+                count: 2
+                spell_level: 1
+                ritual: true
+                always_prepared: true
+    - id: cantrips
+      label: Warlock cantrips
+      kind: spell
+      count: 2
+      spell_level: 0
+      spell_list: warlock
+      hint: Eldritch Blast and Prestidigitation are recommended.
+    - id: prepared
+      label: Warlock prepared spells
+      kind: spell
+      count: 2
+      spell_level: 1
+      spell_list: warlock
+      hint: Charm Person and Hex are recommended.
+    - id: equipment
+      label: Warlock equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Leather Armor, Sickle, 2 Daggers, Arcane Focus (orb), Book (occult lore), Scholar's
+            Pack, 15 GP
+          grants:
+            items:
+              - {item: leather-armor}
+              - {item: sickle}
+              - {item: dagger, qty: 2}
+              - {item: arcane-focus-orb}
+              - {item: book-occult-lore}
+              - {item: scholars-pack}
+            gp: 15
+        - {id: b, name: Gold, description: 100 GP, grants: {gp: 100}}

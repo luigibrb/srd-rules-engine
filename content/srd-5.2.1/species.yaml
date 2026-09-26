@@ -64,6 +64,7 @@
   name: Elf
   description: Long-lived fey-touched people who trance instead of sleeping.
   grants:
+    spellcasting: {ability: $spellcasting_ability}
     size: medium
     effects:
       - {target: speed, op: set, value: 30}
@@ -116,6 +117,7 @@
   name: Gnome
   description: Small, clever tinkerers and illusionists with a knack for resisting magic.
   grants:
+    spellcasting: {ability: $spellcasting_ability}
     size: small
     effects:
       - {target: speed, op: set, value: 30}
@@ -138,6 +140,7 @@
               castable without a slot PB times per Long Rest.
             grants:
               cantrips: [minor-illusion]
+              spells: [speak-with-animals]
           - id: rock-gnome
             name: Rock Gnome
             description: >-
@@ -259,6 +262,7 @@
   name: Tiefling
   description: Bearers of a fiendish legacy that grants resistance and innate magic.
   grants:
+    spellcasting: {ability: $spellcasting_ability}
     effects:
       - {target: speed, op: set, value: 30}
       - {target: darkvision, op: max, value: 60}

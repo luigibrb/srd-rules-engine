@@ -85,7 +85,8 @@ export type Size = (typeof SIZES)[number];
  * Ordered by dependency: each step only needs what earlier steps decided. Equipment comes
  * before features so Weapon Mastery / Fighting Style can be picked knowing your gear, and
  * proficiencies come late so every skill grant (species, background, feats) is known before
- * you spend free picks.
+ * you spend free picks. Spells come after features because features can decide which list
+ * you pick from (Magic Initiate, Divine Order).
  */
 export const STEPS = [
   "class",
@@ -94,6 +95,7 @@ export const STEPS = [
   "abilities",
   "equipment",
   "features",
+  "spells",
   "proficiencies",
   "languages",
   "details",
@@ -109,6 +111,8 @@ export const CHOICE_KINDS = [
   "language",
   "feat",
   "weapon_mastery",
+  "spell",
+  "expertise", // a skill you're already proficient in
 ] as const;
 export type ChoiceKind = (typeof CHOICE_KINDS)[number];
 
@@ -119,6 +123,8 @@ const DEFAULT_STEP_BY_KIND: Partial<Record<ChoiceKind, Step>> = {
   language: "languages",
   feat: "features",
   weapon_mastery: "features",
+  spell: "spells",
+  expertise: "proficiencies",
 };
 
 export const EFFECT_OPS = ["add", "set", "max"] as const;
@@ -127,19 +133,51 @@ export type EffectOp = (typeof EFFECT_OPS)[number];
 /**
  * A declarative numeric modifier. Minimal precursor of the full Effect engine.
  *
- * `value` is an integer or the token `"prof"` (Proficiency Bonus).
+ * `value` is an integer, the token `"prof"` (Proficiency Bonus) or an ability (`"wis"`: that
+ * ability's modifier). `min` is a floor for the value ("Wisdom modifier, minimum of +1").
  * `when` names a condition evaluated by the sheet calculator (e.g. `"wearing_armor"`).
  */
 export const EffectSchema = z.strictObject({
   target: z.string(),
   op: z.enum(EFFECT_OPS).default("add"),
-  value: z.union([z.int(), z.literal("prof")]),
+  value: z.union([z.int(), z.literal("prof"), z.enum(ABILITIES)]),
+  min: z.int().nullable().default(null),
   when: z.string().nullable().default(null),
 });
 export type Effect = z.infer<typeof EffectSchema>;
 
 export const TraitSchema = z.strictObject({ name: z.string(), text: z.string() });
 export type Trait = z.infer<typeof TraitSchema>;
+
+/**
+ * An alternative way to compute Armor Class while wearing no armor (Unarmored Defense, Mage
+ * Armor): `base` + the listed ability modifiers. The sheet uses whichever option is best; they
+ * never stack with each other or with worn armor.
+ */
+export const AcCalculationSchema = z.strictObject({
+  name: z.string(),
+  base: z.int().default(10),
+  abilities: z.array(z.enum(ABILITIES)),
+  /** Whether a Shield can still be used (Barbarian: yes; Monk: no). */
+  shield: z.boolean().default(true),
+});
+export type AcCalculation = z.infer<typeof AcCalculationSchema>;
+
+/**
+ * A spellcasting feature. `list` is a class spell list id (`null` for a fixed set of spells,
+ * like a species' cantrips); `ability` is the spellcasting ability. Either can be
+ * `"$<choice id>"` to use the answer to one of the same source's choices (Magic Initiate lets
+ * you pick both).
+ */
+export const SpellcastingSchema = z.strictObject({
+  list: z.string().nullable().default(null),
+  ability: z.string(),
+  /** Spell slots per spell level: `[2]` = two level 1 slots. */
+  slots: z.array(z.int().min(0)).default([]),
+  /** Warlock Pact Magic: slots come back on a Short Rest. */
+  pact: z.boolean().default(false),
+});
+export type Spellcasting = z.infer<typeof SpellcastingSchema>;
 
 export const ItemGrantSchema = z.strictObject({
   item: z.string(),
@@ -173,10 +211,22 @@ export interface ChoiceDef {
   options: ChoiceOption[];
   /** Restricts ids for other kinds; `null` means any. */
   allowed: string[] | null;
-  /** Feat/tool/language/weapon category filter. */
-  category: string | null;
+  /** Feat/tool/language/weapon category filter (any of these). */
+  category: string[] | null;
   step: Step | null;
   hint: string;
+  /** `kind: spell`: only spells of this level. */
+  spell_level: number | null;
+  /** `kind: spell`: a class spell list, or `"$<choice id>"` for the answer to a sibling choice. */
+  spell_list: string | null;
+  /** `kind: spell`: only spells with the Ritual tag. */
+  ritual: boolean;
+  /** `kind: spell`: the picks are always prepared (they don't count against a class's limit). */
+  always_prepared: boolean;
+  /** Options are limited to what a sibling choice picked (Wizard: prepare from spellbook). */
+  subset_of: string | null;
+  /** `kind: weapon_mastery`: only melee or ranged weapons. */
+  weapon_kind: "melee" | "ranged" | null;
 }
 
 export interface Grants {
@@ -190,6 +240,10 @@ export interface Grants {
   feats: FeatGrant[];
   resistances: string[];
   cantrips: string[];
+  /** Spells you always have prepared (Hunter's Mark, Speak with Animals…). */
+  spells: string[];
+  spellcasting: Spellcasting | null;
+  ac_calculations: AcCalculation[];
   effects: Effect[];
   items: ItemGrant[];
   gp: number;
@@ -198,7 +252,12 @@ export interface Grants {
 }
 
 /** Grants fields that are plain lists of ids, usable with `Resolution.granted()`. */
-export type GrantedIdList = "armor_training" | "weapon_proficiencies" | "resistances" | "cantrips";
+export type GrantedIdList =
+  | "armor_training"
+  | "weapon_proficiencies"
+  | "resistances"
+  | "cantrips"
+  | "spells";
 
 export const ChoiceOptionSchema: z.ZodType<ChoiceOption, unknown> = z
   .lazy(() =>
@@ -221,9 +280,19 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
         count: z.int().min(1).default(1),
         options: z.array(ChoiceOptionSchema).default([]),
         allowed: z.array(z.string()).nullable().default(null),
-        category: z.string().nullable().default(null),
+        category: z
+          .union([z.string(), z.array(z.string())])
+          .transform((c) => (typeof c === "string" ? [c] : c))
+          .nullable()
+          .default(null),
         step: z.enum(STEPS).nullable().default(null),
         hint: z.string().default(""),
+        spell_level: z.int().min(0).max(9).nullable().default(null),
+        spell_list: z.string().nullable().default(null),
+        ritual: z.boolean().default(false),
+        always_prepared: z.boolean().default(false),
+        subset_of: z.string().nullable().default(null),
+        weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
       })
       .refine((c) => (c.kind === "option") === c.options.length > 0, {
         error: (issue) =>
@@ -246,6 +315,9 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       feats: z.array(FeatGrantSchema).default([]),
       resistances: z.array(z.string()).default([]),
       cantrips: z.array(z.string()).default([]),
+      spells: z.array(z.string()).default([]),
+      spellcasting: SpellcastingSchema.nullable().default(null),
+      ac_calculations: z.array(AcCalculationSchema).default([]),
       effects: z.array(EffectSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),
@@ -354,6 +426,21 @@ export type LanguageDef = z.infer<typeof LanguageSchema>;
 
 export const MasterySchema = z.strictObject({ ...entity });
 export type MasteryDef = z.infer<typeof MasterySchema>;
+
+export const SpellDefSchema = z.strictObject({
+  ...entity,
+  level: z.int().min(0).max(9),
+  school: z.string(),
+  /** Class spell lists that include this spell, e.g. `[cleric, druid]`. */
+  lists: z.array(z.string()),
+  casting_time: z.string(),
+  ritual: z.boolean().default(false),
+  range: z.string(),
+  components: z.string(),
+  duration: z.string(),
+  concentration: z.boolean().default(false),
+});
+export type SpellDef = z.infer<typeof SpellDefSchema>;
 
 export const PointBuySchema = z.strictObject({
   budget: z.int(),

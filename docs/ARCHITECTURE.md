@@ -17,12 +17,15 @@ Details) and Baldur's Gate 3, which lets you move freely between tabs.
    +1/+1/+1. This comes after class and background so the builder can recommend where scores go.
 5. **Equipment** comes before features so Weapon Mastery can mark weapons you carry and
    Fighting Style can preview its AC or attack effect.
-6. **Features**: Fighting Style, Weapon Mastery, the Human Versatile feat, and feat
-   sub-choices.
-7. **Skills & tools** comes late so every fixed grant (background, species, feats) is known
+6. **Features**: Fighting Style, Weapon Mastery, Divine/Primal Order, Eldritch Invocation, the
+   Human Versatile feat, and feat sub-choices.
+7. **Spells** comes after features because a feature can decide which list you pick from
+   (Magic Initiate's list, Thaumaturge's extra cantrip, Pact of the Tome).
+8. **Skills & tools** comes late so every fixed grant (background, species, feats) is known
    before free picks are spent. Duplicates are greyed out.
-8. **Languages.**
-9. **Name & alignment** is last because nothing depends on it (BG3 also asks for it last).
+   Expertise is asked last within the step, once every proficiency is known.
+9. **Languages.**
+10. **Name & alignment** is last because nothing depends on it (BG3 also asks for it last).
 
 You can jump to any step. If a change upstream makes a later choice invalid,
 `normalize` in `src/services/builder.ts` removes it and says why. For example, switching to Criminal
@@ -60,19 +63,53 @@ place.
 
 ### Effects (pre-engine)
 
-`Effect{target, op: add|set|max, value: int|"prof", when}` covers the numbers level 1 needs
-(`ac`, `initiative`, `speed`, `darkvision`, `hp_per_level`, `attack.ranged`). It's a small,
-declarative stand-in for the full Effect engine (milestone 3). It already uses the same shape
+`Effect{target, op: add|set|max, value: int|"prof"|ability, min, when}` covers the numbers
+level 1 needs (`ac`, `initiative`, `speed`, `darkvision`, `hp_per_level`, `attack.ranged`,
+`skill.<id>`, `martial_arts.die`). An ability value means that ability's modifier; `min` is a
+floor (Thaumaturge: "Wisdom modifier, minimum of +1"). It's a small, declarative stand-in for
+the full Effect engine (milestone 3). It already uses the same shape
 (target/op/value/condition), so the content won't need rewriting later.
+
+Conditions available to `when`: `wearing_armor`, `wielding_shield`.
+
+**Armor Class** is not a sum of effects: features like Unarmored Defense and Mage Armor are
+*alternative* calculations that never stack with each other or with armor. Content declares
+them as `ac_calculations` (`base` + ability modifiers, whether a Shield still applies). The
+sheet evaluates every legal configuration (each owned and trained armor, or no armor with each
+calculation; with or without a Shield), including conditional effects such as Defense, and
+picks the highest. Ties go to the simpler option.
+
+**Named rules in code (documented exceptions).** A few level 1 features change how attacks
+work rather than a number: Martial Arts (Dex and the Martial Arts die for Unarmed Strikes and
+Monk weapons, only without armor or Shield) is triggered by the `martial_arts.die` effect;
+Great Weapon Fighting adds a note to two-handed melee attacks. Both live in `rules/sheet.ts`.
+
+### Spells
+
+Spells are content (`spells.yaml`: level, school, class `lists`, ritual, concentration, full
+text). A class declares `spellcasting` (list, ability, slots, `pact` for Warlocks) and its
+picks as `kind: spell` choices:
+
+- `spell_level` and `spell_list` filter the options; `ritual: true` keeps only rituals.
+- `spell_list: $spell_list` takes the list from a sibling choice's answer (Magic Initiate); a
+  `spellcasting.ability` can do the same (`$spellcasting_ability`).
+- `subset_of: spellbook` limits options to what a sibling choice picked (a Wizard prepares from
+  the spellbook). The sheet lists the pool as `spellbook`, not as prepared spells.
+- `always_prepared: true` marks picks that don't count against a class's limit (Magic
+  Initiate, Pact of the Tome); `grants.spells` does the same for fixed spells (Hunter's Mark,
+  Speak with Animals).
+- A spell you already have from any other source is unavailable ("already known from Ranger"),
+  except between a pool and its subset.
 
 ### Known gaps (flagged, not invented)
 
-- Magic Initiate cantrip and level 1 spell picks: not automated yet. The builder shows this as
-  a note.
 - Starting gold (Fighter option C, background option B): shopping isn't automated.
 - AC assumes you wear the best armor you own and are trained with. Equipping comes with the
   inventory milestone.
-- Only the Fighter class is defined. Other classes are added as YAML under `classes/`.
+- Level 1 only, so no subclasses (they start at level 3) and no Warlock invocations with a
+  level prerequisite.
+- Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
+  placeholders, like the Soldier's gaming set.
 - The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
   separate, hand-filled snapshot. It isn't derived from a build and sheet yet; bridging the two
   belongs with the session-state layer.

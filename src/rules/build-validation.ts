@@ -59,7 +59,7 @@ export function validateBuild(
     .filter(([, value]) => value === null)
     .map(([what]) => what);
   if (missing.length) {
-    for (const step of ["equipment", "features", "proficiencies"] as const) {
+    for (const step of ["equipment", "features", "spells", "proficiencies"] as const) {
       issues.push(issue(step, "pending", `Choose your ${missing.join(", ")} first`));
     }
   }

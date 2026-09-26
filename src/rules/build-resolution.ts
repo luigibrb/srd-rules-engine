@@ -34,6 +34,7 @@ import {
   type Step,
   skillName,
 } from "../models/content";
+import { isWeaponProficient } from "./weapons";
 
 export interface ActiveSource {
   readonly key: string;
@@ -107,8 +108,26 @@ export class Resolution {
     return this.choices.find((c) => c.key === key);
   }
 
+  /** Choices asked in a step, in order. Expertise comes last: it needs every skill pick. */
   choicesForStep(step: Step): ActiveChoice[] {
-    return this.choices.filter((c) => c.step === step && c.fixed === null);
+    const inStep = this.choices.filter((c) => c.step === step && c.fixed === null);
+    const last = (c: ActiveChoice) => (c.definition.kind === "expertise" ? 1 : 0);
+    return inStep.sort((a, b) => last(a) - last(b));
+  }
+
+  /** Another choice declared by the same source, by its id (e.g. Magic Initiate's `spell_list`). */
+  sibling(choice: ActiveChoice, id: string): ActiveChoice | undefined {
+    return this.choice(`${choice.source.key}#${id}`);
+  }
+
+  /**
+   * Resolve a content value that may refer to a sibling choice (`"$spell_list"`): the first
+   * answer to that choice, or `null` while it's unanswered.
+   */
+  resolveRef(src: ActiveSource, value: string): string | null {
+    if (!value.startsWith("$")) return value;
+    const ref = this.choice(`${src.key}#${value.slice(1)}`);
+    return (ref && this.selected(ref)[0]) ?? null;
   }
 
   private *selections(
@@ -156,6 +175,32 @@ export class Resolution {
     }
     for (const [value, c] of this.selections(["language"], excludeChoice)) {
       setDefault(owned, value, c.source.name);
+    }
+    return owned;
+  }
+
+  /**
+   * Spell id → name of the source that gives it: granted cantrips and always-prepared spells,
+   * plus every spell choice (except the given choice keys).
+   */
+  spells(excludeChoices: ReadonlySet<string> = new Set()): Map<string, string> {
+    const owned = new Map<string, string>();
+    for (const src of this.sources) {
+      for (const id of [...src.grants.cantrips, ...src.grants.spells])
+        setDefault(owned, id, src.name);
+    }
+    for (const c of this.choices) {
+      if (c.definition.kind !== "spell" || excludeChoices.has(c.key)) continue;
+      for (const value of this.selected(c)) setDefault(owned, value, c.source.name);
+    }
+    return owned;
+  }
+
+  /** Skill → name of the source that gave you Expertise in it. */
+  expertise(excludeChoice?: string): Map<Skill, string> {
+    const owned = new Map<Skill, string>();
+    for (const [value, c] of this.selections(["expertise"], excludeChoice)) {
+      if (isSkill(value)) setDefault(owned, value, c.source.name);
     }
     return owned;
   }
@@ -255,6 +300,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
   const d = choice.definition;
   const cat = res.catalog;
   const ok = (id: string) => d.allowed === null || d.allowed.includes(id);
+  const inCategory = (category: string) => d.category === null || d.category.includes(category);
 
   switch (d.kind) {
     case "option": {
@@ -279,7 +325,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
     case "language": {
       const known = res.languages(choice.key);
       return Object.values(cat.languages)
-        .filter((lang) => ok(lang.id) && (d.category === null || lang.category === d.category))
+        .filter((lang) => ok(lang.id) && inCategory(lang.category))
         .map((lang) => view(lang.id, lang.name, "", knownFrom(known.get(lang.id))));
     }
     case "feat": {
@@ -290,7 +336,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
           .map((s) => [s.feat.id, s.name]),
       );
       return Object.values(cat.feats)
-        .filter((feat) => ok(feat.id) && !(d.category && feat.category !== d.category))
+        .filter((feat) => ok(feat.id) && inCategory(feat.category))
         .map((feat) =>
           view(
             feat.id,
@@ -300,15 +346,73 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
           ),
         );
     }
-    case "weapon_mastery":
+    case "weapon_mastery": {
+      const proficiencies = res.granted("weapon_proficiencies");
       return Object.values(cat.weapons)
-        .filter((w) => ok(w.id) && !(d.category && w.category !== d.category))
+        .filter(
+          (w) => ok(w.id) && inCategory(w.category) && (!d.weapon_kind || w.kind === d.weapon_kind),
+        )
         .map((w) => {
           const mastery = cat.masteries[w.mastery];
           const name = mastery?.name ?? w.mastery;
-          return view(w.id, `${w.name} (${name})`, `${name}: ${mastery?.description ?? ""}`);
+          const unavailable = isWeaponProficient(w, proficiencies) ? null : "not proficient";
+          return view(
+            w.id,
+            `${w.name} (${name})`,
+            `${name}: ${mastery?.description ?? ""}`,
+            unavailable,
+          );
         });
+    }
+    case "spell":
+      return spellViews(res, choice, ok);
+    case "expertise": {
+      const proficient = res.skills();
+      const expert = res.expertise(choice.key);
+      return SKILLS.filter(ok).map((s) => {
+        let reason: string | null = null;
+        if (!proficient.has(s)) reason = "not proficient";
+        else if (expert.has(s)) reason = `already have Expertise from ${expert.get(s)}`;
+        return view(s, skillName(s), `${ABILITY_NAMES[SKILL_ABILITY[s]]} skill`, reason);
+      });
+    }
   }
+}
+
+function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => boolean) {
+  const d = choice.definition;
+  const list = d.spell_list === null ? null : res.resolveRef(choice.source, d.spell_list);
+  if (d.spell_list !== null && list === null) return []; // the list isn't chosen yet
+  let spells = Object.values(res.catalog.spells).filter(
+    (s) =>
+      ok(s.id) &&
+      (d.spell_level === null || s.level === d.spell_level) &&
+      (list === null || s.lists.includes(list)) &&
+      (!d.ritual || s.ritual),
+  );
+  // Choices tied by subset_of (spellbook ⊇ prepared) share spells by design.
+  const linked = new Set([choice.key]);
+  if (d.subset_of !== null) {
+    const pool = res.sibling(choice, d.subset_of);
+    if (pool) {
+      linked.add(pool.key);
+      const picked = res.selected(pool);
+      spells = spells.filter((s) => picked.includes(s.id));
+    }
+  }
+  for (const other of res.choices) {
+    if (other.source === choice.source && other.definition.subset_of === d.id)
+      linked.add(other.key);
+  }
+  const known = res.spells(linked);
+  return spells.map((s) =>
+    view(
+      s.id,
+      s.name,
+      s.description,
+      known.has(s.id) ? `already known from ${known.get(s.id)}` : null,
+    ),
+  );
 }
 
 function knownFrom(src: string | undefined): string | null {
@@ -331,7 +435,7 @@ function toolViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => bo
   const owned = res.tools(choice.key);
   const category = choice.definition.category;
   return Object.values(res.catalog.tools)
-    .filter((t) => ok(t.id) && (category === null || t.category === category))
+    .filter((t) => ok(t.id) && (category === null || category.includes(t.category)))
     .map((t) =>
       view(
         t.id,

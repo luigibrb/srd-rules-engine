@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   ABILITIES,
+  type ActiveChoice,
   BuildError,
   createBuild,
   evaluate,
@@ -34,10 +35,27 @@ describe("validation", () => {
     expect(svc.nextIncompleteStep(ev)).toBeNull();
   });
 
-  it("magic initiate spells are flagged as not automated", () => {
-    const build = apply(createBuild(), svc.setBackground, "sage");
-    const notes = validateBuild(build, catalog).issues.filter((i) => i.severity === "note");
-    expect(notes.some((i) => i.message.includes("Magic Initiate"))).toBe(true);
+  it("Magic Initiate spells are chosen from the feat's list", () => {
+    let build = apply(createBuild(), svc.setBackground, "sage"); // Magic Initiate (Wizard)
+    const cantrips = "feat:magic-initiate@background:sage#cantrips";
+    const ev = evaluate(build, catalog);
+    const options = ev.resolution.options(ev.resolution.choice(cantrips) as ActiveChoice);
+    expect(options.map((o) => o.id)).toContain("fire-bolt");
+    expect(options.map((o) => o.id)).not.toContain("sacred-flame"); // Cleric only
+    expect(ev.report.issues.filter((i) => i.severity === "note")).toEqual([]);
+    build = apply(build, svc.setChoice, cantrips, ["fire-bolt", "mage-hand"]);
+    build = apply(build, svc.setChoice, "feat:magic-initiate@background:sage#spell", ["shield"]);
+    build = apply(
+      build,
+      svc.setChoice,
+      "feat:magic-initiate@background:sage#spellcasting_ability",
+      ["int"],
+    );
+    const sheet = evaluate(build, catalog).sheet;
+    expect(sheet.spellcasting).toEqual([
+      expect.objectContaining({ source: "Magic Initiate", list: "wizard", ability: "int" }),
+    ]);
+    expect(sheet.spells.find((s) => s.id === "shield")?.always_prepared).toBe(true);
   });
 });
 
@@ -53,7 +71,7 @@ describe("setters", () => {
   });
 
   it("rejects an unknown class", () => {
-    expect(() => svc.setClass(createBuild(), catalog, "wizard")).toThrow(/Unknown class/);
+    expect(() => svc.setClass(createBuild(), catalog, "artificer")).toThrow(/Unknown class/);
     expect(() => svc.setClass(createBuild(), catalog, "constructor")).toThrow(BuildError);
   });
 

@@ -24,6 +24,7 @@ import {
   type Ability,
   isSkill,
   SKILL_ABILITY,
+  type SpellDef,
   STEPS,
   type Step,
   skillName,
@@ -132,6 +133,7 @@ export class BuilderApp {
       abilities: () => this.stepAbilities(),
       equipment: () => this.stepChoices("equipment"),
       features: () => this.stepFeatures(),
+      spells: () => this.stepSpells(),
       proficiencies: () => this.stepProficiencies(),
       languages: () => this.stepChoices("languages"),
       details: () => this.stepDetails(),
@@ -278,6 +280,21 @@ export class BuilderApp {
       const ability = SKILL_ABILITY[view.id];
       const mod = sheet.modifiers[ability] + sheet.proficiency_bonus;
       extra = `${ability.toUpperCase()} · ${signed(mod)} when proficient`;
+    } else if (kind === "expertise" && isSkill(view.id)) {
+      const ability = SKILL_ABILITY[view.id];
+      const mod = sheet.modifiers[ability] + 2 * sheet.proficiency_bonus;
+      extra = `${ability.toUpperCase()} · ${signed(mod)} with Expertise`;
+    } else if (kind === "spell") {
+      const spell = lookup(this.catalog.spells, view.id);
+      if (spell) {
+        extra = spellSummary(spell);
+        details = [
+          spellSummary(spell, false),
+          `Components: ${spell.components} · Duration: ${spell.duration}`,
+          "",
+          plainText(spell.description),
+        ].join("\n");
+      }
     } else if (kind === "ability") {
       const a = view.id as Ability;
       extra = `your ${ABILITY_NAMES[a]} is ${sheet.scores[a]} (${signed(sheet.modifiers[a])})`;
@@ -701,6 +718,27 @@ export class BuilderApp {
     await this.stepChoices("features");
   }
 
+  private async stepSpells(): Promise<void> {
+    const ev = evaluate(this.build, this.catalog);
+    for (const sc of ev.sheet.spellcasting) {
+      const ability = sc.ability ? ABILITY_NAMES[sc.ability] : "ability not chosen yet";
+      const dc =
+        sc.save_dc !== null
+          ? ` · save DC ${sc.save_dc} · attack ${signed(sc.attack_bonus ?? 0)}`
+          : "";
+      this.con.info(`${sc.source}: ${ability}${dc}`);
+    }
+    const granted = ev.sheet.spells.filter((s) => s.always_prepared);
+    if (granted.length) {
+      this.con.info(`Always prepared: ${granted.map((s) => `${s.name} (${s.source})`).join(", ")}`);
+    }
+    if (!ev.resolution.choicesForStep("spells").length && this.build.class_id) {
+      this.con.info("No spells to choose: your class, species and feats don't give you any.");
+      return;
+    }
+    await this.stepChoices("spells");
+  }
+
   private async stepProficiencies(): Promise<void> {
     const res = resolve(this.build, this.catalog);
     const fixed = [...res.skills()]
@@ -756,6 +794,24 @@ export class BuilderApp {
     this.con.say(this.con.style(`Saved to ${path}`, "green"));
     return path;
   }
+}
+
+/** `Level 1 evocation (concentration) · Action · 60 feet`; `short` trims Reaction triggers. */
+function spellSummary(spell: SpellDef, short = true): string {
+  const level =
+    spell.level === 0
+      ? `${titleCase(spell.school)} cantrip`
+      : `Level ${spell.level} ${spell.school}`;
+  const tags = [spell.ritual ? "ritual" : "", spell.concentration ? "concentration" : ""].filter(
+    Boolean,
+  );
+  const time = short ? spell.casting_time.split(", which")[0] : spell.casting_time;
+  return `${level}${tags.length ? ` (${tags.join(", ")})` : ""} · ${time} · ${spell.range}`;
+}
+
+/** Drop Markdown emphasis markers for terminal display. */
+function plainText(markdown: string): string {
+  return markdown.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/(^|\W)_([^_]+)_(?=\W|$)/g, "$1$2");
 }
 
 function parseAbility(token: string): Ability | null {

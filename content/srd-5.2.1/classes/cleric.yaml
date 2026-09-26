@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Cleric" (level 1 only).
+id: cleric
+name: Cleric
+description: A priestly champion who wields divine magic in service of a higher power.
+primary_abilities: [wis]
+hit_die: 8
+complexity: Average
+standard_array: {str: 14, dex: 8, con: 13, int: 10, wis: 15, cha: 12}
+grants:
+  saving_throws: [wis, cha]
+  weapon_proficiencies: [simple]
+  armor_training: [light, medium, shield]
+  spellcasting: {list: cleric, ability: wis, slots: [2]}
+  traits:
+    - name: Spellcasting
+      text: >-
+        Wisdom is your spellcasting ability. You can use a Holy Symbol as a Spellcasting Focus.
+        After a Long Rest you can change your prepared spells.
+  choices:
+    - id: skills
+      label: Cleric skills
+      kind: skill
+      count: 2
+      allowed: [history, insight, medicine, persuasion, religion]
+    - id: divine_order
+      label: Divine Order
+      kind: option
+      step: features
+      options:
+        - id: protector
+          name: Protector
+          description: Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor.
+          grants:
+            weapon_proficiencies: [martial]
+            armor_training: [heavy]
+        - id: thaumaturge
+          name: Thaumaturge
+          description: >-
+            One extra Cleric cantrip, and a bonus equal to your Wisdom modifier (minimum +1) to
+            Intelligence (Arcana or Religion) checks.
+          grants:
+            effects:
+              - {target: skill.arcana, value: wis, min: 1}
+              - {target: skill.religion, value: wis, min: 1}
+            choices:
+              - id: cantrip
+                label: Thaumaturge cantrip
+                kind: spell
+                spell_level: 0
+                spell_list: cleric
+    - id: cantrips
+      label: Cleric cantrips
+      kind: spell
+      count: 3
+      spell_level: 0
+      spell_list: cleric
+      hint: Guidance, Sacred Flame, and Thaumaturgy are recommended.
+    - id: prepared
+      label: Cleric prepared spells
+      kind: spell
+      count: 4
+      spell_level: 1
+      spell_list: cleric
+      hint: Bless, Cure Wounds, Guiding Bolt, and Shield of Faith are recommended.
+    - id: equipment
+      label: Cleric equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: Chain Shirt, Shield, Mace, Holy Symbol, Priest's Pack, 7 GP
+          grants:
+            items:
+              - {item: chain-shirt}
+              - {item: shield}
+              - {item: mace}
+              - {item: holy-symbol}
+              - {item: priests-pack}
+            gp: 7
+        - {id: b, name: Gold, description: 110 GP, grants: {gp: 110}}

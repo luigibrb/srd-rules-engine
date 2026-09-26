@@ -9,6 +9,7 @@
 
 import { type ZodType, z } from "zod";
 import {
+  ABILITIES,
   type ArmorDef,
   ArmorSchema,
   type BackgroundDef,
@@ -28,6 +29,8 @@ import {
   MasterySchema,
   type SpeciesDef,
   SpeciesSchema,
+  type SpellDef,
+  SpellDefSchema,
   type ToolDef,
   ToolSchema,
   type WeaponDef,
@@ -49,6 +52,7 @@ export interface Catalog {
   readonly tools: Table<ToolDef>;
   readonly languages: Table<LanguageDef>;
   readonly masteries: Table<MasteryDef>;
+  readonly spells: Table<SpellDef>;
 }
 
 /** Raw, unvalidated content: what a YAML/JSON content directory parses to. */
@@ -66,6 +70,7 @@ export interface ContentPack {
   tools?: unknown[];
   languages?: unknown[];
   masteries?: unknown[];
+  spells?: unknown[];
 }
 
 export const TABLE_SCHEMAS = {
@@ -79,6 +84,7 @@ export const TABLE_SCHEMAS = {
   tools: ToolSchema,
   languages: LanguageSchema,
   masteries: MasterySchema,
+  spells: SpellDefSchema,
 } as const;
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
@@ -161,6 +167,7 @@ export function validateReferences(catalog: Catalog): void {
     ...catalog.gear,
     ...catalog.tools,
   };
+  const spellLists = new Set(Object.values(catalog.spells).flatMap((s) => s.lists));
   for (const [where, grants] of allGrants(catalog)) {
     check(
       grants.feats.map((f) => f.feat),
@@ -176,7 +183,35 @@ export function validateReferences(catalog: Catalog): void {
       "item",
       where,
     );
+    check(grants.cantrips, catalog.spells, "spell", where);
+    check(grants.spells, catalog.spells, "spell", where);
+    const siblings = new Set(grants.choices.map((c) => c.id));
+    const ref = (value: string | null, what: string, known: (v: string) => boolean): void => {
+      if (value === null) return;
+      if (value.startsWith("$")) {
+        if (!siblings.has(value.slice(1)))
+          errors.push(`${where}: ${what} refers to unknown choice '${value}'`);
+      } else if (!known(value)) {
+        errors.push(`${where}: unknown ${what} '${value}'`);
+      }
+    };
+    const isList = (list: string) => spellLists.has(list);
+    if (grants.spellcasting) {
+      ref(grants.spellcasting.list, "spell list", isList);
+      ref(grants.spellcasting.ability, "spellcasting ability", (a) =>
+        (ABILITIES as readonly string[]).includes(a),
+      );
+    }
     for (const choice of grants.choices) {
+      ref(choice.spell_list, "spell list", isList);
+      if (choice.subset_of !== null && !siblings.has(choice.subset_of)) {
+        errors.push(
+          `${where}.${choice.id}: subset_of refers to unknown choice '${choice.subset_of}'`,
+        );
+      }
+      if (choice.kind === "spell" && choice.allowed) {
+        check(choice.allowed, catalog.spells, "spell", where);
+      }
       if (choice.kind === "language" && choice.allowed) {
         check(choice.allowed, catalog.languages, "language", where);
       }

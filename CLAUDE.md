@@ -22,11 +22,11 @@ src/
   cli/             # srd-rules bin: build (interactive builder), serve, validate
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
-scripts/           # compile-content.ts
+scripts/           # compile-content.ts; import-srd-spells.ts (one-off SRD Markdown → spells.yaml)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
 data/srd-5-2-1/    # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide)
-tests/             # vitest; *.test.ts
+tests/             # vitest; classes.test.ts: every class × species × background must complete
 ```
 
 ## Key conventions
@@ -41,6 +41,9 @@ tests/             # vitest; *.test.ts
 - Saving throw damage: half (rounded down) on success, full on failure.
 - Rules content is data: every entity has a slug `id` and a `source`. After editing
   `content/`, run `npm run content` and commit the generated files.
+- A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
+  add a named rule in `rules/sheet.ts` only when it can't be expressed declaratively, and list
+  it under "Named rules in code" in `docs/ARCHITECTURE.md`.
 - Character builder: a `CharacterBuild` stores only choices, keyed by choice key
   (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
   recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.

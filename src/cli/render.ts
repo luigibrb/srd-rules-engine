@@ -105,6 +105,20 @@ export function stepSummary(ev: Evaluation, step: Step, catalog: Catalog): strin
   if (step === "details") {
     return [b.name, b.alignment ? ALIGNMENT_NAMES[b.alignment] : ""].filter(Boolean).join(", ");
   }
+  if (step === "spells") {
+    const s = ev.sheet;
+    const parts = [
+      [s.spells.filter((x) => x.level === 0).length, "cantrip"],
+      [s.spells.filter((x) => x.level > 0).length, "prepared"],
+      [s.spellbook.length, "in spellbook"],
+    ] as const;
+    return parts
+      .filter(([n]) => n > 0)
+      .map(([n, what]) =>
+        what === "cantrip" ? `${n} cantrip${n === 1 ? "" : "s"}` : `${n} ${what}`,
+      )
+      .join(", ");
+  }
   const names: string[] = [];
   if (step === "species") {
     const species = lookup(catalog.species, b.species_id);
@@ -186,9 +200,9 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
   }
 
   con.say();
-  con.say(con.style("Skills  (● proficient)", "bold"));
+  con.say(con.style("Skills  (● proficient, ◆ expertise)", "bold"));
   for (const line of s.skills) {
-    const mark = line.proficient_from ? "●" : "○";
+    const mark = line.expertise ? "◆" : line.proficient_from ? "●" : "○";
     const src = line.proficient_from ? `  (${line.proficient_from})` : "";
     con.say(
       `  ${mark} ${pad(skillName(line.skill), 16)} ${padLeft(signed(line.modifier), 3)}` +
@@ -225,6 +239,39 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
     }
   }
 
+  if (s.spellcasting.length || s.spells.length) {
+    con.say();
+    con.say(con.style("Spellcasting", "bold"));
+    for (const sc of s.spellcasting) {
+      const ability = sc.ability ? ABILITY_NAMES[sc.ability] : "ability not chosen";
+      const numbers =
+        sc.save_dc !== null
+          ? ` · save DC ${sc.save_dc} · attack ${signed(sc.attack_bonus ?? 0)}`
+          : "";
+      const slots = sc.slots
+        .map((n, i) => (n ? `${n} × level ${i + 1}` : ""))
+        .filter(Boolean)
+        .join(", ");
+      const slotText = slots
+        ? ` · slots ${slots}${sc.pact ? " (Pact Magic, Short Rest)" : ""}`
+        : "";
+      con.say(`  ${sc.source}: ${ability}${numbers}${slotText}`);
+    }
+    for (const level of [...new Set(s.spells.map((x) => x.level))]) {
+      const names = s.spells
+        .filter((x) => x.level === level)
+        .map(
+          (x) => `${x.name}${x.always_prepared ? "*" : ""}${con.style(` (${x.source})`, "dim")}`,
+        );
+      con.say(`  ${level === 0 ? "Cantrips" : `Level ${level}`}: ${names.join(", ")}`);
+    }
+    if (s.spellbook.length) {
+      const names = s.spellbook.map((id) => lookup(catalog.spells, id)?.name ?? id);
+      con.say(`  Spellbook: ${names.join(", ")}`);
+    }
+    if (s.spells.some((x) => x.always_prepared)) con.info("* always prepared");
+  }
+
   con.say();
   con.say(con.style("Traits & Features", "bold"));
   for (const trait of s.traits) con.say(`  ${trait.name}: ${con.style(trait.text, "dim")}`);
@@ -232,7 +279,6 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
     const desc = src.description ? `: ${con.style(src.description, "dim")}` : "";
     con.say(`  ${src.name}${desc}`);
   }
-  if (s.cantrips.length) con.say(`  Cantrips: ${s.cantrips.map(prettyId).join(", ")}`);
 
   con.say();
   con.say(con.style("Equipment", "bold"));

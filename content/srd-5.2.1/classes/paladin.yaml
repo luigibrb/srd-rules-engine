@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Paladin" (level 1 only).
+id: paladin
+name: Paladin
+description: A holy warrior bound by an oath, blending martial skill with divine magic.
+primary_abilities: [str, cha]
+primary_mode: all
+hit_die: 10
+complexity: Average
+standard_array: {str: 15, dex: 10, con: 13, int: 8, wis: 12, cha: 14}
+grants:
+  saving_throws: [wis, cha]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, heavy, shield]
+  spellcasting: {list: paladin, ability: cha, slots: [2]}
+  traits:
+    - name: Lay On Hands
+      text: >-
+        Bonus Action: touch a creature and restore Hit Points from a pool of 5 × your Paladin
+        level (5 at level 1), or spend 5 from the pool to remove the Poisoned condition. The pool
+        refills on a Long Rest.
+    - name: Spellcasting
+      text: >-
+        Charisma is your spellcasting ability. You can use a Holy Symbol as a Spellcasting Focus.
+        After a Long Rest you can replace one prepared spell.
+    - name: Weapon Mastery
+      text: >-
+        Use the mastery properties of two kinds of weapons you're proficient with. You can change
+        them after a Long Rest.
+  choices:
+    - id: skills
+      label: Paladin skills
+      kind: skill
+      count: 2
+      allowed: [athletics, insight, intimidation, medicine, persuasion, religion]
+    - id: prepared
+      label: Paladin prepared spells
+      kind: spell
+      count: 2
+      spell_level: 1
+      spell_list: paladin
+      hint: Heroism and Searing Smite are recommended.
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 2
+      hint: Longswords and Javelins come with your starting equipment.
+    - id: equipment
+      label: Paladin equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, 9 GP
+          grants:
+            items:
+              - {item: chain-mail}
+              - {item: shield}
+              - {item: longsword}
+              - {item: javelin, qty: 6}
+              - {item: holy-symbol}
+              - {item: priests-pack}
+            gp: 9
+        - {id: b, name: Gold, description: 150 GP, grants: {gp: 150}}

@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Rogue" (level 1 only).
+id: rogue
+name: Rogue
+description: A scoundrel who relies on stealth, skill, and precise, devastating strikes.
+primary_abilities: [dex]
+hit_die: 8
+complexity: Low
+standard_array: {str: 12, dex: 15, con: 13, int: 14, wis: 10, cha: 8}
+grants:
+  saving_throws: [dex, int]
+  weapon_proficiencies: [simple, "martial:finesse", "martial:light"]
+  armor_training: [light]
+  tools: [thieves-tools]
+  languages: [thieves-cant]
+  traits:
+    - name: Expertise
+      text: Your Proficiency Bonus is doubled for two skills you're proficient in.
+    - name: Sneak Attack
+      text: >-
+        Once per turn, deal an extra 1d6 damage to a creature you hit with a Finesse or Ranged
+        weapon if you have Advantage, or if an ally is within 5 ft of the target (not
+        Incapacitated) and you don't have Disadvantage.
+    - name: "Thieves' Cant"
+      text: "You know Thieves' Cant and one other language of your choice."
+    - name: Weapon Mastery
+      text: >-
+        Use the mastery properties of two kinds of weapons you're proficient with. You can change
+        them after a Long Rest.
+  choices:
+    - id: skills
+      label: Rogue skills
+      kind: skill
+      count: 4
+      allowed: [acrobatics, athletics, deception, insight, intimidation, investigation, perception,
+                persuasion, sleight-of-hand, stealth]
+    - id: expertise
+      label: Rogue Expertise
+      kind: expertise
+      count: 2
+      hint: Sleight of Hand and Stealth are recommended if you're proficient in them.
+    - id: language
+      label: "Thieves' Cant: one more language"
+      kind: language
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 2
+      hint: Daggers and Shortbows come with your starting equipment.
+    - id: equipment
+      label: Rogue equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves' Tools,
+            Burglar's Pack, 8 GP
+          grants:
+            items:
+              - {item: leather-armor}
+              - {item: dagger, qty: 2}
+              - {item: shortsword}
+              - {item: shortbow}
+              - {item: arrow, qty: 20}
+              - {item: quiver}
+              - {item: thieves-tools}
+              - {item: burglars-pack}
+            gp: 8
+        - {id: b, name: Gold, description: 100 GP, grants: {gp: 100}}

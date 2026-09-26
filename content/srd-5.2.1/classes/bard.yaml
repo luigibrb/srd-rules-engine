@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Bard" (level 1 only).
+id: bard
+name: Bard
+description: A performer whose words and music weave magic that inspires allies.
+primary_abilities: [cha]
+hit_die: 8
+complexity: High
+standard_array: {str: 8, dex: 14, con: 12, int: 13, wis: 10, cha: 15}
+grants:
+  saving_throws: [dex, cha]
+  weapon_proficiencies: [simple]
+  armor_training: [light]
+  spellcasting: {list: bard, ability: cha, slots: [2]}
+  traits:
+    - name: Bardic Inspiration
+      text: >-
+        Bonus Action: give a creature within 60 ft that can see or hear you a d6. Within the next
+        hour it can add the die to a D20 Test it failed. Uses equal your Charisma modifier
+        (minimum 1); regain all on a Long Rest.
+    - name: Spellcasting
+      text: >-
+        Charisma is your spellcasting ability. You can use a Musical Instrument as a Spellcasting
+        Focus. When you gain a Bard level you can replace one cantrip and one prepared spell.
+  choices:
+    - id: skills
+      label: Bard skills
+      kind: skill
+      count: 3
+    - id: instruments
+      label: Bard musical instruments
+      kind: tool
+      count: 3
+      category: musical-instrument
+    - id: cantrips
+      label: Bard cantrips
+      kind: spell
+      count: 2
+      spell_level: 0
+      spell_list: bard
+      hint: Dancing Lights and Vicious Mockery are recommended.
+    - id: prepared
+      label: Bard prepared spells
+      kind: spell
+      count: 4
+      spell_level: 1
+      spell_list: bard
+      hint: Charm Person, Color Spray, Dissonant Whispers, and Healing Word are recommended.
+    - id: equipment
+      label: Bard equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Leather Armor, 2 Daggers, Musical Instrument of your choice, Entertainer's Pack, 19 GP
+          grants:
+            items:
+              - {item: leather-armor}
+              - {item: dagger, qty: 2}
+              - {item: musical-instrument}
+              - {item: entertainers-pack}
+            gp: 19
+        - {id: b, name: Gold, description: 90 GP, grants: {gp: 90}}

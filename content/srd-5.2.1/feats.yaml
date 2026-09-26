@@ -15,10 +15,11 @@
   repeatable: true
   repeat_requires_different: spell_list
   description: >-
-    Learn two cantrips and one level 1 spell from the Cleric, Druid, or Wizard list. You can
-    cast the level 1 spell once per Long Rest without a slot. Repeatable with a different list.
-  unsupported: Cantrip and level 1 spell selection is not automated yet — note them by hand.
+    Learn two cantrips and one level 1 spell from the Cleric, Druid, or Wizard list. The level 1
+    spell is always prepared and you can cast it once per Long Rest without a slot (or with your
+    slots). Repeatable with a different list.
   grants:
+    spellcasting: {list: $spell_list, ability: $spellcasting_ability}
     choices:
       - id: spell_list
         label: Magic Initiate spell list
@@ -33,6 +34,18 @@
         kind: ability
         step: features
         allowed: [int, wis, cha]
+      - id: cantrips
+        label: Magic Initiate cantrips
+        kind: spell
+        count: 2
+        spell_level: 0
+        spell_list: $spell_list
+      - id: spell
+        label: Magic Initiate level 1 spell
+        kind: spell
+        spell_level: 1
+        spell_list: $spell_list
+        always_prepared: true
 
 - id: savage-attacker
   name: Savage Attacker

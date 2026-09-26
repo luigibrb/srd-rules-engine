@@ -198,6 +198,94 @@
             "type": "string"
           }
         },
+        "spells": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "spellcasting": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ability": {
+                  "type": "string"
+                },
+                "slots": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "pact": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "ability"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ac_calculations": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "base": {
+                "default": 10,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "abilities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "str",
+                    "dex",
+                    "con",
+                    "int",
+                    "wis",
+                    "cha"
+                  ]
+                }
+              },
+              "shield": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "abilities"
+            ],
+            "additionalProperties": false
+          }
+        },
         "effects": {
           "default": [],
           "type": "array",
@@ -226,6 +314,30 @@
                   {
                     "type": "string",
                     "const": "prof"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "str",
+                      "dex",
+                      "con",
+                      "int",
+                      "wis",
+                      "cha"
+                    ]
+                  }
+                ]
+              },
+              "min": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -293,7 +405,6 @@
           }
         },
         "choices": {
-          "default": [],
           "type": "array",
           "items": {
             "$ref": "#/$defs/ChoiceDef"
@@ -321,7 +432,9 @@
             "skill_or_tool",
             "language",
             "feat",
-            "weapon_mastery"
+            "weapon_mastery",
+            "spell",
+            "expertise"
           ]
         },
         "count": {
@@ -331,7 +444,6 @@
           "maximum": 9007199254740991
         },
         "options": {
-          "default": [],
           "type": "array",
           "items": {
             "$ref": "#/$defs/ChoiceOption"
@@ -352,10 +464,23 @@
           ]
         },
         "category": {
-          "default": null,
-          "type": [
-            "string",
-            "null"
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "step": {
@@ -370,6 +495,7 @@
                 "abilities",
                 "equipment",
                 "features",
+                "spells",
                 "proficiencies",
                 "languages",
                 "details"
@@ -383,6 +509,56 @@
         "hint": {
           "default": "",
           "type": "string"
+        },
+        "spell_level": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spell_list": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ritual": {
+          "default": false,
+          "type": "boolean"
+        },
+        "always_prepared": {
+          "default": false,
+          "type": "boolean"
+        },
+        "subset_of": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "weapon_kind": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "melee",
+                "ranged"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

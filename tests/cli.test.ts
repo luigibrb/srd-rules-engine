@@ -20,7 +20,7 @@ async function runScript(answers: string[], build?: CharacterBuild) {
 it("a full session builds and saves a valid fighter", async () => {
   // biome-ignore format: one line per step
   const answers = [
-    "", "1",                  // class: Fighter
+    "", "5",                  // class: Fighter
     "", "3", "3", "2",        // species: Elf, Wood Elf, Wisdom
     "", "4",                  // background: Soldier
     "", "2", "suggest", "",   // abilities: point buy, class suggestion
@@ -45,7 +45,7 @@ it("a full session builds and saves a valid fighter", async () => {
 it("invalid input is explained and asked again", async () => {
   // biome-ignore format: one line per step
   const answers = [
-    "1", "1",                         // class
+    "1", "5",                         // class: Fighter
     "4", "2",                         // abilities: point buy
     "str 16",                         // out of range
     "str 15", "dex 15", "con 15",     // 27 points spent

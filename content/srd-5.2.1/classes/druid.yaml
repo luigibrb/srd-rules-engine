@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Druid" (level 1 only).
+id: druid
+name: Druid
+description: A priest of the Old Faith who draws magic from nature and the wild.
+primary_abilities: [wis]
+hit_die: 8
+complexity: High
+standard_array: {str: 8, dex: 12, con: 14, int: 13, wis: 15, cha: 10}
+grants:
+  saving_throws: [int, wis]
+  weapon_proficiencies: [simple]
+  armor_training: [light, shield]
+  tools: [herbalism-kit]
+  languages: [druidic]
+  spells: [speak-with-animals]
+  spellcasting: {list: druid, ability: wis, slots: [2]}
+  traits:
+    - name: Druidic
+      text: >-
+        You know Druidic, the secret language of Druids, and always have Speak with Animals
+        prepared. Others need a DC 15 Intelligence (Investigation) check to spot your hidden
+        messages and magic to read them.
+    - name: Spellcasting
+      text: >-
+        Wisdom is your spellcasting ability. You can use a Druidic Focus as a Spellcasting Focus.
+        After a Long Rest you can change your prepared spells.
+  choices:
+    - id: skills
+      label: Druid skills
+      kind: skill
+      count: 2
+      allowed: [animal-handling, arcana, insight, medicine, nature, perception, religion, survival]
+    - id: primal_order
+      label: Primal Order
+      kind: option
+      step: features
+      options:
+        - id: magician
+          name: Magician
+          description: >-
+            One extra Druid cantrip, and a bonus equal to your Wisdom modifier (minimum +1) to
+            Intelligence (Arcana or Nature) checks.
+          grants:
+            effects:
+              - {target: skill.arcana, value: wis, min: 1}
+              - {target: skill.nature, value: wis, min: 1}
+            choices:
+              - id: cantrip
+                label: Magician cantrip
+                kind: spell
+                spell_level: 0
+                spell_list: druid
+        - id: warden
+          name: Warden
+          description: Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.
+          grants:
+            weapon_proficiencies: [martial]
+            armor_training: [medium]
+    - id: cantrips
+      label: Druid cantrips
+      kind: spell
+      count: 2
+      spell_level: 0
+      spell_list: druid
+      hint: Druidcraft and Produce Flame are recommended.
+    - id: prepared
+      label: Druid prepared spells
+      kind: spell
+      count: 4
+      spell_level: 1
+      spell_list: druid
+      hint: Animal Friendship, Cure Wounds, Faerie Fire, and Thunderwave are recommended.
+    - id: equipment
+      label: Druid equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer's Pack,
+            Herbalism Kit, 9 GP
+          grants:
+            items:
+              - {item: leather-armor}
+              - {item: shield}
+              - {item: sickle}
+              - {item: quarterstaff}
+              - {item: explorers-pack}
+              - {item: herbalism-kit}
+            gp: 9
+        - {id: b, name: Gold, description: 50 GP, grants: {gp: 50}}

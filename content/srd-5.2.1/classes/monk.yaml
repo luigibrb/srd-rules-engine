@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Monk" (level 1 only).
+id: monk
+name: Monk
+description: A martial artist who channels inner focus into swift, unarmored strikes.
+primary_abilities: [dex, wis]
+primary_mode: all
+hit_die: 8
+complexity: High
+standard_array: {str: 12, dex: 15, con: 13, int: 10, wis: 14, cha: 8}
+grants:
+  saving_throws: [str, dex]
+  weapon_proficiencies: [simple, "martial:light"]
+  ac_calculations:
+    - {name: Unarmored Defense, abilities: [dex, wis], shield: false}
+  # Martial Arts die (d6 at level 1): see rules/sheet.ts for Monk weapons and Unarmed Strikes.
+  effects: [{target: martial_arts.die, op: max, value: 6}]
+  traits:
+    - name: Martial Arts
+      text: >-
+        While unarmored, without a Shield, and unarmed or wielding only Monk weapons (Simple Melee
+        weapons, and Martial Melee weapons with the Light property): make an Unarmed Strike as a
+        Bonus Action; roll 1d6 instead of the normal damage; use Dexterity instead of Strength
+        for attack and damage, and for Grapple and Shove DCs.
+    - name: Unarmored Defense
+      text: While you wear no armor and wield no Shield, your base AC is 10 + Dex + Wis.
+  choices:
+    - id: skills
+      label: Monk skills
+      kind: skill
+      count: 2
+      allowed: [acrobatics, athletics, history, insight, religion, stealth]
+    - id: tool
+      label: "Monk tool (Artisan's Tools or Musical Instrument)"
+      kind: tool
+      category: [artisan, musical-instrument]
+    - id: equipment
+      label: Monk equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Spear, 5 Daggers, the Artisan's Tools or Musical Instrument you're proficient with,
+            Explorer's Pack, 11 GP
+          grants:
+            items:
+              - {item: spear}
+              - {item: dagger, qty: 5}
+              - {item: artisans-tools-or-instrument}
+              - {item: explorers-pack}
+            gp: 11
+        - {id: b, name: Gold, description: 50 GP, grants: {gp: 50}}

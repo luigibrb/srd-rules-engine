@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Ranger" (level 1 only).
+id: ranger
+name: Ranger
+description: A wandering hunter and scout who blends martial skill with nature magic.
+primary_abilities: [dex, wis]
+primary_mode: all
+hit_die: 10
+complexity: Average
+standard_array: {str: 12, dex: 15, con: 13, int: 8, wis: 14, cha: 10}
+grants:
+  saving_throws: [str, dex]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, shield]
+  spells: [hunters-mark]
+  spellcasting: {list: ranger, ability: wis, slots: [2]}
+  traits:
+    - name: Favored Enemy
+      text: >-
+        You always have Hunter's Mark prepared, and you can cast it twice without a spell slot;
+        regain both uses on a Long Rest.
+    - name: Spellcasting
+      text: >-
+        Wisdom is your spellcasting ability. You can use a Druidic Focus as a Spellcasting Focus.
+        After a Long Rest you can replace one prepared spell.
+    - name: Weapon Mastery
+      text: >-
+        Use the mastery properties of two kinds of weapons you're proficient with. You can change
+        them after a Long Rest.
+  choices:
+    - id: skills
+      label: Ranger skills
+      kind: skill
+      count: 3
+      allowed: [animal-handling, athletics, insight, investigation, nature, perception, stealth, survival]
+    - id: prepared
+      label: Ranger prepared spells
+      kind: spell
+      count: 2
+      spell_level: 1
+      spell_list: ranger
+      hint: Cure Wounds and Ensnaring Strike are recommended.
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 2
+      hint: Longbows and Shortswords are a classic pair.
+    - id: equipment
+      label: Ranger equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: >-
+            Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus
+            (sprig of mistletoe), Explorer's Pack, 7 GP
+          grants:
+            items:
+              - {item: studded-leather-armor}
+              - {item: scimitar}
+              - {item: shortsword}
+              - {item: longbow}
+              - {item: arrow, qty: 20}
+              - {item: quiver}
+              - {item: druidic-focus-mistletoe}
+              - {item: explorers-pack}
+            gp: 7
+        - {id: b, name: Gold, description: 150 GP, grants: {gp: 150}}

@@ -121,7 +121,7 @@ npx srd-rules build --content my-homebrew/   # build with homebrew layered over 
 ```
 
 The builder walks you through Class, Species, Background, Ability Scores, Equipment,
-Features, Skills & Tools, Languages, and Name & Alignment, in dependency order, and you can
+Features, Spells, Skills & Tools, Languages, and Name & Alignment, in dependency order, and you can
 jump between steps at any time. A live panel shows HP, AC, Initiative, Speed and Passive
 Perception. Options you can't pick are greyed out with the reason, and picks that change
 your numbers show a preview (`Defense · AC 16→17`). `save` writes the build to
@@ -198,10 +198,11 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 
 | Area | Coverage |
 |---|---|
-| Character creation | Level 1, complete: all 9 SRD species and all 4 SRD backgrounds |
-| Classes | Fighter (others are YAML files away; see [CONTRIBUTING](CONTRIBUTING.md)) |
+| Character creation | Level 1, complete: all 12 SRD classes, all 9 species, all 4 backgrounds |
+| Class features | Spellcasting (cantrips, prepared spells, Wizard spellbook, Pact Magic), Divine and Primal Orders, Eldritch Invocations, Expertise, Unarmored Defense, Martial Arts, Weapon Mastery, Fighting Styles |
+| Spells | All 84 SRD cantrips and level 1 spells, with full text; Magic Initiate and Pact of the Tome are automated |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
-| Not yet | Spell selection (Magic Initiate is flagged as a note), shopping with starting gold, levels 2+, conditions, the full Effect engine |
+| Not yet | Levels 2+ (and so subclasses), shopping with starting gold, conditions, the full Effect engine |
 
 The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

@@ -7,7 +7,7 @@
  * can tell the player what was reset.
  */
 
-import { type Catalog, lookup } from "../content/catalog";
+import { type Catalog, lookup, TABLE_NAMES, type Table } from "../content/catalog";
 import {
   type AbilityMap,
   type AbilityMethod,
@@ -15,7 +15,7 @@ import {
   type CharacterBuild,
   updateBuild,
 } from "../models/build";
-import { STEPS, type Step } from "../models/content";
+import { isSkill, STEPS, type Step, skillName } from "../models/content";
 import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "../rules/ability-scores";
 import { answers, type Resolution, resolve } from "../rules/build-resolution";
 import { issuesForStep, type ValidationReport, validateBuild } from "../rules/build-validation";
@@ -28,6 +28,7 @@ export const STEP_TITLES: Readonly<Record<Step, string>> = {
   abilities: "Ability Scores",
   equipment: "Equipment",
   features: "Class & Feat Features",
+  spells: "Spells",
   proficiencies: "Skills & Tools",
   languages: "Languages",
   details: "Name & Alignment",
@@ -253,6 +254,13 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
     const values = answers(res.build, choice.key);
     for (const [i, value] of values.entries()) {
       const view = views.get(value);
+      if (!view && !seen.has(value)) {
+        const name = entityName(res.catalog, value);
+        const note = name
+          ? `${choice.label}: removed ${name} (no longer available).`
+          : `${choice.label}: removed invalid choice '${value}'.`;
+        return [choice.key, i, note];
+      }
       if (seen.has(value) || !view) {
         return [choice.key, i, `${choice.label}: removed invalid choice '${value}'.`];
       }
@@ -264,6 +272,16 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
       }
       seen.add(value);
     }
+  }
+  return null;
+}
+
+/** The display name of any skill or catalog entity with this id, if there is one. */
+function entityName(catalog: Catalog, id: string): string | null {
+  if (isSkill(id)) return skillName(id);
+  for (const table of TABLE_NAMES) {
+    const entity = lookup(catalog[table] as Table<{ name: string }>, id);
+    if (entity) return entity.name;
   }
   return null;
 }

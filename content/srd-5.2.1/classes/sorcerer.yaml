@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Sorcerer" (level 1 only).
+id: sorcerer
+name: Sorcerer
+description: A spellcaster whose magic is an innate gift that flows from within.
+primary_abilities: [cha]
+hit_die: 6
+complexity: High
+standard_array: {str: 10, dex: 13, con: 14, int: 8, wis: 12, cha: 15}
+grants:
+  saving_throws: [con, cha]
+  weapon_proficiencies: [simple]
+  spellcasting: {list: sorcerer, ability: cha, slots: [2]}
+  traits:
+    - name: Innate Sorcery
+      text: >-
+        Bonus Action, twice per Long Rest: for 1 minute, your Sorcerer spell save DC rises by 1
+        and you have Advantage on attack rolls of Sorcerer spells you cast.
+    - name: Spellcasting
+      text: >-
+        Charisma is your spellcasting ability. You can use an Arcane Focus as a Spellcasting
+        Focus. When you gain a Sorcerer level you can replace one cantrip and one prepared spell.
+  choices:
+    - id: skills
+      label: Sorcerer skills
+      kind: skill
+      count: 2
+      allowed: [arcana, deception, insight, intimidation, persuasion, religion]
+    - id: cantrips
+      label: Sorcerer cantrips
+      kind: spell
+      count: 4
+      spell_level: 0
+      spell_list: sorcerer
+      hint: Light, Prestidigitation, Shocking Grasp, and Sorcerous Burst are recommended.
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      spell_level: 1
+      spell_list: sorcerer
+      hint: Burning Hands and Detect Magic are recommended.
+    - id: equipment
+      label: Sorcerer equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: Spear, 2 Daggers, Arcane Focus (crystal), Dungeoneer's Pack, 28 GP
+          grants:
+            items:
+              - {item: spear}
+              - {item: dagger, qty: 2}
+              - {item: arcane-focus-crystal}
+              - {item: dungeoneers-pack}
+            gp: 28
+        - {id: b, name: Gold, description: 50 GP, grants: {gp: 50}}

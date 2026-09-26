@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Wizard" (level 1 only).
+id: wizard
+name: Wizard
+description: A scholarly magic-user who records spells in a spellbook and prepares them daily.
+primary_abilities: [int]
+hit_die: 6
+complexity: Average
+standard_array: {str: 8, dex: 12, con: 13, int: 15, wis: 14, cha: 10}
+grants:
+  saving_throws: [int, wis]
+  weapon_proficiencies: [simple]
+  spellcasting: {list: wizard, ability: int, slots: [2]}
+  traits:
+    - name: Spellcasting
+      text: >-
+        Intelligence is your spellcasting ability. You can use an Arcane Focus or your spellbook
+        as a Spellcasting Focus. After a Long Rest you can change your prepared spells (from your
+        spellbook) and replace one cantrip.
+    - name: Ritual Adept
+      text: >-
+        You can cast any Ritual spell in your spellbook as a Ritual without having it prepared,
+        reading from the book.
+    - name: Arcane Recovery
+      text: >-
+        Once per Long Rest, when you finish a Short Rest, recover expended spell slots with a
+        combined level up to half your Wizard level, rounded up (one level 1 slot at level 1).
+  choices:
+    - id: skills
+      label: Wizard skills
+      kind: skill
+      count: 2
+      allowed: [arcana, history, insight, investigation, medicine, nature, religion]
+    - id: cantrips
+      label: Wizard cantrips
+      kind: spell
+      count: 3
+      spell_level: 0
+      spell_list: wizard
+      hint: Light, Mage Hand, and Ray of Frost are recommended.
+    - id: spellbook
+      label: Spellbook
+      kind: spell
+      count: 6
+      spell_level: 1
+      spell_list: wizard
+      hint: Detect Magic, Feather Fall, Mage Armor, Magic Missile, Sleep, and Thunderwave are recommended.
+    - id: prepared
+      label: Wizard prepared spells
+      kind: spell
+      count: 4
+      spell_level: 1
+      subset_of: spellbook
+      hint: Prepare four spells from your spellbook.
+    - id: equipment
+      label: Wizard equipment
+      kind: option
+      step: equipment
+      options:
+        - id: a
+          name: Package
+          description: 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar's Pack, 5 GP
+          grants:
+            items:
+              - {item: dagger, qty: 2}
+              - {item: quarterstaff}
+              - {item: robe}
+              - {item: spellbook}
+              - {item: scholars-pack}
+            gp: 5
+        - {id: b, name: Gold, description: 55 GP, grants: {gp: 55}}
