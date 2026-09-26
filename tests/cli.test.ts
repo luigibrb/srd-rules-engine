@@ -84,3 +84,23 @@ it("the sheet renders every section", async () => {
   }
   expect(output).toContain("Armor Class  17   = 16 Chain Mail + 1 Defense");
 });
+
+it("levels up, rolls Hit Points, picks a subclass, and removes a level", async () => {
+  // biome-ignore format: one line per step
+  const answers = [
+    "up", "5", "1",           // Fighter 2, fixed HP
+    "up", "5", "2", "1",      // Fighter 3, roll HP, Champion
+    "sheet",
+    "up", "12",               // Wizard: not allowed (Int 8)
+    "back",
+    "down", "y",              // remove level 3
+    "quit", "n",
+  ];
+  const { build, output } = await runScript(answers, fighterBuild());
+  expect(output).toContain("Level 2: Fighter 2");
+  expect(output).toMatch(/You rolled \d+ on the d10/);
+  expect(output).toContain("Critical Hits on 19–20");
+  expect(output).toContain("Wizard needs Intelligence 13+");
+  expect(output).toContain("Removed level 3.");
+  expect(build.levels).toEqual([{ class_id: "fighter", hp: null }]);
+});

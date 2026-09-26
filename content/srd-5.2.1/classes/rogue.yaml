@@ -1,71 +1,220 @@
 # yaml-language-server: $schema=../../../schemas/classes.schema.json
-# SRD 5.2.1 — "Classes" > "Rogue" (level 1 only).
+# SRD 5.2.1 — "Classes" > "Rogue". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from data/srd-5-2-1/classes.md; mechanics were added by hand.
 id: rogue
 name: Rogue
 description: A scoundrel who relies on stealth, skill, and precise, devastating strikes.
 primary_abilities: [dex]
 hit_die: 8
 complexity: Low
-standard_array: {str: 12, dex: 15, con: 13, int: 14, wis: 10, cha: 8}
+standard_array:
+  str: 12
+  dex: 15
+  con: 13
+  int: 14
+  wis: 10
+  cha: 8
+subclass_level: 3
+progression:
+  Sneak Attack: [1d6, 1d6, 2d6, 2d6, 3d6, 3d6, 4d6, 4d6, 5d6, 5d6, 6d6, 6d6, 7d6, 7d6, 8d6, 8d6, 9d6,
+    9d6, 10d6, 10d6]
 grants:
   saving_throws: [dex, int]
-  weapon_proficiencies: [simple, "martial:finesse", "martial:light"]
+  weapon_proficiencies: [simple, 'martial:finesse', 'martial:light']
   armor_training: [light]
   tools: [thieves-tools]
-  languages: [thieves-cant]
-  traits:
+  choices:
+  - id: skills
+    label: Rogue skills
+    kind: skill
+    count: 4
+    allowed: [acrobatics, athletics, deception, insight, intimidation, investigation, perception, persuasion,
+      sleight-of-hand, stealth]
+  - id: equipment
+    label: Rogue equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Package
+      description: Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves' Tools,
+        Burglar's Pack, 8 GP
+      grants:
+        items:
+        - {item: leather-armor}
+        - {item: dagger, qty: 2}
+        - {item: shortsword}
+        - {item: shortbow}
+        - {item: arrow, qty: 20}
+        - {item: quiver}
+        - {item: thieves-tools}
+        - {item: burglars-pack}
+        gp: 8
+    - id: b
+      name: Gold
+      description: 100 GP
+      grants: {gp: 100}
+multiclass:
+  armor_training: [light]
+  tools: [thieves-tools]
+  choices:
+  - id: skills
+    label: Rogue multiclass skill
+    kind: skill
+    allowed: [acrobatics, athletics, deception, insight, intimidation, investigation, perception, persuasion,
+      sleight-of-hand, stealth]
+features:
+  '1':
+    languages: [thieves-cant]
+    traits:
     - name: Expertise
       text: Your Proficiency Bonus is doubled for two skills you're proficient in.
     - name: Sneak Attack
-      text: >-
-        Once per turn, deal an extra 1d6 damage to a creature you hit with a Finesse or Ranged
-        weapon if you have Advantage, or if an ally is within 5 ft of the target (not
-        Incapacitated) and you don't have Disadvantage.
-    - name: "Thieves' Cant"
-      text: "You know Thieves' Cant and one other language of your choice."
+      text: Once per turn, deal an extra 1d6 damage to a creature you hit with a Finesse or Ranged weapon
+        if you have Advantage, or if an ally is within 5 ft of the target (not Incapacitated) and you
+        don't have Disadvantage.
+    - name: Thieves' Cant
+      text: You know Thieves' Cant and one other language of your choice.
     - name: Weapon Mastery
-      text: >-
-        Use the mastery properties of two kinds of weapons you're proficient with. You can change
+      text: Use the mastery properties of two kinds of weapons you're proficient with. You can change
         them after a Long Rest.
-  choices:
-    - id: skills
-      label: Rogue skills
-      kind: skill
-      count: 4
-      allowed: [acrobatics, athletics, deception, insight, intimidation, investigation, perception,
-                persuasion, sleight-of-hand, stealth]
+    choices:
     - id: expertise
       label: Rogue Expertise
       kind: expertise
       count: 2
       hint: Sleight of Hand and Stealth are recommended if you're proficient in them.
-    - id: language
-      label: "Thieves' Cant: one more language"
-      kind: language
+    - {id: language, label: 'Thieves'' Cant: one more language', kind: language}
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
       count: 2
       hint: Daggers and Shortbows come with your starting equipment.
-    - id: equipment
-      label: Rogue equipment
-      kind: option
-      step: equipment
-      options:
-        - id: a
-          name: Package
-          description: >-
-            Leather Armor, 2 Daggers, Shortsword, Shortbow, 20 Arrows, Quiver, Thieves' Tools,
-            Burglar's Pack, 8 GP
-          grants:
-            items:
-              - {item: leather-armor}
-              - {item: dagger, qty: 2}
-              - {item: shortsword}
-              - {item: shortbow}
-              - {item: arrow, qty: 20}
-              - {item: quiver}
-              - {item: thieves-tools}
-              - {item: burglars-pack}
-            gp: 8
-        - {id: b, name: Gold, description: 100 GP, grants: {gp: 100}}
+  '2':
+    traits:
+    - name: Cunning Action
+      text: 'Your quick thinking and agility allow you to move and act quickly. On your turn, you can
+        take one of the following actions as a Bonus Action: Dash, Disengage, or Hide.'
+  '3':
+    traits:
+    - name: Rogue Subclass
+      text: You gain a Rogue subclass of your choice. The Thief subclass is detailed after this class's
+        description. A subclass is a specialization that grants you features at certain Rogue levels.
+        For the rest of your career, you gain each of your subclass's features that are of your Rogue
+        level or lower.
+    - name: Steady Aim
+      text: As a Bonus Action, you give yourself Advantage on your next attack roll on the current turn.
+        You can use this feature only if you haven't moved during this turn, and after you use it, your
+        Speed is 0 until the end of the current turn.
+    choices:
+    - {id: subclass, label: Rogue subclass, kind: subclass}
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Rogue levels 8, 10, 12, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '5':
+    traits:
+    - name: Cunning Strike
+      text: |-
+        You've developed cunning ways to use your Sneak Attack. When you deal Sneak Attack damage, you can add one of the following Cunning Strike effects. Each effect has a die cost, which is the number of Sneak Attack damage dice you must forgo to add the effect. You remove the die before rolling, and the effect occurs immediately after the attack's damage is dealt. For example, if you add the Poison effect, remove 1d6 from the Sneak Attack's damage before rolling.
+
+        If a Cunning Strike effect requires a saving throw, the DC equals 8 plus your Dexterity modifier and Proficiency Bonus.
+
+        _Poison (Cost: 1d6)._ You add a toxin to your strike, forcing the target to make a Constitution saving throw. On a failed save, the target has the Poisoned condition for 1 minute. At the end of each of its turns, the Poisoned target repeats the save, ending the effect on itself on a success.
+
+        To use this effect, you must have a Poisoner's Kit on your person.
+
+        _Trip (Cost: 1d6)._ If the target is Large or smaller, it must succeed on a Dexterity saving throw or have the Prone condition.
+
+        _Withdraw (Cost: 1d6)._ Immediately after the attack, you move up to half your Speed without provoking Opportunity Attacks.
+    - name: Uncanny Dodge
+      text: When an attacker that you can see hits you with an attack roll, you can take a Reaction to
+        halve the attack's damage against you (round down).
+  '6':
+    choices:
+    - {id: expertise, label: Rogue Expertise, kind: expertise, count: 2}
+  '7':
+    traits:
+    - name: Evasion
+      text: You can nimbly dodge out of the way of certain dangers. When you're subjected to an effect
+        that allows you to make a Dexterity saving throw to take only half damage, you instead take no
+        damage if you succeed on the saving throw and only half damage if you fail. You can't use this
+        feature if you have the Incapacitated condition.
+    - name: Reliable Talent
+      text: Whenever you make an ability check that uses one of your skill or tool proficiencies, you
+        can treat a d20 roll of 9 or lower as a 10.
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '10':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '11':
+    traits:
+    - name: Improved Cunning Strike
+      text: You can use up to two Cunning Strike effects when you deal Sneak Attack damage, paying the
+        die cost for each effect.
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '14':
+    traits:
+    - name: Devious Strikes
+      text: |-
+        You've practiced new ways to use your Sneak Attack deviously. The following effects are now among your Cunning Strike options.
+
+        _Daze (Cost: 2d6)._ The target must succeed on a Constitution saving throw, or on its next turn, it can do only one of the following: move or take an action or a Bonus Action.
+
+        _Knock Out (Cost: 6d6)._ The target must succeed on a Constitution saving throw, or it has the Unconscious condition for 1 minute or until it takes any damage. The Unconscious target repeats the save at the end of each of its turns, ending the effect on itself on a success.
+
+        _Obscure (Cost: 3d6)._ The target must succeed on a Dexterity saving throw, or it has the Blinded condition until the end of its next turn.
+  '15':
+    traits:
+    - name: Slippery Mind
+      text: Your cunning mind is exceptionally difficult to control. You gain proficiency in Wisdom and
+        Charisma saving throws.
+    saving_throws: [wis, cha]
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '18':
+    traits:
+    - name: Elusive
+      text: You're so evasive that attackers rarely gain the upper hand against you. No attack roll can
+        have Advantage against you unless you have the Incapacitated condition.
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of the Night Spirit is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.
+  '20':
+    traits:
+    - name: Stroke of Luck
+      text: |-
+        You have a marvelous knack for succeeding when you need to. If you fail a D20 Test, you can turn the roll into a 20.
+
+        Once you use this feature, you can't use it again until you finish a Short or Long Rest.

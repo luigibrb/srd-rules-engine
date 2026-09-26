@@ -87,6 +87,21 @@ const { build: next, notes } = builder.setBackground(build, catalog, "criminal")
 // notes: ["Skilled proficiencies: removed Stealth (already proficient from Criminal)."]
 ```
 
+Levels are added one at a time, like in Baldur's Gate 3. A level 5 character is a level 1
+character plus four level-ups, each in any class you qualify for:
+
+```ts
+builder.levelUpOptions(build, catalog);
+// [{ class_id: "fighter", class_level: 2, fixed_hp: 6, unavailable: null },
+//  { class_id: "wizard", class_level: 1, unavailable: "Wizard needs Intelligence 13+" }, …]
+
+build = builder.levelUp(build, catalog, "fighter").build;     // fixed Hit Points
+build = builder.levelUp(build, catalog, "fighter", 7).build;  // a Hit Die roll of 7
+evaluate(build, catalog).resolution.choicesForLevel(3);       // [class:fighter:3#subclass]
+```
+
+The build stores each level as `{ class_id, hp }`, so it stays small and replayable.
+
 Builds are frozen, JSON-serializable objects: save them with `JSON.stringify` and load them
 with `parseBuild(json)`. Choice keys (`class:fighter#skills`,
 `feat:skilled@species:human#versatile#proficiencies`) are explained in
@@ -128,6 +143,12 @@ your numbers show a preview (`Defense · AC 16→17`). `save` writes the build t
 `characters/<name>.json`. Builds saved by the earlier Python version of the builder load
 unchanged.
 
+Once level 1 is complete, `up` levels up the character, like in Baldur's Gate 3: pick a class
+(your own, or a new one if you meet the multiclass prerequisites, with the reason shown when
+you don't), take the fixed Hit Points or roll, then answer that level's choices (subclass, feat
+or Ability Score Improvement, new spells, invocations…). `L5` revisits level 5, and `down`
+removes the last level.
+
 ## HTTP API
 
 `createHandler()` returns a Web-standard `(Request) => Promise<Response>`, so it deploys
@@ -147,7 +168,8 @@ export default { fetch: handler };                // Cloudflare Workers
 |---|---|
 | `GET /health` | Liveness check |
 | `GET /v1/content` · `/v1/content/{table}` · `/v1/content/{table}/{id}` | Browse the catalog |
-| `POST /v1/builds/evaluate` | Build → validation report, derived sheet, and every choice with its options |
+| `POST /v1/builds/evaluate` | Build → validation report, derived sheet, level-up options, and every choice with its options |
+| `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` | Change a build the same way the builder does (validated, repaired, with notes) |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
 | `POST /v1/characters/{name}/passive-perception` | Passive Perception (`?proficient=true`) |
@@ -198,11 +220,12 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 
 | Area | Coverage |
 |---|---|
-| Character creation | Level 1, complete: all 12 SRD classes, all 9 species, all 4 backgrounds |
-| Class features | Spellcasting (cantrips, prepared spells, Wizard spellbook, Pact Magic), Divine and Primal Orders, Eldritch Invocations, Expertise, Unarmored Defense, Martial Arts, Weapon Mastery, Fighting Styles |
-| Spells | All 84 SRD cantrips and level 1 spells, with full text; Magic Initiate and Pact of the Tome are automated |
+| Character creation | Complete: all 12 SRD classes, 9 species, 4 backgrounds |
+| Levels | 1–20 with multiclassing (prerequisites, partial proficiencies, combined spell slots, Pact Magic), fixed or rolled Hit Points, Ability Score Improvements, feats with prerequisites, Epic Boons |
+| Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells; the rest is shown as the SRD text |
+| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
-| Not yet | Levels 2+ (and so subclasses), shopping with starting gold, conditions, the full Effect engine |
+| Not yet | Swapping spells or options when you level up, shopping with starting gold, conditions and session state, the full Effect engine |
 
 The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

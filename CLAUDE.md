@@ -26,7 +26,8 @@ scripts/           # compile-content.ts; import-srd-spells.ts (one-off SRD Markd
 examples/          # homebrew-pack (tested in tests/content.test.ts)
 data/srd-5-2-1/    # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide)
-tests/             # vitest; classes.test.ts: every class × species × background must complete
+tests/             # vitest; classes.test.ts: every class × species × background completes;
+                   #   levels.test.ts: every class to 20, seeded random multiclass paths to 20
 ```
 
 ## Key conventions
@@ -44,6 +45,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 - A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
   add a named rule in `rules/sheet.ts` only when it can't be expressed declaratively, and list
   it under "Named rules in code" in `docs/ARCHITECTURE.md`.
+- Levels: `build.levels` = `[{ class_id, hp }]` for levels 2+ (BG3 style: build level 1, then
+  level up). Class content = `grants` (core) + `multiclass` + `features` by level; sources are
+  `class:<id>` (first level in it), `class:<id>:<n>`, `subclass:<id>:<n>`. Every source/choice
+  has `level` (character level); use `choicesForLevel(n)` / `issuesForLevel`.
 - Character builder: a `CharacterBuild` stores only choices, keyed by choice key
   (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
   recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.
@@ -83,7 +88,8 @@ npm run serve            # HTTP API on localhost:8000
 
 `GET /health` — liveness check  
 `GET /v1/content` — table names and counts; `/v1/content/{table}`, `/v1/content/{table}/{id}`  
-`POST /v1/builds/evaluate` — build → `{ report, sheet, choices (with options) }`  
+`POST /v1/builds/evaluate` — build → `{ report, sheet, levels, level_up_options, choices (with options) }`  
+`POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` — workflow setters  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  
 `POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  

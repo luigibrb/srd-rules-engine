@@ -1,5 +1,5 @@
 /**
- * Compute the derived level 1 character sheet from a (possibly partial) build.
+ * Compute the derived character sheet from a (possibly partial) build, at any level.
  *
  * Derived values are never stored; they are recomputed from the build every time. Each
  * headline number keeps its list of contributions so a UI can explain it
@@ -18,16 +18,12 @@ import {
   SKILL_ABILITY,
   SKILLS,
   type Skill,
-  type Trait,
   type WeaponDef,
 } from "../models/content";
 import { finalScores } from "./ability-scores";
-import { type Resolution, resolve } from "./build-resolution";
+import { type ActiveSource, type Resolution, resolve } from "./build-resolution";
 import { abilityModifier, proficiencyBonus, signed } from "./dice";
 import { isMonkWeapon, isWeaponProficient } from "./weapons";
-
-export const LEVEL = 1;
-export const DEFAULT_SCORE = 10;
 
 export interface Contribution {
   readonly source: string;
@@ -63,14 +59,41 @@ export interface AttackLine {
   readonly notes: readonly string[];
 }
 
-export interface DerivedSheet {
+export interface ClassLine {
+  readonly class_id: string;
+  readonly name: string;
   readonly level: number;
+  readonly subclass: string | null;
+  readonly hit_die: number;
+}
+
+/** A class table column at the character's level in that class (Rages 3, Sneak Attack 2d6). */
+export interface ResourceLine {
+  readonly class_id: string;
+  readonly name: string;
+  readonly value: number | string;
+}
+
+/** A feature or trait, with where and when it was gained. */
+export interface TraitLine {
+  readonly name: string;
+  readonly text: string;
+  readonly source: string;
+  /** Character level at which it was gained. */
+  readonly level: number;
+}
+
+export interface DerivedSheet {
+  /** Total character level. */
+  readonly level: number;
+  readonly classes: readonly ClassLine[];
   readonly scores: Readonly<Record<Ability, number>>;
   readonly modifiers: Readonly<Record<Ability, number>>;
   readonly scores_complete: boolean;
   readonly proficiency_bonus: number;
   readonly max_hp: Stat | null;
-  readonly hit_die: number | null;
+  /** Hit Dice pools: die size → count, e.g. `{ "10": 3, "8": 2 }`. */
+  readonly hit_dice: Readonly<Record<string, number>>;
   readonly armor_class: Stat;
   readonly armor_worn: string | null;
   readonly initiative: Stat;
@@ -80,6 +103,10 @@ export interface DerivedSheet {
   readonly saving_throws: Readonly<Record<Ability, SaveLine>>;
   readonly skills: readonly SkillLine[];
   readonly passive_perception: number;
+  /** Attacks you make when you take the Attack action (Extra Attack and its upgrades). */
+  readonly attacks_per_action: number;
+  /** The lowest d20 roll that's a Critical Hit (20, or 19 for a Champion). */
+  readonly critical_hit_on: number;
   readonly attacks: readonly AttackLine[];
   /** Tool id → source of the proficiency. */
   readonly tools: Readonly<Record<string, string>>;
@@ -89,14 +116,21 @@ export interface DerivedSheet {
   /** Ids of every cantrip you know (a shortcut into `spells`). */
   readonly cantrips: readonly string[];
   readonly spellcasting: readonly SpellcastingLine[];
+  /** Spell slots per spell level from the Spellcasting feature(s): `[4, 3, 2]`. */
+  readonly spell_slots: readonly number[];
+  /** Warlock Pact Magic slots, recovered on a Short Rest. */
+  readonly pact_magic: { readonly slots: number; readonly slot_level: number } | null;
   /** Cantrips and prepared spells: what you can cast. */
   readonly spells: readonly SpellLine[];
   /** Spells in your spellbook (Wizard), prepared or not. */
   readonly spellbook: readonly string[];
+  readonly resources: readonly ResourceLine[];
   readonly armor_training: readonly string[];
   readonly weapon_proficiencies: readonly string[];
   readonly feats: readonly string[];
-  readonly traits: readonly Trait[];
+  /** Chosen class feature options (Eldritch Invocations, Metamagic). */
+  readonly features: readonly string[];
+  readonly traits: readonly TraitLine[];
   readonly weapon_masteries: readonly string[];
   /** Item id → quantity. */
   readonly equipment: Readonly<Record<string, number>>;
@@ -119,7 +153,7 @@ export function explainStat(s: Stat): string {
     .join(" ");
 }
 
-type ResolvedEffect = [op: EffectOp, value: number, source: string];
+type ResolvedEffect = [op: EffectOp, value: number, source: string, from: ActiveSource];
 type Conditions = ReadonlyMap<string, boolean>;
 
 export interface SpellcastingLine {
@@ -130,9 +164,8 @@ export interface SpellcastingLine {
   readonly ability: Ability | null;
   readonly save_dc: number | null;
   readonly attack_bonus: number | null;
-  /** Spell slots per spell level: `[2]` = two level 1 slots. */
-  readonly slots: readonly number[];
-  readonly pact: boolean;
+  /** How the class's levels count toward spell slots (`full`, `half`, `pact`), if at all. */
+  readonly progression: "full" | "half" | "pact" | null;
 }
 
 export interface SpellLine {
@@ -149,11 +182,12 @@ export function computeSheet(
   catalog: Catalog,
   res: Resolution = resolve(build, catalog),
 ): DerivedSheet {
-  const pb = proficiencyBonus(LEVEL);
+  const level = res.characterLevel;
+  const pb = proficiencyBonus(level);
   const known = finalScores(build.base_scores, build.background_bonus);
-  const scores = mapAbilities((a) => known[a] ?? DEFAULT_SCORE);
+  const scores = res.abilityScores();
   const mod = mapAbilities((a) => abilityModifier(scores[a]));
-  const cls = lookup(catalog.classes, build.class_id);
+  const classLevels = res.classLevels();
   const warnings: string[] = [];
 
   // Equipment: fixed item grants plus chosen packages (both are option sources).
@@ -171,14 +205,13 @@ export function computeSheet(
     for (const [effect, source] of res.effects()) {
       if (effect.target !== target) continue;
       if (effect.when !== null && !conditions.get(effect.when)) continue;
-      let value =
-        effect.value === "prof"
-          ? pb
-          : typeof effect.value === "string"
-            ? mod[effect.value]
-            : effect.value;
+      let value: number;
+      if (effect.value === "prof") value = pb;
+      else if (effect.value === "half_prof") value = Math.floor(pb / 2);
+      else if (typeof effect.value === "string") value = mod[effect.value];
+      else value = effect.value;
       if (effect.min !== null) value = Math.max(value, effect.min);
-      out.push([effect.op, value, source]);
+      out.push([effect.op, value, source.name, source]);
     }
     return out;
   };
@@ -186,20 +219,64 @@ export function computeSheet(
   // Armor Class: the best of every legal way to compute it (see `bestArmorClass`).
   const ac = bestArmorClass(equipment, training, res, catalog, mod, effectsFor);
   const { armor, shield } = ac;
-  const conditions: Conditions = new Map([
-    ["wearing_armor", armor !== null],
-    ["wielding_shield", shield !== null],
-  ]);
+  const conditions = armorConditions(armor, shield);
   const effects = (target: string) => effectsFor(target, conditions);
+  const sum = (list: ResolvedEffect[]) =>
+    list.reduce((total, [op, v]) => total + (op === "add" ? v : 0), 0);
 
-  // Hit points
+  // Classes
+  const classes: ClassLine[] = [...classLevels].flatMap(([id, lvl]) => {
+    const cls = lookup(catalog.classes, id);
+    if (!cls) return [];
+    const sub = res.subclassOf(id);
+    return [
+      {
+        class_id: id,
+        name: cls.name,
+        level: lvl,
+        subclass: sub?.name ?? null,
+        hit_die: cls.hit_die,
+      },
+    ];
+  });
+  const hitDice: Record<string, number> = {};
+  for (const c of classes) hitDice[c.hit_die] = (hitDice[c.hit_die] ?? 0) + c.level;
+
+  // Hit points: max die at level 1, then the fixed value or the roll for each level, plus Con
+  // for every level (at least 1 HP per level).
   let maxHp: Stat | null = null;
-  if (cls) {
-    maxHp = stat([
-      { source: `${cls.name} d${cls.hit_die}`, value: cls.hit_die },
-      { source: "Con", value: mod.con },
-      ...effects("hp_per_level").map(([, value, source]) => ({ source, value: value * LEVEL })),
-    ]);
+  const first = res.levels[0];
+  const firstClass = first ? lookup(catalog.classes, first.class_id) : undefined;
+  if (first && firstClass) {
+    const parts: Contribution[] = [
+      { source: `${firstClass.name} d${firstClass.hit_die}`, value: firstClass.hit_die },
+    ];
+    const groups = new Map<string, { value: number; levels: number }>();
+    let minimumBump = 0;
+    for (const l of res.levels.slice(1)) {
+      const cls = lookup(catalog.classes, l.class_id);
+      if (!cls) continue;
+      const gained = l.hp ?? Math.floor(cls.hit_die / 2) + 1;
+      const label = `${cls.name} ×LEVELS ${l.hp === null ? "fixed" : "rolled"}`;
+      const g = groups.get(label) ?? { value: 0, levels: 0 };
+      groups.set(label, { value: g.value + gained, levels: g.levels + 1 });
+      if (gained + mod.con < 1) minimumBump += 1 - (gained + mod.con);
+    }
+    for (const [label, g] of groups) {
+      parts.push({ source: label.replace("×LEVELS", `×${g.levels}`), value: g.value });
+    }
+    parts.push({ source: level > 1 ? `Con ×${level}` : "Con", value: mod.con * level });
+    if (first && firstClass.hit_die + mod.con < 1)
+      minimumBump += 1 - (firstClass.hit_die + mod.con);
+    if (minimumBump) parts.push({ source: "minimum 1 HP per level", value: minimumBump });
+    for (const [op, value, source] of effects("hp_per_level")) {
+      if (op === "add") parts.push({ source, value: value * level });
+    }
+    for (const [op, value, source, from] of effects("hp_per_class_level")) {
+      const classLevel = from.class_id ? (classLevels.get(from.class_id) ?? 0) : 0;
+      if (op === "add") parts.push({ source, value: value * classLevel });
+    }
+    maxHp = stat(parts);
   }
 
   // Initiative
@@ -220,6 +297,9 @@ export function computeSheet(
     }
   }
   const speedParts: Contribution[] = [{ source: speedSource, value: speedValue }];
+  for (const [op, value, source] of effects("speed")) {
+    if (op === "add") speedParts.push({ source, value });
+  }
   if (armor?.strength && scores.str < armor.strength) {
     speedParts.push({ source: `${armor.name} (Str < ${armor.strength})`, value: -10 });
     warnings.push(
@@ -235,20 +315,19 @@ export function computeSheet(
 
   // Saves and skills
   const saveProfs = res.savingThrows();
+  const allSaves = sum(effects("saves"));
   const savingThrows = mapAbilities((a) => ({
-    modifier: mod[a] + (saveProfs.has(a) ? pb : 0),
+    modifier: mod[a] + (saveProfs.has(a) ? pb : 0) + allSaves + sum(effects(`save.${a}`)),
     proficient: saveProfs.has(a),
   }));
   const ownedSkills = res.skills();
   const expertise = res.expertise();
+  const unproficientBonus = sum(effects("skill.unproficient"));
   const skills: SkillLine[] = SKILLS.map((skill) => {
     const ability = SKILL_ABILITY[skill];
     const proficient = ownedSkills.has(skill);
     const expert = proficient && expertise.has(skill);
-    const bonus = effects(`skill.${skill}`).reduce(
-      (sum, [op, v]) => sum + (op === "add" ? v : 0),
-      0,
-    );
+    const bonus = sum(effects(`skill.${skill}`)) + (proficient ? 0 : unproficientBonus);
     return {
       skill,
       ability,
@@ -263,6 +342,9 @@ export function computeSheet(
   const masteries = res.weaponMasteries();
   const weaponProfs = res.granted("weapon_proficiencies");
   const martialArtsDie = Math.max(0, ...effects("martial_arts.die").map(([, v]) => v));
+  // Extra Attack from several classes doesn't stack: take the best.
+  const attacksPerAction = Math.max(1, ...effects("attacks").map(([, v]) => v));
+  const criticalHitOn = Math.min(20, ...effects("attack.critical").map(([, v]) => v));
   const attackContext: AttackContext = {
     catalog,
     scores,
@@ -284,23 +366,36 @@ export function computeSheet(
   }
 
   // Spells
-  const { spellcasting, spells, spellbook } = spellcastingSummary(res, catalog, mod, pb);
+  const magic = spellcastingSummary(res, catalog, mod, pb, classLevels);
+
+  // Class table columns (Rages, Sneak Attack…) at the character's level in each class.
+  const resources: ResourceLine[] = [];
+  for (const c of classes) {
+    const cls = lookup(catalog.classes, c.class_id);
+    for (const [name, values] of Object.entries(cls?.progression ?? {})) {
+      const value = values[c.level - 1];
+      if (value !== undefined && value !== "—" && value !== 0) {
+        resources.push({ class_id: c.class_id, name, value });
+      }
+    }
+  }
 
   let size: Size | null = null;
   for (const src of res.sources) size = src.grants.size ?? size;
 
-  const traits: Trait[] = res.sources
+  const traits: TraitLine[] = res.sources
     .filter((src) => src.feat === null && src.key !== "creation")
-    .flatMap((src) => src.grants.traits);
+    .flatMap((src) => src.grants.traits.map((t) => ({ ...t, source: src.name, level: src.level })));
 
   return {
-    level: LEVEL,
+    level,
+    classes,
     scores,
     modifiers: mod,
     scores_complete: Object.keys(known).length === ABILITIES.length,
     proficiency_bonus: pb,
     max_hp: maxHp,
-    hit_die: cls ? cls.hit_die : null,
+    hit_dice: hitDice,
     armor_class: stat(ac.parts),
     armor_worn: armor ? armor.name : null,
     initiative,
@@ -310,23 +405,40 @@ export function computeSheet(
     saving_throws: savingThrows,
     skills,
     passive_perception: 10 + perception.modifier,
+    attacks_per_action: attacksPerAction,
+    critical_hit_on: criticalHitOn,
     attacks,
     tools: Object.fromEntries(res.tools()),
     languages: Object.fromEntries(res.languages()),
     resistances: res.granted("resistances"),
-    cantrips: spells.filter((s) => s.level === 0).map((s) => s.id),
-    spellcasting,
-    spells,
-    spellbook,
+    cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),
+    spellcasting: magic.spellcasting,
+    spell_slots: magic.slots,
+    pact_magic: magic.pact,
+    spells: magic.spells,
+    spellbook: magic.spellbook,
+    resources,
     armor_training: training,
     weapon_proficiencies: weaponProfs,
     feats: res.featSources().map((s) => s.name),
+    features: res.featureSources().map((s) => s.name),
     traits,
     weapon_masteries: masteries,
     equipment,
     gp,
     warnings,
   };
+}
+
+/** Conditions that effects can depend on (`when`), given what the character wears. */
+function armorConditions(armor: ArmorDef | null, shield: ArmorDef | null): Conditions {
+  return new Map([
+    ["wearing_armor", armor !== null],
+    ["wielding_shield", shield !== null],
+    ["wearing_heavy_armor", armor?.category === "heavy"],
+    ["not_wearing_heavy_armor", armor?.category !== "heavy"],
+    ["unarmored", armor === null && shield === null],
+  ]);
 }
 
 function mapAbilities<T>(fn: (a: Ability) => T): Record<Ability, T> {
@@ -406,10 +518,7 @@ function bestArmorClass(
   let bestTotal = Number.NEGATIVE_INFINITY;
   for (const body of bodies) {
     for (const shield of body.shieldAllowed && shieldItem ? [null, shieldItem] : [null]) {
-      const conditions: Conditions = new Map([
-        ["wearing_armor", body.armor !== null],
-        ["wielding_shield", shield !== null],
-      ]);
+      const conditions = armorConditions(body.armor, shield);
       const parts = [...body.parts];
       if (shield) parts.push({ source: shield.name, value: shield.base_ac });
       for (const [op, value, source] of effectsFor("ac", conditions)) {
@@ -430,8 +539,17 @@ function spellcastingSummary(
   catalog: Catalog,
   mod: Record<Ability, number>,
   pb: number,
-): { spellcasting: SpellcastingLine[]; spells: SpellLine[]; spellbook: string[] } {
+  classLevels: ReadonlyMap<string, number>,
+): {
+  spellcasting: SpellcastingLine[];
+  slots: number[];
+  pact: DerivedSheet["pact_magic"];
+  spells: SpellLine[];
+  spellbook: string[];
+} {
   const spellcasting: SpellcastingLine[] = [];
+  let casterLevel = 0;
+  let pact: DerivedSheet["pact_magic"] = null;
   for (const src of res.sources) {
     const sc = src.grants.spellcasting;
     if (!sc) continue;
@@ -442,10 +560,18 @@ function spellcastingSummary(
       ability,
       save_dc: ability ? 8 + pb + mod[ability] : null,
       attack_bonus: ability ? pb + mod[ability] : null,
-      slots: sc.slots,
-      pact: sc.pact,
+      progression: sc.progression,
     });
+    const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
+    if (sc.progression === "full") casterLevel += classLevel;
+    else if (sc.progression === "half") casterLevel += Math.ceil(classLevel / 2);
+    else if (sc.progression === "pact") {
+      const row = sc.pact_slots[classLevel - 1];
+      if (row) pact = { slots: row.count, slot_level: row.level };
+    }
   }
+  const slots =
+    casterLevel > 0 ? [...(catalog.creation.spell_slots[Math.min(casterLevel, 20) - 1] ?? [])] : [];
 
   const spells = new Map<string, SpellLine>();
   const add = (id: string, source: string, always: boolean) => {
@@ -460,18 +586,17 @@ function spellcastingSummary(
   }
   const spellbook: string[] = [];
   for (const choice of res.choices) {
-    if (choice.definition.kind !== "spell") continue;
-    // A choice that another one prepares from (a spellbook) isn't itself prepared.
-    const isPool = res.choices.some(
-      (c) => c.source === choice.source && c.definition.subset_of === choice.definition.id,
-    );
+    if (choice.definition.kind !== "spell" || choice.definition.known_only) continue;
+    // A choice that others prepare from (a spellbook) isn't itself prepared.
+    const tag = choice.definition.tag;
+    const isPool = tag !== null && res.choices.some((c) => c.definition.subset_of === tag);
     for (const id of res.selected(choice)) {
       if (isPool) spellbook.push(id);
       else add(id, choice.source.name, choice.definition.always_prepared);
     }
   }
   const sorted = [...spells.values()].sort((a, b) => a.level - b.level);
-  return { spellcasting, spells: sorted, spellbook };
+  return { spellcasting, slots, pact, spells: sorted, spellbook };
 }
 
 interface AttackContext {

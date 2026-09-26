@@ -18,3 +18,27 @@ base_grants:
       count: 2
       category: standard
       hint: Every character knows Common plus two standard languages.
+# SRD 5.2.1 — "Character Creation" > "Multiclassing" > Multiclass Spellcaster table: spell slots
+# per spell level (index 0 = level 1 slots) for caster levels 1–20. Full casters count each class
+# level, Paladins and Rangers half (rounded up); a single-class caster's own table matches it.
+spell_slots:
+  - [2]
+  - [3]
+  - [4, 2]
+  - [4, 3]
+  - [4, 3, 2]
+  - [4, 3, 3]
+  - [4, 3, 3, 1]
+  - [4, 3, 3, 2]
+  - [4, 3, 3, 3, 1]
+  - [4, 3, 3, 3, 2]
+  - [4, 3, 3, 3, 2, 1]
+  - [4, 3, 3, 3, 2, 1]
+  - [4, 3, 3, 3, 2, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 1, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 2, 2, 1, 1]

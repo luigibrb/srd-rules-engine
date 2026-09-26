@@ -17,7 +17,15 @@ import { savingThrow } from "../rules/combat";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import { spellAttackBonus, spellSaveDc } from "../rules/spells";
-import { evaluate, STEP_TITLES } from "../services/builder";
+import {
+  BuildError,
+  evaluate,
+  levelUp,
+  levelUpOptions,
+  removeLastLevel,
+  STEP_TITLES,
+  setChoice,
+} from "../services/builder";
 import {
   isAlive,
   passivePerception,
@@ -65,6 +73,12 @@ const SpellCastRequest = z.object({
   target: CharacterSchema,
   spell: SpellSchema,
   spellcasting_ability: AbilityFullNameSchema,
+});
+const BuildRequest = z.object({ build: z.unknown() });
+const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
+const LevelUpRequest = BuildRequest.extend({
+  class_id: z.string(),
+  hp: z.int().nullable().default(null),
 });
 const SpellStatsRequest = z.object({
   caster: CharacterSchema,
@@ -239,12 +253,16 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         return {
           report: ev.report,
           sheet: ev.sheet,
+          levels: res.levels,
+          level_up_options: levelUpOptions(build, getCatalog()),
           choices: res.choices.map((c) => ({
             key: c.key,
             label: c.label,
+            level: c.level,
             step: c.step,
             step_title: STEP_TITLES[c.step],
             count: c.definition.count,
+            required: res.required(c),
             hint: c.definition.hint,
             source: c.source.name,
             fixed: c.fixed,
@@ -253,6 +271,28 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           })),
         };
       },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/set-choice$/,
+      handle: ({ body }) => {
+        const req = SetChoiceRequest.parse(body);
+        return setChoice(parseBuild(req.build), getCatalog(), req.key, req.values);
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/level-up$/,
+      handle: ({ body }) => {
+        const req = LevelUpRequest.parse(body);
+        return levelUp(parseBuild(req.build), getCatalog(), req.class_id, req.hp);
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/builds\/remove-level$/,
+      handle: ({ body }) =>
+        removeLastLevel(parseBuild(BuildRequest.parse(body).build), getCatalog()),
     },
   ];
 
@@ -278,6 +318,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         return json(422, { detail: z.treeifyError(error), message: z.prettifyError(error) }, cors);
       }
       if (error instanceof RangeError) return json(400, { detail: error.message }, cors);
+      if (error instanceof BuildError) return json(400, { detail: error.messages }, cors);
       return json(500, { detail: "Internal Server Error" }, cors);
     }
   };

@@ -113,6 +113,9 @@ export const CHOICE_KINDS = [
   "weapon_mastery",
   "spell",
   "expertise", // a skill you're already proficient in
+  "subclass", // the class's subclass (options: subclasses of the source's class)
+  "ability_increase", // each pick is +1 to an ability; the same ability can be picked again
+  "feature", // a selectable class feature (Eldritch Invocation, Metamagic): `features` table
 ] as const;
 export type ChoiceKind = (typeof CHOICE_KINDS)[number];
 
@@ -125,22 +128,25 @@ const DEFAULT_STEP_BY_KIND: Partial<Record<ChoiceKind, Step>> = {
   weapon_mastery: "features",
   spell: "spells",
   expertise: "proficiencies",
+  subclass: "features",
+  ability_increase: "features",
+  feature: "features",
 };
 
-export const EFFECT_OPS = ["add", "set", "max"] as const;
+export const EFFECT_OPS = ["add", "set", "max", "min"] as const;
 export type EffectOp = (typeof EFFECT_OPS)[number];
 
 /**
  * A declarative numeric modifier. Minimal precursor of the full Effect engine.
  *
- * `value` is an integer, the token `"prof"` (Proficiency Bonus) or an ability (`"wis"`: that
- * ability's modifier). `min` is a floor for the value ("Wisdom modifier, minimum of +1").
+ * `value` is an integer, the token `"prof"` (Proficiency Bonus), `"half_prof"` (half of it,
+ * rounded down) or an ability (`"wis"`: that ability's modifier). `min` is a floor for the value ("Wisdom modifier, minimum of +1").
  * `when` names a condition evaluated by the sheet calculator (e.g. `"wearing_armor"`).
  */
 export const EffectSchema = z.strictObject({
   target: z.string(),
   op: z.enum(EFFECT_OPS).default("add"),
-  value: z.union([z.int(), z.literal("prof"), z.enum(ABILITIES)]),
+  value: z.union([z.int(), z.literal("prof"), z.literal("half_prof"), z.enum(ABILITIES)]),
   min: z.int().nullable().default(null),
   when: z.string().nullable().default(null),
 });
@@ -172,12 +178,24 @@ export type AcCalculation = z.infer<typeof AcCalculationSchema>;
 export const SpellcastingSchema = z.strictObject({
   list: z.string().nullable().default(null),
   ability: z.string(),
-  /** Spell slots per spell level: `[2]` = two level 1 slots. */
-  slots: z.array(z.int().min(0)).default([]),
-  /** Warlock Pact Magic: slots come back on a Short Rest. */
-  pact: z.boolean().default(false),
+  /**
+   * How class levels turn into spell slots: `full` (each level counts), `half` (half, rounded
+   * up), both through the Multiclass Spellcaster table in the creation rules; `pact` (Warlock
+   * Pact Magic, from `pact_slots`); `null` for spells cast without class slots.
+   */
+  progression: z.enum(["full", "half", "pact"]).nullable().default(null),
+  /** Pact Magic by class level (20 entries): number of slots and their level. */
+  pact_slots: z.array(z.strictObject({ count: z.int(), level: z.int() })).default([]),
 });
 export type Spellcasting = z.infer<typeof SpellcastingSchema>;
+
+/** A fixed ability score increase with its own cap (Primal Champion: Str +4, max 25). */
+export const AbilityBonusSchema = z.strictObject({
+  ability: z.enum(ABILITIES),
+  value: z.int(),
+  max: z.int().default(20),
+});
+export type AbilityBonus = z.infer<typeof AbilityBonusSchema>;
 
 export const ItemGrantSchema = z.strictObject({
   item: z.string(),
@@ -217,13 +235,26 @@ export interface ChoiceDef {
   hint: string;
   /** `kind: spell`: only spells of this level. */
   spell_level: number | null;
-  /** `kind: spell`: a class spell list, or `"$<choice id>"` for the answer to a sibling choice. */
-  spell_list: string | null;
+  /** `kind: spell`: spells of level 1 up to this one (a level you have slots for). */
+  max_spell_level: number | null;
+  /**
+   * `kind: spell`: class spell lists (any of them), each possibly `"$<choice id>"` for the
+   * answer to a sibling choice. `null` means any list.
+   */
+  spell_list: string[] | null;
+  /** `kind: spell`: only spells you already have from another source (Agonizing Blast). */
+  known_only: boolean;
+  /** A label shared by related choices; `subset_of` refers to it. */
+  tag: string | null;
+  /** `kind: ability_increase`: the score can't go above this. */
+  max_score: number;
   /** `kind: spell`: only spells with the Ritual tag. */
   ritual: boolean;
+  /** `kind: spell`: only spells of this school (Evoker: evocation). */
+  school: string | null;
   /** `kind: spell`: the picks are always prepared (they don't count against a class's limit). */
   always_prepared: boolean;
-  /** Options are limited to what a sibling choice picked (Wizard: prepare from spellbook). */
+  /** Options are limited to what the choices with this `tag` picked (Wizard: prepare from the spellbook). */
   subset_of: string | null;
   /** `kind: weapon_mastery`: only melee or ranged weapons. */
   weapon_kind: "melee" | "ranged" | null;
@@ -244,11 +275,17 @@ export interface Grants {
   spells: string[];
   spellcasting: Spellcasting | null;
   ac_calculations: AcCalculation[];
+  ability_bonuses: AbilityBonus[];
   effects: Effect[];
   items: ItemGrant[];
   gp: number;
   traits: Trait[];
   choices: ChoiceDef[];
+  /**
+   * More grants that switch on as the source's class gains levels, e.g. a subclass's spells at
+   * class levels 5, 7 and 9, or what a Land type gives at level 10.
+   */
+  at_class_level: { level: number; grants: Grants }[];
 }
 
 /** Grants fields that are plain lists of ids, usable with `Resolution.granted()`. */
@@ -288,8 +325,17 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
         step: z.enum(STEPS).nullable().default(null),
         hint: z.string().default(""),
         spell_level: z.int().min(0).max(9).nullable().default(null),
-        spell_list: z.string().nullable().default(null),
+        max_spell_level: z.int().min(1).max(9).nullable().default(null),
+        spell_list: z
+          .union([z.string(), z.array(z.string())])
+          .transform((c) => (typeof c === "string" ? [c] : c))
+          .nullable()
+          .default(null),
+        known_only: z.boolean().default(false),
+        tag: z.string().nullable().default(null),
+        max_score: z.int().default(20),
         ritual: z.boolean().default(false),
+        school: z.string().nullable().default(null),
         always_prepared: z.boolean().default(false),
         subset_of: z.string().nullable().default(null),
         weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
@@ -318,11 +364,15 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       spells: z.array(z.string()).default([]),
       spellcasting: SpellcastingSchema.nullable().default(null),
       ac_calculations: z.array(AcCalculationSchema).default([]),
+      ability_bonuses: z.array(AbilityBonusSchema).default([]),
       effects: z.array(EffectSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),
       traits: z.array(TraitSchema).default([]),
       choices: z.array(ChoiceDefSchema).default([]),
+      at_class_level: z
+        .array(z.strictObject({ level: z.int().min(1).max(20), grants: GrantsSchema }))
+        .default([]),
     }),
   )
   .meta({ id: "Grants" });
@@ -361,15 +411,62 @@ export const ClassSchema = z.strictObject({
   hit_die: z.int(),
   complexity: z.string(),
   standard_array: z.record(z.enum(ABILITIES), z.int()),
-  /** Level 1 grants (core traits + level 1 features). */
+  /** Core traits, gained only when this is your first class: saves, skills, proficiencies, gear. */
   grants: GrantsSchema,
+  /** What you gain instead of `grants` when you multiclass into this class. */
+  multiclass: GrantsSchema.prefault({}),
+  /** Features by class level (`1`–`20`). Level 1 features apply to both starting and multiclass. */
+  features: z.record(z.string().regex(/^([1-9]|1[0-9]|20)$/), GrantsSchema).default({}),
+  /**
+   * Named columns of the class table, one value per class level (20 values), shown on the
+   * sheet as class resources, e.g. `Rages: [2, 2, 3, …]`.
+   */
+  progression: z.record(z.string(), z.array(z.union([z.int(), z.string()])).length(20)).default({}),
+  /** The class level at which you choose a subclass. */
+  subclass_level: z.int().min(1).max(20).default(3),
 });
 export type ClassDef = z.infer<typeof ClassSchema>;
 
+export const SubclassSchema = z.strictObject({
+  ...entity,
+  /** The class this subclass belongs to. */
+  class: z.string(),
+  /** Features by class level. */
+  features: z.record(z.string().regex(/^([1-9]|1[0-9]|20)$/), GrantsSchema).default({}),
+});
+export type SubclassDef = z.infer<typeof SubclassSchema>;
+
+/**
+ * What you need to take a feat or a class feature option. Every listed condition must hold.
+ * Character level counts levels in all classes; `class_level` counts one class.
+ */
+export const PrerequisiteSchema = z.strictObject({
+  level: z.int().nullable().default(null),
+  class_level: z
+    .strictObject({ class: z.string(), level: z.int().default(1) })
+    .nullable()
+    .default(null),
+  /** At least one of these abilities must have a score of `min` or more. */
+  abilities: z
+    .strictObject({ any_of: z.array(z.enum(ABILITIES)), min: z.int() })
+    .nullable()
+    .default(null),
+  /** Feats or features (ids) you must already have. */
+  requires: z.array(z.string()).default([]),
+  /** A trait you must have, by name (e.g. "Fighting Style"). */
+  trait: z.string().nullable().default(null),
+  /** You must have a Spellcasting or Pact Magic feature. */
+  spellcasting: z.boolean().default(false),
+  /** You must know at least one of these spells. */
+  spells: z.array(z.string()).default([]),
+});
+export type Prerequisite = z.infer<typeof PrerequisiteSchema>;
+
 export const FeatSchema = z.strictObject({
   ...entity,
-  /** origin, general, fighting_style, epic_boon */
+  /** origin, general, fighting_style, epic_boon; features: eldritch_invocation, metamagic */
   category: z.string(),
+  prerequisite: PrerequisiteSchema.nullable().default(null),
   repeatable: z.boolean().default(false),
   /** For repeatable feats: each instance must pick a different value for this choice id. */
   repeat_requires_different: z.string().nullable().default(null),
@@ -457,5 +554,14 @@ export const CreationSchema = z.strictObject({
   point_buy: PointBuySchema,
   max_score_at_creation: z.int(),
   base_grants: GrantsSchema,
+  /** Fixed Hit Points per level after 1 are hit die / 2 + 1 (SRD "Gaining a Level"). */
+  max_level: z.int().default(20),
+  /** Minimum score in the primary abilities to multiclass (into and out of a class). */
+  multiclass_min_score: z.int().default(13),
+  /**
+   * Multiclass Spellcaster table: spell slots per spell level for each caster level (1–20).
+   * Single-class full and half casters use it too (their tables match it).
+   */
+  spell_slots: z.array(z.array(z.int())).length(20),
 });
 export type CreationRules = z.infer<typeof CreationSchema>;

@@ -249,18 +249,45 @@
                 "ability": {
                   "type": "string"
                 },
-                "slots": {
+                "progression": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half",
+                        "pact"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pact_slots": {
                   "default": [],
                   "type": "array",
                   "items": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "level": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "count",
+                      "level"
+                    ],
+                    "additionalProperties": false
                   }
-                },
-                "pact": {
-                  "default": false,
-                  "type": "boolean"
                 }
               },
               "required": [
@@ -314,6 +341,42 @@
             "additionalProperties": false
           }
         },
+        "ability_bonuses": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ability": {
+                "type": "string",
+                "enum": [
+                  "str",
+                  "dex",
+                  "con",
+                  "int",
+                  "wis",
+                  "cha"
+                ]
+              },
+              "value": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "max": {
+                "default": 20,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "ability",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
         "effects": {
           "default": [],
           "type": "array",
@@ -329,7 +392,8 @@
                 "enum": [
                   "add",
                   "set",
-                  "max"
+                  "max",
+                  "min"
                 ]
               },
               "value": {
@@ -342,6 +406,10 @@
                   {
                     "type": "string",
                     "const": "prof"
+                  },
+                  {
+                    "type": "string",
+                    "const": "half_prof"
                   },
                   {
                     "type": "string",
@@ -437,6 +505,27 @@
           "items": {
             "$ref": "#/$defs/ChoiceDef"
           }
+        },
+        "at_class_level": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "grants": {
+                "$ref": "#/$defs/Grants"
+              }
+            },
+            "required": [
+              "level",
+              "grants"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -462,7 +551,10 @@
             "feat",
             "weapon_mastery",
             "spell",
-            "expertise"
+            "expertise",
+            "subclass",
+            "ability_increase",
+            "feature"
           ]
         },
         "count": {
@@ -551,16 +643,66 @@
             }
           ]
         },
+        "max_spell_level": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "spell_list": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "known_only": {
+          "default": false,
+          "type": "boolean"
+        },
+        "tag": {
           "default": null,
           "type": [
             "string",
             "null"
           ]
         },
+        "max_score": {
+          "default": 20,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
         "ritual": {
           "default": false,
           "type": "boolean"
+        },
+        "school": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "always_prepared": {
           "default": false,

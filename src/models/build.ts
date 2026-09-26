@@ -24,9 +24,22 @@ export const ALIGNMENT_NAMES: Readonly<Record<Alignment, string>> = {
 export type AbilityMap = Partial<Record<Ability, number>>;
 
 /**
- * A (possibly incomplete) level 1 character build. Immutable: setters return a new build.
+ * One level gained after level 1: the class it goes into, and how Hit Points were gained.
+ * `hp: null` takes the fixed value (hit die / 2 + 1); a number is the Hit Die roll, stored so the
+ * build stays reproducible.
+ */
+export const LevelUpSchema = z.object({
+  class_id: z.string(),
+  hp: z.int().min(1).nullable().default(null),
+});
+export type LevelUp = z.infer<typeof LevelUpSchema>;
+
+/**
+ * A (possibly incomplete) character build. Immutable: setters return a new build.
  *
- * `choices` maps an active choice key (see `rules/build-resolution`) to the ids selected for
+ * Level 1 is created with `class_id` (the starting class) and the other creation fields; each
+ * later level is an entry in `levels` (index 0 is level 2), which may go into another class
+ * (multiclassing). `choices` maps an active choice key (see `rules/build-resolution`) to the ids selected for
  * it, e.g. `{"class:fighter#skills": ["athletics", "perception"]}`.
  */
 export const CharacterBuildSchema = z.object({
@@ -40,6 +53,7 @@ export const CharacterBuildSchema = z.object({
   base_scores: z.partialRecord(z.enum(ABILITIES), z.int()).default({}),
   background_bonus: z.partialRecord(z.enum(ABILITIES), z.int()).default({}),
   choices: z.record(z.string(), z.array(z.string())).default({}),
+  levels: z.array(LevelUpSchema).default([]),
 });
 
 type BuildShape = z.infer<typeof CharacterBuildSchema>;
@@ -61,6 +75,11 @@ export function createBuild(fields: Partial<CharacterBuild> = {}): CharacterBuil
   return parseBuild(fields);
 }
 
+/** Total character level: 1 plus every level-up. */
+export function characterLevel(build: CharacterBuild): number {
+  return 1 + build.levels.length;
+}
+
 /** Return a copy of `build` with `update` applied (the equivalent of `model_copy`). */
 export function updateBuild(
   build: CharacterBuild,
@@ -75,5 +94,7 @@ function freezeBuild(build: BuildShape): CharacterBuild {
   Object.freeze(build.base_scores);
   Object.freeze(build.background_bonus);
   Object.freeze(build.rolled_pool);
+  for (const level of build.levels) Object.freeze(level);
+  Object.freeze(build.levels);
   return Object.freeze(build);
 }

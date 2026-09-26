@@ -13,12 +13,19 @@ import {
   type AbilityMethod,
   type Alignment,
   type CharacterBuild,
+  characterLevel,
   updateBuild,
 } from "../models/build";
 import { isSkill, STEPS, type Step, skillName } from "../models/content";
 import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "../rules/ability-scores";
 import { answers, type Resolution, resolve } from "../rules/build-resolution";
-import { issuesForStep, type ValidationReport, validateBuild } from "../rules/build-validation";
+import {
+  issuesForLevel,
+  issuesForStep,
+  multiclassBlockers,
+  type ValidationReport,
+  validateBuild,
+} from "../rules/build-validation";
 import { computeSheet, type DerivedSheet } from "../rules/sheet";
 
 export const STEP_TITLES: Readonly<Record<Step, string>> = {
@@ -179,7 +186,10 @@ export function setChoice(
     throw new BuildError([`${choice.label} is fixed by ${choice.source.name}`]);
   }
   const errors: string[] = [];
-  if (new Set(values).size !== values.length) errors.push("Each option can be chosen only once");
+  const repeats = choice.definition.kind === "ability_increase";
+  if (!repeats && new Set(values).size !== values.length) {
+    errors.push("Each option can be chosen only once");
+  }
   if (values.length > choice.definition.count) {
     errors.push(`${choice.label}: choose at most ${choice.definition.count}`);
   }
@@ -189,11 +199,119 @@ export function setChoice(
     if (!view) errors.push(`'${value}' isn't an option for ${choice.label}`);
     else if (view.unavailable) errors.push(`${view.name}: ${view.unavailable}`);
   }
+  if (repeats && !errors.length) {
+    const before = res.abilityScores(choice.level) as Record<string, number>;
+    for (const value of new Set(values)) {
+      const n = values.filter((v) => v === value).length;
+      if ((before[value] ?? 0) + n > choice.definition.max_score) {
+        errors.push(
+          `${views.get(value)?.name ?? value} can't exceed ${choice.definition.max_score}`,
+        );
+      }
+    }
+  }
   if (errors.length) throw new BuildError(errors);
   return normalize(
     updateBuild(build, { choices: { ...build.choices, [key]: [...values] } }),
     catalog,
   );
+}
+
+// --- levels -------------------------------------------------------------------------------
+
+/** A class you could level up in, with the reason you can't (if any). */
+export interface LevelUpOption {
+  readonly class_id: string;
+  readonly name: string;
+  /** Your level in this class after the level-up. */
+  readonly class_level: number;
+  readonly hit_die: number;
+  /** Fixed Hit Points for the level (before your Constitution modifier). */
+  readonly fixed_hp: number;
+  readonly unavailable: string | null;
+}
+
+/** Fixed Hit Points gained per level after 1: half the hit die, plus 1. */
+export function fixedHitPoints(hitDie: number): number {
+  return Math.floor(hitDie / 2) + 1;
+}
+
+/** Every class, with whether the character can take its next level in it. */
+export function levelUpOptions(build: CharacterBuild, catalog: Catalog): LevelUpOption[] {
+  const res = resolve(build, catalog);
+  const current = res.classLevels();
+  const next = res.characterLevel + 1;
+  const atMax = res.characterLevel >= catalog.creation.max_level;
+  return Object.values(catalog.classes).map((cls) => {
+    const have = current.get(cls.id) ?? 0;
+    let unavailable: string | null = null;
+    if (build.class_id === null) unavailable = "choose your first class during character creation";
+    else if (atMax) unavailable = `already level ${catalog.creation.max_level}`;
+    else if (have === 0) {
+      const blockers = multiclassBlockers(res, catalog, [...current.keys(), cls.id], next);
+      if (blockers.length) unavailable = blockers.join("; ");
+    }
+    return {
+      class_id: cls.id,
+      name: cls.name,
+      class_level: have + 1,
+      hit_die: cls.hit_die,
+      fixed_hp: fixedHitPoints(cls.hit_die),
+      unavailable,
+    };
+  });
+}
+
+/**
+ * Gain a level in a class (your current class, or a new one if you meet the multiclass
+ * prerequisites). `hp` is the Hit Die roll, or `null` for the fixed value.
+ */
+export function levelUp(
+  build: CharacterBuild,
+  catalog: Catalog,
+  classId: string,
+  hp: number | null = null,
+): BuildResult {
+  const option = levelUpOptions(build, catalog).find((o) => o.class_id === classId);
+  if (!option) throw new BuildError([`Unknown class '${classId}'`]);
+  if (option.unavailable) throw new BuildError([`${option.name}: ${option.unavailable}`]);
+  checkRoll(hp, option.hit_die);
+  const levels = [...build.levels, { class_id: classId, hp }];
+  return normalize(updateBuild(build, { levels }), catalog);
+}
+
+/** Change how Hit Points were gained at a level (2+): `null` for fixed, or the Hit Die roll. */
+export function setLevelHp(
+  build: CharacterBuild,
+  catalog: Catalog,
+  level: number,
+  hp: number | null,
+): BuildResult {
+  const entry = build.levels[level - 2];
+  if (!entry) throw new BuildError([`The character has no level ${level}`]);
+  const cls = lookup(catalog.classes, entry.class_id);
+  if (cls) checkRoll(hp, cls.hit_die);
+  const levels = build.levels.map((l, i) => (i === level - 2 ? { ...l, hp } : l));
+  return { build: updateBuild(build, { levels }), notes: [] };
+}
+
+/** Undo the last level-up, dropping the choices it made. */
+export function removeLastLevel(build: CharacterBuild, catalog: Catalog): BuildResult {
+  if (!build.levels.length) throw new BuildError(["The character is level 1"]);
+  const level = characterLevel(build);
+  const result = normalize(updateBuild(build, { levels: build.levels.slice(0, -1) }), catalog);
+  return { build: result.build, notes: [`Removed level ${level}.`, ...result.notes] };
+}
+
+function checkRoll(hp: number | null, hitDie: number): void {
+  if (hp !== null && (!Number.isInteger(hp) || hp < 1 || hp > hitDie)) {
+    throw new BuildError([`A d${hitDie} roll is between 1 and ${hitDie}, not ${hp}`]);
+  }
+}
+
+/** Whether every choice and check of a level (2+) is done. */
+export function levelComplete(ev: Evaluation, level: number): boolean {
+  return issuesForLevel(ev.report, level).every((i) => i.severity === "note");
 }
 
 export function setName(build: CharacterBuild, _catalog: Catalog, name: string): BuildResult {
@@ -252,6 +370,20 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
     const views = new Map(res.options(choice).map((v) => [v.id, v]));
     const seen = new Set<string>();
     const values = answers(res.build, choice.key);
+    if (choice.definition.kind === "ability_increase") {
+      const fix = invalidIncrease(
+        res,
+        choice.key,
+        values,
+        choice.definition.max_score,
+        choice.level,
+      );
+      if (fix) return [choice.key, fix[0], `${choice.label}: ${fix[1]}`];
+      if (values.length > choice.definition.count) {
+        return [choice.key, values.length - 1, `${choice.label}: removed an extra increase.`];
+      }
+      continue;
+    }
     for (const [i, value] of values.entries()) {
       const view = views.get(value);
       if (!view && !seen.has(value)) {
@@ -271,6 +403,26 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
         return [choice.key, i, `${choice.label}: removed extra choice ${view.name}.`];
       }
       seen.add(value);
+    }
+  }
+  return null;
+}
+
+/** The first ability increase that's unknown or goes over the cap, as [index, note]. */
+function invalidIncrease(
+  res: Resolution,
+  _key: string,
+  values: readonly string[],
+  max: number,
+  level: number,
+): [number, string] | null {
+  const scores = res.abilityScores(level) as Record<string, number>;
+  const running: Record<string, number> = {};
+  for (const [i, value] of values.entries()) {
+    if (!Object.hasOwn(scores, value)) return [i, `removed invalid choice '${value}'.`];
+    running[value] = (running[value] ?? scores[value] ?? 0) + 1;
+    if ((running[value] ?? 0) > max) {
+      return [i, `removed an increase to ${value.toUpperCase()} (it can't exceed ${max}).`];
     }
   }
   return null;

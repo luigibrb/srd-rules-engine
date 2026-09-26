@@ -60,11 +60,15 @@ export function autocomplete(build: CharacterBuild, cat: Catalog = catalog): Cha
   for (let i = 0; i < 500; i++) {
     const res = resolve(b, cat);
     const pending = res.choices.find(
-      (c) => c.fixed === null && res.selected(c).length < c.definition.count,
+      (c) => c.fixed === null && res.selected(c).length < res.required(c),
     );
     if (!pending) return b;
     const current = res.selected(pending);
     const free = res.options(pending).filter((o) => !o.unavailable && !current.includes(o.id));
+    // Like a player would, take the highest-level spells a leveled spell choice allows.
+    if (pending.definition.kind === "spell" && pending.definition.max_spell_level !== null) {
+      free.sort((a, b) => (cat.spells[b.id]?.level ?? 0) - (cat.spells[a.id]?.level ?? 0));
+    }
     const next = free[0];
     if (!next) throw new Error(`No legal option left for ${pending.key}`);
     b = svc.setChoice(b, cat, pending.key, [...current, next.id]).build;
@@ -97,5 +101,20 @@ export function classBuild(
   b = apply(b, svc.setBackgroundBonus, bonus ?? { [first as string]: 2, [second as string]: 1 });
   b = apply(b, svc.setName, name);
   b = apply(b, svc.setAlignment, "N");
+  return b;
+}
+
+/** Level up `times` times in a class, answering every new choice with the first legal option. */
+export function levelUpIn(
+  build: CharacterBuild,
+  classId: string,
+  times = 1,
+  hp: number | null = null,
+  cat: Catalog = catalog,
+): CharacterBuild {
+  let b = build;
+  for (let i = 0; i < times; i++) {
+    b = autocomplete(svc.levelUp(b, cat, classId, hp).build, cat);
+  }
   return b;
 }

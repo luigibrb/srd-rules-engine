@@ -53,7 +53,7 @@ describe("hit points and saves", () => {
     ["wizard", 6, ["int", "wis"]],
   ])("%s: d%i hit die, saves %j", (classId, die, saves) => {
     const sheet = computeSheet(classBuild(classId as string), catalog);
-    expect(sheet.hit_die).toBe(die);
+    expect(sheet.hit_dice).toEqual({ [String(die)]: 1 });
     expect(sheet.max_hp?.total).toBe((die as number) + sheet.modifiers.con);
     const proficient = Object.entries(sheet.saving_throws)
       .filter(([, s]) => s.proficient)
@@ -105,9 +105,10 @@ describe("Bard", () => {
       ability: "cha",
       save_dc: 8 + 2 + 3,
       attack_bonus: 2 + 3,
-      slots: [2],
-      pact: false,
+      progression: "full",
     });
+    expect(sheet.spell_slots).toEqual([2]);
+    expect(sheet.pact_magic).toBeNull();
   });
 
   it("only offers Bard spells of the right level", () => {
@@ -338,17 +339,24 @@ describe("Warlock", () => {
   const base = classBuild("warlock");
 
   it("Pact Magic: one slot, back on a Short Rest", () => {
-    expect(computeSheet(base, catalog).spellcasting[0]).toMatchObject({ slots: [1], pact: true });
+    const sheet = computeSheet(base, catalog);
+    expect(sheet.pact_magic).toEqual({ slots: 1, slot_level: 1 });
+    expect(sheet.spell_slots).toEqual([]);
   });
 
   it("only invocations without prerequisites are offered at level 1", () => {
-    expect(options(base, "class:warlock#invocation").map((o) => o.id)).toEqual([
+    const available = options(base, "class:warlock#invocation").filter((o) => !o.unavailable);
+    expect(available.map((o) => o.id)).toEqual([
       "armor-of-shadows",
       "eldritch-mind",
       "pact-of-the-blade",
       "pact-of-the-chain",
       "pact-of-the-tome",
     ]);
+    const agonizing = options(base, "class:warlock#invocation").find(
+      (o) => o.id === "agonizing-blast",
+    );
+    expect(agonizing?.unavailable).toBe("requires Warlock level 2+");
   });
 
   it("Armor of Shadows: Mage Armor at will", () => {
@@ -366,15 +374,16 @@ describe("Warlock", () => {
 
   it("Pact of the Tome: any cantrips, and level 1 rituals from any list", () => {
     const build = set(base, "class:warlock#invocation", ["pact-of-the-tome"]);
-    const rituals = options(build, "class:warlock#invocation=pact-of-the-tome#rituals").map(
+    const rituals = options(build, "feature:pact-of-the-tome@class:warlock#invocation#rituals").map(
       (o) => o.id,
     );
     expect(rituals).toContain("find-familiar"); // Wizard list
     expect(rituals).toContain("speak-with-animals"); // Druid list
     expect(rituals).not.toContain("magic-missile"); // not a ritual
-    const cantrips = options(build, "class:warlock#invocation=pact-of-the-tome#cantrips").map(
-      (o) => o.id,
-    );
+    const cantrips = options(
+      build,
+      "feature:pact-of-the-tome@class:warlock#invocation#cantrips",
+    ).map((o) => o.id);
     expect(cantrips).toContain("sacred-flame"); // Cleric list
   });
 

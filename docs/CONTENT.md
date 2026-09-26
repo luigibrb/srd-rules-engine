@@ -8,7 +8,9 @@ as `schemas/*.schema.json`). A **content pack** is a folder, and every file in i
 | `creation.yaml` | Standard array, point buy, base grants (languages) | `creation.schema.json` |
 | `species.yaml` | Species | `species.schema.json` |
 | `backgrounds.yaml` | Backgrounds | `backgrounds.schema.json` |
-| `classes/<id>.yaml` (or `classes.yaml`) | Classes (level 1 for now) | `classes.schema.json` |
+| `classes/<id>.yaml` (or `classes.yaml`) | Classes: core traits, multiclass grants, features by level 1–20, table columns | `classes.schema.json` |
+| `subclasses.yaml` | Subclasses (`class: <id>`, features by class level) | `subclasses.schema.json` |
+| `features.yaml` | Selectable class features: Eldritch Invocations, Metamagic | `features.schema.json` |
 | `feats.yaml` | Feats | `feats.schema.json` |
 | `weapons.yaml`, `armor.yaml`, `gear.yaml`, `tools.yaml` | Equipment | … |
 | `languages.yaml`, `masteries.yaml` | Languages, weapon mastery properties | … |
@@ -70,9 +72,15 @@ grants:
 | `hp_per_level` | `add` | Dwarven Toughness: `1` |
 | `attack.ranged` | `add` | Archery: `2` |
 | `skill.<skill id>` | `add` | Thaumaturge: `wis`, `min: 1` |
-| `martial_arts.die` | `max` | Monk: `6` (a d6) |
+| `martial_arts.die` | `max` | Monk: `6` (a d6), `8` at level 5… |
+| `attacks` | `max` | Extra Attack: `2`; Fighter 11: `3` |
+| `attack.critical` | `min` | Champion: `19` |
+| `saves` / `save.<ability>` | `add` | Aura of Protection: `cha`, `min: 1` |
+| `skill.unproficient` | `add` | Jack of All Trades: `half_prof` |
+| `hp_per_class_level` | `add` | Draconic Resilience: `1` × Sorcerer level |
 
-Conditions for `when`: `wearing_armor`, `wielding_shield`. Armor Class alternatives such as
+Conditions for `when`: `wearing_armor`, `wielding_shield`, `wearing_heavy_armor`,
+`not_wearing_heavy_armor`, `unarmored` (no armor and no Shield). Armor Class alternatives such as
 Unarmored Defense go in `ac_calculations`, not effects, because they don't stack.
 
 This is a small stand-in for the full Effect engine planned in the roadmap. Anything these
@@ -86,7 +94,7 @@ choices:
   - id: skills               # choice key becomes "<source key>#skills"
     label: Fighter skills
     kind: skill              # option | ability | skill | tool | skill_or_tool | language | feat |
-                             # weapon_mastery | spell | expertise
+                             # weapon_mastery | spell | expertise | subclass | ability_increase | feature
     count: 2
     allowed: [athletics, perception]   # optional whitelist
     category: standard       # optional filter (language/tool/feat/weapon category); a string or a list
@@ -114,6 +122,60 @@ skills you're proficient in.
 `kind: option` takes inline `options`, each with its own `grants`. Picking an option
 activates those grants, which can include further choices (Human → Versatile → Skilled →
 "choose 3 skills or tools").
+
+## Classes and levels
+
+```yaml
+id: fighter
+hit_die: 10
+primary_abilities: [str, dex]       # multiclassing needs 13+ in these (any; all with primary_mode: all)
+subclass_level: 3
+progression:                         # class table columns, 20 values; shown as class resources
+  Second Wind: [2, 2, 2, 3, …]
+grants: {…}                          # core traits: only for a character's first class
+multiclass: {weapon_proficiencies: [martial], armor_training: [light, medium, shield]}
+features:
+  "1": {…}                           # level 1 features (starting or multiclass)
+  "3":
+    choices: [{id: subclass, label: Fighter subclass, kind: subclass}]
+  "4":
+    choices: [{id: feat, label: Ability Score Improvement or feat, kind: feat}]
+  "5":
+    effects: [{target: attacks, op: max, value: 2}]     # Extra Attack
+```
+
+A subclass lists its features by class level, and `at_class_level` switches grants on later:
+
+```yaml
+- id: life-domain
+  class: cleric
+  features:
+    "3":
+      spells: [aid, bless, cure-wounds, lesser-restoration]
+      at_class_level:
+        - {level: 5, grants: {spells: [mass-healing-word, revivify]}}
+```
+
+Spell choices grow with the class: `max_spell_level` (spells of level 1 up to it), `spell_list`
+(one list or several: Magical Secrets), `tag` and `subset_of` (the Wizard's spellbook: every
+`spellbook` choice has `tag: wizard-spellbook`, prepared choices use `subset_of:
+wizard-spellbook`), `school` (Evoker), `known_only` (Agonizing Blast: one of your cantrips).
+
+Feats and features can have a `prerequisite`:
+
+```yaml
+prerequisite:
+  level: 4                              # character level
+  class_level: {class: warlock, level: 5}
+  abilities: {any_of: [str, dex], min: 13}
+  requires: [pact-of-the-blade]         # feats or features you have
+  trait: Fighting Style                 # a feature, by name
+  spellcasting: true
+  spells: [eldritch-blast]              # know one of these
+```
+
+`kind: ability_increase` choices raise scores by 1 per pick (pick the same ability twice for +2)
+up to `max_score` (default 20); `ability_bonuses` gives fixed increases with their own cap.
 
 ## Checking your work
 

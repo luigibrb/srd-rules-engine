@@ -106,13 +106,79 @@ picks as `kind: spell` choices:
 - Starting gold (Fighter option C, background option B): shopping isn't automated.
 - AC assumes you wear the best armor you own and are trained with. Equipping comes with the
   inventory milestone.
-- Level 1 only, so no subclasses (they start at level 3) and no Warlock invocations with a
-  level prerequisite.
+- Level-up replacements aren't modeled: swapping a cantrip, prepared spell, invocation,
+  Metamagic option or Weapon Mastery when you gain a level. Clerics, Druids, Paladins and
+  Rangers can change prepared spells after a Long Rest; the build stores one set.
+- Features that roll dice or depend on the situation (Rage damage, Sneak Attack, Divine Strike,
+  Potent Spellcasting) are shown as text and class resources, not added to attack lines.
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
   placeholders, like the Soldier's gaming set.
 - The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
   separate, hand-filled snapshot. It isn't derived from a build and sheet yet; bridging the two
   belongs with the session-state layer.
+
+## Levels and multiclassing
+
+Leveling follows Baldur's Gate 3: a character is created at level 1, then gains levels one at
+a time. The build stores each level after the first as `{ class_id, hp }` (`hp: null` = the
+fixed value, hit die / 2 + 1; a number = the stored Hit Die roll), so any level can be
+recomputed or undone.
+
+**Class content** has three parts:
+
+- `grants`: core traits you get only when it's your first class (saves, skills, gear);
+- `multiclass`: what you get instead when you multiclass into it (SRD "As a Multiclass
+  Character");
+- `features`: grants by class level, `1`–`20`. Level 1 features apply either way.
+
+**Sources by level.** The first level in a class is the source `class:<id>` (core or multiclass
+grants merged with level 1 features), so level 1 choice keys are the same as before; later
+levels are `class:<id>:<class level>`. A `kind: subclass` choice picks the subclass, whose
+features are sources `subclass:<id>:<class level>`. Every source and choice knows the character
+level it was gained at, so the builder can ask each level's choices in order and validation
+reports issues per level. `at_class_level` switches on more grants when the class reaches a
+level (a subclass's spell table, the Land druid's resistance).
+
+**Multiclassing** (SRD "Multiclassing"): taking a new class needs a score of 13+ in the primary
+abilities of the new class and every class you have (`primary_mode: all` classes need all of
+them). Spell slots come from the Multiclass Spellcaster table (in `creation.yaml`): full casters
+count every level, Paladins and Rangers half (rounded up). The single-class Paladin and Ranger
+tables match that formula, and a test checks it. Pact Magic slots are separate. Each class's
+spell choices use that class's own table (its "levels you have slots for"). Extra Attack from
+several classes doesn't stack (effects use `op: max`), and AC calculations never stack.
+
+**Ability scores** are recomputed in level order: base scores, background bonus, then every
+Ability Score Improvement, feat increase and fixed bonus (Primal Champion), each capped (20, or
+the feat's own cap such as 30 for Epic Boons). Prerequisites are checked against the scores
+from before the level where the choice is made.
+
+**Feats and feature options** have prerequisites: character level, class level, ability scores,
+other feats or features, a trait (Fighting Style feats need the Fighting Style feature),
+Spellcasting, or knowing one of some spells. Eldritch Invocations and Metamagic options have the
+same shape as feats but live in their own `features` table, so an Ability Score Improvement
+("any feat you qualify for") can't pick one.
+
+### Interpretations (flagged, not invented)
+
+- **A spell or Expertise choice needs no more picks than there are options left.** With the
+  SRD's 27 cantrips, a multiclass caster can already know every cantrip on a short list (the
+  Cleric has seven), and a multiclass Wizard may have none of the skills Scholar needs. The SRD
+  doesn't cover this; the builder accepts fewer picks instead of blocking the character. A spell
+  choice whose list isn't chosen yet (Magic Initiate) still needs its full count.
+- **A repeatable feat that must differ each time** (Magic Initiate: a different spell list) stops
+  being offered once every option is used.
+- **"A Warlock cantrip that deals damage"** (Agonizing Blast, Eldritch Spear, Repelling Blast)
+  is Chill Touch, Eldritch Blast, or Poison Spray, the SRD Warlock cantrips that deal damage with
+  an attack roll or save.
+- **Class feature text for levels 2–20 is the SRD's own**, generated from the Markdown; level 1
+  traits stay summarized. Only features that change the sheet's numbers or ask a choice are
+  modeled; the rest (Rage damage, Sneak Attack dice, Channel Divinity…) is shown as text and
+  as class resources.
+
+### Named rules in code (documented exceptions)
+
+Martial Arts (the `martial_arts.die` effect) and Great Weapon Fighting's note live in
+`rules/sheet.ts`, as before. Everything level-related above is data.
 
 ## Runtime and packaging (TypeScript)
 

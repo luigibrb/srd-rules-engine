@@ -31,6 +31,8 @@ import {
   SpeciesSchema,
   type SpellDef,
   SpellDefSchema,
+  type SubclassDef,
+  SubclassSchema,
   type ToolDef,
   ToolSchema,
   type WeaponDef,
@@ -53,6 +55,9 @@ export interface Catalog {
   readonly languages: Table<LanguageDef>;
   readonly masteries: Table<MasteryDef>;
   readonly spells: Table<SpellDef>;
+  readonly subclasses: Table<SubclassDef>;
+  /** Selectable class features (Eldritch Invocations, Metamagic): feats in shape, not in kind. */
+  readonly features: Table<FeatDef>;
 }
 
 /** Raw, unvalidated content: what a YAML/JSON content directory parses to. */
@@ -71,6 +76,8 @@ export interface ContentPack {
   languages?: unknown[];
   masteries?: unknown[];
   spells?: unknown[];
+  subclasses?: unknown[];
+  features?: unknown[];
 }
 
 export const TABLE_SCHEMAS = {
@@ -85,6 +92,8 @@ export const TABLE_SCHEMAS = {
   languages: LanguageSchema,
   masteries: MasterySchema,
   spells: SpellDefSchema,
+  subclasses: SubclassSchema,
+  features: FeatSchema,
 } as const;
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
@@ -168,6 +177,10 @@ export function validateReferences(catalog: Catalog): void {
     ...catalog.tools,
   };
   const spellLists = new Set(Object.values(catalog.spells).flatMap((s) => s.lists));
+  const tags = new Set<string>();
+  for (const [, grants] of allGrants(catalog)) {
+    for (const choice of grants.choices) if (choice.tag) tags.add(choice.tag);
+  }
   for (const [where, grants] of allGrants(catalog)) {
     check(
       grants.feats.map((f) => f.feat),
@@ -203,11 +216,9 @@ export function validateReferences(catalog: Catalog): void {
       );
     }
     for (const choice of grants.choices) {
-      ref(choice.spell_list, "spell list", isList);
-      if (choice.subset_of !== null && !siblings.has(choice.subset_of)) {
-        errors.push(
-          `${where}.${choice.id}: subset_of refers to unknown choice '${choice.subset_of}'`,
-        );
+      for (const list of choice.spell_list ?? []) ref(list, "spell list", isList);
+      if (choice.subset_of !== null && !tags.has(choice.subset_of)) {
+        errors.push(`${where}.${choice.id}: subset_of refers to unknown tag '${choice.subset_of}'`);
       }
       if (choice.kind === "spell" && choice.allowed) {
         check(choice.allowed, catalog.spells, "spell", where);
@@ -218,6 +229,30 @@ export function validateReferences(catalog: Catalog): void {
       if (choice.kind === "tool" && choice.allowed) {
         check(choice.allowed, catalog.tools, "tool", where);
       }
+    }
+  }
+  for (const cls of Object.values(catalog.classes)) {
+    const core = new Set([...cls.grants.choices, ...cls.multiclass.choices].map((c) => c.id));
+    for (const choice of cls.features["1"]?.choices ?? []) {
+      if (core.has(choice.id)) {
+        errors.push(
+          `${cls.id}: choice id '${choice.id}' is used by both core traits and level 1 features`,
+        );
+      }
+    }
+  }
+  check(
+    Object.values(catalog.subclasses).map((s) => s.class),
+    catalog.classes,
+    "class",
+    "subclasses",
+  );
+  for (const table of [catalog.feats, catalog.features]) {
+    for (const feat of Object.values(table)) {
+      const pre = feat.prerequisite;
+      if (!pre) continue;
+      check(pre.requires, { ...catalog.feats, ...catalog.features }, "feat or feature", feat.id);
+      if (pre.class_level) check([pre.class_level.class], catalog.classes, "class", feat.id);
     }
   }
   check(
@@ -231,13 +266,26 @@ export function validateReferences(catalog: Catalog): void {
 
 function* allGrants(catalog: Catalog): Generator<[string, Grants]> {
   yield* walk("creation", catalog.creation.base_grants);
-  for (const table of [catalog.classes, catalog.species, catalog.backgrounds, catalog.feats]) {
+  for (const table of [catalog.species, catalog.backgrounds, catalog.feats, catalog.features]) {
     for (const entity of Object.values(table)) yield* walk(entity.id, entity.grants);
+  }
+  for (const cls of Object.values(catalog.classes)) {
+    yield* walk(cls.id, cls.grants);
+    yield* walk(`${cls.id}.multiclass`, cls.multiclass);
+    for (const [level, grants] of Object.entries(cls.features)) {
+      yield* walk(`${cls.id}.${level}`, grants);
+    }
+  }
+  for (const sub of Object.values(catalog.subclasses)) {
+    for (const [level, grants] of Object.entries(sub.features)) {
+      yield* walk(`${sub.id}.${level}`, grants);
+    }
   }
 }
 
 function* walk(where: string, grants: Grants): Generator<[string, Grants]> {
   yield [where, grants];
+  for (const gate of grants.at_class_level) yield* walk(`${where}@${gate.level}`, gate.grants);
   for (const choice of grants.choices) {
     for (const option of choice.options) {
       yield* walk(`${where}.${choice.id}.${option.id}`, option.grants);

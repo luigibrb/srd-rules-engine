@@ -12,7 +12,7 @@ import {
   titleCase,
 } from "../models/content";
 import type { ActiveSource } from "../rules/build-resolution";
-import { issuesForStep } from "../rules/build-validation";
+import { issuesForLevel, issuesForStep } from "../rules/build-validation";
 import { abilityModifier, signed } from "../rules/dice";
 import { explainStat } from "../rules/sheet";
 import { type Evaluation, STEP_TITLES } from "../services/builder";
@@ -27,7 +27,7 @@ export function prettyId(itemId: string): string {
 
 /** First sentence of `text`, cut at a word boundary with an ellipsis if too long. */
 export function shorten(text: string, width = 60): string {
-  const first = (text.split(". ")[0] ?? "").replace(/\.+$/, "");
+  const first = (text.replace(/\s+/g, " ").split(". ")[0] ?? "").replace(/\.+$/, "");
   if (first.length <= width) return first;
   const cut = first.slice(0, width);
   const space = cut.lastIndexOf(" ");
@@ -50,11 +50,13 @@ export function identityLine(ev: Evaluation, catalog: Catalog): string {
     const lineage = speciesOptionSources(ev).map((src) => src.name.split(" (")[0]);
     parts.push(`${species.name}${lineage.length ? ` (${lineage.join(", ")})` : ""}`);
   }
-  if (cls) parts.push(cls.name);
+  const classes = ev.sheet.classes;
+  if (classes.length > 1) parts.push(classes.map((c) => `${c.name} ${c.level}`).join(" / "));
+  else if (cls) parts.push(cls.name);
   const who = parts.join(" ") || "New adventurer";
   const bg = lookup(catalog.backgrounds, b.background_id);
   const name = b.name || "(unnamed)";
-  return `${name} · Level 1 ${who}${bg ? ` · ${bg.name}` : ""}`;
+  return `${name} · Level ${ev.sheet.level} ${who}${bg ? ` · ${bg.name}` : ""}`;
 }
 
 export function abilityLine(ev: Evaluation, con: Console, catalog: Catalog): string {
@@ -148,7 +150,32 @@ export function renderMenu(ev: Evaluation, con: Console, catalog: Catalog): void
         con.style(summary + extra, "dim"),
     );
   });
+  for (const l of ev.resolution.levels.slice(1)) {
+    const issues = issuesForLevel(ev.report, l.level);
+    const [mark, style] = issues.some((x) => x.severity === "error")
+      ? (["✘", "red"] as const)
+      : issues.some((x) => x.severity === "pending")
+        ? (["•", "yellow"] as const)
+        : (["✔", "green"] as const);
+    const title = `Level ${l.level}: ${lookup(catalog.classes, l.class_id)?.name ?? l.class_id} ${l.class_level}`;
+    con.say(
+      ` L${pad(l.level, 2)} ${con.style(mark, style)} ${pad(title, 22)} ` +
+        con.style(levelSummary(ev, l.level), "dim"),
+    );
+  }
   con.say(` ${padLeft(STEPS.length + 1, 2)}.   Review & save`);
+}
+
+/** Feature names gained at a character level (2+). */
+export function levelSummary(ev: Evaluation, level: number): string {
+  const names = ev.resolution.sources
+    .filter((s) => s.level === level && s.feat === null)
+    .flatMap((s) => s.grants.traits.map((t) => t.name));
+  const picks = ev.resolution.choicesForLevel(level).flatMap((c) => {
+    const views = new Map(ev.resolution.options(c).map((v) => [v.id, v.name]));
+    return ev.resolution.selected(c).map((v) => views.get(v) ?? v);
+  });
+  return [...new Set([...names, ...picks])].join(", ");
 }
 
 export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): void {
@@ -176,7 +203,10 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
   con.say(con.style("Combat", "bold"));
   if (s.max_hp) {
     con.say(`  Hit Points  ${padLeft(s.max_hp.total, 3)}   = ${explainStat(s.max_hp)}`);
-    con.say(`  Hit Dice    1d${s.hit_die}`);
+    const dice = Object.entries(s.hit_dice)
+      .sort(([a], [b]) => Number(b) - Number(a))
+      .map(([die, n]) => `${n}d${die}`);
+    con.say(`  Hit Dice    ${dice.join(" + ")}`);
   }
   con.say(`  Armor Class ${padLeft(s.armor_class.total, 3)}   = ${explainStat(s.armor_class)}`);
   con.say(
@@ -184,6 +214,11 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
   );
   con.say(`  Speed       ${padLeft(s.speed.total, 3)}   = ${explainStat(s.speed)}`);
   con.say(`  Proficiency ${padLeft(signed(s.proficiency_bonus), 3)}`);
+  if (s.attacks_per_action > 1) con.say(`  Attack action: ${s.attacks_per_action} attacks`);
+  if (s.critical_hit_on < 20) con.say(`  Critical Hits on ${s.critical_hit_on}–20`);
+  if (s.resources.length) {
+    con.say(`  ${s.resources.map((r) => `${r.name} ${r.value}`).join(" · ")}`);
+  }
   if (s.resistances.length) {
     con.say(`  Resistances: ${s.resistances.map(titleCase).join(", ")}`);
   }
@@ -248,14 +283,16 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
         sc.save_dc !== null
           ? ` · save DC ${sc.save_dc} · attack ${signed(sc.attack_bonus ?? 0)}`
           : "";
-      const slots = sc.slots
-        .map((n, i) => (n ? `${n} × level ${i + 1}` : ""))
-        .filter(Boolean)
-        .join(", ");
-      const slotText = slots
-        ? ` · slots ${slots}${sc.pact ? " (Pact Magic, Short Rest)" : ""}`
-        : "";
-      con.say(`  ${sc.source}: ${ability}${numbers}${slotText}`);
+      con.say(`  ${sc.source}: ${ability}${numbers}`);
+    }
+    if (s.spell_slots.length) {
+      const slots = s.spell_slots.map((n, i) => `${n} × level ${i + 1}`).join(", ");
+      con.say(`  Spell slots: ${slots}`);
+    }
+    if (s.pact_magic) {
+      con.say(
+        `  Pact Magic: ${s.pact_magic.slots} × level ${s.pact_magic.slot_level} (back on a Short Rest)`,
+      );
     }
     for (const level of [...new Set(s.spells.map((x) => x.level))]) {
       const names = s.spells
@@ -274,7 +311,12 @@ export function renderSheet(ev: Evaluation, con: Console, catalog: Catalog): voi
 
   con.say();
   con.say(con.style("Traits & Features", "bold"));
-  for (const trait of s.traits) con.say(`  ${trait.name}: ${con.style(trait.text, "dim")}`);
+  for (const trait of s.traits) {
+    const where = trait.level > 1 ? ` (${trait.source}, level ${trait.level})` : "";
+    const text = trait.level > 1 ? shorten(trait.text.replace(/[_*]/g, ""), 110) : trait.text;
+    con.say(`  ${trait.name}${where}: ${con.style(text, "dim")}`);
+  }
+  if (s.features.length) con.say(`  Chosen options: ${s.features.join(", ")}`);
   for (const src of speciesOptionSources(ev)) {
     const desc = src.description ? `: ${con.style(src.description, "dim")}` : "";
     con.say(`  ${src.name}${desc}`);

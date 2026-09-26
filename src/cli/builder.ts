@@ -32,7 +32,7 @@ import {
 } from "../models/content";
 import { pointBuyStatus, rollAbilityScores, unassignedValues } from "../rules/ability-scores";
 import { type ActiveChoice, type OptionView, resolve } from "../rules/build-resolution";
-import { issuesForStep } from "../rules/build-validation";
+import { issuesForLevel, issuesForStep } from "../rules/build-validation";
 import { abilityModifier, signed } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import { computeSheet, type DerivedSheet } from "../rules/sheet";
@@ -100,18 +100,43 @@ export class BuilderApp {
     renderPanel(ev, this.con, this.catalog);
     renderMenu(ev, this.con, this.catalog);
     const next = svc.nextIncompleteStep(ev);
-    const fallback = next ? STEP_TITLES[next] : "Review & save";
+    const nextLevel = next
+      ? null
+      : (ev.resolution.levels.find((l) => l.level > 1 && !svc.levelComplete(ev, l.level))?.level ??
+        null);
+    const fallback = next ? STEP_TITLES[next] : nextLevel ? `Level ${nextLevel}` : "Review & save";
+    const levelCmds =
+      ev.sheet.level > 1
+        ? "'up'/'down' to add/remove a level, 'L2'… to revisit"
+        : "'up' to level up";
     let answer: string;
     try {
-      answer = await this.con.ask(`Step number, 'sheet', 'save' or Enter for ${fallback} >`);
+      answer = await this.con.ask(
+        `Step number, ${levelCmds}, 'sheet', 'save' or Enter for ${fallback} >`,
+      );
     } catch (error) {
       if (error instanceof BackToMenu) return;
       throw error;
     }
     const n = /^\d+$/.test(answer) ? Number(answer) : null;
+    const lvl = /^l(\d+)$/i.exec(answer);
+    const cmd = answer.toLowerCase();
     if (!answer) {
       if (next) await this.runStep(next);
+      else if (nextLevel) await this.runLevel(nextLevel);
       else await this.review();
+    } else if (cmd === "up" || cmd === "level up" || cmd === "levelup") {
+      await this.guard(() => this.levelUpFlow());
+    } else if (cmd === "down") {
+      await this.guard(async () => {
+        if (await this.con.confirm(`Remove level ${ev.sheet.level} and its choices?`, false)) {
+          this.apply(svc.removeLastLevel);
+        }
+      });
+    } else if (lvl) {
+      const level = Number(lvl[1]);
+      if (level >= 2 && level <= ev.sheet.level) await this.guard(() => this.runLevel(level));
+      else this.con.error(`The character has levels 2–${ev.sheet.level} to revisit`);
     } else if (n !== null && n >= 1 && n <= STEPS.length) {
       await this.runStep(STEPS[n - 1] as Step);
     } else if (n === STEPS.length + 1) {
@@ -123,6 +148,106 @@ export class BuilderApp {
     } else {
       this.con.error(`Unknown command '${answer}'`);
     }
+  }
+
+  /** Run a sub-flow where 'back' returns to the menu. */
+  private async guard(flow: () => Promise<void>): Promise<void> {
+    try {
+      await flow();
+    } catch (error) {
+      if (!(error instanceof BackToMenu)) throw error;
+    }
+  }
+
+  // --- levels -----------------------------------------------------------------------------
+
+  private async levelUpFlow(): Promise<void> {
+    const con = this.con;
+    const ev = evaluate(this.build, this.catalog);
+    const incomplete = svc.nextIncompleteStep(ev);
+    if (incomplete) {
+      con.warn(`Finish character creation first (${STEP_TITLES[incomplete]} is incomplete).`);
+      return;
+    }
+    const current = new Set(ev.sheet.classes.map((c) => c.class_id));
+    const options = svc.levelUpOptions(this.build, this.catalog);
+    con.title(`Level ${ev.sheet.level + 1}`);
+    const rows: Row[] = options.map((o) => ({
+      id: o.class_id,
+      label: `${o.name} ${o.class_level}`,
+      extra: `${current.has(o.class_id) ? "" : "multiclass · "}d${o.hit_die} · ${this.levelPreview(o.class_id, o.class_level)}`,
+      unavailable: o.unavailable,
+    }));
+    const [classId] = await this.select(
+      rows,
+      1,
+      [],
+      "Multiclassing needs 13+ in the primary abilities of your classes.",
+    );
+    const option = options.find((o) => o.class_id === classId) as svc.LevelUpOption;
+    const con_mod = ev.sheet.modifiers.con;
+    const [how] = await this.select(
+      [
+        {
+          id: "fixed",
+          label: "Fixed",
+          extra: `${option.fixed_hp} + Con (${signed(con_mod)}) = ${Math.max(1, option.fixed_hp + con_mod)} HP`,
+        },
+        {
+          id: "roll",
+          label: `Roll 1d${option.hit_die}`,
+          extra: `1–${option.hit_die} + Con (${signed(con_mod)}), at least 1 HP`,
+        },
+      ],
+      1,
+      ["fixed"],
+    );
+    let hp: number | null = null;
+    if (how === "roll") {
+      hp = this.rng.int(1, option.hit_die);
+      con.say(`  You rolled ${con.style(String(hp), "bold")} on the d${option.hit_die}.`);
+    }
+    if (this.apply(svc.levelUp, classId as string, hp)) {
+      await this.runLevel(ev.sheet.level + 1);
+    }
+  }
+
+  /** The features a class gives at a class level, for the level-up menu. */
+  private levelPreview(classId: string, classLevel: number): string {
+    const cls = lookup(this.catalog.classes, classId);
+    const traits = cls?.features[String(classLevel)]?.traits.map((t) => t.name) ?? [];
+    return traits.join(", ") || "more of your class features";
+  }
+
+  /** Show what a level gave and ask its choices. */
+  private async runLevel(level: number): Promise<void> {
+    const con = this.con;
+    const ev = evaluate(this.build, this.catalog);
+    const entry = ev.resolution.levels.find((l) => l.level === level);
+    if (!entry) return;
+    const cls = lookup(this.catalog.classes, entry.class_id);
+    con.title(`Level ${level}: ${cls?.name ?? entry.class_id} ${entry.class_level}`);
+    for (const src of ev.resolution.sources) {
+      if (src.level !== level || src.feat !== null || src.feature !== null) continue;
+      for (const t of src.grants.traits) {
+        con.info(
+          `${t.name}${src.name !== cls?.name ? ` (${src.name})` : ""}: ${shorten(t.text.replace(/[_*]/g, ""), 90)}`,
+        );
+      }
+    }
+    for (const issue of issuesForLevel(ev.report, level)) {
+      if (issue.choice_key === null && issue.severity !== "note") con.error(issue.message);
+    }
+    const visited = new Set<string>();
+    for (;;) {
+      const res = resolve(this.build, this.catalog);
+      const todo = res.choicesForLevel(level).filter((c) => !visited.has(c.key));
+      const first = todo[0];
+      if (!first) break;
+      await this.runChoice(first);
+      visited.add(first.key);
+    }
+    if (!visited.size) con.info("No choices at this level.");
   }
 
   private async runStep(step: Step): Promise<void> {
@@ -183,10 +308,13 @@ export class BuilderApp {
     count = 1,
     current: readonly string[] = [],
     hint = "",
+    /** Allow picking the same row more than once (ability increases: '1 1' = +2). */
+    repeats = false,
   ): Promise<string[]> {
     const con = this.con;
     rows.forEach((row, i) => {
-      const chosen = current.includes(row.id) ? "◉" : " ";
+      const times = current.filter((c) => c === row.id).length;
+      const chosen = times > 1 ? `${times}` : times ? "◉" : " ";
       const label = pad(row.label, 24);
       if (row.unavailable) {
         con.say(con.style(` ${chosen} ${padLeft(i + 1, 2)}. ${label} ✘ ${row.unavailable}`, "dim"));
@@ -198,7 +326,12 @@ export class BuilderApp {
     if (hint) con.info(hint);
     const ids = new Set(rows.map((r) => r.id));
     const keep = current.length === count && current.every((c) => ids.has(c));
-    const what = count === 1 ? "one number" : `${count} numbers, e.g. '1 4'`;
+    const what =
+      count === 1
+        ? "one number"
+        : repeats
+          ? `${count} numbers (repeat one for +${count}, e.g. '1 1')`
+          : `${count} numbers, e.g. '1 4'`;
     const prompt = `Choose ${what}${keep ? " (Enter keeps current)" : ""}, '?N' for details >`;
     const inRange = (t: string) => /^\d+$/.test(t) && Number(t) >= 1 && Number(t) <= rows.length;
     for (;;) {
@@ -220,7 +353,7 @@ export class BuilderApp {
         continue;
       }
       const picked = tokens.map((t) => rows[Number(t) - 1] as Row);
-      if (new Set(picked.map((r) => r.id)).size !== picked.length) {
+      if (!repeats && new Set(picked.map((r) => r.id)).size !== picked.length) {
         con.error("Each option can be chosen only once");
         continue;
       }
@@ -266,7 +399,13 @@ export class BuilderApp {
     this.con.say(`${this.con.style(`${choice.label}${count}`, "bold")}  — from ${src.name}${via}`);
     const rows = res.options(choice).map((view) => this.choiceRow(choice, view));
     for (;;) {
-      const picked = await this.select(rows, d.count, res.selected(choice), d.hint);
+      const picked = await this.select(
+        rows,
+        d.count,
+        res.selected(choice),
+        d.hint,
+        d.kind === "ability_increase",
+      );
       if (this.apply(svc.setChoice, choice.key, picked)) return;
     }
   }
@@ -295,6 +434,10 @@ export class BuilderApp {
           plainText(spell.description),
         ].join("\n");
       }
+    } else if (kind === "ability_increase") {
+      extra = view.description;
+    } else if (kind === "subclass" || kind === "feature") {
+      extra = shorten(view.description.replace(/[_*]/g, ""), 70);
     } else if (kind === "ability") {
       const a = view.id as Ability;
       extra = `your ${ABILITY_NAMES[a]} is ${sheet.scores[a]} (${signed(sheet.modifiers[a])})`;

@@ -19,18 +19,24 @@
           "default": "",
           "type": "string"
         },
-        "creature_type": {
-          "default": "Humanoid",
+        "class": {
           "type": "string"
         },
-        "grants": {
-          "$ref": "#/$defs/Grants"
+        "features": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^([1-9]|1[0-9]|20)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Grants"
+          }
         }
       },
       "required": [
         "id",
         "name",
-        "grants"
+        "class"
       ],
       "additionalProperties": false
     },
@@ -54,18 +60,24 @@
             "default": "",
             "type": "string"
           },
-          "creature_type": {
-            "default": "Humanoid",
+          "class": {
             "type": "string"
           },
-          "grants": {
-            "$ref": "#/$defs/Grants"
+          "features": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^([1-9]|1[0-9]|20)$"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/Grants"
+            }
           }
         },
         "required": [
           "id",
           "name",
-          "grants"
+          "class"
         ],
         "additionalProperties": false
       }
@@ -737,5 +749,5 @@
       "additionalProperties": false
     }
   },
-  "title": "species content"
+  "title": "subclasses content"
 }

@@ -1,55 +1,221 @@
 # yaml-language-server: $schema=../../../schemas/classes.schema.json
-# SRD 5.2.1 — "Classes" > "Barbarian" (level 1 only).
+# SRD 5.2.1 — "Classes" > "Barbarian". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from data/srd-5-2-1/classes.md; mechanics were added by hand.
 id: barbarian
 name: Barbarian
 description: A fierce warrior who fights with primal rage and shrugs off blows.
 primary_abilities: [str]
 hit_die: 12
 complexity: Average
-standard_array: {str: 15, dex: 13, con: 14, int: 10, wis: 12, cha: 8}
+standard_array:
+  str: 15
+  dex: 13
+  con: 14
+  int: 10
+  wis: 12
+  cha: 8
+subclass_level: 3
+progression:
+  Rages: [2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6]
+  Rage Damage: ['+2', '+2', '+2', '+2', '+2', '+2', '+2', '+2', '+3', '+3', '+3', '+3', '+3', '+3', '+3',
+    '+4', '+4', '+4', '+4', '+4']
+  Weapon Mastery: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
 grants:
   saving_throws: [str, con]
   weapon_proficiencies: [simple, martial]
   armor_training: [light, medium, shield]
-  ac_calculations:
-    - {name: Unarmored Defense, abilities: [dex, con], shield: true}
-  traits:
+  choices:
+  - id: skills
+    label: Barbarian skills
+    kind: skill
+    count: 2
+    allowed: [animal-handling, athletics, intimidation, nature, perception, survival]
+  - id: equipment
+    label: Barbarian equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Package
+      description: Greataxe, 4 Handaxes, Explorer's Pack, 15 GP
+      grants:
+        items:
+        - {item: greataxe}
+        - {item: handaxe, qty: 4}
+        - {item: explorers-pack}
+        gp: 15
+    - id: b
+      name: Gold
+      description: 75 GP
+      grants: {gp: 75}
+multiclass:
+  weapon_proficiencies: [martial]
+  armor_training: [shield]
+features:
+  '1':
+    ac_calculations:
+    - name: Unarmored Defense
+      abilities: [dex, con]
+      shield: true
+    traits:
     - name: Rage
-      text: >-
-        Bonus Action, not in Heavy armor. 2 uses; regain one on a Short Rest, all on a Long Rest.
-        For up to 10 minutes: Resistance to Bludgeoning, Piercing and Slashing damage; +2 damage
-        on attacks using Strength; Advantage on Strength checks and saves; no Concentration or
-        spells. Extend it each turn by attacking, forcing a save, or taking a Bonus Action.
+      text: 'Bonus Action, not in Heavy armor. 2 uses; regain one on a Short Rest, all on a Long Rest.
+        For up to 10 minutes: Resistance to Bludgeoning, Piercing and Slashing damage; +2 damage on attacks
+        using Strength; Advantage on Strength checks and saves; no Concentration or spells. Extend it
+        each turn by attacking, forcing a save, or taking a Bonus Action.'
     - name: Unarmored Defense
       text: While you wear no armor, your base AC is 10 + Dex + Con. You can still use a Shield.
     - name: Weapon Mastery
-      text: >-
-        Use the mastery properties of two kinds of Simple or Martial Melee weapons. After a Long
-        Rest you can swap one choice.
-  choices:
-    - id: skills
-      label: Barbarian skills
-      kind: skill
-      count: 2
-      allowed: [animal-handling, athletics, intimidation, nature, perception, survival]
+      text: Use the mastery properties of two kinds of Simple or Martial Melee weapons. After a Long Rest
+        you can swap one choice.
+    choices:
     - id: weapon_mastery
       label: Weapon Mastery
       kind: weapon_mastery
       count: 2
       weapon_kind: melee
       hint: Greataxes and Handaxes come with your starting equipment.
-    - id: equipment
-      label: Barbarian equipment
-      kind: option
-      step: equipment
-      options:
-        - id: a
-          name: Package
-          description: Greataxe, 4 Handaxes, Explorer's Pack, 15 GP
-          grants:
-            items:
-              - {item: greataxe}
-              - {item: handaxe, qty: 4}
-              - {item: explorers-pack}
-            gp: 15
-        - {id: b, name: Gold, description: 75 GP, grants: {gp: 75}}
+  '2':
+    traits:
+    - name: Danger Sense
+      text: You gain an uncanny sense of when things aren't as they should be, giving you an edge when
+        you dodge perils. You have Advantage on Dexterity saving throws unless you have the Incapacitated
+        condition.
+    - name: Reckless Attack
+      text: You can throw aside all concern for defense to attack with increased ferocity. When you make
+        your first attack roll on your turn, you can decide to attack recklessly. Doing so gives you Advantage
+        on attack rolls using Strength until the start of your next turn, but attack rolls against you
+        have Advantage during that time.
+  '3':
+    traits:
+    - name: Barbarian Subclass
+      text: You gain a Barbarian subclass of your choice. The Path of the Berserker subclass is detailed
+        after this class's description. A subclass is a specialization that grants you features at certain
+        Barbarian levels. For the rest of your career, you gain each of your subclass's features that
+        are of your Barbarian level or lower.
+    - name: Primal Knowledge
+      text: |-
+        You gain proficiency in another skill of your choice from the skill list available to Barbarians at level 1.
+
+        In addition, while your Rage is active, you can channel primal power when you attempt certain tasks; whenever you make an ability check using one of the following skills, you can make it as a Strength check even if it normally uses a different ability: Acrobatics, Intimidation, Perception, Stealth, or Survival. When you use this ability, your Strength represents primal power coursing through you, honing your agility, bearing, and senses.
+    choices:
+    - {id: subclass, label: Barbarian subclass, kind: subclass}
+    - id: primal_knowledge
+      label: Primal Knowledge skill
+      kind: skill
+      allowed: [animal-handling, athletics, intimidation, nature, perception, survival]
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 1
+      weapon_kind: melee
+  '5':
+    traits:
+    - name: Extra Attack
+      text: You can attack twice instead of once whenever you take the Attack action on your turn.
+    - name: Fast Movement
+      text: Your speed increases by 10 feet while you aren't wearing Heavy armor.
+    effects:
+    - {target: attacks, op: max, value: 2}
+    - {target: speed, value: 10, when: not_wearing_heavy_armor}
+  '7':
+    traits:
+    - name: Feral Instinct
+      text: Your instincts are so honed that you have Advantage on Initiative rolls.
+    - name: Instinctive Pounce
+      text: As part of the Bonus Action you take to enter your Rage, you can move up to half your Speed.
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '9':
+    traits:
+    - name: Brutal Strike
+      text: |-
+        If you use Reckless Attack, you can forgo any Advantage on one Strength-based attack roll of your choice on your turn. The chosen attack roll mustn't have Disadvantage. If the chosen attack roll hits, the target takes an extra 1d10 damage of the same type dealt by the weapon or Unarmed Strike, and you can cause one Brutal Strike effect of your choice. You have the following effect options.
+
+        _Forceful Blow._ The target is pushed 15 feet straight away from you. You can then move up to half your Speed straight toward the target without provoking Opportunity Attacks.
+        _Hamstring Blow._ The target's Speed is reduced by 15 feet until the start of your next turn. A target can be affected by only one Hamstring Blow at a time—the most recent one.
+  '10':
+    choices:
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 1
+      weapon_kind: melee
+  '11':
+    traits:
+    - name: Relentless Rage
+      text: |-
+        Your Rage can keep you fighting despite grievous wounds. If you drop to 0 Hit Points while your Rage is active and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, your Hit Points instead change to a number equal to twice your Barbarian level.
+
+        Each time you use this feature after the first, the DC increases by 5. When you finish a Short or Long Rest, the DC resets to 10.
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '13':
+    traits:
+    - name: Improved Brutal Strike
+      text: |-
+        You have honed new ways to attack furiously. The following effects are now among your Brutal Strike options.
+
+        _Staggering Blow._ The target has Disadvantage on the next saving throw it makes, and it can't make Opportunity Attacks until the start of your next turn.
+
+        _Sundering Blow._ Before the start of your next turn, the next attack roll made by another creature against the target gains a +5 bonus to the roll. An attack roll can gain only one Sundering Blow bonus.
+  '15':
+    traits:
+    - name: Persistent Rage
+      text: |-
+        When you roll Initiative, you can regain all expended uses of Rage. After you regain uses of Rage in this way, you can't do so again until you finish a Long Rest.
+
+        In addition, your Rage is so fierce that it now lasts for 10 minutes without you needing to do anything to extend it from round to round. Your Rage ends early if you have the Unconscious condition (not just the Incapacitated condition) or don Heavy armor.
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '17':
+    traits:
+    - name: Improved Brutal Strike
+      text: The extra damage of your Brutal Strike increases to 2d10. In addition, you can use two different
+        Brutal Strike effects whenever you use your Brutal Strike feature.
+  '18':
+    traits:
+    - name: Indomitable Might
+      text: If your total for a Strength check or Strength saving throw is less than your Strength score,
+        you can use that score in place of the total.
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of Irresistible Offense is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.
+  '20':
+    traits:
+    - name: Primal Champion
+      text: You embody primal power. Your Strength and Constitution scores increase by 4, to a maximum
+        of 25.
+    ability_bonuses:
+    - {ability: str, value: 4, max: 25}
+    - {ability: con, value: 4, max: 25}

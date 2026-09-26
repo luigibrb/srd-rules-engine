@@ -117,6 +117,37 @@ describe("HTTP API", () => {
     );
   });
 
+  it("levels up and sets choices over HTTP", async () => {
+    const build = fighterBuild();
+    const up = await api.post("/v1/builds/level-up", { build, class_id: "fighter", hp: 7 });
+    expect(up.status).toBe(200);
+    expect(up.body.build.levels).toEqual([{ class_id: "fighter", hp: 7 }]);
+    const three = await api.post("/v1/builds/level-up", {
+      build: up.body.build,
+      class_id: "fighter",
+    });
+    const ev = await api.post("/v1/builds/evaluate", three.body.build);
+    const subclass = ev.body.choices.find(
+      (c: { key: string }) => c.key === "class:fighter:3#subclass",
+    );
+    expect(subclass).toMatchObject({ level: 3, required: 1, selected: [] });
+    const chosen = await api.post("/v1/builds/set-choice", {
+      build: three.body.build,
+      key: "class:fighter:3#subclass",
+      values: ["champion"],
+    });
+    const after = await api.post("/v1/builds/evaluate", chosen.body.build);
+    expect(after.body.sheet.critical_hit_on).toBe(19);
+    expect(after.body.sheet.level).toBe(3);
+    const down = await api.post("/v1/builds/remove-level", { build: chosen.body.build });
+    expect(down.body.build.levels).toHaveLength(1);
+    const bad = await api.post("/v1/builds/level-up", { build, class_id: "wizard" });
+    expect(bad).toMatchObject({
+      status: 400,
+      body: { detail: ["Wizard: Wizard needs Intelligence 13+"] },
+    });
+  });
+
   it("rejects bad requests", async () => {
     expect((await api.get("/nope")).status).toBe(404);
     expect((await api.get("/v1/combat/roll")).status).toBe(405);

@@ -19,18 +19,148 @@
           "default": "",
           "type": "string"
         },
-        "creature_type": {
-          "default": "Humanoid",
+        "category": {
           "type": "string"
         },
+        "prerequisite": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "class_level": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "class": {
+                          "type": "string"
+                        },
+                        "level": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "class"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "abilities": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "any_of": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "str",
+                              "dex",
+                              "con",
+                              "int",
+                              "wis",
+                              "cha"
+                            ]
+                          }
+                        },
+                        "min": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "any_of",
+                        "min"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "requires": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "trait": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "spellcasting": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "spells": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repeatable": {
+          "default": false,
+          "type": "boolean"
+        },
+        "repeat_requires_different": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "grants": {
+          "default": {},
           "$ref": "#/$defs/Grants"
+        },
+        "unsupported": {
+          "default": "",
+          "type": "string"
         }
       },
       "required": [
         "id",
         "name",
-        "grants"
+        "category"
       ],
       "additionalProperties": false
     },
@@ -54,18 +184,148 @@
             "default": "",
             "type": "string"
           },
-          "creature_type": {
-            "default": "Humanoid",
+          "category": {
             "type": "string"
           },
+          "prerequisite": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "class_level": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "class": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "default": 1,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "class"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "abilities": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "any_of": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "str",
+                                "dex",
+                                "con",
+                                "int",
+                                "wis",
+                                "cha"
+                              ]
+                            }
+                          },
+                          "min": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "any_of",
+                          "min"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "requires": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "trait": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "spellcasting": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "spells": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repeatable": {
+            "default": false,
+            "type": "boolean"
+          },
+          "repeat_requires_different": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "grants": {
+            "default": {},
             "$ref": "#/$defs/Grants"
+          },
+          "unsupported": {
+            "default": "",
+            "type": "string"
           }
         },
         "required": [
           "id",
           "name",
-          "grants"
+          "category"
         ],
         "additionalProperties": false
       }
@@ -737,5 +997,5 @@
       "additionalProperties": false
     }
   },
-  "title": "species content"
+  "title": "features content"
 }
