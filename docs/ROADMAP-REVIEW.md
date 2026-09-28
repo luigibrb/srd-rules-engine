@@ -269,3 +269,10 @@ Approved with the recommendations above:
   weren't rewritten on top of combatants (their results have a different shape); they stay
   as they are, with `applyDamage` already on `takeDamage`. Spell casting moves to combatants in
   P4, with the spell mechanics.
+- **P4a (done, branch `p4a-spell-mechanics`):** `SpellMechanicsSchema` on catalog spells, from a
+  MECHANICS overlay in `import-srd-spells.ts`; `castSpell` (attack per target or beam, save with
+  damage rolled once, halving per type, upcasting, Cantrip Upgrade, healing, conditions, caster
+  and target play actions); combatants gained `level` and `spellcasting`; `POST /v1/state/cast`;
+  11 golden spells; the `Spell` model and `Character` spell functions deprecated. Not modeled
+  yet: Magic Missile-style darts (a flat bonus per dart), spells with both an attack and a save,
+  riders such as Guiding Bolt's Advantage (text).

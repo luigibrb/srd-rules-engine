@@ -21975,7 +21975,30 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [
+                    {
+                        "dice": "1d6",
+                        "type": "acid",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 5
+                }
+            }
         },
         {
             "id": "chill-touch",
@@ -21994,7 +22017,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dancing-lights",
@@ -22013,7 +22037,8 @@
             "range": "120 feet",
             "components": "V, S, M (a bit of phosphorus)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "druidcraft",
@@ -22030,7 +22055,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "eldritch-blast",
@@ -22047,7 +22073,24 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d10",
+                        "type": "force",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "beams",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "elementalism",
@@ -22066,7 +22109,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "fire-bolt",
@@ -22084,7 +22128,24 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d10",
+                        "type": "fire",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "guidance",
@@ -22102,7 +22163,8 @@
             "range": "Touch",
             "components": "",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "light",
@@ -22122,7 +22184,8 @@
             "range": "Touch",
             "components": "V, M (a firefly or phosphorescent moss)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mage-hand",
@@ -22142,7 +22205,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mending",
@@ -22163,7 +22227,8 @@
             "range": "Touch",
             "components": "V, S, M (two lodestones)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "message",
@@ -22183,7 +22248,8 @@
             "range": "120 feet",
             "components": "S, M (a copper wire)",
             "duration": "1 round",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "minor-illusion",
@@ -22203,7 +22269,8 @@
             "range": "30 feet",
             "components": "S, M (a bit of fleece)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "poison-spray",
@@ -22223,7 +22290,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "prestidigitation",
@@ -22243,7 +22311,8 @@
             "range": "10 feet",
             "components": "V, S",
             "duration": "Up to 1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "produce-flame",
@@ -22260,7 +22329,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "ray-of-frost",
@@ -22278,7 +22348,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "resistance",
@@ -22296,7 +22367,8 @@
             "range": "Touch",
             "components": "",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "sacred-flame",
@@ -22313,7 +22385,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shillelagh",
@@ -22330,7 +22403,8 @@
             "range": "Self",
             "components": "V, S, M (mistletoe)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shocking-grasp",
@@ -22348,7 +22422,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sorcerous-burst",
@@ -22365,7 +22440,8 @@
             "range": "120 feet",
             "components": "",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "spare-the-dying",
@@ -22383,7 +22459,8 @@
             "range": "15 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "starry-wisp",
@@ -22401,7 +22478,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "thaumaturgy",
@@ -22418,7 +22496,8 @@
             "range": "30 feet",
             "components": "V",
             "duration": "Up to 1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "true-strike",
@@ -22438,7 +22517,8 @@
             "range": "Self",
             "components": "S, M (a weapon with which you have proficiency and that is worth 1+ CP)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "vicious-mockery",
@@ -22455,7 +22535,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "alarm",
@@ -22473,7 +22554,8 @@
             "range": "30 feet",
             "components": "V, S, M (a bell and silver wire)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "animal-friendship",
@@ -22492,7 +22574,8 @@
             "range": "30 feet",
             "components": "V, S, M (a morsel of food)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "bane",
@@ -22511,7 +22594,8 @@
             "range": "30 feet",
             "components": "V, S, M (a drop of blood)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "bless",
@@ -22529,7 +22613,8 @@
             "range": "30 feet",
             "components": "V, S, M (a Holy Symbol worth 5+ GP)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "burning-hands",
@@ -22547,7 +22632,39 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d6",
+                        "type": "fire",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cone",
+                    "size": 15
+                }
+            }
         },
         {
             "id": "charm-person",
@@ -22568,7 +22685,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "chromatic-orb",
@@ -22586,7 +22704,8 @@
             "range": "90 feet",
             "components": "V, S, M (a diamond worth 50+ GP)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "color-spray",
@@ -22605,7 +22724,8 @@
             "range": "Self",
             "components": "V, S, M (a pinch of colorful sand)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "command",
@@ -22624,7 +22744,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "comprehend-languages",
@@ -22644,7 +22765,8 @@
             "range": "Self",
             "components": "V, S, M (a pinch of soot and salt)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "create-or-destroy-water",
@@ -22662,7 +22784,8 @@
             "range": "30 feet",
             "components": "V, S, M (a mix of water and sand)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "cure-wounds",
@@ -22683,7 +22806,25 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": {
+                    "dice": "2d8",
+                    "add_modifier": true
+                },
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": "2d8",
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "detect-evil-and-good",
@@ -22701,7 +22842,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "detect-magic",
@@ -22725,7 +22867,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "detect-poison-and-disease",
@@ -22745,7 +22888,8 @@
             "range": "Self",
             "components": "V, S, M (a yew leaf)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "disguise-self",
@@ -22764,7 +22908,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dissonant-whispers",
@@ -22781,7 +22926,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "divine-favor",
@@ -22798,7 +22944,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "divine-smite",
@@ -22815,7 +22962,8 @@
             "range": "Self",
             "components": "",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "ensnaring-strike",
@@ -22832,7 +22980,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "entangle",
@@ -22850,7 +22999,8 @@
             "range": "90 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "expeditious-retreat",
@@ -22869,7 +23019,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "faerie-fire",
@@ -22887,7 +23038,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "false-life",
@@ -22905,7 +23057,8 @@
             "range": "Self",
             "components": "V, S, M (a drop of alcohol)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "feather-fall",
@@ -22924,7 +23077,8 @@
             "range": "60 feet",
             "components": "V, M (a small feather or piece of down)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "find-familiar",
@@ -22941,7 +23095,8 @@
             "range": "10 feet",
             "components": "V, S, M (burning incense worth 10+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "floating-disk",
@@ -22958,7 +23113,8 @@
             "range": "30 feet",
             "components": "V, S, M (a drop of mercury)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "fog-cloud",
@@ -22978,7 +23134,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "goodberry",
@@ -22996,7 +23153,8 @@
             "range": "Self",
             "components": "V, S, M (a sprig of mistletoe)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "grease",
@@ -23014,7 +23172,8 @@
             "range": "60 feet",
             "components": "V, S, M (a bit of pork rind or butter)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "guiding-bolt",
@@ -23031,7 +23190,33 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "1 round",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "4d6",
+                        "type": "radiant",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "healing-word",
@@ -23050,7 +23235,25 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": {
+                    "dice": "2d4",
+                    "add_modifier": true
+                },
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": "2d4",
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "hellish-rebuke",
@@ -23067,7 +23270,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "heroism",
@@ -23085,7 +23289,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "hex",
@@ -23102,7 +23307,8 @@
             "range": "90 feet",
             "components": "V, S, M (the petrified eye of a newt)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "hideous-laughter",
@@ -23121,7 +23327,8 @@
             "range": "30 feet",
             "components": "V, S, M (a tart and a feather)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "hunters-mark",
@@ -23138,7 +23345,8 @@
             "range": "90 feet",
             "components": "V",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "ice-knife",
@@ -23157,7 +23365,8 @@
             "range": "60 feet",
             "components": "S, M (a drop of water or a piece of ice)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "identify",
@@ -23175,7 +23384,8 @@
             "range": "Touch",
             "components": "V, S, M (a pearl worth 100+ GP)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "illusory-script",
@@ -23194,7 +23404,8 @@
             "range": "Touch",
             "components": "S, M (ink worth 10+ GP, which the spell consumes)",
             "duration": "10 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "inflict-wounds",
@@ -23211,7 +23422,36 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d10",
+                        "type": "necrotic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "necrotic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "jump",
@@ -23231,7 +23471,8 @@
             "range": "Touch",
             "components": "",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "longstrider",
@@ -23251,7 +23492,8 @@
             "range": "Touch",
             "components": "V, S, M (a pinch of dirt)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mage-armor",
@@ -23269,7 +23511,8 @@
             "range": "Touch",
             "components": "V, S, M (a piece of cured leather)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "magic-missile",
@@ -23287,7 +23530,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "protection-from-evil-and-good",
@@ -23308,7 +23552,8 @@
             "range": "Touch",
             "components": "V, S, M (a flask of Holy Water worth 25+ GP, which the spell consumes)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "purify-food-and-drink",
@@ -23327,7 +23572,8 @@
             "range": "10 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "ray-of-sickness",
@@ -23345,7 +23591,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sanctuary",
@@ -23362,7 +23609,8 @@
             "range": "30 feet",
             "components": "V, S, M (a shard of glass from a mirror)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "searing-smite",
@@ -23379,7 +23627,8 @@
             "range": "Self",
             "components": "",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shield",
@@ -23397,7 +23646,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "1 round",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shield-of-faith",
@@ -23415,7 +23665,8 @@
             "range": "60 feet",
             "components": "V, S, M (a prayer scroll)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "silent-image",
@@ -23434,7 +23685,8 @@
             "range": "60 feet",
             "components": "V, S, M (a bit of fleece)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "sleep",
@@ -23453,7 +23705,8 @@
             "range": "60 feet",
             "components": "V, S, M (a pinch of sand or rose petals)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "speak-with-animals",
@@ -23473,7 +23726,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "thunderwave",
@@ -23493,7 +23747,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "unseen-servant",
@@ -23512,7 +23767,8 @@
             "range": "60 feet",
             "components": "V, S, M (a bit of string and of wood)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "acid-arrow",
@@ -23529,7 +23785,8 @@
             "range": "90 feet",
             "components": "V, S, M (powdered rhubarb leaf)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "aid",
@@ -23550,7 +23807,8 @@
             "range": "30 feet",
             "components": "V, S, M (a strip of white cloth)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "alter-self",
@@ -23568,7 +23826,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "animal-messenger",
@@ -23587,7 +23846,8 @@
             "range": "30 feet",
             "components": "V, S, M (a morsel of food)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "arcane-lock",
@@ -23604,7 +23864,8 @@
             "range": "Touch",
             "components": "V, S, M (gold dust worth 25+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "arcanists-magic-aura",
@@ -23621,7 +23882,8 @@
             "range": "Touch",
             "components": "V, S, M (a small square of silk)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "augury",
@@ -23640,7 +23902,8 @@
             "range": "Self",
             "components": "V, S, M (specially marked sticks, bones, cards, or other divinatory tokens worth 25+ GP)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "barkskin",
@@ -23658,7 +23921,8 @@
             "range": "Touch",
             "components": "",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "blindness-deafness",
@@ -23678,7 +23942,8 @@
             "range": "120 feet",
             "components": "V",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "blur",
@@ -23696,7 +23961,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "calm-emotions",
@@ -23714,7 +23980,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "continual-flame",
@@ -23733,7 +24000,8 @@
             "range": "Touch",
             "components": "V, S, M (ruby dust worth 50+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "darkness",
@@ -23752,7 +24020,8 @@
             "range": "60 feet",
             "components": "V, M (bat fur and a piece of coal)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "darkvision",
@@ -23772,7 +24041,8 @@
             "range": "Touch",
             "components": "V, S, M (a dried carrot)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "detect-thoughts",
@@ -23791,7 +24061,8 @@
             "range": "Self",
             "components": "V, S, M (1 Copper Piece)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "dragons-breath",
@@ -23809,7 +24080,8 @@
             "range": "Touch",
             "components": "V, S, M (a hot pepper)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "enhance-ability",
@@ -23831,7 +24103,8 @@
             "range": "Touch",
             "components": "V, S, M (fur or a feather)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "enlarge-reduce",
@@ -23851,7 +24124,8 @@
             "range": "30 feet",
             "components": "V, S, M (a pinch of powdered iron)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "enthrall",
@@ -23869,7 +24143,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "find-steed",
@@ -23886,7 +24161,8 @@
             "range": "30 feet",
             "components": "",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "find-traps",
@@ -23905,7 +24181,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "flame-blade",
@@ -23923,7 +24200,8 @@
             "range": "Self",
             "components": "V, S, M (a sumac leaf)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "flaming-sphere",
@@ -23942,7 +24220,8 @@
             "range": "60 feet",
             "components": "V, S, M (a ball of wax)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "gentle-repose",
@@ -23961,7 +24240,8 @@
             "range": "Touch",
             "components": "V, S, M (2 Copper Pieces, which the spell consumes)",
             "duration": "10 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "gust-of-wind",
@@ -23981,7 +24261,8 @@
             "range": "Self",
             "components": "V, S, M (a legume seed)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "heat-metal",
@@ -23999,7 +24280,8 @@
             "range": "60 feet",
             "components": "V, S, M (a piece of iron and a flame)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "hold-person",
@@ -24021,7 +24303,30 @@
             "range": "60 feet",
             "components": "V, S, M (a straight piece of iron)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "paralyzed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "invisibility",
@@ -24041,7 +24346,8 @@
             "range": "Touch",
             "components": "V, S, M (an eyelash in gum arabic)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "knock",
@@ -24060,7 +24366,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "lesser-restoration",
@@ -24081,7 +24388,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "levitate",
@@ -24099,7 +24407,8 @@
             "range": "60 feet",
             "components": "V, S, M (a metal spring)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "locate-animals-or-plants",
@@ -24118,7 +24427,8 @@
             "range": "Self",
             "components": "V, S, M (fur from a bloodhound)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "locate-object",
@@ -24140,7 +24450,8 @@
             "range": "Self",
             "components": "V, S, M (a forked twig)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "magic-mouth",
@@ -24158,7 +24469,8 @@
             "range": "30 feet",
             "components": "V, S, M (jade dust worth 10+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "magic-weapon",
@@ -24178,7 +24490,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mind-spike",
@@ -24197,7 +24510,8 @@
             "range": "120 feet",
             "components": "S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "mirror-image",
@@ -24217,7 +24531,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "misty-step",
@@ -24236,7 +24551,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "moonbeam",
@@ -24253,7 +24569,8 @@
             "range": "120 feet",
             "components": "V, S, M (a moonseed leaf)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "pass-without-trace",
@@ -24271,7 +24588,8 @@
             "range": "Self",
             "components": "V, S, M (ashes from burned mistletoe)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "phantasmal-force",
@@ -24290,7 +24608,8 @@
             "range": "60 feet",
             "components": "V, S, M (a bit of fleece)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "prayer-of-healing",
@@ -24308,7 +24627,8 @@
             "range": "30 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "protection-from-poison",
@@ -24328,7 +24648,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "ray-of-enfeeblement",
@@ -24346,7 +24667,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "rope-trick",
@@ -24363,7 +24685,8 @@
             "range": "Touch",
             "components": "V, S, M (a segment of rope)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "scorching-ray",
@@ -24381,7 +24704,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "see-invisibility",
@@ -24400,7 +24724,8 @@
             "range": "Self",
             "components": "V, S, M (a pinch of talc)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shatter",
@@ -24419,7 +24744,8 @@
             "range": "60 feet",
             "components": "V, S, M (a chip of mica)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shining-smite",
@@ -24436,7 +24762,8 @@
             "range": "Self",
             "components": "",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "silence",
@@ -24455,7 +24782,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "spider-climb",
@@ -24474,7 +24802,8 @@
             "range": "Touch",
             "components": "V, S, M (a drop of bitumen and a spider)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "spike-growth",
@@ -24492,7 +24821,8 @@
             "range": "150 feet",
             "components": "V, S, M (seven thorns)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "spiritual-weapon",
@@ -24509,7 +24839,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "suggestion",
@@ -24529,7 +24860,8 @@
             "range": "30 feet",
             "components": "V, M (a drop of honey)",
             "duration": "Concentration, up to 8 hours",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "warding-bond",
@@ -24547,7 +24879,8 @@
             "range": "Touch",
             "components": "V, S, M (a pair of platinum rings worth 50+ GP each, which you and the target must wear for the duration)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "web",
@@ -24565,7 +24898,8 @@
             "range": "60 feet",
             "components": "V, S, M (a bit of spiderweb)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "zone-of-truth",
@@ -24584,7 +24918,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "animate-dead",
@@ -24602,7 +24937,8 @@
             "range": "10 feet",
             "components": "V, S, M (a drop of blood, a piece of flesh, and a pinch of bone dust)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "beacon-of-hope",
@@ -24619,7 +24955,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "bestow-curse",
@@ -24638,7 +24975,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "blink",
@@ -24656,7 +24994,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "call-lightning",
@@ -24673,7 +25012,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "clairvoyance",
@@ -24693,7 +25033,8 @@
             "range": "1 mile",
             "components": "V, S, M (a focus worth 100+ GP, either a jeweled horn for hearing or a glass eye for seeing)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "conjure-animals",
@@ -24711,7 +25052,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "counterspell",
@@ -24730,7 +25072,8 @@
             "range": "60 feet",
             "components": "S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "create-food-and-water",
@@ -24748,7 +25091,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "daylight",
@@ -24769,7 +25113,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dispel-magic",
@@ -24793,7 +25138,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "fear",
@@ -24813,7 +25159,8 @@
             "range": "Self",
             "components": "V, S, M (a white feather)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "fireball",
@@ -24831,7 +25178,39 @@
             "range": "150 feet",
             "components": "V, S, M (a ball of bat guano and sulfur)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "8d6",
+                        "type": "fire",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20
+                }
+            }
         },
         {
             "id": "fly",
@@ -24850,7 +25229,8 @@
             "range": "Touch",
             "components": "V, S, M (a feather)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "gaseous-form",
@@ -24869,7 +25249,8 @@
             "range": "Touch",
             "components": "V, S, M (a bit of gauze)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "glyph-of-warding",
@@ -24888,7 +25269,8 @@
             "range": "Touch",
             "components": "V, S, M (powdered diamond worth 200+ GP, which the spell consumes)",
             "duration": "Until dispelled or triggered",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "haste",
@@ -24906,7 +25288,8 @@
             "range": "30 feet",
             "components": "V, S, M (a shaving of licorice root)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "hypnotic-pattern",
@@ -24926,7 +25309,8 @@
             "range": "120 feet",
             "components": "S, M (a pinch of confetti)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "lightning-bolt",
@@ -24944,7 +25328,8 @@
             "range": "Self",
             "components": "V, S, M (a bit of fur and a crystal rod)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "magic-circle",
@@ -24964,7 +25349,8 @@
             "range": "10 feet",
             "components": "V, S, M (salt and powdered silver worth 100+ GP, which the spell consumes)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "major-image",
@@ -24984,7 +25370,8 @@
             "range": "120 feet",
             "components": "V, S, M (a bit of fleece)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "mass-healing-word",
@@ -25002,7 +25389,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "meld-into-stone",
@@ -25021,7 +25409,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "nondetection",
@@ -25040,7 +25429,8 @@
             "range": "Touch",
             "components": "V, S, M (a pinch of diamond dust worth 25+ GP, which the spell consumes)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "phantom-steed",
@@ -25057,7 +25447,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "plant-growth",
@@ -25076,7 +25467,8 @@
             "range": "150 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "protection-from-energy",
@@ -25097,7 +25489,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "remove-curse",
@@ -25117,7 +25510,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "revivify",
@@ -25137,7 +25531,8 @@
             "range": "Touch",
             "components": "V, S, M (a diamond worth 300+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sending",
@@ -25156,7 +25551,8 @@
             "range": "Unlimited",
             "components": "V, S, M (a copper wire)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sleet-storm",
@@ -25175,7 +25571,8 @@
             "range": "150 feet",
             "components": "V, S, M (a miniature umbrella)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "slow",
@@ -25194,7 +25591,8 @@
             "range": "120 feet",
             "components": "V, S, M (a drop of molasses)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "speak-with-dead",
@@ -25213,7 +25611,8 @@
             "range": "10 feet",
             "components": "V, S, M (burning incense)",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "speak-with-plants",
@@ -25232,7 +25631,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "spirit-guardians",
@@ -25249,7 +25649,8 @@
             "range": "Self",
             "components": "V, S, M (a prayer scroll)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "stinking-cloud",
@@ -25268,7 +25669,8 @@
             "range": "90 feet",
             "components": "V, S, M (a rotten egg)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "tiny-hut",
@@ -25286,7 +25688,8 @@
             "range": "Self",
             "components": "V, S, M (a crystal bead)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "tongues",
@@ -25307,7 +25710,8 @@
             "range": "Touch",
             "components": "V, M (a miniature ziggurat)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "vampiric-touch",
@@ -25326,7 +25730,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "water-breathing",
@@ -25346,7 +25751,8 @@
             "range": "30 feet",
             "components": "V, S, M (a short reed)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "water-walk",
@@ -25366,7 +25772,8 @@
             "range": "30 feet",
             "components": "V, S, M (a piece of cork)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "wind-wall",
@@ -25384,7 +25791,8 @@
             "range": "120 feet",
             "components": "V, S, M (a fan and a feather)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "arcane-eye",
@@ -25401,7 +25809,8 @@
             "range": "30 feet",
             "components": "V, S, M (a bit of bat fur)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "aura-of-life",
@@ -25419,7 +25828,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "banishment",
@@ -25440,7 +25850,8 @@
             "range": "30 feet",
             "components": "V, S, M (a pentacle)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "black-tentacles",
@@ -25457,7 +25868,8 @@
             "range": "90 feet",
             "components": "V, S, M (a tentacle)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "blight",
@@ -25477,7 +25889,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "charm-monster",
@@ -25498,7 +25911,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "compulsion",
@@ -25515,7 +25929,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "confusion",
@@ -25535,7 +25950,8 @@
             "range": "90 feet",
             "components": "V, S, M (three nut shells)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "conjure-minor-elementals",
@@ -25553,7 +25969,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "conjure-woodland-beings",
@@ -25571,7 +25988,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "control-water",
@@ -25590,7 +26008,8 @@
             "range": "300 feet",
             "components": "V, S, M (a mixture of water and dust)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "death-ward",
@@ -25608,7 +26027,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dimension-door",
@@ -25628,7 +26048,8 @@
             "range": "500 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "divination",
@@ -25647,7 +26068,8 @@
             "range": "Self",
             "components": "V, S, M (incense worth 25+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dominate-beast",
@@ -25666,7 +26088,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "fabricate",
@@ -25683,7 +26106,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "faithful-hound",
@@ -25700,7 +26124,8 @@
             "range": "30 feet",
             "components": "V, S, M (a silver whistle)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "fire-shield",
@@ -25719,7 +26144,8 @@
             "range": "Self",
             "components": "V, S, M (a bit of phosphorus or a firefly)",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "freedom-of-movement",
@@ -25739,7 +26165,8 @@
             "range": "Touch",
             "components": "V, S, M (a leather strap)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "giant-insect",
@@ -25756,7 +26183,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "greater-invisibility",
@@ -25775,7 +26203,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "guardian-of-faith",
@@ -25792,7 +26221,8 @@
             "range": "30 feet",
             "components": "V",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "hallucinatory-terrain",
@@ -25812,7 +26242,8 @@
             "range": "300 feet",
             "components": "V, S, M (a mushroom)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "ice-storm",
@@ -25831,7 +26262,44 @@
             "range": "300 feet",
             "components": "V, S, M (a mitten)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d10",
+                        "type": "bludgeoning",
+                        "add_modifier": false
+                    },
+                    {
+                        "dice": "4d6",
+                        "type": "cold",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "bludgeoning"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cylinder",
+                    "size": 20
+                }
+            }
         },
         {
             "id": "locate-creature",
@@ -25853,7 +26321,8 @@
             "range": "Self",
             "components": "V, S, M (fur from a bloodhound)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "phantasmal-killer",
@@ -25871,7 +26340,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "polymorph",
@@ -25891,7 +26361,8 @@
             "range": "60 feet",
             "components": "V, S, M (a caterpillar cocoon)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "private-sanctum",
@@ -25908,7 +26379,8 @@
             "range": "120 feet",
             "components": "V, S, M (a thin sheet of lead)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "resilient-sphere",
@@ -25925,7 +26397,8 @@
             "range": "30 feet",
             "components": "V, S, M (a glass sphere)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "secret-chest",
@@ -25942,7 +26415,8 @@
             "range": "Touch",
             "components": "V, S, M (a chest, 3 feet by 2 feet by 2 feet, constructed from rare materials worth 5,000+ GP, and a Tiny replica of the chest made from the same materials worth 50+ GP)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "stone-shape",
@@ -25961,7 +26435,8 @@
             "range": "Touch",
             "components": "V, S, M (soft clay)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "stoneskin",
@@ -25981,7 +26456,8 @@
             "range": "Touch",
             "components": "V, S, M (diamond dust worth 100+ GP, which the spell consumes)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "vitriolic-sphere",
@@ -25999,7 +26475,8 @@
             "range": "150 feet",
             "components": "V, S, M (a drop of bile)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "wall-of-fire",
@@ -26018,7 +26495,8 @@
             "range": "120 feet",
             "components": "V, S, M (a piece of charcoal)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "animate-objects",
@@ -26037,7 +26515,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "antilife-shell",
@@ -26054,7 +26533,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "arcane-hand",
@@ -26072,7 +26552,8 @@
             "range": "120 feet",
             "components": "V, S, M (an eggshell and a glove)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "awaken",
@@ -26090,7 +26571,8 @@
             "range": "Touch",
             "components": "V, S, M (an agate worth 1,000+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "cloudkill",
@@ -26108,7 +26590,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "commune",
@@ -26125,7 +26608,8 @@
             "range": "Self",
             "components": "V, S, M (incense)",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "commune-with-nature",
@@ -26143,7 +26627,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "cone-of-cold",
@@ -26162,7 +26647,8 @@
             "range": "Self",
             "components": "V, S, M (a small crystal or glass cone)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "conjure-elemental",
@@ -26180,7 +26666,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "contact-other-plane",
@@ -26198,7 +26685,8 @@
             "range": "Self",
             "components": "V",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "contagion",
@@ -26216,7 +26704,8 @@
             "range": "Touch",
             "components": "",
             "duration": "7 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "creation",
@@ -26234,7 +26723,8 @@
             "range": "30 feet",
             "components": "V, S, M (a paintbrush)",
             "duration": "Special",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dispel-evil-and-good",
@@ -26252,7 +26742,8 @@
             "range": "Self",
             "components": "V, S, M (powdered silver and iron)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "dominate-person",
@@ -26271,7 +26762,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "dream",
@@ -26290,7 +26782,8 @@
             "range": "Special",
             "components": "V, S, M (a handful of sand)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "flame-strike",
@@ -26307,7 +26800,8 @@
             "range": "60 feet",
             "components": "V, S, M (a pinch of sulfur)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "geas",
@@ -26328,7 +26822,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "30 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "greater-restoration",
@@ -26349,7 +26844,8 @@
             "range": "Touch",
             "components": "V, S, M (diamond dust worth 100+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "hallow",
@@ -26366,7 +26862,8 @@
             "range": "Touch",
             "components": "V, S, M (incense worth 1,000+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "hold-monster",
@@ -26386,7 +26883,8 @@
             "range": "90 feet",
             "components": "V, S, M (a straight piece of iron)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "insect-plague",
@@ -26405,7 +26903,8 @@
             "range": "300 feet",
             "components": "V, S, M (a locust)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "legend-lore",
@@ -26424,7 +26923,8 @@
             "range": "Self",
             "components": "V, S, M (incense worth 250+ GP, which the spell consumes, and four ivory strips worth 50+ GP each)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mass-cure-wounds",
@@ -26443,7 +26943,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mislead",
@@ -26462,7 +26963,8 @@
             "range": "Self",
             "components": "S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "modify-memory",
@@ -26480,7 +26982,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "passwall",
@@ -26497,7 +27000,8 @@
             "range": "30 feet",
             "components": "V, S, M (a pinch of sesame seeds)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "planar-binding",
@@ -26518,7 +27022,8 @@
             "range": "60 feet",
             "components": "V, S, M (a jewel worth 1,000+ GP, which the spell consumes)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "raise-dead",
@@ -26537,7 +27042,8 @@
             "range": "Touch",
             "components": "V, S, M (a diamond worth 500+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "reincarnate",
@@ -26554,7 +27060,8 @@
             "range": "Touch",
             "components": "V, S, M (rare oils worth 1,000+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "scrying",
@@ -26575,7 +27082,8 @@
             "range": "Self",
             "components": "V, S, M (a focus worth 1,000+ GP, such as a crystal ball, mirror, or water-filled font)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "seeming",
@@ -26594,7 +27102,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "summon-dragon",
@@ -26611,7 +27120,8 @@
             "range": "60 feet",
             "components": "V, S, M (an object with the image of a dragon engraved on it worth 500+ GP)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "telekinesis",
@@ -26629,7 +27139,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "telepathic-bond",
@@ -26647,7 +27158,8 @@
             "range": "30 feet",
             "components": "V, S, M (two eggs)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "teleportation-circle",
@@ -26667,7 +27179,8 @@
             "range": "10 feet",
             "components": "V, M (rare inks worth 50+ GP, which the spell consumes)",
             "duration": "1 round",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "tree-stride",
@@ -26685,7 +27198,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "wall-of-force",
@@ -26702,7 +27216,8 @@
             "range": "120 feet",
             "components": "V, S, M (a shard of glass)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "wall-of-stone",
@@ -26721,7 +27236,8 @@
             "range": "120 feet",
             "components": "V, S, M (a cube of granite)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "blade-barrier",
@@ -26738,7 +27254,8 @@
             "range": "90 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "chain-lightning",
@@ -26756,7 +27273,8 @@
             "range": "150 feet",
             "components": "V, S, M (three silver pins)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "circle-of-death",
@@ -26775,7 +27293,8 @@
             "range": "150 feet",
             "components": "V, S, M (the powder of a crushed black pearl worth 500+ GP)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "conjure-fey",
@@ -26792,7 +27311,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "contingency",
@@ -26809,7 +27329,8 @@
             "range": "Self",
             "components": "V, S, M (a gem-encrusted statuette of yourself worth 1,500+ GP)",
             "duration": "10 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "create-undead",
@@ -26828,7 +27349,8 @@
             "range": "10 feet",
             "components": "V, S, M (one 150+ GP black onyx stone for each corpse)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "disintegrate",
@@ -26846,7 +27368,8 @@
             "range": "60 feet",
             "components": "V, S, M (a lodestone and dust)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "eyebite",
@@ -26866,7 +27389,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "find-the-path",
@@ -26885,7 +27409,8 @@
             "range": "Self",
             "components": "V, S, M (a set of divination tools—such as cards or runes—worth 100+ GP)",
             "duration": "Concentration, up to 1 day",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "flesh-to-stone",
@@ -26904,7 +27429,8 @@
             "range": "60 feet",
             "components": "V, S, M (a cockatrice feather)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "forbiddance",
@@ -26921,7 +27447,8 @@
             "range": "Touch",
             "components": "V, S, M (ruby dust worth 1,000+ GP)",
             "duration": "1 day",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "freezing-sphere",
@@ -26939,7 +27466,8 @@
             "range": "300 feet",
             "components": "V, S, M (a miniature crystal sphere)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "globe-of-invulnerability",
@@ -26957,7 +27485,8 @@
             "range": "Self",
             "components": "V, S, M (a glass bead)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "guards-and-wards",
@@ -26975,7 +27504,8 @@
             "range": "Touch",
             "components": "V, S, M (a silver rod worth 10+ GP)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "harm",
@@ -26992,7 +27522,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "heal",
@@ -27010,7 +27541,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "heroes-feast",
@@ -27029,7 +27561,8 @@
             "range": "Self",
             "components": "V, S, M (a gem-encrusted bowl worth 1,000+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "instant-summons",
@@ -27046,7 +27579,8 @@
             "range": "Touch",
             "components": "V, S, M (a sapphire worth 1,000+ GP)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "irresistible-dance",
@@ -27064,7 +27598,8 @@
             "range": "30 feet",
             "components": "V",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "magic-jar",
@@ -27081,7 +27616,8 @@
             "range": "Self",
             "components": "V, S, M (a gem, crystal, or reliquary worth 500+ GP)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mass-suggestion",
@@ -27100,7 +27636,8 @@
             "range": "60 feet",
             "components": "V, M (a snake's tongue)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "move-earth",
@@ -27119,7 +27656,8 @@
             "range": "120 feet",
             "components": "V, S, M (a miniature shovel)",
             "duration": "Concentration, up to 2 hours",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "planar-ally",
@@ -27136,7 +27674,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "programmed-illusion",
@@ -27154,7 +27693,8 @@
             "range": "120 feet",
             "components": "V, S, M (jade dust worth 25+ GP)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sunbeam",
@@ -27174,7 +27714,8 @@
             "range": "Self",
             "components": "V, S, M (a magnifying glass)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "transport-via-plants",
@@ -27191,7 +27732,8 @@
             "range": "10 feet",
             "components": "V, S",
             "duration": "1 minute",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "true-seeing",
@@ -27212,7 +27754,8 @@
             "range": "Touch",
             "components": "V, S, M (mushroom powder worth 25+ GP, which the spell consumes)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "wall-of-ice",
@@ -27229,7 +27772,8 @@
             "range": "120 feet",
             "components": "V, S, M (a piece of quartz)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "wall-of-thorns",
@@ -27246,7 +27790,8 @@
             "range": "120 feet",
             "components": "V, S, M (a handful of thorns)",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "wind-walk",
@@ -27263,7 +27808,8 @@
             "range": "30 feet",
             "components": "V, S, M (a candle)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "word-of-recall",
@@ -27280,7 +27826,8 @@
             "range": "5 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "arcane-sword",
@@ -27298,7 +27845,8 @@
             "range": "90 feet",
             "components": "V, S, M (a miniature sword worth 250+ GP)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "conjure-celestial",
@@ -27315,7 +27863,8 @@
             "range": "90 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "delayed-blast-fireball",
@@ -27333,7 +27882,8 @@
             "range": "150 feet",
             "components": "V, S, M (a ball of bat guano and sulfur)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "divine-word",
@@ -27350,7 +27900,8 @@
             "range": "30 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "etherealness",
@@ -27371,7 +27922,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Up to 8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "finger-of-death",
@@ -27390,7 +27942,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "fire-storm",
@@ -27409,7 +27962,8 @@
             "range": "150 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "forcecage",
@@ -27428,7 +27982,8 @@
             "range": "100 feet",
             "components": "V, S, M (ruby dust worth 1,500+ GP, which the spell consumes)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "magnificent-mansion",
@@ -27446,7 +28001,8 @@
             "range": "300 feet",
             "components": "V, S, M (a miniature door worth 15+ GP)",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mirage-arcane",
@@ -27465,7 +28021,8 @@
             "range": "Sight",
             "components": "V, S",
             "duration": "10 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "plane-shift",
@@ -27486,7 +28043,8 @@
             "range": "Touch",
             "components": "V, S, M (a forked, metal rod worth 250+ GP and attuned to a plane of existence)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "prismatic-spray",
@@ -27505,7 +28063,8 @@
             "range": "Self",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "project-image",
@@ -27523,7 +28082,8 @@
             "range": "500 miles",
             "components": "V, S, M (a statuette of yourself worth 5+ GP)",
             "duration": "Concentration, up to 1 day",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "regenerate",
@@ -27542,7 +28102,8 @@
             "range": "Touch",
             "components": "V, S, M (a prayer wheel)",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "resurrection",
@@ -27560,7 +28121,8 @@
             "range": "Touch",
             "components": "V, S, M (a diamond worth 1,000+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "reverse-gravity",
@@ -27579,7 +28141,8 @@
             "range": "100 feet",
             "components": "V, S, M (a lodestone and iron filings)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "sequester",
@@ -27596,7 +28159,8 @@
             "range": "Touch",
             "components": "V, S, M (gem dust worth 5,000+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "simulacrum",
@@ -27613,7 +28177,8 @@
             "range": "Touch",
             "components": "V, S, M (powdered ruby worth 1,500+ GP, which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "symbol",
@@ -27633,7 +28198,8 @@
             "range": "Touch",
             "components": "V, S, M (powdered diamond worth 1,000+ GP, which the spell consumes)",
             "duration": "Until dispelled or triggered",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "teleport",
@@ -27652,7 +28218,8 @@
             "range": "10 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "animal-shapes",
@@ -27669,7 +28236,8 @@
             "range": "30 feet",
             "components": "V, S",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "antimagic-field",
@@ -27687,7 +28255,8 @@
             "range": "Self",
             "components": "V, S, M (iron filings)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "antipathy-sympathy",
@@ -27706,7 +28275,8 @@
             "range": "60 feet",
             "components": "V, S, M (a mix of vinegar and honey)",
             "duration": "10 days",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "befuddlement",
@@ -27726,7 +28296,8 @@
             "range": "150 feet",
             "components": "V, S, M (a key ring with no keys)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "clone",
@@ -27743,7 +28314,8 @@
             "range": "Touch",
             "components": "V, S, M (a diamond worth 1,000+ GP, which the spell consumes, and a sealable vessel worth 2,000+ GP that is large enough to hold the creature being cloned)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "control-weather",
@@ -27762,7 +28334,8 @@
             "range": "Self",
             "components": "V, S, M (burning incense)",
             "duration": "Concentration, up to 8 hours",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "demiplane",
@@ -27781,7 +28354,8 @@
             "range": "60 feet",
             "components": "S",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "dominate-monster",
@@ -27801,7 +28375,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "earthquake",
@@ -27820,7 +28395,8 @@
             "range": "500 feet",
             "components": "V, S, M (a fractured rock)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "glibness",
@@ -27838,7 +28414,8 @@
             "range": "Self",
             "components": "V",
             "duration": "1 hour",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "holy-aura",
@@ -27855,7 +28432,8 @@
             "range": "Self",
             "components": "V, S, M (a reliquary worth 1,000+ GP)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "incendiary-cloud",
@@ -27874,7 +28452,8 @@
             "range": "150 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "maze",
@@ -27891,7 +28470,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "mind-blank",
@@ -27909,7 +28489,8 @@
             "range": "Touch",
             "components": "V, S",
             "duration": "24 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "power-word-stun",
@@ -27929,7 +28510,8 @@
             "range": "60 feet",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "sunburst",
@@ -27949,7 +28531,8 @@
             "range": "150 feet",
             "components": "V, S, M (a piece of sunstone)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "tsunami",
@@ -27966,7 +28549,8 @@
             "range": "1 mile",
             "components": "V, S",
             "duration": "Concentration, up to 6 rounds",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "astral-projection",
@@ -27985,7 +28569,8 @@
             "range": "10 feet",
             "components": "V, S, M (for each of the spell's targets, one jacinth worth 1,000+ GP and one silver bar worth 100+ GP, all of which the spell consumes)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "foresight",
@@ -28005,7 +28590,8 @@
             "range": "Touch",
             "components": "V, S, M (a hummingbird feather)",
             "duration": "8 hours",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "gate",
@@ -28025,7 +28611,8 @@
             "range": "60 feet",
             "components": "V, S, M (a diamond worth 5,000+ GP)",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "imprisonment",
@@ -28043,7 +28630,8 @@
             "range": "30 feet",
             "components": "V, S, M (a statuette of the target worth 5,000+ GP)",
             "duration": "Until dispelled",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "mass-heal",
@@ -28060,7 +28648,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "meteor-swarm",
@@ -28078,7 +28667,8 @@
             "range": "1 mile",
             "components": "V, S",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "power-word-heal",
@@ -28096,7 +28686,8 @@
             "range": "60 feet",
             "components": "",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "power-word-kill",
@@ -28116,7 +28707,8 @@
             "range": "60 feet",
             "components": "",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "prismatic-wall",
@@ -28134,7 +28726,8 @@
             "range": "60 feet",
             "components": "V, S",
             "duration": "10 minutes",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "shapechange",
@@ -28152,7 +28745,8 @@
             "range": "Self",
             "components": "V, S, M (a jade circlet worth 1,500+ GP)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "storm-of-vengeance",
@@ -28169,7 +28763,8 @@
             "range": "1 mile",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "time-stop",
@@ -28187,7 +28782,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "true-polymorph",
@@ -28206,7 +28802,8 @@
             "range": "30 feet",
             "components": "V, S, M (a drop of mercury, a dollop of gum arabic, and a wisp of smoke)",
             "duration": "Concentration, up to 1 hour",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "true-resurrection",
@@ -28224,7 +28821,8 @@
             "range": "Touch",
             "components": "V, S, M (diamonds worth 25,000+ GP, which the spell consumes)",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         },
         {
             "id": "weird",
@@ -28242,7 +28840,8 @@
             "range": "120 feet",
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
-            "concentration": true
+            "concentration": true,
+            "mechanics": null
         },
         {
             "id": "wish",
@@ -28260,7 +28859,8 @@
             "range": "Self",
             "components": "V",
             "duration": "Instantaneous",
-            "concentration": false
+            "concentration": false,
+            "mechanics": null
         }
     ],
     "subclasses": [

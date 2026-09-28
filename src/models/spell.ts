@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AbilityFullNameSchema } from "./character";
+import { DAMAGE_TYPES } from "./content";
 
 export const SPELL_SCHOOLS = [
   "abjuration",
@@ -13,23 +14,12 @@ export const SPELL_SCHOOLS = [
 ] as const;
 export type SpellSchool = (typeof SPELL_SCHOOLS)[number];
 
-export const DAMAGE_TYPES = [
-  "acid",
-  "bludgeoning",
-  "cold",
-  "fire",
-  "force",
-  "lightning",
-  "necrotic",
-  "piercing",
-  "poison",
-  "psychic",
-  "radiant",
-  "slashing",
-  "thunder",
-] as const;
-export type DamageType = (typeof DAMAGE_TYPES)[number];
-
+/**
+ * A hand-filled spell for the `Character`-based spell functions.
+ *
+ * @deprecated Catalog spells (`SpellDef`) carry their `mechanics`; cast them with `castSpell`.
+ * Kept until 1.0.
+ */
 export const SpellSchema = z.object({
   name: z.string(),
   level: z.int().min(0).max(9),

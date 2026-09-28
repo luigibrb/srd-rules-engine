@@ -22,6 +22,17 @@
 
     _Cantrip Upgrade._ The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17
     (4d6).
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    damage:
+      - dice: 1d6
+        type: acid
+    cantrip_scaling: dice
+    area:
+      shape: sphere
+      size: 5
 - id: chill-touch
   name: Chill Touch
   level: 0
@@ -119,6 +130,13 @@
     _Cantrip Upgrade._ The spell creates two beams at level 5, three beams at level 11, and four
     beams at level 17. You can direct the beams at the same target or at different ones. Make a
     separate attack roll for each beam.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d10
+        type: force
+    targets: 1
+    cantrip_scaling: beams
 - id: elementalism
   name: Elementalism
   level: 0
@@ -179,6 +197,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and
     17 (4d10).
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d10
+        type: fire
+    targets: 1
+    cantrip_scaling: dice
 - id: guidance
   name: Guidance
   level: 0
@@ -780,6 +805,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 3d6
+        type: fire
+    upcast:
+      damage:
+        - dice: 1d6
+          type: fire
+    area:
+      shape: cone
+      size: 15
 - id: charm-person
   name: Charm Person
   level: 1
@@ -957,6 +996,13 @@
 
     _Using a Higher-Level Spell Slot._ The healing increases by 2d8 for each spell slot level above
     1.
+  mechanics:
+    heal:
+      dice: 2d8
+      add_modifier: true
+    targets: 1
+    upcast:
+      heal: 2d8
 - id: detect-evil-and-good
   name: Detect Evil and Good
   level: 1
@@ -1389,6 +1435,16 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     1.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 4d6
+        type: radiant
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d6
+          type: radiant
 - id: healing-word
   name: Healing Word
   level: 1
@@ -1410,6 +1466,13 @@
 
     _Using a Higher-Level Spell Slot._ The healing increases by 2d4 for each spell slot level above
     1.
+  mechanics:
+    heal:
+      dice: 2d4
+      add_modifier: true
+    targets: 1
+    upcast:
+      heal: 2d4
 - id: hellish-rebuke
   name: Hellish Rebuke
   level: 1
@@ -1620,6 +1683,18 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 2d10
+        type: necrotic
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d10
+          type: necrotic
 - id: jump
   name: Jump
   level: 1
@@ -2789,6 +2864,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional Humanoid for each spell slot
     level above 2.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    targets: 1
+    upcast:
+      targets: 1
+    conditions:
+      - condition: paralyzed
+        on: failed_save
 - id: invisibility
   name: Invisibility
   level: 2
@@ -3851,6 +3936,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     3.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 8d6
+        type: fire
+    upcast:
+      damage:
+        - dice: 1d6
+          type: fire
+    area:
+      shape: sphere
+      size: 20
 - id: fly
   name: Fly
   level: 3
@@ -5390,6 +5489,22 @@
 
     _Using a Higher-Level Spell Slot._ The Bludgeoning damage increases by 1d10 for each spell slot
     level above 4.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 2d10
+        type: bludgeoning
+      - dice: 4d6
+        type: cold
+    upcast:
+      damage:
+        - dice: 1d10
+          type: bludgeoning
+    area:
+      shape: cylinder
+      size: 20
 - id: locate-creature
   name: Locate Creature
   level: 4

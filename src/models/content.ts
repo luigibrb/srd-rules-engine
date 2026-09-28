@@ -640,6 +640,90 @@ export type LanguageDef = z.infer<typeof LanguageSchema>;
 export const MasterySchema = z.strictObject({ ...entity });
 export type MasteryDef = z.infer<typeof MasterySchema>;
 
+export const DAMAGE_TYPES = [
+  "acid",
+  "bludgeoning",
+  "cold",
+  "fire",
+  "force",
+  "lightning",
+  "necrotic",
+  "piercing",
+  "poison",
+  "psychic",
+  "radiant",
+  "slashing",
+  "thunder",
+] as const;
+export type DamageType = (typeof DAMAGE_TYPES)[number];
+
+const Dice = z.string().regex(/^\d+d\d+$/, "dice like 8d6");
+
+export const SPELL_AREAS = ["cone", "cube", "cylinder", "emanation", "line", "sphere"] as const;
+
+/**
+ * What a spell does, as data (`castSpell` uses it). Anything not listed here stays in the
+ * spell's text: durations, movement, repeated saves, choices made while casting.
+ */
+export const SpellMechanicsSchema = z
+  .strictObject({
+    /** A spell attack roll against each target. */
+    attack: z.enum(["melee", "ranged"]).nullable().default(null),
+    /** A saving throw each target makes; on a success, half damage or none. */
+    save: z
+      .strictObject({
+        ability: z.enum(ABILITIES),
+        on_success: z.enum(["half", "none"]).default("none"),
+      })
+      .nullable()
+      .default(null),
+    /** Damage on a hit or a failed save (rolled once for all targets of a save). */
+    damage: z
+      .array(
+        z.strictObject({
+          dice: Dice,
+          type: z.enum(DAMAGE_TYPES),
+          /** Add the spellcasting ability modifier. */
+          add_modifier: z.boolean().default(false),
+        }),
+      )
+      .default([]),
+    /** Hit Points each target regains. */
+    heal: z
+      .strictObject({ dice: Dice, add_modifier: z.boolean().default(false) })
+      .nullable()
+      .default(null),
+    /** How many creatures it can target (`null`: an area, or not limited). */
+    targets: z.int().min(1).nullable().default(null),
+    /** Per spell slot level above the spell's level. */
+    upcast: z
+      .strictObject({
+        /** Dice added to the damage of the same type. */
+        damage: z.array(z.strictObject({ dice: Dice, type: z.enum(DAMAGE_TYPES) })).default([]),
+        heal: Dice.nullable().default(null),
+        /** More targets. */
+        targets: z.int().min(0).default(0),
+      })
+      .nullable()
+      .default(null),
+    /**
+     * Cantrip Upgrade at character levels 5, 11 and 17: more damage dice (`dice`: 2, 3, 4 times
+     * the dice), or more attacks (`beams`: Eldritch Blast).
+     */
+    cantrip_scaling: z.enum(["dice", "beams"]).nullable().default(null),
+    /** Conditions a target gets on a failed save or when hit. */
+    conditions: z
+      .array(z.strictObject({ condition: z.string(), on: z.enum(["failed_save", "hit"]) }))
+      .default([]),
+    area: z
+      .strictObject({ shape: z.enum(SPELL_AREAS), size: z.int().min(1) })
+      .nullable()
+      .default(null),
+  })
+  .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
+  .meta({ id: "SpellMechanics" });
+export type SpellMechanics = z.infer<typeof SpellMechanicsSchema>;
+
 export const SpellDefSchema = z.strictObject({
   ...entity,
   level: z.int().min(0).max(9),
@@ -652,6 +736,8 @@ export const SpellDefSchema = z.strictObject({
   components: z.string(),
   duration: z.string(),
   concentration: z.boolean().default(false),
+  /** What the spell does, as data; `null` while it's only text. */
+  mechanics: SpellMechanicsSchema.nullable().default(null),
 });
 export type SpellDef = z.infer<typeof SpellDefSchema>;
 

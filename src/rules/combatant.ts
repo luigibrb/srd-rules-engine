@@ -24,8 +24,23 @@ import type { AttackLine } from "./sheet";
 export const ROLL_MODES = ["normal", "advantage", "disadvantage"] as const;
 export type RollMode = (typeof ROLL_MODES)[number];
 
+/** A way the combatant casts spells: the list it covers, its save DC and attack bonus. */
+export interface CombatantSpellcasting {
+  /** `Wizard`, `Magic Initiate`… */
+  readonly source: string;
+  /** Spell list id, or `null` for a fixed set of spells. */
+  readonly list: string | null;
+  readonly ability: Ability;
+  readonly save_dc: number;
+  readonly attack_bonus: number;
+  /** The spellcasting ability modifier (added by Cure Wounds and similar). */
+  readonly modifier: number;
+}
+
 export interface Combatant {
   readonly name: string;
+  /** Character level (cantrip damage grows at 5, 11 and 17). */
+  readonly level: number;
   readonly armor_class: number;
   readonly hp: number;
   readonly temp_hp: number;
@@ -41,6 +56,7 @@ export interface Combatant {
   /** The lowest d20 roll that's a Critical Hit with these attacks (20; 19 for a Champion). */
   readonly critical_hit_on: number;
   readonly attacks_per_action: number;
+  readonly spellcasting: readonly CombatantSpellcasting[];
 }
 
 export interface D20Roll {
@@ -180,7 +196,8 @@ const FULL_NAMES = {
 
 /**
  * A combatant from the old hand-filled `Character` snapshot: no attacks (pass an `AttackLine`
- * to `makeAttack`), no saving throw proficiencies, no Temporary Hit Points or defenses.
+ * to `makeAttack`), no spellcasting, no saving throw proficiencies, no Temporary Hit Points or
+ * defenses.
  */
 export function combatantFromSnapshot(character: Character): Combatant {
   const modifiers = Object.fromEntries(
@@ -188,6 +205,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
   ) as Record<Ability, number>;
   return {
     name: character.name,
+    level: character.level,
     armor_class: character.armor_class,
     hp: character.current_hit_points,
     temp_hp: 0,
@@ -200,5 +218,6 @@ export function combatantFromSnapshot(character: Character): Combatant {
     attacks: [],
     critical_hit_on: 20,
     attacks_per_action: 1,
+    spellcasting: [],
   };
 }

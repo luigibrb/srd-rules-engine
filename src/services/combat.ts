@@ -70,6 +70,9 @@ export function resolveAttack(
   return { attack, damage, target: applyDamage(target, damage.roll.total) };
 }
 
+/**
+ * @deprecated Cast catalog spells with `castSpell` (combatants, `mechanics`). Kept until 1.0.
+ */
 export function resolveSpellAttack(
   caster: Character,
   target: Character,
@@ -83,6 +86,9 @@ export function resolveSpellAttack(
   return { attack, damage, target: damage ? applyDamage(target, damage.roll.total) : target };
 }
 
+/**
+ * @deprecated Cast catalog spells with `castSpell` (combatants, `mechanics`). Kept until 1.0.
+ */
 export function resolveSpellSave(
   caster: Character,
   target: Character,

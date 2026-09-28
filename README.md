@@ -162,9 +162,11 @@ A natural 1 always misses. A natural 20 (19 for a Champion) is a Critical Hit: i
 the AC and doubles every damage die. `rollSavingThrow(combatant, "dex", 15)` rolls a save with
 the sheet's bonus. The older functions that take a hand-filled `Character` (`resolveAttack`,
 `attackRoll`) are deprecated; `combatantFromSnapshot` turns a `Character` into a combatant.
-Spells (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) deal half damage on a
-successful save. They still take a `Character` and a `Spell` (`SpellSchema`) that you fill in,
-damage dice included: catalog spells don't carry mechanics yet.
+`castSpell(caster, catalog.spells.fireball, targets, { slot_level: 5 })` casts a catalog spell
+whose `mechanics` are modeled: attack or save (half damage on a success), upcasting, Cantrip
+Upgrade, healing and conditions, with the play actions that apply the result. Mechanics cover a
+first reviewed set of spells; the others are cast with their text. The older `Character` spell
+functions (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) are deprecated.
 
 Attack lines on the sheet carry their damage ready to roll, and `takeDamage` applies the rules
 for Resistance, Vulnerability, Immunity, Temporary Hit Points and dropping to 0:
@@ -243,6 +245,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/new` | Build → a fresh play state |
 | `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
+| `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed? }` → the attack, and the target's state after the damage |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
@@ -251,7 +254,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/combat/attack` | Attack roll and damage (crits double all dice); deprecated, use `/v1/state/attack` |
 | `POST /v1/combat/saving-throw` | Saving throw |
 | `POST /v1/spells/stats` | Spell save DC and attack bonus |
-| `POST /v1/spells/attack` · `/v1/spells/save` | Spell attack or save (half damage on success) |
+| `POST /v1/spells/attack` · `/v1/spells/save` | Spell attack or save (half damage on success); deprecated, use `/v1/state/cast` |
 
 Invalid bodies return `422` with a readable message; bad dice expressions return `400`.
 
@@ -302,7 +305,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Character creation | Complete: all 12 SRD classes, 9 species, 4 backgrounds |
 | Levels | 1–20 with multiclassing (prerequisites, partial proficiencies, combined spell slots, Pact Magic), fixed or rolled Hit Points, Ability Score Improvements, feats with prerequisites, Epic Boons |
 | Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells; the rest is shown as the SRD text |
-| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic |
+| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions) for a first set of 11 spells |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |

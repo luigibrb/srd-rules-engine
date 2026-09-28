@@ -16,7 +16,7 @@ src/
                    #   character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
-  rules/           # pure logic: dice, rng, ability-scores, combat, combatant, damage, spells,
+  rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
                    #   build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   combat.ts (HP, attacks, spells)
@@ -51,6 +51,9 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   in `services/play.ts`). `makeAttack` returns rolls + damage `instances`; the caller applies
   them (play action `{ type: "damage", instances, critical }`). The `Character`-based
   `resolveAttack`/`attackRoll` are deprecated adapters kept until 1.0.
+- Spells: `mechanics` on catalog spells (from the MECHANICS overlay in import-srd-spells.ts,
+  never hand-edited in spells.yaml); `castSpell` in `rules/casting.ts`. A new spell's mechanics
+  need a golden test in `tests/casting.test.ts` checked against the SRD text.
 - Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
   0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).
@@ -124,6 +127,7 @@ npm run serve            # HTTP API on localhost:8000
 `POST /v1/builds/set-choice` · `/level-up` · `/remove-level` · `/set-level-class` · `/set-level-hp` — workflow setters  
 `POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  
 `POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)
+`POST /v1/state/cast` — cast a catalog spell (slot spent, effects applied to targets' states)
 `POST /v1/state/attack` — one character attacks another (combatants); damage applied to the target's state  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  

@@ -52,6 +52,17 @@
         "concentration": {
           "default": false,
           "type": "boolean"
+        },
+        "mechanics": {
+          "default": null,
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SpellMechanics"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -120,6 +131,17 @@
           "concentration": {
             "default": false,
             "type": "boolean"
+          },
+          "mechanics": {
+            "default": null,
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SpellMechanics"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -137,5 +159,283 @@
       }
     }
   ],
+  "$defs": {
+    "SpellMechanics": {
+      "type": "object",
+      "properties": {
+        "attack": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "melee",
+                "ranged"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "save": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "ability": {
+                  "type": "string",
+                  "enum": [
+                    "str",
+                    "dex",
+                    "con",
+                    "int",
+                    "wis",
+                    "cha"
+                  ]
+                },
+                "on_success": {
+                  "default": "none",
+                  "type": "string",
+                  "enum": [
+                    "half",
+                    "none"
+                  ]
+                }
+              },
+              "required": [
+                "ability"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "damage": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dice": {
+                "type": "string",
+                "pattern": "^\\d+d\\d+$"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "acid",
+                  "bludgeoning",
+                  "cold",
+                  "fire",
+                  "force",
+                  "lightning",
+                  "necrotic",
+                  "piercing",
+                  "poison",
+                  "psychic",
+                  "radiant",
+                  "slashing",
+                  "thunder"
+                ]
+              },
+              "add_modifier": {
+                "default": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "dice",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "heal": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dice": {
+                  "type": "string",
+                  "pattern": "^\\d+d\\d+$"
+                },
+                "add_modifier": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "dice"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "targets": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upcast": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "damage": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dice": {
+                        "type": "string",
+                        "pattern": "^\\d+d\\d+$"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "acid",
+                          "bludgeoning",
+                          "cold",
+                          "fire",
+                          "force",
+                          "lightning",
+                          "necrotic",
+                          "piercing",
+                          "poison",
+                          "psychic",
+                          "radiant",
+                          "slashing",
+                          "thunder"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "dice",
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "heal": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^\\d+d\\d+$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "targets": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cantrip_scaling": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "dice",
+                "beams"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conditions": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string"
+              },
+              "on": {
+                "type": "string",
+                "enum": [
+                  "failed_save",
+                  "hit"
+                ]
+              }
+            },
+            "required": [
+              "condition",
+              "on"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "area": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "cone",
+                    "cube",
+                    "cylinder",
+                    "emanation",
+                    "line",
+                    "sphere"
+                  ]
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "shape",
+                "size"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
   "title": "spells content"
 }

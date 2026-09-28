@@ -165,6 +165,28 @@ Spellcasting, or knowing one of some spells. Eldritch Invocations and Metamagic 
 same shape as feats but live in their own `features` table, so an Ability Score Improvement
 ("any feat you qualify for") can't pick one.
 
+### Casting spells
+
+Catalog spells can carry `mechanics` (attack or save, damage by type, healing, targets,
+upcasting, Cantrip Upgrade, conditions, area). `castSpell(caster, spell, targets, { slot_level,
+pact, spellcasting, mode, rng })` in `rules/casting.ts` resolves them between combatants and,
+like `makeAttack`, changes nothing: it returns each target's attack or save, damage instances,
+healing and conditions, with the play actions that apply them (`targets[i].actions`) and the
+caster's (`spend_slot` or `spend_pact_slot`, `set_concentration`). `POST /v1/state/cast` checks
+that the caster has the spell and applies everything to the states.
+
+The spellcasting feature used is the one asked for, else the one with the best save DC whose
+spell list has the spell, else the best overall (a species' fixed spells). A spell without
+`mechanics` is still cast (slot, Concentration) with a note that its effects are in the text.
+
+Interpretations (flagged): on a successful save for half, each damage type is halved separately
+(rounded down), since Resistance applies per type; healing that several targets receive is
+rolled once, like damage; each beam's damage preview is against the target as it was before
+the spell.
+
+Only a reviewed set of spells has mechanics so far (`tests/casting.test.ts` lists them); the
+old `Spell` model and the `Character` spell functions (`resolveSpellSave`…) are deprecated.
+
 ### Changing choices: replacements and lists
 
 The SRD has two kinds of "change it later" rule, modeled differently:
