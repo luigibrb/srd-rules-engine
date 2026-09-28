@@ -13,6 +13,7 @@ export * from "./models/build";
 export * from "./models/character";
 export type * from "./models/combat";
 export * from "./models/content";
+export * from "./models/encounter";
 export * from "./models/pack";
 export * from "./models/spell";
 export * from "./models/state";
@@ -38,6 +39,16 @@ export {
   STEP_TITLES,
 } from "./services/builder";
 export * from "./services/combat";
+export {
+  applyEncounterAction,
+  type CharacterRef,
+  createEncounter,
+  currentCombatant,
+  type EncounterContext,
+  EncounterError,
+  type EncounterResult,
+  encounterCombatant,
+} from "./services/encounter";
 export {
   applyAction,
   combatantFromCharacter,

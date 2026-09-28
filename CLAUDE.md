@@ -19,6 +19,7 @@ src/
   rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
                    #   build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
+                   #   encounter.ts (initiative, turns, action economy, effects on combatants),
                    #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
   cli/             # srd-rules bin: build (interactive builder), play, serve, validate
@@ -56,6 +57,9 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   spells.yaml): parser drafts used only for ids in `REVIEWED` (each checked against the SRD
   text), `REJECTED` drafts with a reason, hand-written `MECHANICS` (win). `--report` lists drafts
   and skips. `castSpell` in `rules/casting.ts`; `tests/casting.test.ts` snapshots all mechanics.
+- Encounters: `Encounter` is its own document (monsters inside, characters by key); change it only
+  via `applyEncounterAction` (JSON actions, `EncounterError`); character changes come back in
+  `states` and go through `applyAction`.
 - Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
   0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).
@@ -133,6 +137,7 @@ npm run serve            # HTTP API on localhost:8000
 `POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  
 `POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)
 `POST /v1/state/cast` — cast a catalog spell (slot spent, effects applied to targets' states)
+`POST /v1/encounters/apply` — encounter actions (initiative, turns, economy, effects on combatants)
 `POST /v1/state/attack` — one character attacks another (combatants); damage applied to the target's state  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  

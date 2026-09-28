@@ -12,6 +12,7 @@ import { type Catalog, lookup, TABLE_NAMES, type TableName } from "../content/ca
 import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
+import { EncounterActionSchema, EncounterSchema } from "../models/encounter";
 import { SpellSchema } from "../models/spell";
 import { type CharacterState, CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { castSpell } from "../rules/casting";
@@ -39,6 +40,7 @@ import {
   resolveSpellAttack,
   resolveSpellSave,
 } from "../services/combat";
+import { applyEncounterAction, type CharacterRef, EncounterError } from "../services/encounter";
 import {
   applyAction,
   combatantFromCharacter,
@@ -114,6 +116,12 @@ const StateCastRequest = z.object({
   pact: z.boolean().default(false),
   spellcasting: z.string().optional(),
   mode: z.enum(ROLL_MODES).default("normal"),
+});
+const EncounterRequest = z.object({
+  encounter: EncounterSchema,
+  /** Characters by key (`add_character`'s `character`): their build and play state. */
+  characters: z.record(z.string(), StateRequest).default({}),
+  action: z.union([EncounterActionSchema, z.array(EncounterActionSchema)]),
 });
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
@@ -512,6 +520,35 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     },
     {
       method: "POST",
+      pattern: /^\/v1\/encounters\/apply$/,
+      handle: ({ body }) => {
+        // One action or a list, applied in order; all or nothing. Changed character states are
+        // returned in `states`, by character key.
+        const req = EncounterRequest.parse(body);
+        const catalog = getCatalog();
+        const characters: Record<string, CharacterRef> = Object.fromEntries(
+          Object.entries(req.characters).map(([key, c]) => [
+            key,
+            { build: parseBuild(c.build), state: c.state },
+          ]),
+        );
+        let encounter = req.encounter;
+        const states: Record<string, CharacterState> = {};
+        const notes: string[] = [];
+        for (const action of Array.isArray(req.action) ? req.action : [req.action]) {
+          const result = applyEncounterAction(encounter, action, { catalog, characters, rng });
+          encounter = result.encounter;
+          for (const [key, state] of Object.entries(result.states)) {
+            states[key] = state;
+            characters[key] = { build: (characters[key] as CharacterRef).build, state };
+          }
+          notes.push(...result.notes);
+        }
+        return { encounter, states, notes };
+      },
+    },
+    {
+      method: "POST",
       pattern: /^\/v1\/state\/reconcile$/,
       handle: ({ body }) => {
         const req = StateRequest.parse(body);
@@ -543,7 +580,9 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       }
       if (error instanceof RangeError) return json(400, { detail: error.message }, cors);
       if (error instanceof BuildError) return json(400, { detail: error.messages }, cors);
-      if (error instanceof PlayError) return json(400, { detail: error.messages }, cors);
+      if (error instanceof PlayError || error instanceof EncounterError) {
+        return json(400, { detail: error.messages }, cors);
+      }
       return json(500, { detail: "Internal Server Error" }, cors);
     }
   };

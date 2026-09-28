@@ -213,6 +213,34 @@ Interpretations (flagged): a "First Failure" is what a failed save does (the sec
 text); conditions a stat block gives only to targets of some size, or after being swallowed or
 engulfed, stay text.
 
+### Encounters
+
+An `Encounter` (`src/models/encounter.ts`) is its own saved document: combatants, the Initiative
+order, the round and whose turn it is, and what each combatant has spent this turn (action,
+Bonus Action, reaction, movement). Monsters live in it (catalog id, current HP, Temporary HP,
+conditions, `defeated`); characters are referenced by a key into the caller's characters (build +
+state), so their HP and conditions stay in their `CharacterState`.
+
+`applyEncounterAction(encounter, action, { catalog, characters, rng })` → `{ encounter, states,
+notes }`, or `EncounterError`. Actions: `add_monster` (average or rolled HP), `add_character`,
+`remove`, `roll_initiative` (d20 + Initiative bonus; Disadvantage when surprised; one roll per
+group of identical monsters), `set_initiative`, `set_order` (ties only), `start`, `next_turn`,
+`end`, `use` (action, Bonus Action or reaction), `move`, `dash`, and `effects`: the play actions
+that `makeAttack`, `castSpell` and `useSaveAction` return. For a character they go through
+`applyAction` on its state (returned in `states`); for a monster, damage goes through
+`takeDamage` with its defenses, and conditions respect its immunities. `encounterCombatant`
+gives the `Combatant` for any id. `POST /v1/encounters/apply` runs a list of actions.
+
+Rules enforced: an action, Bonus Action and movement only on your turn; a reaction at any time,
+once until the start of your next turn; nothing while Incapacitated; movement up to your Speed
+(0 while a condition sets it to 0), plus your Speed again with Dash. A monster dies at 0 Hit
+Points (SRD "Monster Death") and its turns are skipped, as are a dead character's; a character at
+0 HP is reminded to make a Death Saving Throw.
+
+Interpretations (flagged): ties go to the higher Initiative bonus, then the order combatants
+joined (the SRD leaves ties to the GM and players: `set_order`); Dash uses the walking Speed.
+Durations, Concentration saves, recharges and once-per-turn limits come in P7b.
+
 ### Casting spells
 
 Catalog spells can carry `mechanics` (attack or save, damage by type, healing, targets,

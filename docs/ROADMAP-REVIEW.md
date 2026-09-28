@@ -303,3 +303,9 @@ Approved with the recommendations above:
   Grappled condition ends"). Two Markdown typos corrected in FIXES. Deviation: the bundled SRD JSON
   grows to ~3.9 MB; splitting monsters into a separate entry point can come later if bundle size
   matters for the web app.
+- **P7a (done, branch `p7a-encounters`):** `Encounter` document (monsters inside, characters by
+  key), `applyEncounterAction` (Initiative with surprise, group rolls and tie order; start,
+  turns, rounds, end; action economy; movement and Dash; `effects` routed to monsters or to
+  character states; Monster Death), `encounterCombatant`, `POST /v1/encounters/apply`. Not in
+  P7a: no CLI for encounters yet; durations, Concentration saves, recharges, once-per-turn limits
+  and Rage's extension are P7b.

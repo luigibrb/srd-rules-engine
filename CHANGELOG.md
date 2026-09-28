@@ -24,6 +24,11 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Encounters: an `Encounter` document and `applyEncounterAction` (add monsters and characters,
+  Initiative with surprise and group rolls, turn order and ties, rounds and turns, action /
+  Bonus Action / reaction, movement and Dash, `effects` routing attack and spell results to
+  monsters and characters, Monster Death), `encounterCombatant`, `currentCombatant`.
+  `POST /v1/encounters/apply`.
 - Monsters: a `monsters` content table with all 330 SRD stat blocks (`import-srd-monsters.ts`),
   `combatantFromMonster`, and `useSaveAction` for saving throw effects such as breath weapons.
   Combatants have `condition_immunities` (respected by spells and save effects) and
