@@ -100,7 +100,7 @@ All notable changes are documented here. This project follows
   `set-level-class`, `set-level-hp`.
 - `scripts/import-srd-classes.py` (`npm run content:import-classes`): the generator of class
   levels 2–20, subclasses, invocations, Metamagic and feats.
-- Level-up to 20, in the style of Baldur's Gate 3: `levelUp`, `setLevelHp`, `removeLastLevel`,
+- Level-up to 20, one level at a time: `levelUp`, `setLevelHp`, `removeLastLevel`,
   `levelUpOptions`; builds store `levels: [{ class_id, hp }]`. Multiclassing with its
   prerequisites, partial proficiencies, combined spell slots and separate Pact Magic.
 - Every SRD class feature to level 20 (feature text from the SRD), and the 12 SRD subclasses.

@@ -92,8 +92,8 @@ const { build: next, notes } = builder.setBackground(build, catalog, "criminal")
 // notes: ["Skilled proficiencies: removed Stealth (already proficient from Criminal)."]
 ```
 
-Levels are added one at a time, like in Baldur's Gate 3. A level 5 character is a level 1
-character plus four level-ups, each in any class you qualify for:
+Levels are added one at a time. A level 5 character is a level 1 character plus four
+level-ups, each in any class you qualify for:
 
 ```ts
 builder.levelUpOptions(build, catalog);
@@ -268,7 +268,7 @@ your numbers show a preview (`Defense · AC 16→17`). `save` writes the build t
 `characters/<name>.json`. Builds saved by the earlier Python version of the builder load
 unchanged.
 
-Once level 1 is complete, `up` levels up the character, like in Baldur's Gate 3: pick a class
+Once level 1 is complete, `up` levels up the character: pick a class
 (your own, or a new one if you meet the multiclass prerequisites, with the reason shown when
 you don't), take the fixed Hit Points or roll, then answer that level's choices (subclass, feat
 or Ability Score Improvement, new spells, invocations…). Where the rules allow it, each

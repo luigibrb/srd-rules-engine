@@ -80,8 +80,8 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 - A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
   add a named rule in `rules/sheet.ts` only when it can't be expressed declaratively, and list
   it under "Named rules in code" in `docs/ARCHITECTURE.md`.
-- Levels: `build.levels` = `[{ class_id, hp }]` for levels 2+ (BG3 style: build level 1, then
-  level up). Class content = `grants` (core) + `multiclass` + `features` by level; sources are
+- Levels: `build.levels` = `[{ class_id, hp }]` for levels 2+ (build level 1, then level up
+  one level at a time). Class content = `grants` (core) + `multiclass` + `features` by level; sources are
   `class:<id>` (first level in it), `class:<id>:<n>`, `subclass:<id>:<n>`. Every source/choice
   has `level` (character level); use `choicesForLevel(n)` / `issuesForLevel`.
 - Changing choices: "gain a level → replace one" families = same `tag` + `swap`; the engine adds

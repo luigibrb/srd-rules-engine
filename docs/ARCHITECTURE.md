@@ -70,7 +70,7 @@ fields exactly, throws on anything unexpected, and corrects two values the Markd
 `STEPS` in `src/models/content.ts` defines the order, based on dependencies. Each step only
 uses what earlier steps decided, and nothing important is asked before the facts that
 constrain it are known. The order follows the 2024 rules (Class → Origin → Ability Scores →
-Details) and Baldur's Gate 3, which lets you move freely between tabs.
+Details), and you can move freely between steps.
 
 1. **Class**: sets the primary ability, saves, armor training and skill list.
 2. **Species**, including size, lineage and legacy (sub-choices that change speed,
@@ -88,7 +88,7 @@ Details) and Baldur's Gate 3, which lets you move freely between tabs.
    before free picks are spent. Duplicates are greyed out.
    Expertise is asked last within the step, once every proficiency is known.
 9. **Languages.**
-10. **Name & alignment** is last because nothing depends on it (BG3 also asks for it last).
+10. **Name & alignment** is last because nothing depends on it.
 
 You can jump to any step. If a change upstream makes a later choice invalid,
 `normalize` in `src/services/builder.ts` removes it and says why. For example, switching to Criminal
@@ -160,8 +160,7 @@ text, and `mechanics` for casting; see "Casting spells"). A class declares `spel
 
 ## Levels and multiclassing
 
-Leveling follows Baldur's Gate 3: a character is created at level 1, then gains levels one at
-a time. The build stores each level after the first as `{ class_id, hp }` (`hp: null` = the
+A character is created at level 1, then gains levels one at a time. The build stores each level after the first as `{ class_id, hp }` (`hp: null` = the
 fixed value, hit die / 2 + 1; a number = the stored Hit Die roll), so any level can be
 recomputed or undone.
 
