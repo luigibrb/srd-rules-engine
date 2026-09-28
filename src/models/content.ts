@@ -136,19 +136,66 @@ const DEFAULT_STEP_BY_KIND: Partial<Record<ChoiceKind, Step>> = {
 export const EFFECT_OPS = ["add", "set", "max", "min"] as const;
 export type EffectOp = (typeof EFFECT_OPS)[number];
 
+/** Effect targets the sheet reads, besides the per-skill, per-save and per-score ones. */
+const EFFECT_TARGET_NAMES = [
+  "ac",
+  "attack.critical",
+  "attack.ranged",
+  "attacks",
+  "checks",
+  "darkvision",
+  "hp_per_class_level",
+  "hp_per_level",
+  "initiative",
+  "martial_arts.die",
+  "saves",
+  "skill.unproficient",
+  "speed",
+] as const;
+export type EffectTarget =
+  | (typeof EFFECT_TARGET_NAMES)[number]
+  | `skill.${Skill}`
+  | `save.${Ability}`
+  | `score.${Ability}`;
+/** Every effect target the sheet understands; content using any other target is rejected. */
+export const EFFECT_TARGETS: readonly EffectTarget[] = [
+  ...EFFECT_TARGET_NAMES,
+  ...SKILLS.map((s) => `skill.${s}` as const),
+  ...ABILITIES.map((a) => `save.${a}` as const),
+  ...ABILITIES.map((a) => `score.${a}` as const),
+];
+
+/** Conditions an effect can depend on (`when`), evaluated from what the character wears. */
+export const EFFECT_CONDITIONS = [
+  "wearing_armor",
+  "wielding_shield",
+  "wearing_heavy_armor",
+  "not_wearing_heavy_armor",
+  "unarmored",
+] as const;
+export type EffectCondition = (typeof EFFECT_CONDITIONS)[number];
+
 /**
  * A declarative numeric modifier. Minimal precursor of the full Effect engine.
  *
- * `value` is an integer, the token `"prof"` (Proficiency Bonus), `"half_prof"` (half of it,
- * rounded down) or an ability (`"wis"`: that ability's modifier). `min` is a floor for the value ("Wisdom modifier, minimum of +1").
- * `when` names a condition evaluated by the sheet calculator (e.g. `"wearing_armor"`).
+ * `target` is one of `EFFECT_TARGETS`. `value` is an integer, the token `"prof"` (Proficiency
+ * Bonus), `"half_prof"` (half of it, rounded down) or an ability (`"wis"`: that ability's
+ * modifier). `min` is a floor for the value ("Wisdom modifier, minimum of +1"). `when` is one
+ * of `EFFECT_CONDITIONS`.
  */
 export const EffectSchema = z.strictObject({
-  target: z.string(),
+  target: z.enum(EFFECT_TARGETS as [EffectTarget, ...EffectTarget[]], {
+    error: (issue) => `unknown effect target '${String(issue.input)}' (see docs/CONTENT.md)`,
+  }),
   op: z.enum(EFFECT_OPS).default("add"),
   value: z.union([z.int(), z.literal("prof"), z.literal("half_prof"), z.enum(ABILITIES)]),
   min: z.int().nullable().default(null),
-  when: z.string().nullable().default(null),
+  when: z
+    .enum(EFFECT_CONDITIONS, {
+      error: (issue) => `unknown effect condition '${String(issue.input)}' (see docs/CONTENT.md)`,
+    })
+    .nullable()
+    .default(null),
 });
 export type Effect = z.infer<typeof EffectSchema>;
 
@@ -445,10 +492,16 @@ export function choiceStep(choice: ChoiceDef): Step {
   return choice.step ?? DEFAULT_STEP_BY_KIND[choice.kind] ?? "features";
 }
 
+/**
+ * Where content comes from when an entity doesn't say: `createCatalog` fills in the pack's name
+ * instead (`srd-5.2.1` for the SRD folder), so this default only applies to schemas used alone.
+ */
+export const DEFAULT_SOURCE = "homebrew";
+
 const entity = {
   id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs"),
   name: z.string(),
-  source: z.string().default("srd-5.2.1"),
+  source: z.string().default(DEFAULT_SOURCE),
   description: z.string().default(""),
 };
 
@@ -689,7 +742,7 @@ export const PointBuySchema = z.strictObject({
 export type PointBuyRules = z.infer<typeof PointBuySchema>;
 
 export const CreationSchema = z.strictObject({
-  source: z.string().default("srd-5.2.1"),
+  source: z.string().default(DEFAULT_SOURCE),
   standard_array: z.array(z.int()),
   point_buy: PointBuySchema,
   max_score_at_creation: z.int(),

@@ -6,6 +6,11 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- Effect `target` and `when` are closed lists (`EFFECT_TARGETS`, `EFFECT_CONDITIONS`): content
+  with an unknown target or condition is rejected at load instead of being silently ignored.
+  The JSON Schemas list them for autocompletion.
+- An entity without a `source` gets its pack's name (`homebrew` for a pack without a name)
+  instead of `srd-5.2.1`. The bundled SRD is unchanged.
 - Class content is split into core traits (`grants`), `multiclass` grants and `features` by
   level. Level 1 choice keys are unchanged, so existing builds still load.
 - Sheet: `hit_die` became `hit_dice`; spell slots moved from each spellcasting line to
@@ -19,6 +24,9 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- `npm run check:sources` (part of `npm run check`): fails if `content/` holds anything but
+  the SRD, or if an example or test pack has a `source` other than `srd-5.2.1`, `homebrew` or
+  `test`.
 - Play state (`CharacterState`, `applyAction`, `computePlaySheet`, `createState`,
   `validateState`, `reconcileState`): HP and temporary HP, dying and death saves, massive damage,
   Short and Long Rests with Hit Dice, spell and Pact slots, limited-use features (`resources` in

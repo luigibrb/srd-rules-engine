@@ -7,7 +7,7 @@ contribution and needs no TypeScript at all.
 
 ```bash
 npm install
-npm run check      # what CI runs: content up to date, lint, typecheck, tests
+npm run check      # what CI runs: content up to date, leak guard, lint, typecheck, tests
 ```
 
 Node 22.18 or newer is required (`.nvmrc` pins 24).

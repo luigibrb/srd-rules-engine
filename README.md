@@ -154,6 +154,8 @@ const { attack, damage, target } = resolveAttack(fighter, goblin, 5, "2d6+3", "s
 
 A natural 20 always hits and doubles every damage die; a natural 1 always misses. Spells
 (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) deal half damage on a successful save.
+These functions take a combat `Character` and a `Spell` (`SpellSchema`) that you fill in, damage
+dice included: they aren't derived from a build or from catalog spells yet.
 Without an `rng`, rolls use `Math.random()`.
 
 ## Command line
@@ -253,8 +255,9 @@ import { createCatalog, loadContentPack, srdPack } from "srd-rules-engine/node";
 const catalog = createCatalog(srdPack, loadContentPack("my-homebrew"));
 ```
 
-The `$schema` comment gives you autocompletion and inline errors in VS Code (with the YAML
-extension) and other editors. See [`examples/homebrew-pack`](examples/homebrew-pack) and
+Leave out `source` and entities take the pack's name (`my-homebrew` above). The `$schema`
+comment gives you autocompletion and inline errors in VS Code (with the YAML extension) and
+other editors. See [`examples/homebrew-pack`](examples/homebrew-pack) and
 [docs/CONTENT.md](docs/CONTENT.md).
 
 ## Using it from another language

@@ -63,14 +63,18 @@ place.
 
 ### Effects (pre-engine)
 
-`Effect{target, op: add|set|max, value: int|"prof"|ability, min, when}` covers the numbers
-level 1 needs (`ac`, `initiative`, `speed`, `darkvision`, `hp_per_level`, `attack.ranged`,
-`skill.<id>`, `martial_arts.die`). An ability value means that ability's modifier; `min` is a
+`Effect{target, op: add|set|max|min, value: int|"prof"|"half_prof"|ability, min, when}` covers
+the numbers the sheet computes. An ability value means that ability's modifier; `min` is a
 floor (Thaumaturge: "Wisdom modifier, minimum of +1"). It's a small, declarative stand-in for
-the full Effect engine (milestone 3). It already uses the same shape
-(target/op/value/condition), so the content won't need rewriting later.
+the full Effect engine. It already uses the same shape (target/op/value/condition), so the
+content won't need rewriting later.
 
-Conditions available to `when`: `wearing_armor`, `wielding_shield`.
+`target` and `when` are closed lists (`EFFECT_TARGETS`, `EFFECT_CONDITIONS` in
+`src/models/content.ts`; the table is in [CONTENT.md](CONTENT.md#effects)). Content that uses
+anything else is rejected at load, so a typo can't be silently ignored, and the sheet's lookups
+are typed against the same lists. `when` only knows what the character wears (`wearing_armor`,
+`wielding_shield`, `wearing_heavy_armor`, `not_wearing_heavy_armor`, `unarmored`); play
+conditions and active features (Rage) can't drive effects yet.
 
 **Armor Class** is not a sum of effects: features like Unarmored Defense and Mage Armor are
 *alternative* calculations that never stack with each other or with armor. Content declares
@@ -104,8 +108,8 @@ picks as `kind: spell` choices:
 ### Known gaps (flagged, not invented)
 
 - Starting gold (Fighter option C, background option B): shopping isn't automated.
-- AC assumes you wear the best armor you own and are trained with. Equipping comes with the
-  inventory milestone.
+- Without a play state, AC assumes you wear the best armor you own and are trained with; with
+  one, it uses the equipped armor and Shield.
 - Replacements and "after a rest" lists store the character's current state; rest-by-rest
   history (which spells were prepared on which day) belongs to session state, not the build.
 - Features that roll dice or depend on the situation (Rage damage, Sneak Attack, Divine Strike,
@@ -113,8 +117,12 @@ picks as `kind: spell` choices:
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
   placeholders, like the Soldier's gaming set.
 - The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
-  separate, hand-filled snapshot. It isn't derived from a build and sheet yet; bridging the two
-  belongs with the session-state layer.
+  separate, hand-filled snapshot. It isn't derived from a build and sheet, its `character_class`
+  only accepts the 12 SRD classes, and its `applyDamage` ignores resistances, temporary HP and
+  death saves (the play action `damage` handles those). The spell functions (`resolveSpellSave`,
+  `resolveSpellAttack`) take a separate `Spell` model (`src/models/spell.ts`) with the damage
+  dice filled in by the caller; catalog spells (`SpellDef`) have no mechanics yet. Unifying them
+  is on the roadmap ([ROADMAP-REVIEW.md](ROADMAP-REVIEW.md), P2–P4).
 
 ## Levels and multiclassing
 
@@ -254,6 +262,10 @@ is halved (Resistance to all damage).
 Martial Arts (the `martial_arts.die` effect) and Great Weapon Fighting's note live in
 `rules/sheet.ts`, as before. Everything level-related above is data.
 
+Play (`services/play.ts`) knows a few SRD condition ids by name: `petrified` halves all damage
+(Resistance to all damage), `unconscious` is added at 0 HP and removed when you regain Hit
+Points, and `incapacitated` (or a condition that implies it) ends Concentration.
+
 ## Runtime and packaging (TypeScript)
 
 The engine was ported from Python to TypeScript so the same code can run in a browser
@@ -276,7 +288,12 @@ builder, a VTT client, an edge function and a server.
   so ids like `constructor` can't hit the prototype.
 - **Content packs.** `createCatalog(...packs)` layers packs in order: a later pack adds
   entities and replaces earlier ones with the same id. Duplicate ids within one pack are
-  errors. Cross-references are checked after layering.
+  errors. Cross-references are checked after layering. An entity without a `source` gets its
+  pack's name (the SRD folder is named `srd-5.2.1`; a pack without a name gives `homebrew`).
+- **Leak guard.** `npm run check:sources` (part of `npm run check`) fails if `content/` holds
+  anything besides `srd-5.2.1/`, or if a `source` in `content/` or the bundled JSON isn't
+  `srd-5.2.1`, or one in `examples/` or `tests/fixtures/` isn't `srd-5.2.1`, `homebrew` or
+  `test`. Non-SRD content lives in separate, private packs.
 - **Dice.** Every rolling function takes an optional `Rng` (`{ int(min, max) }`).
   `seededRng` (mulberry32) gives the same sequence on every platform; `scriptedRng` and
   `fixedRng` are for tests.

@@ -150,6 +150,36 @@ describe("content packs", () => {
     expect(pack.gear).toHaveLength(1);
     expect(createCatalog(srdPack, pack).gear["rope-of-holding"]?.name).toBe("Rope of Holding");
   });
+
+  it("an entity without a source gets its pack's name", () => {
+    const gear = [
+      { id: "lucky-coin", name: "Lucky Coin" },
+      { id: "bent-nail", name: "Bent Nail", source: "my-book" },
+    ];
+    const named = createCatalog(srdPack, { name: "my-homebrew", gear });
+    expect(named.gear["lucky-coin"]?.source).toBe("my-homebrew");
+    expect(named.gear["bent-nail"]?.source).toBe("my-book");
+    expect(named.gear.arrow?.source).toBe("srd-5.2.1");
+    expect(createCatalog(srdPack, { gear }).gear["lucky-coin"]?.source).toBe("homebrew");
+  });
+
+  it("rejects effects the sheet doesn't understand", () => {
+    const feat = (effect: object) => ({
+      name: "bad",
+      feats: [{ id: "odd", name: "Odd", category: "origin", grants: { effects: [effect] } }],
+    });
+    expect(() => createCatalog(srdPack, feat({ target: "speeed", value: 5 }))).toThrow(
+      /unknown effect target 'speeed'/,
+    );
+    expect(() => createCatalog(srdPack, feat({ target: "ac", value: 1, when: "raging" }))).toThrow(
+      /unknown effect condition 'raging'/,
+    );
+    const ok = createCatalog(
+      srdPack,
+      feat({ target: "skill.stealth", value: 1, when: "unarmored" }),
+    );
+    expect(ok.feats.odd?.grants.effects[0]?.target).toBe("skill.stealth");
+  });
 });
 
 describe("examples/homebrew-pack", () => {
