@@ -208,5 +208,7 @@ describe("examples/homebrew-pack", () => {
     expect(ev.report.issues.filter((i) => i.severity !== "note")).toEqual([]);
     expect(ev.sheet.initiative.parts.map((p) => p.source)).toContain("Lucky Streak");
     expect(ev.sheet.equipment["lucky-coin"]).toBe(1);
+    expect(layered.packs.at(-1)).toMatchObject({ id: "homebrew-pack", source: "homebrew" });
+    expect(layered.spells.light?.lists).toContain("warlock"); // patches.yaml
   });
 });

@@ -7,12 +7,13 @@
 
 // Content
 export * from "./content/catalog";
-export { srdCatalog, srdPack } from "./content/srd";
+export { SRD_PACK_ID, srdCatalog, srdPack } from "./content/srd";
 // Models
 export * from "./models/build";
 export * from "./models/character";
 export type * from "./models/combat";
 export * from "./models/content";
+export * from "./models/pack";
 export * from "./models/spell";
 export * from "./models/state";
 // Rules

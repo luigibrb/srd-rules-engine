@@ -12,7 +12,8 @@
 src/
   index.ts         # public API (platform-neutral: no node:* imports)
   node.ts          # index + loadContentPack/loadCatalog + serveNode
-  models/          # Zod schemas + types: content, build, state (play), character, combat, spell
+  models/          # Zod schemas + types: content, pack (manifest, patches), build, state (play),
+                   #   character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, combat, spells,
@@ -51,6 +52,9 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 - This repo holds only SRD 5.2.1 content and invented homebrew (`source: homebrew` or `test`),
   including examples and test fixtures; `npm run check:sources` enforces it. Non-SRD content
   belongs in a separate private pack.
+- Packs: `pack.yaml` (id, `requires`, default `source`) + `patches.yaml` (edit earlier packs'
+  entities by path; never copy an SRD entity to tweak it). `catalog.packs` = loaded manifests.
+  Changing a public export updates `tests/__snapshots__/api.test.ts.snap`: note it in CHANGELOG.
 - Effect `target`/`when` values are closed lists in `src/models/content.ts`: a new target needs
   an entry there and a consumer in `rules/sheet.ts`.
 - A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
@@ -108,7 +112,8 @@ npm run serve            # HTTP API on localhost:8000
 ## API base
 
 `GET /health` — liveness check  
-`GET /v1/content` — table names and counts; `/v1/content/{table}`, `/v1/content/{table}/{id}`  
+`GET /v1/content` — table names and counts; `/v1/content/{table}`, `/v1/content/{table}/{id}`;
+`/v1/content/packs` — loaded pack manifests  
 `POST /v1/builds/evaluate` — build → `{ report, sheet, levels, level_up_options, choices (with options) }`  
 `POST /v1/builds/set-choice` · `/level-up` · `/remove-level` · `/set-level-class` · `/set-level-hp` — workflow setters  
 `POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  

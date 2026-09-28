@@ -24,6 +24,14 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Content pack manifests (`pack.yaml`: id, version, ruleset, default `source`, `requires`),
+  checked against load order; `catalog.packs` lists them and `GET /v1/content/packs` serves them.
+- Patches (`patches.yaml`): `set`, `append` and `remove` on a path of an entity from an earlier
+  pack, validated again after patching (`applyPatch`, `PatchSchema`).
+- `createCatalog(packs, { sources })` loads only the given sources.
+- Builds can list the packs they need (`packs`, optional); a missing one is a validation error.
+  The CLI builder records the packs loaded with `--content` when it saves.
+- `tests/api.test.ts` snapshots the names each entry point exports.
 - `npm run check:sources` (part of `npm run check`): fails if `content/` holds anything but
   the SRD, or if an example or test pack has a `source` other than `srd-5.2.1`, `homebrew` or
   `test`.

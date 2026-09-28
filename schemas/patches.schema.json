@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Patch"
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Patch"
+      }
+    }
+  ],
+  "$defs": {
+    "Patch": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "type": "string",
+          "pattern": "^[a-z_]+\\/[a-z0-9][a-z0-9-]*$"
+        },
+        "op": {
+          "type": "string",
+          "enum": [
+            "set",
+            "append",
+            "remove"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {},
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "target",
+        "op",
+        "path"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "title": "Content patches"
+}

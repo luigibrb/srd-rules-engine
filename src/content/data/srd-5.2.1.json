@@ -1,5 +1,13 @@
 {
     "name": "srd-5.2.1",
+    "manifest": {
+        "id": "srd-5.2.1",
+        "version": "5.2.1",
+        "ruleset": "2024",
+        "source": "srd-5.2.1",
+        "requires": [],
+        "description": "System Reference Document 5.2.1 by Wizards of the Coast LLC (CC BY 4.0)."
+    },
     "creation": {
         "source": "srd-5.2.1",
         "standard_array": [

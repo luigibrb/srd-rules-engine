@@ -43,8 +43,16 @@ import {
   type WeaponDef,
   WeaponSchema,
 } from "../models/content";
+import {
+  applyPatch,
+  type PackManifest,
+  PackManifestSchema,
+  PatchError,
+  PatchSchema,
+} from "../models/pack";
 
 export type Table<T> = Readonly<Record<string, T>>;
+type Entity = { id: string; source: string };
 export type Item = WeaponDef | ArmorDef | GearDef | ToolDef | MagicItemDef;
 
 export interface Catalog {
@@ -65,15 +73,21 @@ export interface Catalog {
   readonly features: Table<FeatDef>;
   readonly magic_items: Table<MagicItemDef>;
   readonly conditions: Table<ConditionDef>;
+  /** The loaded packs, in load order (a pack without `pack.yaml` gets a minimal manifest). */
+  readonly packs: readonly PackManifest[];
 }
 
 /** Raw, unvalidated content: what a YAML/JSON content directory parses to. */
 export interface ContentPack {
   /**
-   * Used in error messages, e.g. `srd-5.2.1` or `my-homebrew`, and as the `source` of entities
-   * that don't declare one (`homebrew` for a pack without a name).
+   * Used in error messages, e.g. `srd-5.2.1` or `my-homebrew`. Without a manifest, it's also
+   * the pack id and the `source` of entities that don't declare one (`homebrew` without a name).
    */
   name?: string;
+  /** `pack.yaml`: id, version, default source, required packs. */
+  manifest?: unknown;
+  /** `patches.yaml`: changes to entities loaded earlier, applied after this pack's entities. */
+  patches?: unknown[];
   creation?: unknown;
   classes?: unknown[];
   species?: unknown[];
@@ -137,19 +151,62 @@ export function catalogItem(catalog: Catalog, itemId: string): Item {
   throw new ContentError(`Unknown item '${itemId}'`);
 }
 
-export function createCatalog(...packs: ContentPack[]): Catalog {
+export interface CatalogOptions {
+  /**
+   * Load only entities and patches whose `source` is in this list (say, the books a campaign
+   * allows). Creation rules are always loaded. Entities that refer to a filtered-out one fail
+   * the cross-reference check.
+   */
+  sources?: readonly string[];
+}
+
+/**
+ * Validate and layer content packs, in order. Pass the packs as arguments, or as a list
+ * followed by options: `createCatalog([srdPack, mine], { sources: ["srd-5.2.1", "mine"] })`.
+ */
+export function createCatalog(...packs: ContentPack[]): Catalog;
+export function createCatalog(packs: readonly ContentPack[], options: CatalogOptions): Catalog;
+export function createCatalog(...args: unknown[]): Catalog {
+  const [packs, options] = Array.isArray(args[0])
+    ? [args[0] as readonly ContentPack[], (args[1] ?? {}) as CatalogOptions]
+    : [args as ContentPack[], {}];
+  const enabled = (source: string) => !options.sources || options.sources.includes(source);
   const errors: string[] = [];
   let creation: CreationRules | undefined;
+  const manifests: PackManifest[] = [];
   const tables = Object.fromEntries(TABLE_NAMES.map((t) => [t, {}])) as Record<
     TableName,
     Record<string, unknown>
   >;
 
   packs.forEach((pack, i) => {
-    const packName = pack.name ?? `pack ${i + 1}`;
+    let manifest: PackManifest;
+    if (pack.manifest !== undefined) {
+      const where = `${pack.name ?? `pack ${i + 1}`}/pack`;
+      const parsed = parse(PackManifestSchema, pack.manifest, where, errors);
+      if (!parsed) return;
+      manifest = parsed;
+    } else {
+      manifest = { ...PackManifestSchema.parse({ id: "pack" }), id: pack.name ?? `pack-${i + 1}` };
+    }
+    const packName = manifest.id;
+    if (manifests.some((m) => m.id === packName)) {
+      errors.push(`${packName}: the pack is loaded twice`);
+      return;
+    }
+    for (const id of manifest.requires) {
+      if (!manifests.some((m) => m.id === id)) {
+        errors.push(`${packName}: needs pack '${id}', loaded before it`);
+      }
+    }
+    manifests.push(manifest);
+    const defaultSource =
+      pack.manifest !== undefined
+        ? (manifest.source ?? manifest.id)
+        : (pack.name ?? DEFAULT_SOURCE);
     const withSource = (entry: unknown): unknown =>
       entry !== null && typeof entry === "object" && !Array.isArray(entry) && !("source" in entry)
-        ? { ...entry, source: pack.name ?? DEFAULT_SOURCE }
+        ? { ...entry, source: defaultSource }
         : entry;
     if (pack.creation !== undefined) {
       const where = `${packName}/creation`;
@@ -162,7 +219,7 @@ export function createCatalog(...packs: ContentPack[]): Catalog {
       const seen = new Set<string>();
       entries.forEach((entry, j) => {
         const where = `${packName}/${table}[${j}]`;
-        const schema = TABLE_SCHEMAS[table] as ZodType<{ id: string }>;
+        const schema = TABLE_SCHEMAS[table] as ZodType<Entity>;
         const parsed = parse(schema, withSource(entry), where, errors);
         if (!parsed) return;
         if (seen.has(parsed.id)) {
@@ -170,15 +227,45 @@ export function createCatalog(...packs: ContentPack[]): Catalog {
           return;
         }
         seen.add(parsed.id);
-        tables[table][parsed.id] = parsed;
+        if (enabled(parsed.source)) tables[table][parsed.id] = parsed;
       });
     }
+    (pack.patches ?? []).forEach((entry, j) => {
+      const where = `${packName}/patches[${j}]`;
+      const patch = parse(PatchSchema, entry, where, errors);
+      if (!patch || !enabled(patch.source ?? defaultSource)) return;
+      const [table, id] = patch.target.split("/") as [string, string];
+      if (!(TABLE_NAMES as string[]).includes(table)) {
+        errors.push(`${where}: unknown table '${table}'`);
+        return;
+      }
+      const rows = tables[table as TableName];
+      if (!Object.hasOwn(rows, id)) {
+        errors.push(`${where}: no ${table} '${id}' loaded before this pack`);
+        return;
+      }
+      let patched: unknown;
+      try {
+        patched = applyPatch(rows[id], patch);
+      } catch (e) {
+        if (!(e instanceof PatchError)) throw e;
+        errors.push(`${where} (${patch.target}): ${e.message}`);
+        return;
+      }
+      const schema = TABLE_SCHEMAS[table as TableName] as ZodType<Entity>;
+      const parsed = parse(schema, patched, `${where} (${patch.target})`, errors);
+      if (parsed && parsed.id !== id) {
+        errors.push(`${where}: a patch can't change the id`);
+      } else if (parsed) {
+        rows[id] = parsed;
+      }
+    });
   });
 
   if (!creation) errors.push("No pack provides the character creation rules (`creation`)");
   if (errors.length) throw new ContentError(errors.join("\n"));
 
-  const catalog = deepFreeze({ creation, ...tables } as Catalog);
+  const catalog = deepFreeze({ creation, ...tables, packs: manifests } as Catalog);
   validateReferences(catalog);
   return catalog;
 }
