@@ -21,7 +21,8 @@ import {
 } from "../models/state";
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
-import { takeDamage } from "../rules/damage";
+import type { Combatant } from "../rules/combatant";
+import { type Defenses, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import {
@@ -268,6 +269,49 @@ export function computePlaySheet(
       carrying_capacity: sheet.scores.str * 15,
       rest_choices: Object.keys(state.choices).filter((k) => restChoiceKeys(res).has(k)),
     },
+  };
+}
+
+/** Damage defenses from the sheet and the active conditions (Petrified: Resistance to all). */
+function characterDefenses(
+  sheet: DerivedSheet,
+  conditions: ReadonlySet<string>,
+): Required<Defenses> {
+  const resistances = conditions.has("petrified")
+    ? [...sheet.resistances, "all"]
+    : [...sheet.resistances];
+  return { resistances, vulnerabilities: [], immunities: [] };
+}
+
+/**
+ * The character as a combatant: AC, HP, saves, attack lines and defenses from its play sheet.
+ * Resolve attacks with `makeAttack`, then apply the damage to the target's state with the play
+ * action `{ type: "damage", instances, critical }`.
+ */
+export function combatantFromCharacter(
+  build: CharacterBuild,
+  state: CharacterState,
+  catalog: Catalog,
+): Combatant {
+  const sheet = computePlaySheet(build, state, catalog);
+  const conditions = sheet.play.conditions.map((c) => c.id);
+  const saves = Object.fromEntries(
+    Object.entries(sheet.saving_throws).map(([a, line]) => [a, line.modifier]),
+  ) as Combatant["saving_throws"];
+  return {
+    name: build.name || "Character",
+    armor_class: sheet.armor_class.total,
+    hp: sheet.play.hp.current,
+    temp_hp: sheet.play.hp.temp,
+    max_hp: sheet.play.hp.max,
+    proficiency_bonus: sheet.proficiency_bonus,
+    modifiers: sheet.modifiers,
+    saving_throws: saves,
+    defenses: characterDefenses(sheet, new Set(conditions)),
+    conditions,
+    attacks: sheet.attacks,
+    critical_hit_on: sheet.critical_hit_on,
+    attacks_per_action: sheet.attacks_per_action,
   };
 }
 
@@ -532,14 +576,13 @@ export function applyAction(
   switch (action.type) {
     case "damage": {
       if (s.dead) fail("The character is dead");
-      // Petrified: Resistance to all damage.
-      const resistances = conditionsNow.has("petrified")
-        ? [...sheet.resistances, "all"]
-        : sheet.resistances;
+      if ((action.amount === undefined) === (action.instances === undefined)) {
+        fail("Give either an amount or a list of damage instances");
+      }
       const hit = takeDamage(
         { hp: current, temp: s.hp.temp, max: p.hp.max },
-        [{ amount: action.amount, type: action.damage_type ?? null }],
-        { resistances },
+        action.instances ?? [{ amount: action.amount ?? 0, type: action.damage_type ?? null }],
+        characterDefenses(sheet, conditionsNow),
         { critical: action.critical },
       );
       notes.push(...hit.notes);

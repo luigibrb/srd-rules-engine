@@ -116,10 +116,10 @@ picks as `kind: spell` choices:
   Potent Spellcasting) are shown as text and class resources, not added to attack lines.
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
   placeholders, like the Soldier's gaming set.
-- The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
-  separate, hand-filled snapshot. It isn't derived from a build and sheet, and its
-  `character_class` only accepts the 12 SRD classes. Its `applyDamage` uses the shared
-  `takeDamage`, but a snapshot has no Temporary Hit Points or defenses. The spell functions (`resolveSpellSave`,
+- The old combat model (`Character` in `src/models/character.ts`) is a hand-filled snapshot
+  whose `character_class` only accepts the 12 SRD classes. Combat now works on combatants (see
+  "Combatants"); the `Character` functions (`resolveAttack`, `attackRoll`) are deprecated and
+  `combatantFromSnapshot` bridges the two. The spell functions (`resolveSpellSave`,
   `resolveSpellAttack`) take a separate `Spell` model (`src/models/spell.ts`) with the damage
   dice filled in by the caller; catalog spells (`SpellDef`) have no mechanics yet. Unifying them
   is on the roadmap ([ROADMAP-REVIEW.md](ROADMAP-REVIEW.md), P2–P4).
@@ -250,6 +250,25 @@ slots and uses, the inventory, coins, and `choices`: today's picks for choices m
   Temporary Hit Points first, and reports dropping to 0, dying (massive damage, or damage at 0
   HP at least the maximum), Death Saving Throw failures and the Concentration DC. The caller
   updates its own state (conditions, death saves, Concentration).
+
+### Combatants
+
+A `Combatant` (`rules/combatant.ts`) is what combat needs to know about a creature: AC, HP and
+Temporary HP, saving throw bonuses, damage defenses, conditions, attack lines, critical range.
+It's a read-only view built from something else: `combatantFromCharacter(build, state,
+catalog)` (from the play sheet), `combatantFromSnapshot(character)` (the old model), and later
+monster stat blocks.
+
+`makeAttack(attacker, attackName, target, { mode, two_handed, rng })` rolls the d20 (twice
+with Advantage or Disadvantage), decides hit and Critical Hit, rolls the attack line's damage
+parts, and previews `takeDamage` on the target. It changes nothing: the caller applies the
+result's `instances` to the target's own state (for a character, the play action `damage`
+with `instances` and `critical`). `POST /v1/state/attack` does both for two characters.
+`rollSavingThrow` rolls a save with the combatant's bonus.
+
+Interpretations (flagged): a roll in an extended critical range (19 with Improved Critical) is a
+Critical Hit and so hits regardless of AC, like a natural 20 (SRD "Critical Hit"). A natural 1
+misses even inside such a range. Natural 20s and 1s mean nothing special on saving throws.
 
 Every attack line on the sheet carries its damage as parts (`damage_parts`, and
 `two_handed_damage_parts` for Versatile weapons), and its display string is built from them.

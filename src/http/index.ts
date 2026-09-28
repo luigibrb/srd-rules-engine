@@ -15,6 +15,7 @@ import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
 import { SpellSchema } from "../models/spell";
 import { CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { savingThrow } from "../rules/combat";
+import { makeAttack, ROLL_MODES } from "../rules/combatant";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import { spellAttackBonus, spellSaveDc } from "../rules/spells";
@@ -39,6 +40,7 @@ import {
 } from "../services/combat";
 import {
   applyAction,
+  combatantFromCharacter,
   computePlaySheet,
   createState,
   PlayError,
@@ -90,6 +92,14 @@ const BuildRequest = z.object({ build: z.unknown() });
 const StateRequest = z.object({ build: z.unknown(), state: CharacterStateSchema });
 const ApplyRequest = StateRequest.extend({
   action: z.union([PlayActionSchema, z.array(PlayActionSchema)]),
+});
+const StateAttackRequest = z.object({
+  attacker: StateRequest,
+  target: StateRequest,
+  /** The name of one of the attacker's attack lines (`Longsword`, `Unarmed Strike`). */
+  attack: z.string(),
+  mode: z.enum(ROLL_MODES).default("normal"),
+  two_handed: z.boolean().default(false),
 });
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
@@ -395,6 +405,37 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           notes.push(...result.notes);
         }
         return { state, notes };
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/attack$/,
+      handle: ({ body }) => {
+        // One attack between two characters; on a hit, the damage is applied to the target.
+        const req = StateAttackRequest.parse(body);
+        const catalog = getCatalog();
+        const [attackerBuild, targetBuild] = [
+          parseBuild(req.attacker.build),
+          parseBuild(req.target.build),
+        ];
+        const attacker = combatantFromCharacter(attackerBuild, req.attacker.state, catalog);
+        const target = combatantFromCharacter(targetBuild, req.target.state, catalog);
+        const { mode, two_handed } = req;
+        let result: ReturnType<typeof makeAttack>;
+        try {
+          result = makeAttack(attacker, req.attack, target, { rng, mode, two_handed });
+        } catch (e) {
+          if (e instanceof RangeError) throw new PlayError([e.message]);
+          throw e;
+        }
+        if (!result.hit) return { result, target_state: req.target.state, notes: [] };
+        const action = {
+          type: "damage" as const,
+          instances: [...result.instances],
+          critical: result.critical_hit,
+        };
+        const applied = applyAction(targetBuild, req.target.state, catalog, action, { rng });
+        return { result, target_state: applied.state, notes: applied.notes };
       },
     },
     {

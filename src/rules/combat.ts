@@ -3,7 +3,11 @@ import type { AttackRoll, DamageRoll, SavingThrow } from "../models/combat";
 import { abilityModifier, formatDiceExpression, parseDiceExpression, roll } from "./dice";
 import { mathRng, type Rng } from "./rng";
 
-/** A natural 20 always hits (and crits); a natural 1 always misses. */
+/**
+ * A natural 20 always hits (and crits); a natural 1 always misses.
+ *
+ * @deprecated Use `makeAttack` (critical range, Advantage and Disadvantage). Kept until 1.0.
+ */
 export function attackRoll(
   attacker: Character,
   target: Character,
