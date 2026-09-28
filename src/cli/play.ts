@@ -36,6 +36,7 @@ const HELP = `Commands (ids are shown in brackets; numbers work for uses, items 
   short [10 10]         Short Rest, spending Hit Dice of those sizes      long   Long Rest
   slot 2 · unslot 2     spend / restore a spell slot    pact · unpact   Pact Magic slot
   use 1 [n] · regain 1  spend / restore a limited-use feature
+  on 1 · off 1          switch a feature on or off (Rage), spending its use
   cond poisoned · cond -poisoned · exh 2 · conc bless · conc - · insp on|off
   prep [n]              today's prepared spells and other after-a-rest choices
   items                 inventory        add weapon-1 base=longsword · add potion-of-healing 2
@@ -116,6 +117,8 @@ export class PlayApp {
     };
     const useRef = (ref = "") =>
       /^\d+$/.test(ref) ? (sheet.play.uses[Number(ref) - 1]?.key ?? ref) : ref;
+    const toggleRef = (ref = "") =>
+      /^\d+$/.test(ref) ? (sheet.toggles[Number(ref) - 1]?.key ?? ref) : ref;
     switch (cmd) {
       case "":
       case "sheet":
@@ -169,6 +172,10 @@ export class PlayApp {
         return this.act({ type: "restore_pact_slot" });
       case "use":
         return this.act({ type: "use", key: useRef(args[0]), amount: num(1) ?? 1 });
+      case "on":
+        return this.act({ type: "activate", key: toggleRef(args[0]) });
+      case "off":
+        return this.act({ type: "deactivate", key: toggleRef(args[0]) });
       case "regain":
         return this.act({ type: "restore_use", key: useRef(args[0]), amount: num(1) ?? 1 });
       case "cond": {
@@ -286,6 +293,13 @@ export class PlayApp {
       con.say(
         `Uses   ${p.uses.map((u, i) => `${i + 1}. ${u.name} ${u.max - u.spent}/${u.max}${u.recharge === "short" ? " (SR)" : ""}`).join("   ")}`,
       );
+    }
+    if (s.toggles.length) {
+      const toggles = s.toggles.map(
+        (t, i) =>
+          `${i + 1}. ${t.name} ${t.active ? "ON" : "off"}${t.blocked ? ` (${t.blocked})` : ""}`,
+      );
+      con.say(`Toggle ${toggles.join("   ")}`);
     }
     const tags = [
       ...p.conditions.filter((c) => !c.implied && c.id !== "exhaustion").map((c) => c.name),

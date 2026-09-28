@@ -248,6 +248,11 @@ def extra_attack(n):
 
 FIGHTING_STYLE_FEAT = {"id": "style", "label": "Fighting Style feat", "kind": "feat", "category": "fighting_style"}
 
+def DIVINE_STRIKE(dice):
+    return {"id": "divine-strike", "name": "Divine Strike", "damage": dice, "type": ["necrotic", "radiant"],
+            "applies_to": {"weapon": True}, "once_per_turn": True}
+
+
 OVERLAY = {
     "barbarian": {
         3: {"choices": [{"id": "primal_knowledge", "label": "Primal Knowledge skill", "kind": "skill",
@@ -264,7 +269,10 @@ OVERLAY = {
     "cleric": {
         7: {"choices": [{"id": "blessed_strikes", "label": "Blessed Strikes", "kind": "option", "options": [
             {"id": "divine-strike", "name": "Divine Strike",
-             "description": "Once per turn, a weapon hit deals an extra 1d8 Necrotic or Radiant damage."},
+             "description": "Once per turn, a weapon hit deals an extra 1d8 Necrotic or Radiant damage.",
+             "grants": {"damage_riders": [DIVINE_STRIKE("1d8")],
+                        # Improved Blessed Strikes: 2d8 (same id: replaces the 1d8).
+                        "at_class_level": [{"level": 14, "grants": {"damage_riders": [DIVINE_STRIKE("2d8")]}}]}},
             {"id": "potent-spellcasting", "name": "Potent Spellcasting",
              "description": "Add your Wisdom modifier to the damage of your Cleric cantrips."}]}]},
     },

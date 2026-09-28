@@ -12,7 +12,9 @@ import {
   ABILITIES,
   ABILITY_NAMES,
   type Ability,
+  type AdvantageTarget,
   type ArmorDef,
+  type DamageRider,
   type Effect,
   type EffectCondition,
   type EffectOp,
@@ -55,9 +57,28 @@ export interface SaveLine {
   readonly proficient: boolean;
 }
 
+/** An optional rider on an attack line (Sneak Attack, Divine Strike): `makeAttack` applies it. */
+export interface AttackRider {
+  readonly id: string;
+  readonly name: string;
+  readonly dice: string | null;
+  readonly bonus: number;
+  /** The damage type, or the types to choose from. */
+  readonly type: string | readonly string[];
+  readonly once_per_turn: boolean;
+  readonly requires: "advantage_or_ally" | null;
+}
+
 export interface AttackLine {
   readonly name: string;
   readonly kind: "melee" | "ranged";
+  /** The ability the attack uses. */
+  readonly ability: Ability;
+  /** A weapon attack (not an Unarmed Strike). */
+  readonly weapon: boolean;
+  readonly properties: readonly string[];
+  /** Extra damage you can add on a hit (automatic riders are already in `damage_parts`). */
+  readonly riders: readonly AttackRider[];
   readonly attack_bonus: number;
   /** For display: `1d8+3`, or `1d8+3 (1d10+3 two-handed)` for a Versatile weapon. */
   readonly damage: string;
@@ -121,8 +142,23 @@ export interface CarriedItem {
 }
 
 /** What play state changes on the sheet: carried items, conditions, Exhaustion. */
+/** A feature switched on in play (Rage). */
+export interface ToggleLine {
+  readonly key: string;
+  readonly name: string;
+  /** The limited use spent to switch it on (`barbarian:rage`). */
+  readonly uses: string | null;
+  readonly active: boolean;
+  /** Why it can't be active now (`wearing_heavy_armor`), if so. */
+  readonly blocked: string | null;
+  readonly ends_on: readonly string[];
+  readonly no_spells: boolean;
+}
+
 export interface PlayContext {
   readonly items: readonly CarriedItem[];
+  /** Keys of the toggles switched on (`barbarian:rage`). */
+  readonly active?: ReadonlySet<string>;
   /** Active condition ids, including implied ones (Unconscious → Prone, Incapacitated). */
   readonly conditions: ReadonlySet<string>;
   readonly exhaustion: number;
@@ -158,6 +194,10 @@ export interface DerivedSheet {
   /** Language id → source. */
   readonly languages: Readonly<Record<string, string>>;
   readonly resistances: readonly string[];
+  /** Advantage on saving throws or checks (`save.str`), with where it comes from. */
+  readonly advantages: readonly { readonly target: AdvantageTarget; readonly source: string }[];
+  /** Features you can switch on in play. */
+  readonly toggles: readonly ToggleLine[];
   /** Ids of every cantrip you know (a shortcut into `spells`). */
   readonly cantrips: readonly string[];
   readonly spellcasting: readonly SpellcastingLine[];
@@ -248,15 +288,29 @@ export function computeSheet(
   const pb = proficiencyBonus(level);
   const known = finalScores(build.base_scores, build.background_bonus);
   const scores = { ...res.abilityScores() };
-  // Active magic items act as extra sources (Ring of Protection, Gauntlets of Ogre Power…).
-  const itemSources: ActiveSource[] = (play?.items ?? [])
-    .filter((i) => i.active && i.magic)
-    .map((i) => {
-      const magic = i.magic as MagicItemDef;
-      const variant = magic.variants.find((v) => v.id === i.variant);
-      const grants = variant ? mergeGrants(magic.grants, variant.grants) : magic.grants;
-      return { ...itemSource, key: `item:${i.id}`, name: i.name, grants, level };
-    });
+  // Active magic items act as extra sources (Ring of Protection, Gauntlets of Ogre Power…),
+  // and so do active toggles (Rage).
+  const toggleDefs = res.sources.flatMap((src) =>
+    src.grants.toggles.map((toggle) => ({ key: `${usesScope(src)}:${toggle.id}`, toggle, src })),
+  );
+  const itemSources: ActiveSource[] = [
+    ...(play?.items ?? [])
+      .filter((i) => i.active && i.magic)
+      .map((i) => {
+        const magic = i.magic as MagicItemDef;
+        const variant = magic.variants.find((v) => v.id === i.variant);
+        const grants = variant ? mergeGrants(magic.grants, variant.grants) : magic.grants;
+        return { ...itemSource, key: `item:${i.id}`, name: i.name, grants, level };
+      }),
+    ...toggleDefs
+      .filter((t) => play?.active?.has(t.key))
+      .map((t) => ({
+        ...t.src,
+        key: `toggle:${t.key}`,
+        name: t.toggle.name,
+        grants: t.toggle.grants,
+      })),
+  ];
   for (const src of itemSources) {
     for (const e of src.grants.effects) {
       const ability = /^score\.(\w+)$/.exec(e.target)?.[1] as Ability | undefined;
@@ -493,6 +547,19 @@ export function computeSheet(
       if (weapon) attacks.push(attackLine(weapon, attackContext));
     }
   }
+  // Damage riders (Rage Damage, Sneak Attack, Divine Strike): the latest of each id wins.
+  const riders = new Map<string, { rider: ResolvedRider; level: number }>();
+  for (const src of [...res.sources, ...itemSources]) {
+    for (const def of src.grants.damage_riders) {
+      const rider = resolveRider(def, src, catalog, classLevels);
+      const previous = riders.get(def.id);
+      if (rider && (!previous || src.level >= previous.level)) {
+        riders.set(def.id, { rider, level: src.level });
+      }
+    }
+  }
+  const resolvedRiders = [...riders.values()].map((r) => r.rider);
+  for (const [i, a] of attacks.entries()) attacks[i] = withRiders(a, resolvedRiders);
   if (d20Penalty) {
     for (const [i, a] of attacks.entries()) {
       attacks[i] = {
@@ -559,6 +626,22 @@ export function computeSheet(
         ...itemSources.flatMap((s) => s.grants.resistances),
       ]),
     ],
+    advantages: [...res.sources, ...itemSources].flatMap((src) =>
+      src.grants.advantages.map((target) => ({ target, source: src.name })),
+    ),
+    toggles: toggleDefs.map(({ key, toggle, src }) => {
+      const armorBlock = toggle.blocked_when.find((c) => conditions.get(c));
+      const conditionBlock = toggle.ends_on.find((c) => play?.conditions.has(c));
+      return {
+        key,
+        name: toggle.name,
+        uses: toggle.uses === null ? null : `${usesScope(src)}:${toggle.uses}`,
+        active: play?.active?.has(key) ?? false,
+        blocked: armorBlock ?? conditionBlock ?? null,
+        ends_on: toggle.ends_on,
+        no_spells: toggle.no_spells,
+      };
+    }),
     cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),
     spellcasting: magic.spellcasting,
     spell_slots: magic.slots,
@@ -761,6 +844,11 @@ function wornArmorClass(
 }
 
 /** Limited-use features with their maximum now; a later definition of the same key wins. */
+/** Resources and toggles of a class are keyed by the class (`barbarian:rage`), others by source. */
+function usesScope(src: ActiveSource): string {
+  return src.feat === null && src.feature === null && src.class_id ? src.class_id : src.key;
+}
+
 function limitedUses(
   res: Resolution,
   catalog: Catalog,
@@ -771,9 +859,7 @@ function limitedUses(
   const byKey = new Map<string, { line: UsesLine; level: number }>();
   for (const src of res.sources) {
     for (const r of src.grants.resources) {
-      const scope =
-        src.feat === null && src.feature === null && src.class_id ? src.class_id : src.key;
-      const key = `${scope}:${r.id}`;
+      const key = `${usesScope(src)}:${r.id}`;
       const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
       let max = 0;
       if (r.max.value !== null) max = r.max.value;
@@ -883,9 +969,15 @@ interface AttackContext {
 
 function unarmedStrike(ctx: AttackContext): AttackLine {
   const strMod = abilityModifier(ctx.scores.str);
+  const dexMod = abilityModifier(ctx.scores.dex);
   const line = (bonus: number, parts: DamagePart[], notes: string[]): AttackLine => ({
     name: "Unarmed Strike",
     kind: "melee",
+    // Martial Arts uses Dexterity when it's higher.
+    ability: ctx.martialArtsDie && dexMod > strMod ? "dex" : "str",
+    weapon: false,
+    properties: [],
+    riders: [],
     attack_bonus: bonus,
     damage: formatDamage(parts),
     damage_type: "bludgeoning",
@@ -899,7 +991,7 @@ function unarmedStrike(ctx: AttackContext): AttackLine {
     const parts = [{ dice: null, bonus: Math.max(0, 1 + strMod), type: "bludgeoning" }];
     return line(strMod + ctx.pb, parts, []);
   }
-  const abilityMod = Math.max(strMod, abilityModifier(ctx.scores.dex));
+  const abilityMod = Math.max(strMod, dexMod);
   const parts = [{ dice: `1d${ctx.martialArtsDie}`, bonus: abilityMod, type: "bludgeoning" }];
   return line(abilityMod + ctx.pb, parts, [
     "Martial Arts",
@@ -915,9 +1007,11 @@ function attackLine(
   const strMod = abilityModifier(ctx.scores.str);
   const dexMod = abilityModifier(ctx.scores.dex);
   const martialArts = ctx.martialArtsDie > 0 && isMonkWeapon(w);
-  let abilityMod: number;
-  if (w.properties.includes("finesse") || martialArts) abilityMod = Math.max(strMod, dexMod);
-  else abilityMod = w.kind === "ranged" ? dexMod : strMod;
+  // Finesse (and Martial Arts): the better of Strength and Dexterity.
+  let ability: Ability;
+  if (w.properties.includes("finesse") || martialArts) ability = dexMod > strMod ? "dex" : "str";
+  else ability = w.kind === "ranged" ? "dex" : "str";
+  const abilityMod = ability === "dex" ? dexMod : strMod;
   const proficient = isWeaponProficient(w, ctx.weaponProfs);
   let bonus = abilityMod + (proficient ? ctx.pb : 0);
   const notes: string[] = [];
@@ -955,12 +1049,95 @@ function attackLine(
   return {
     name: magic.name,
     kind: w.kind,
+    ability,
+    weapon: true,
+    properties: w.properties,
+    riders: [],
     attack_bonus: bonus + magic.attack,
     damage,
     damage_type: w.damage_type,
     damage_parts: parts,
     two_handed_damage_parts: twoHanded,
     mastery,
+    notes,
+  };
+}
+
+/** A rider with its damage worked out for its source's class level. */
+interface ResolvedRider {
+  readonly def: DamageRider;
+  readonly source: string;
+  readonly dice: string | null;
+  readonly bonus: number;
+}
+
+function resolveRider(
+  def: DamageRider,
+  src: ActiveSource,
+  catalog: Catalog,
+  classLevels: ReadonlyMap<string, number>,
+): ResolvedRider | null {
+  let value: string | number | undefined;
+  if (typeof def.damage === "string") value = def.damage;
+  else {
+    const cls = lookup(catalog.classes, src.class_id);
+    const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
+    value = cls?.progression[def.damage.progression]?.[classLevel - 1];
+  }
+  if (typeof value === "number") return { def, source: src.name, dice: null, bonus: value };
+  if (value === undefined) return null;
+  if (/^\d+d\d+$/.test(value)) return { def, source: src.name, dice: value, bonus: 0 };
+  if (/^[+-]?\d+$/.test(value)) return { def, source: src.name, dice: null, bonus: Number(value) };
+  return null;
+}
+
+function riderApplies(rider: DamageRider, line: AttackLine): boolean {
+  const to = rider.applies_to;
+  if (to.ability !== null && line.ability !== to.ability) return false;
+  if (to.weapon && !line.weapon) return false;
+  if (to.any_of.length && !to.any_of.some((x) => x === line.kind || line.properties.includes(x))) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Add riders to the attack lines they apply to: automatic ones (Rage Damage) become a damage part
+ * of the weapon's type; the others are listed for `makeAttack`.
+ */
+function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackLine {
+  let parts = [...line.damage_parts];
+  let twoHanded = line.two_handed_damage_parts ? [...line.two_handed_damage_parts] : null;
+  const notes = [...line.notes];
+  const optional: AttackRider[] = [];
+  for (const r of riders) {
+    if (!riderApplies(r.def, line)) continue;
+    const type = r.def.type === "weapon" ? line.damage_type : r.def.type;
+    if (r.def.automatic && typeof type === "string") {
+      const part = { dice: r.dice, bonus: r.bonus, type };
+      parts = [...parts, part];
+      if (twoHanded) twoHanded = [...twoHanded, part];
+      notes.push(`${r.def.name} ${formatDamage([part]).replace(/^(\d)/, "+$1")}`);
+    } else {
+      optional.push({
+        id: r.def.id,
+        name: r.def.name,
+        dice: r.dice,
+        bonus: r.bonus,
+        type,
+        once_per_turn: r.def.once_per_turn,
+        requires: r.def.requires,
+      });
+    }
+  }
+  let damage = formatDamage(parts);
+  if (twoHanded) damage += ` (${formatDamage(twoHanded)} two-handed)`;
+  return {
+    ...line,
+    damage,
+    damage_parts: parts,
+    two_handed_damage_parts: twoHanded,
+    riders: optional,
     notes,
   };
 }

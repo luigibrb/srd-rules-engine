@@ -24,6 +24,12 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Effects, step 1: `damage_riders` (dice, flat or a class table column; automatic or optional;
+  Rage Damage, Sneak Attack, Divine Strike), `advantages` (`save.str`…, applied by
+  `rollSavingThrow`) and `toggles` (features switched on in play: Rage). Play state `active`,
+  actions `activate`/`deactivate`, CLI `on`/`off`; `makeAttack` takes `riders` and
+  `ally_adjacent` (also in `POST /v1/state/attack`). Attack lines have `ability`, `weapon`,
+  `properties` and `riders`; the sheet has `advantages` and `toggles`.
 - Spell `mechanics` (attack or save, damage by type, healing, targets, upcasting, Cantrip
   Upgrade, conditions, area) for 53 reviewed SRD spells (drafted by a parser in
   `import-srd-spells.ts`, each checked against its text), and `castSpell` to resolve them between

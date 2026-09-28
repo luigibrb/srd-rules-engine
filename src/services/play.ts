@@ -200,6 +200,7 @@ export function computePlaySheet(
     items,
     conditions: new Set(conditions.keys()),
     exhaustion: state.exhaustion,
+    active: new Set(state.active),
   };
   const sheet = computeSheet(played, catalog, res, context);
   const max = sheet.max_hp?.total ?? 0;
@@ -313,6 +314,8 @@ export function combatantFromCharacter(
     attacks: sheet.attacks,
     critical_hit_on: sheet.critical_hit_on,
     attacks_per_action: sheet.attacks_per_action,
+    advantages: sheet.advantages.map((a) => a.target),
+    no_spells: sheet.toggles.some((t) => t.active && t.no_spells),
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []
@@ -480,6 +483,23 @@ export function reconcileState(
     }
   }
   s.conditions = s.conditions.filter((id) => lookup(catalog.conditions, id));
+  // Toggles end when the feature is gone, or when armor or a condition blocks them (Rage:
+  // Heavy armor, Incapacitated).
+  const before = computePlaySheet(build, s, catalog);
+  s.active = s.active.filter((key) => {
+    const toggle = before.toggles.find((t) => t.key === key);
+    if (toggle && !toggle.blocked) return true;
+    notes.push(
+      toggle
+        ? `${toggle.name} ends (${(toggle.blocked ?? "").replaceAll("_", " ")}).`
+        : `'${key}' ends: the feature is gone.`,
+    );
+    return false;
+  });
+  if (s.concentration && before.toggles.some((t) => t.no_spells && s.active.includes(t.key))) {
+    notes.push(`Concentration on ${s.concentration} ends.`);
+    s.concentration = null;
+  }
   const sheet = computePlaySheet(build, s, catalog);
   const p = sheet.play;
   if (s.hp.current !== null && s.hp.current > p.hp.max) s.hp.current = null;
@@ -681,6 +701,7 @@ export function applyAction(
     }
     case "short_rest": {
       if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Short Rest");
+      endToggles(s, sheet, notes, "rest");
       let hp = current;
       for (const spend of action.hit_dice ?? []) {
         const pool = p.hit_dice.find((d) => d.die === spend.die);
@@ -707,6 +728,7 @@ export function applyAction(
     }
     case "long_rest": {
       if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Long Rest");
+      endToggles(s, sheet, notes, "rest");
       s.hp = { current: null, temp: 0 };
       s.hit_dice_spent = {};
       s.death_saves = { successes: 0, failures: 0 };
@@ -791,8 +813,30 @@ export function applyAction(
     case "set_concentration": {
       if (action.spell && conditionsNow.has("incapacitated"))
         fail("You can't concentrate while Incapacitated");
+      const blocking = sheet.toggles.find((t) => t.active && t.no_spells);
+      if (action.spell && blocking) fail(`You can't concentrate during ${blocking.name}`);
       if (action.spell && s.concentration) notes.push(`Concentration on ${s.concentration} ends.`);
       s.concentration = action.spell;
+      break;
+    }
+    case "activate": {
+      const toggle =
+        sheet.toggles.find((t) => t.key === action.key) ?? fail(`No feature '${action.key}'`);
+      if (toggle.active) fail(`${toggle.name} is already active`);
+      if (toggle.blocked)
+        fail(`${toggle.name} can't start: ${toggle.blocked.replaceAll("_", " ")}`);
+      if (toggle.uses) {
+        const use = p.uses.find((u) => u.key === toggle.uses);
+        if (!use || use.spent >= use.max) fail(`No uses of ${toggle.name} left`);
+        s.uses_spent[toggle.uses] = (use?.spent ?? 0) + 1;
+      }
+      s.active.push(toggle.key);
+      if (toggle.no_spells) dropConcentration(toggle.name);
+      break;
+    }
+    case "deactivate": {
+      if (!s.active.includes(action.key)) fail(`'${action.key}' isn't active`);
+      s.active = s.active.filter((k) => k !== action.key);
       break;
     }
     case "set_inspiration": {
@@ -939,6 +983,15 @@ export function applyAction(
   }
   const repaired = reconcileState(build, parseState(s), catalog);
   return { state: repaired.state, notes: [...notes, ...repaired.notes] };
+}
+
+/** Every active toggle ends (a rest lasts longer than Rage's 10 minutes). */
+function endToggles(s: CharacterState, sheet: PlaySheet, notes: string[], why: string): void {
+  for (const key of s.active) {
+    const name = sheet.toggles.find((t) => t.key === key)?.name ?? key;
+    notes.push(`${name} ends (${why}).`);
+  }
+  s.active = [];
 }
 
 function regainConsciousness(s: CharacterState, notes: string[]): void {

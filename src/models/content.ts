@@ -199,6 +199,67 @@ export const EffectSchema = z.strictObject({
 });
 export type Effect = z.infer<typeof EffectSchema>;
 
+export const DAMAGE_TYPES = [
+  "acid",
+  "bludgeoning",
+  "cold",
+  "fire",
+  "force",
+  "lightning",
+  "necrotic",
+  "piercing",
+  "poison",
+  "psychic",
+  "radiant",
+  "slashing",
+  "thunder",
+] as const;
+export type DamageType = (typeof DAMAGE_TYPES)[number];
+
+const Dice = z.string().regex(/^\d+d\d+$/, "dice like 8d6");
+
+/** What a feature can give Advantage on: `save.<ability>` or `check.<ability>`. */
+export type AdvantageTarget = `save.${Ability}` | `check.${Ability}`;
+export const ADVANTAGE_TARGETS: readonly AdvantageTarget[] = [
+  ...ABILITIES.map((a) => `save.${a}` as const),
+  ...ABILITIES.map((a) => `check.${a}` as const),
+];
+
+/**
+ * Extra damage on some attacks (Rage Damage, Sneak Attack, Divine Strike). `damage` is dice
+ * (`1d8`), a flat amount (`+2`), or a column of the source class's table (`{progression:
+ * "Sneak Attack"}`) read at its current level. An `automatic` rider is part of every matching
+ * attack line's damage; the others are listed on the line for `makeAttack` to apply on request.
+ * A later rider with the same `id` replaces an earlier one (Divine Strike: 1d8, then 2d8).
+ */
+export const DamageRiderSchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  damage: z.union([
+    Dice,
+    z.string().regex(/^[+-]\d+$/, "a flat amount like +2"),
+    z.strictObject({ progression: z.string() }),
+  ]),
+  /** The weapon's damage type, a type, or a choice of types made when it's applied. */
+  type: z
+    .union([z.literal("weapon"), z.enum(DAMAGE_TYPES), z.array(z.enum(DAMAGE_TYPES)).min(2)])
+    .default("weapon"),
+  /** Which attacks: using an ability, with a weapon (not an Unarmed Strike), with a property or kind. */
+  applies_to: z
+    .strictObject({
+      ability: z.enum(ABILITIES).nullable().default(null),
+      weapon: z.boolean().default(false),
+      /** Any of these weapon properties or kinds (`finesse`, `ranged`). */
+      any_of: z.array(z.string()).default([]),
+    })
+    .prefault({}),
+  automatic: z.boolean().default(false),
+  once_per_turn: z.boolean().default(false),
+  /** Sneak Attack: Advantage on the roll, or an ally next to the target (and no Disadvantage). */
+  requires: z.enum(["advantage_or_ally"]).nullable().default(null),
+});
+export type DamageRider = z.infer<typeof DamageRiderSchema>;
+
 export const TraitSchema = z.strictObject({ name: z.string(), text: z.string() });
 export type Trait = z.infer<typeof TraitSchema>;
 
@@ -350,6 +411,22 @@ export interface ChoiceDef {
   weapon_kind: "melee" | "ranged" | null;
 }
 
+/** A feature you switch on in play (Rage). Its key is like a resource's: `barbarian:rage`. */
+export interface ToggleDef {
+  id: string;
+  name: string;
+  /** A resource of the same source spent to switch it on (`rage`). */
+  uses: string | null;
+  /** What it gives while active. */
+  grants: Grants;
+  /** Can't be switched on, and ends, while one of these holds (`wearing_heavy_armor`). */
+  blocked_when: EffectCondition[];
+  /** Ends when the character has one of these conditions (`incapacitated`, implied ones too). */
+  ends_on: string[];
+  /** No Concentration and no spellcasting while active. */
+  no_spells: boolean;
+}
+
 export interface Grants {
   size: Size | null;
   skills: Skill[];
@@ -371,6 +448,12 @@ export interface Grants {
   /** Things a Long Rest gives besides recovery (Human: Heroic Inspiration). */
   on_long_rest: "heroic_inspiration"[];
   effects: Effect[];
+  /** Extra damage on some attacks. */
+  damage_riders: DamageRider[];
+  /** Advantage on saving throws or ability checks with an ability. */
+  advantages: AdvantageTarget[];
+  /** Features you switch on in play (Rage); their grants apply while active. */
+  toggles: ToggleDef[];
   items: ItemGrant[];
   gp: number;
   traits: Trait[];
@@ -456,6 +539,18 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
   .meta({ id: "ChoiceDef" });
 
 /** Everything a content source gives the character, plus the choices it asks for. */
+const ToggleSchema: z.ZodType<ToggleDef, unknown> = z.lazy(() =>
+  z.strictObject({
+    id: z.string(),
+    name: z.string(),
+    uses: z.string().nullable().default(null),
+    grants: GrantsSchema,
+    blocked_when: z.array(z.enum(EFFECT_CONDITIONS)).default([]),
+    ends_on: z.array(z.string()).default([]),
+    no_spells: z.boolean().default(false),
+  }),
+);
+
 export const GrantsSchema: z.ZodType<Grants, unknown> = z
   .lazy(() =>
     z.strictObject({
@@ -476,6 +571,11 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       resources: z.array(ResourceSchema).default([]),
       on_long_rest: z.array(z.enum(["heroic_inspiration"])).default([]),
       effects: z.array(EffectSchema).default([]),
+      damage_riders: z.array(DamageRiderSchema).default([]),
+      advantages: z
+        .array(z.enum(ADVANTAGE_TARGETS as [AdvantageTarget, ...AdvantageTarget[]]))
+        .default([]),
+      toggles: z.array(ToggleSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),
       traits: z.array(TraitSchema).default([]),
@@ -639,25 +739,6 @@ export type LanguageDef = z.infer<typeof LanguageSchema>;
 
 export const MasterySchema = z.strictObject({ ...entity });
 export type MasteryDef = z.infer<typeof MasterySchema>;
-
-export const DAMAGE_TYPES = [
-  "acid",
-  "bludgeoning",
-  "cold",
-  "fire",
-  "force",
-  "lightning",
-  "necrotic",
-  "piercing",
-  "poison",
-  "psychic",
-  "radiant",
-  "slashing",
-  "thunder",
-] as const;
-export type DamageType = (typeof DAMAGE_TYPES)[number];
-
-const Dice = z.string().regex(/^\d+d\d+$/, "dice like 8d6");
 
 export const SPELL_AREAS = ["cone", "cube", "cylinder", "emanation", "line", "sphere"] as const;
 

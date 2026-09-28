@@ -112,8 +112,9 @@ picks as `kind: spell` choices:
   one, it uses the equipped armor and Shield.
 - Replacements and "after a rest" lists store the character's current state; rest-by-rest
   history (which spells were prepared on which day) belongs to session state, not the build.
-- Features that roll dice or depend on the situation (Rage damage, Sneak Attack, Divine Strike,
-  Potent Spellcasting) are shown as text and class resources, not added to attack lines.
+- Rage, Sneak Attack and Divine Strike are modeled (see "Effects: riders, Advantage, toggles");
+  most other features that roll dice or depend on the situation (Potent Spellcasting, Reckless
+  Attack, Danger Sense…) are still text and class resources.
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
   placeholders, like the Soldier's gaming set.
 - The old combat model (`Character` in `src/models/character.ts`) is a hand-filled snapshot
@@ -164,6 +165,30 @@ other feats or features, a trait (Fighting Style feats need the Fighting Style f
 Spellcasting, or knowing one of some spells. Eldritch Invocations and Metamagic options have the
 same shape as feats but live in their own `features` table, so an Ability Score Improvement
 ("any feat you qualify for") can't pick one.
+
+### Effects: riders, Advantage, toggles
+
+Three additions to grants, beyond numeric effects:
+
+- **Damage riders** (`damage_riders`): extra damage on the attacks they apply to (by ability,
+  weapon or Unarmed Strike, weapon property or kind). The amount is dice, a flat bonus, or a
+  column of the source class's table read at its current level (Rage Damage, Sneak Attack).
+  Automatic riders become a damage part of every matching attack line (not doubled on a Critical
+  Hit when they're flat); optional ones are listed on the line (`riders`) and `makeAttack` adds
+  them on request, checking `requires: advantage_or_ally` and asking for the damage type when
+  there's a choice. The latest rider with an id wins (Divine Strike 1d8 → 2d8).
+- **Advantage** (`advantages`: `save.<ability>`, `check.<ability>`): listed on the sheet with
+  its source; `rollSavingThrow` applies it and cancels it against Disadvantage.
+- **Toggles** (`toggles`): a feature switched on in play. `state.active` holds their keys (like
+  resources: `barbarian:rage`), the play actions `activate` (spends `uses`) and `deactivate` change
+  it, and active toggles are sources, so their grants use the same machinery as magic items.
+  `reconcileState` ends a toggle whose `blocked_when` effect condition holds (Heavy armor) or whose
+  `ends_on` condition is active (Incapacitated); `no_spells` drops Concentration, refuses new
+  Concentration and makes the combatant unable to cast.
+
+Interpretations (flagged): a Short or Long Rest ends every active toggle (Rage lasts at most 10
+minutes); Rage's duration and its extension each turn aren't tracked until turns exist (the
+Encounter phase), nor are once-per-turn limits, which the caller enforces.
 
 ### Casting spells
 

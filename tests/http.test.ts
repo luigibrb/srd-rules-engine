@@ -262,6 +262,14 @@ describe("HTTP play state", () => {
     expect(res.body.notes).toContain(
       "Down to 0 Hit Points: Unconscious, making Death Saving Throws.",
     );
+    const sneakless = await api.post("/v1/state/attack", {
+      attacker: side,
+      target: side,
+      attack: "Greatsword",
+      riders: [{ rider: "sneak-attack" }],
+    });
+    expect(sneakless.status).toBe(400);
+    expect(sneakless.body.detail[0]).toMatch(/no rider 'sneak-attack'/);
     const unknown = await api.post("/v1/state/attack", {
       attacker: side,
       target: side,

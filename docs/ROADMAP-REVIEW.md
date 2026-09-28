@@ -286,3 +286,10 @@ Approved with the recommendations above:
   (damage after casting 46, no resolving effect 10, damage elsewhere 9, unread upcasts 5, tables 3,
   rejected 2, attack and save 2, several saves 1, fixed DC 1). Those need P5/P7 concepts (ongoing
   effects, triggers) or hand-written entries.
+- **P5 (done, branch `p5-effects`):** `damage_riders`, `advantages` and `toggles` in grants;
+  play state `active` with `activate`/`deactivate` (CLI `on`/`off`); Rage (toggle: Resistance,
+  Rage Damage from its column, Strength Advantage, no spells; ends on Incapacitated, Heavy armor,
+  rests), Sneak Attack (optional rider from its column, Advantage or an adjacent ally), Divine
+  Strike (optional rider, Necrotic or Radiant, 2d8 at 14). Deviations: no new `when` conditions
+  (a toggle's grants apply while it's active, which covers "while raging"); once-per-turn limits
+  and Rage's per-round extension wait for turns (P7).

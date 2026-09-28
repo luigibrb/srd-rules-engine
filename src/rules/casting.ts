@@ -105,6 +105,7 @@ export function castSpell(
   targets: readonly Combatant[],
   { slot_level, pact = false, spellcasting, mode = "normal", rng = mathRng }: CastOptions = {},
 ): SpellCastResult {
+  if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
   const m = spell.mechanics;
   const cantrip = spell.level === 0;
   const slot = cantrip ? null : (slot_level ?? spell.level);
