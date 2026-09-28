@@ -26,7 +26,8 @@ import {
 } from "../models/content";
 import { finalScores } from "./ability-scores";
 import { type ActiveSource, mergeGrants, type Resolution, resolve } from "./build-resolution";
-import { abilityModifier, proficiencyBonus, signed } from "./dice";
+import { type DamagePart, formatDamage } from "./damage";
+import { abilityModifier, proficiencyBonus } from "./dice";
 import { isMonkWeapon, isWeaponProficient } from "./weapons";
 
 export interface Contribution {
@@ -56,9 +57,15 @@ export interface SaveLine {
 
 export interface AttackLine {
   readonly name: string;
+  readonly kind: "melee" | "ranged";
   readonly attack_bonus: number;
+  /** For display: `1d8+3`, or `1d8+3 (1d10+3 two-handed)` for a Versatile weapon. */
   readonly damage: string;
   readonly damage_type: string;
+  /** The damage on a hit, ready to roll (`rollDamage`). */
+  readonly damage_parts: readonly DamagePart[];
+  /** A Versatile weapon's damage when used with two hands. */
+  readonly two_handed_damage_parts: readonly DamagePart[] | null;
   readonly mastery: string | null;
   readonly notes: readonly string[];
 }
@@ -876,25 +883,28 @@ interface AttackContext {
 
 function unarmedStrike(ctx: AttackContext): AttackLine {
   const strMod = abilityModifier(ctx.scores.str);
+  const line = (bonus: number, parts: DamagePart[], notes: string[]): AttackLine => ({
+    name: "Unarmed Strike",
+    kind: "melee",
+    attack_bonus: bonus,
+    damage: formatDamage(parts),
+    damage_type: "bludgeoning",
+    damage_parts: parts,
+    two_handed_damage_parts: null,
+    mastery: null,
+    notes,
+  });
   if (!ctx.martialArtsDie) {
-    return {
-      name: "Unarmed Strike",
-      attack_bonus: strMod + ctx.pb,
-      damage: String(Math.max(0, 1 + strMod)),
-      damage_type: "bludgeoning",
-      mastery: null,
-      notes: [],
-    };
+    // 1 + Strength modifier, never below 0.
+    const parts = [{ dice: null, bonus: Math.max(0, 1 + strMod), type: "bludgeoning" }];
+    return line(strMod + ctx.pb, parts, []);
   }
   const abilityMod = Math.max(strMod, abilityModifier(ctx.scores.dex));
-  return {
-    name: "Unarmed Strike",
-    attack_bonus: abilityMod + ctx.pb,
-    damage: withMod(`1d${ctx.martialArtsDie}`, abilityMod),
-    damage_type: "bludgeoning",
-    mastery: null,
-    notes: ["Martial Arts", "Bonus Action: one extra Unarmed Strike"],
-  };
+  const parts = [{ dice: `1d${ctx.martialArtsDie}`, bonus: abilityMod, type: "bludgeoning" }];
+  return line(abilityMod + ctx.pb, parts, [
+    "Martial Arts",
+    "Bonus Action: one extra Unarmed Strike",
+  ]);
 }
 
 function attackLine(
@@ -930,22 +940,27 @@ function attackLine(
     const sides = Number(/^1d(\d+)$/.exec(w.damage)?.[1] ?? 0);
     if (sides < ctx.martialArtsDie) die = `1d${ctx.martialArtsDie}`;
   }
-  const damageMod = abilityMod + magic.damage;
-  let damage = withMod(die, damageMod);
-  if (w.versatile_damage) damage += ` (${withMod(w.versatile_damage, damageMod)} two-handed)`;
+  // A fixed amount (Blowgun: 1) gets no ability modifier (SRD "Damage Rolls").
+  const part = (dice: string): DamagePart =>
+    /^\d+$/.test(dice)
+      ? { dice: null, bonus: Number(dice) + magic.damage, type: w.damage_type }
+      : { dice, bonus: abilityMod + magic.damage, type: w.damage_type };
+  const parts = [part(die)];
+  const twoHanded = w.versatile_damage ? [part(w.versatile_damage)] : null;
+  let damage = formatDamage(parts);
+  if (twoHanded) damage += ` (${formatDamage(twoHanded)} two-handed)`;
   const mastery = ctx.masteries.includes(w.id)
     ? (lookup(ctx.catalog.masteries, w.mastery)?.name ?? null)
     : null;
   return {
     name: magic.name,
+    kind: w.kind,
     attack_bonus: bonus + magic.attack,
     damage,
     damage_type: w.damage_type,
+    damage_parts: parts,
+    two_handed_damage_parts: twoHanded,
     mastery,
     notes,
   };
-}
-
-function withMod(dice: string, mod: number): string {
-  return mod === 0 ? dice : `${dice}${signed(mod)}`;
 }

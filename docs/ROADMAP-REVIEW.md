@@ -255,3 +255,10 @@ Approved with the recommendations above:
   defaults filled in, paths are stable); exports stay `export *`, with the snapshot as the guard
   and the accidental internal exports listed for 1.0; no `version` field on builds and states
   yet (a build without one is version 1, so it can wait for the first real migration).
+- **P2 (done, branch `p2-damage`):** `rules/damage.ts` (`rollDamage`, `adjustDamage`,
+  `takeDamage`) used by the play `damage` action and the combat `applyDamage`; attack lines have
+  `kind`, `damage_parts`, `two_handed_damage_parts`. Fixed on the way: the Blowgun's fixed damage
+  added the ability modifier; Petrified didn't halve untyped damage. The play action still takes
+  one amount and type: several instances (Flame Tongue) come with the combatant in P3. Two
+  existing behaviours kept and flagged in ARCHITECTURE.md (Temporary Hit Points absorbing all the
+  damage: no Concentration save, no death save failure).

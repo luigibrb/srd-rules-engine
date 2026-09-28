@@ -117,9 +117,9 @@ picks as `kind: spell` choices:
 - Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are
   placeholders, like the Soldier's gaming set.
 - The combat model (`Character` in `src/models/character.ts`: HP, AC, ability scores) is a
-  separate, hand-filled snapshot. It isn't derived from a build and sheet, its `character_class`
-  only accepts the 12 SRD classes, and its `applyDamage` ignores resistances, temporary HP and
-  death saves (the play action `damage` handles those). The spell functions (`resolveSpellSave`,
+  separate, hand-filled snapshot. It isn't derived from a build and sheet, and its
+  `character_class` only accepts the 12 SRD classes. Its `applyDamage` uses the shared
+  `takeDamage`, but a snapshot has no Temporary Hit Points or defenses. The spell functions (`resolveSpellSave`,
   `resolveSpellAttack`) take a separate `Spell` model (`src/models/spell.ts`) with the damage
   dice filled in by the caller; catalog spells (`SpellDef`) have no mechanics yet. Unifying them
   is on the roadmap ([ROADMAP-REVIEW.md](ROADMAP-REVIEW.md), P2–P4).
@@ -235,6 +235,31 @@ slots and uses, the inventory, coins, and `choices`: today's picks for choices m
   level to speed. Incapacitated ends Concentration.
 - **Build changes** don't touch the state; `reconcileState` clamps spent resources, drops
   rest-change picks that no longer fit and ends attunements that are no longer allowed.
+
+### Damage
+
+`rules/damage.ts` holds the damage rules, shared by the play action `damage` and the combat
+`applyDamage`:
+
+- `rollDamage(parts, { critical, rng })` rolls `DamagePart`s (`{ dice, bonus, type }`). A
+  Critical Hit doubles each part's dice, not its bonus; a part never goes below 0.
+- `adjustDamage` applies Immunity, then Resistance (halved, rounded down), then Vulnerability
+  (doubled), per instance and per type; `"all"` covers every type, including untyped damage
+  (Petrified). Several Resistances to one type count once.
+- `takeDamage(vitals, instances, defenses, { critical })` sums the adjusted instances, takes
+  Temporary Hit Points first, and reports dropping to 0, dying (massive damage, or damage at 0
+  HP at least the maximum), Death Saving Throw failures and the Concentration DC. The caller
+  updates its own state (conditions, death saves, Concentration).
+
+Every attack line on the sheet carries its damage as parts (`damage_parts`, and
+`two_handed_damage_parts` for Versatile weapons), and its display string is built from them.
+A fixed damage amount (the Blowgun's 1) gets no ability modifier (SRD "Damage Rolls").
+
+Interpretations (flagged): damage that Temporary Hit Points absorb entirely calls for no
+Concentration save and causes no Death Saving Throw failure, and the Concentration DC uses the
+damage that got past them (the SRD says "if you take damage"; this keeps Temporary Hit Points a
+full buffer). A magic weapon's damage bonus still applies to fixed damage (only the ability
+modifier is excluded).
 
 Interpretations: a Long Rest doesn't remove conditions (the SRD ties them to their source);
 attuning is recorded immediately, with a note that it takes a Short Rest; damage while Petrified
