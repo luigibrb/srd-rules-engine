@@ -1,20 +1,39 @@
 # Roadmap
 
-What's done, and what comes next. The review that set the current plan, with the decisions and
-what each phase did, is in [ROADMAP-REVIEW.md](ROADMAP-REVIEW.md).
+What's done, the decisions behind it, and what comes next.
 
 ## Done
 
-| Phase | What |
-|---|---|
-| P0 | Guard rails: closed effect targets and conditions, `source` defaults to the pack's name, leak guard |
-| P1 | Content packs: `pack.yaml` manifests, `patches.yaml`, filtering by source, builds that record their packs, public API snapshot |
-| P2 | One damage function (`takeDamage`), structured attack damage (`damage_parts`) |
-| P3 | Combatants, `makeAttack` (critical range, Advantage, Versatile), `POST /v1/state/attack` |
-| P4 | Spell mechanics as data and `castSpell`; 53 reviewed SRD spells, drafted by a parser in the importer |
-| P5 | Effects: damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage, toggles (Rage) |
-| P6 | Monsters: all 330 SRD stat blocks, `combatantFromMonster`, `useSaveAction` |
-| P7 | Encounters: Initiative, turns and rounds, action economy, attacks and spells in turns, timed effects, Concentration saves, recharges, once-per-turn riders, Rage's duration |
+The P0–P7 plan came from a review of an earlier roadmap against the code (2026-09-28); each phase
+was a branch merged into `main`. Details are in the CHANGELOG and the commits.
+
+| Phase | What | Notes |
+|---|---|---|
+| P0 | Guard rails: closed effect targets and conditions, `source` defaults to the pack's name, leak guard | |
+| P1 | Content packs: `pack.yaml` manifests, `patches.yaml`, filtering by source, builds that record their packs, public API snapshot | Patches apply to the parsed entity (defaults filled in, so paths are stable) and it's validated again. Exports stay `export *`, guarded by the snapshot |
+| P2 | One damage function (`takeDamage`), structured attack damage (`damage_parts`) | Fixed on the way: the Blowgun's fixed damage added the ability modifier; Petrified didn't halve untyped damage |
+| P3 | Combatants, `makeAttack` (critical range, Advantage, Versatile), `POST /v1/state/attack` | The `Character` functions weren't rebuilt on combatants (different result shapes): deprecated as they are |
+| P4 | Spell mechanics as data and `castSpell`; 53 reviewed SRD spells, drafted by a parser in the importer | All 43 parser drafts reviewed against their text: 38 used, 2 rejected, 3 corrected; the review found and fixed 5 parser bugs |
+| P5 | Effects: damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage, toggles (Rage) | A toggle's grants apply while it's active, so no new `when` conditions were needed |
+| P6 | Monsters: all 330 SRD stat blocks, `combatantFromMonster`, `useSaveAction` | Reviewed by invariants on every stat block plus 15 golden ones; two Markdown typos corrected in the importer's `FIXES`. The bundled JSON grew to ~3.9 MB |
+| P7 | Encounters: Initiative, turns and rounds, action economy, attacks and spells in turns, timed effects, Concentration saves, recharges, once-per-turn riders, Rage's duration | Split in two: the encounter document and turns (P7a), then the rules that need turns (P7b) |
+
+## Decisions
+
+Taken with the P0–P7 plan; they still hold.
+
+- Patches are a small list of operations (`set`, `append`, `remove` on a path), not JSON Merge
+  Patch, which can't append to lists.
+- Builds may list the packs they need (`packs`, optional), so loading one without them says so.
+- The `Character`-based API and its routes stay as deprecated adapters until 1.0.
+- `import-srd-classes.py` stays in Python for now.
+- The leak guard runs in CI (`npm run check`); no pre-commit hook dependency.
+- No `ruleset` field beyond the manifest's informational one: the engine targets the 2024
+  rules, and older material is converted by hand.
+- No registry for new tables from packs: selectable options (maneuvers, infusions) fit the
+  `features` table with a `category`, and monsters are a core table.
+- A spell's or monster's mechanics are used only after a review against the SRD text; what a
+  parser can't read safely stays text.
 
 ## Next steps
 
@@ -53,6 +72,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
   first.
+- **Spell mechanics the schema can't express yet (M).** A flat bonus per dart (Magic Missile),
+  spells with both an attack and a save, and riders on a hit such as Guiding Bolt's Advantage on
+  the next attack.
 - **Monster save effects left as text (M).** 19 effects without plain damage or conditions
   (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
 - **Class features still text (M, ongoing).** Features that roll dice or change rolls in

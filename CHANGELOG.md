@@ -7,8 +7,9 @@ All notable changes are documented here. This project follows
 
 ### Changed
 - Docs: README reorganized by use (builder, play, combat, spells, monsters, encounters, packs);
-  ARCHITECTURE.md restructured, with every flagged interpretation in one section; a new
-  `docs/ROADMAP.md` with next steps; "Writing your own pack, step by step" in CONTENT.md.
+  ARCHITECTURE.md restructured, with every flagged interpretation in one section;
+  `docs/ROADMAP.md` (what's done, decisions, next steps) replaces the roadmap review;
+  "Writing your own pack, step by step" in CONTENT.md.
 - Effect `target` and `when` are closed lists (`EFFECT_TARGETS`, `EFFECT_CONDITIONS`): content
   with an unknown target or condition is rejected at load instead of being silently ignored.
   The JSON Schemas list them for autocompletion.

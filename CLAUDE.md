@@ -33,7 +33,7 @@ scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homeb
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
 docs/              # ARCHITECTURE.md (design, flagged interpretations), CONTENT.md (authoring
-                   #   guide), ROADMAP.md (next steps), ROADMAP-REVIEW.md (P0–P7 record)
+                   #   guide), ROADMAP.md (done, decisions, next steps)
   srd-5.2.1/       # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 tests/             # vitest; classes.test.ts: every class × species × background completes;
                    #   levels.test.ts: every class to 20, seeded random multiclass paths to 20
