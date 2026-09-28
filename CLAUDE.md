@@ -23,12 +23,14 @@ src/
   cli/             # srd-rules bin: build (interactive builder), play, serve, validate
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
-scripts/           # compile-content.ts; import-srd-spells.ts (SRD Markdown → spells.yaml);
+scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homebrew only);
+                   #   import-srd-spells.ts (SRD Markdown → spells.yaml);
                    #   import-srd-items.ts (→ magic-items.yaml, conditions.yaml);
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
-docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide)
+docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide),
+                   #   ROADMAP-REVIEW.md (roadmap, decisions, phase progress)
   srd-5.2.1/       # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 tests/             # vitest; classes.test.ts: every class × species × background completes;
                    #   levels.test.ts: every class to 20, seeded random multiclass paths to 20
@@ -44,8 +46,13 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   `seededRng`, `scriptedRng`, `fixedRng`.
 - D&D 5e rule: critical hits double all dice (not the modifier); nat-1 always misses; nat-20 always hits.
 - Saving throw damage: half (rounded down) on success, full on failure.
-- Rules content is data: every entity has a slug `id` and a `source`. After editing
-  `content/`, run `npm run content` and commit the generated files.
+- Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).
+  After editing `content/`, run `npm run content` and commit the generated files.
+- This repo holds only SRD 5.2.1 content and invented homebrew (`source: homebrew` or `test`),
+  including examples and test fixtures; `npm run check:sources` enforces it. Non-SRD content
+  belongs in a separate private pack.
+- Effect `target`/`when` values are closed lists in `src/models/content.ts`: a new target needs
+  an entry there and a consumer in `rules/sheet.ts`.
 - A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
   add a named rule in `rules/sheet.ts` only when it can't be expressed declaratively, and list
   it under "Named rules in code" in `docs/ARCHITECTURE.md`.
@@ -70,7 +77,7 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 
 ```bash
 npm test                 # run tests
-npm run check            # content up to date + lint + typecheck + tests (CI)
+npm run check            # content up to date + leak guard + lint + typecheck + tests (CI)
 npm run format           # biome format + safe fixes
 npm run content          # YAML → bundled JSON + JSON Schemas
 npm run build            # dist/

@@ -15,6 +15,8 @@ as `schemas/*.schema.json`). A **content pack** is a folder, and every file in i
 | `weapons.yaml`, `armor.yaml`, `gear.yaml`, `tools.yaml` | Equipment | … |
 | `languages.yaml`, `masteries.yaml` | Languages, weapon mastery properties | … |
 | `spells.yaml` | Spells: level, school, class `lists`, ritual, concentration, text | `spells.schema.json` |
+| `magic-items.yaml` | Magic items: base item, bonuses, Attunement, charges, grants while active | `magic_items.schema.json` |
+| `conditions.yaml` | Conditions: `implies`, `speed_zero`, levels (Exhaustion) | `conditions.schema.json` |
 
 A file can hold a single entity or a list. `.yml` and `.json` work too.
 
@@ -29,6 +31,13 @@ Start each file with a schema comment to get autocompletion and inline errors:
 Every entity has a slug `id` (lowercase letters, digits and hyphens), a `name`, a `source`
 (`srd-5.2.1`, `homebrew`, …) and an optional `description`. A pack loaded after another
 replaces entities that have the same id.
+
+`source` is optional: an entity without one gets its pack's name (the folder name when loaded
+with `loadContentPack`, or `homebrew` for a pack without a name). Set it explicitly when the
+content comes from a specific book, so it can be told apart from the SRD.
+
+This repository only holds SRD 5.2.1 content and invented homebrew: `npm run check` fails if
+`content/` has anything but `srd-5.2.1/`, or if an example or test pack has another `source`.
 
 ## Grants
 
@@ -78,10 +87,15 @@ grants:
 | `saves` / `save.<ability>` | `add` | Aura of Protection: `cha`, `min: 1` |
 | `skill.unproficient` | `add` | Jack of All Trades: `half_prof` |
 | `hp_per_class_level` | `add` | Draconic Resilience: `1` × Sorcerer level |
+| `checks` | `add` | Stone of Good Luck: `1` (ability checks) |
+| `score.<ability>` | `max` | Gauntlets of Ogre Power: Strength `19` |
 
 Conditions for `when`: `wearing_armor`, `wielding_shield`, `wearing_heavy_armor`,
 `not_wearing_heavy_armor`, `unarmored` (no armor and no Shield). Armor Class alternatives such as
 Unarmored Defense go in `ac_calculations`, not effects, because they don't stack.
+
+These targets and conditions are the complete list: anything else is rejected when the pack
+loads ("unknown effect target 'speeed'"), and the JSON Schemas offer them for autocompletion.
 
 This is a small stand-in for the full Effect engine planned in the roadmap. Anything these
 targets can't express goes in a trait's text, or in a feat's `unsupported` note, which the

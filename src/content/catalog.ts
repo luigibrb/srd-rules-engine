@@ -3,8 +3,8 @@
  *
  * A pack is plain data (parsed YAML or JSON), so this module works everywhere: Node, Deno,
  * Bun, browsers, workers. Packs are layered in order: a later pack adds entities and replaces
- * any entity with the same id (that's how homebrew overrides or extends the SRD). Loading
- * packs from disk lives in `node.ts`.
+ * any entity with the same id (that's how homebrew overrides or extends the SRD). An entity
+ * without a `source` gets its pack's name. Loading packs from disk lives in `node.ts`.
  */
 
 import { type ZodType, z } from "zod";
@@ -20,6 +20,7 @@ import {
   ConditionSchema,
   type CreationRules,
   CreationSchema,
+  DEFAULT_SOURCE,
   type FeatDef,
   FeatSchema,
   type GearDef,
@@ -68,7 +69,10 @@ export interface Catalog {
 
 /** Raw, unvalidated content: what a YAML/JSON content directory parses to. */
 export interface ContentPack {
-  /** Used in error messages, e.g. `srd-5.2.1` or `my-homebrew`. */
+  /**
+   * Used in error messages, e.g. `srd-5.2.1` or `my-homebrew`, and as the `source` of entities
+   * that don't declare one (`homebrew` for a pack without a name).
+   */
   name?: string;
   creation?: unknown;
   classes?: unknown[];
@@ -143,8 +147,13 @@ export function createCatalog(...packs: ContentPack[]): Catalog {
 
   packs.forEach((pack, i) => {
     const packName = pack.name ?? `pack ${i + 1}`;
+    const withSource = (entry: unknown): unknown =>
+      entry !== null && typeof entry === "object" && !Array.isArray(entry) && !("source" in entry)
+        ? { ...entry, source: pack.name ?? DEFAULT_SOURCE }
+        : entry;
     if (pack.creation !== undefined) {
-      const parsed = parse(CreationSchema, pack.creation, `${packName}/creation`, errors);
+      const where = `${packName}/creation`;
+      const parsed = parse(CreationSchema, withSource(pack.creation), where, errors);
       if (parsed) creation = parsed;
     }
     for (const table of TABLE_NAMES) {
@@ -153,7 +162,8 @@ export function createCatalog(...packs: ContentPack[]): Catalog {
       const seen = new Set<string>();
       entries.forEach((entry, j) => {
         const where = `${packName}/${table}[${j}]`;
-        const parsed = parse(TABLE_SCHEMAS[table] as ZodType<{ id: string }>, entry, where, errors);
+        const schema = TABLE_SCHEMAS[table] as ZodType<{ id: string }>;
+        const parsed = parse(schema, withSource(entry), where, errors);
         if (!parsed) return;
         if (seen.has(parsed.id)) {
           errors.push(`${packName}/${table}: duplicate id '${parsed.id}'`);

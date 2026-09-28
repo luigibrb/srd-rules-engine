@@ -12,7 +12,7 @@
           "type": "string"
         },
         "source": {
-          "default": "srd-5.2.1",
+          "default": "homebrew",
           "type": "string"
         },
         "description": {
@@ -53,7 +53,7 @@
             "type": "string"
           },
           "source": {
-            "default": "srd-5.2.1",
+            "default": "homebrew",
             "type": "string"
           },
           "description": {
@@ -490,7 +490,52 @@
             "type": "object",
             "properties": {
               "target": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "ac",
+                  "attack.critical",
+                  "attack.ranged",
+                  "attacks",
+                  "checks",
+                  "darkvision",
+                  "hp_per_class_level",
+                  "hp_per_level",
+                  "initiative",
+                  "martial_arts.die",
+                  "saves",
+                  "skill.unproficient",
+                  "speed",
+                  "skill.acrobatics",
+                  "skill.animal-handling",
+                  "skill.arcana",
+                  "skill.athletics",
+                  "skill.deception",
+                  "skill.history",
+                  "skill.insight",
+                  "skill.intimidation",
+                  "skill.investigation",
+                  "skill.medicine",
+                  "skill.nature",
+                  "skill.perception",
+                  "skill.performance",
+                  "skill.persuasion",
+                  "skill.religion",
+                  "skill.sleight-of-hand",
+                  "skill.stealth",
+                  "skill.survival",
+                  "save.str",
+                  "save.dex",
+                  "save.con",
+                  "save.int",
+                  "save.wis",
+                  "save.cha",
+                  "score.str",
+                  "score.dex",
+                  "score.con",
+                  "score.int",
+                  "score.wis",
+                  "score.cha"
+                ]
               },
               "op": {
                 "default": "add",
@@ -545,9 +590,20 @@
               },
               "when": {
                 "default": null,
-                "type": [
-                  "string",
-                  "null"
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "wearing_armor",
+                      "wielding_shield",
+                      "wearing_heavy_armor",
+                      "not_wearing_heavy_armor",
+                      "unarmored"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               }
             },

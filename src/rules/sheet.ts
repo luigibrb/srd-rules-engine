@@ -14,7 +14,9 @@ import {
   type Ability,
   type ArmorDef,
   type Effect,
+  type EffectCondition,
   type EffectOp,
+  type EffectTarget,
   type MagicItemDef,
   type Size,
   SKILL_ABILITY,
@@ -206,7 +208,7 @@ const itemSource: ActiveSource = {
   level: 1,
   class_id: null,
 };
-type Conditions = ReadonlyMap<string, boolean>;
+type Conditions = ReadonlyMap<EffectCondition, boolean>;
 
 export interface SpellcastingLine {
   /** The feature's source, e.g. `Wizard` or `Magic Initiate`. */
@@ -278,7 +280,7 @@ export function computeSheet(
   const gp = res.sources.reduce((sum, src) => sum + src.grants.gp, 0);
   const training = res.granted("armor_training");
 
-  const effectsFor = (target: string, conditions: Conditions): ResolvedEffect[] => {
+  const effectsFor = (target: EffectTarget, conditions: Conditions): ResolvedEffect[] => {
     const out: ResolvedEffect[] = [];
     const all = [
       ...res.effects(),
@@ -307,7 +309,7 @@ export function computeSheet(
   }
   const { armor, shield } = ac;
   const conditions = armorConditions(armor, shield);
-  const effects = (target: string) => effectsFor(target, conditions);
+  const effects = (target: EffectTarget) => effectsFor(target, conditions);
   const sum = (list: ResolvedEffect[]) =>
     list.reduce((total, [op, v]) => total + (op === "add" ? v : 0), 0);
   // Exhaustion: every D20 Test is reduced by 2 per level (SRD Rules Glossary).
@@ -572,13 +574,14 @@ export function computeSheet(
 
 /** Conditions that effects can depend on (`when`), given what the character wears. */
 function armorConditions(armor: ArmorDef | null, shield: ArmorDef | null): Conditions {
-  return new Map([
-    ["wearing_armor", armor !== null],
-    ["wielding_shield", shield !== null],
-    ["wearing_heavy_armor", armor?.category === "heavy"],
-    ["not_wearing_heavy_armor", armor?.category !== "heavy"],
-    ["unarmored", armor === null && shield === null],
-  ]);
+  const when: Record<EffectCondition, boolean> = {
+    wearing_armor: armor !== null,
+    wielding_shield: shield !== null,
+    wearing_heavy_armor: armor?.category === "heavy",
+    not_wearing_heavy_armor: armor?.category !== "heavy",
+    unarmored: armor === null && shield === null,
+  };
+  return new Map(Object.entries(when) as [EffectCondition, boolean][]);
 }
 
 function mapAbilities<T>(fn: (a: Ability) => T): Record<Ability, T> {
@@ -612,7 +615,7 @@ function bestArmorClass(
   res: Resolution,
   catalog: Catalog,
   mod: Record<Ability, number>,
-  effectsFor: (target: string, conditions: Conditions) => ResolvedEffect[],
+  effectsFor: (target: EffectTarget, conditions: Conditions) => ResolvedEffect[],
   play?: PlayContext,
 ): ArmorClassOption {
   if (play) return wornArmorClass(res, catalog, mod, effectsFor, play);
@@ -684,7 +687,7 @@ function wornArmorClass(
   res: Resolution,
   catalog: Catalog,
   mod: Record<Ability, number>,
-  effectsFor: (target: string, conditions: Conditions) => ResolvedEffect[],
+  effectsFor: (target: EffectTarget, conditions: Conditions) => ResolvedEffect[],
   play: PlayContext,
 ): ArmorClassOption {
   const worn = (category: (c: string) => boolean) => {

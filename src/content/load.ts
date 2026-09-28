@@ -6,15 +6,13 @@ import { parse as parseYaml } from "yaml";
 import { type Catalog, type ContentPack, createCatalog, TABLE_NAMES } from "./catalog";
 
 /**
- * Read a content directory laid out like `content/srd-5.2.1/`:
- *
- * ```
- * creation.yaml  species.yaml  backgrounds.yaml  feats.yaml  weapons.yaml  armor.yaml
- * gear.yaml  tools.yaml  languages.yaml  masteries.yaml  classes/<id>.yaml
- * ```
+ * Read a content directory laid out like `content/srd-5.2.1/`: `creation.yaml`, plus one file
+ * per table (`TABLE_NAMES`: `classes.yaml`, `spells.yaml`, `magic-items.yaml`…) or a folder of
+ * files per table (`classes/<id>.yaml`).
  *
  * Every file is optional, so a homebrew pack can contain just `feats.yaml`. A file may hold
- * one entity or a list of them. The result is unvalidated: pass it to `createCatalog`.
+ * one entity or a list of them. `name` (default: the folder name) is also the `source` of
+ * entities that don't declare one. The result is unvalidated: pass it to `createCatalog`.
  */
 export function loadContentPack(dir: string, name: string = basename(dir)): ContentPack {
   const pack: ContentPack = { name };

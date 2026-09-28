@@ -12,7 +12,7 @@
           "type": "string"
         },
         "source": {
-          "default": "srd-5.2.1",
+          "default": "homebrew",
           "type": "string"
         },
         "description": {
@@ -39,7 +39,7 @@
             "type": "string"
           },
           "source": {
-            "default": "srd-5.2.1",
+            "default": "homebrew",
             "type": "string"
           },
           "description": {
