@@ -300,6 +300,7 @@ export function combatantFromCharacter(
   ) as Combatant["saving_throws"];
   return {
     name: build.name || "Character",
+    level: sheet.level,
     armor_class: sheet.armor_class.total,
     hp: sheet.play.hp.current,
     temp_hp: sheet.play.hp.temp,
@@ -312,6 +313,20 @@ export function combatantFromCharacter(
     attacks: sheet.attacks,
     critical_hit_on: sheet.critical_hit_on,
     attacks_per_action: sheet.attacks_per_action,
+    spellcasting: sheet.spellcasting.flatMap((line) =>
+      line.ability === null || line.save_dc === null || line.attack_bonus === null
+        ? []
+        : [
+            {
+              source: line.source,
+              list: line.list,
+              ability: line.ability,
+              save_dc: line.save_dc,
+              attack_bonus: line.attack_bonus,
+              modifier: sheet.modifiers[line.ability],
+            },
+          ],
+    ),
   };
 }
 

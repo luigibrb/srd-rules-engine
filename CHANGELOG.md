@@ -24,6 +24,10 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Spell `mechanics` (attack or save, damage by type, healing, targets, upcasting, Cantrip
+  Upgrade, conditions, area) for 11 reviewed SRD spells, and `castSpell` to resolve them between
+  combatants, with the play actions that apply the result. `POST /v1/state/cast`.
+- Combatants have `level` and `spellcasting` (save DC, attack bonus, modifier per feature).
 - Combatants (`rules/combatant.ts`): `combatantFromCharacter` (build + play state),
   `combatantFromSnapshot` (the old `Character`), `makeAttack` (attack lines, critical range,
   Advantage/Disadvantage, two-handed Versatile damage, a preview of the damage),
@@ -105,6 +109,10 @@ All notable changes are documented here. This project follows
 - `seededRng`, `scriptedRng` and `fixedRng` for deterministic dice.
 
 ### Deprecated
+- The `Spell` model (`SpellSchema`) and the `Character` spell functions (`spellSaveDc`,
+  `spellAttackBonus`, `castSpellAttack`, `castSpellSave`, `castSpellDamage`, `resolveSpellAttack`,
+  `resolveSpellSave`), and `POST /v1/spells/attack` and `/save`: use `castSpell` and
+  `POST /v1/state/cast`. Kept until 1.0.
 - `resolveAttack` and `attackRoll` (hand-filled `Character`): use `makeAttack` with combatants.
   `POST /v1/combat/attack` too: use `POST /v1/state/attack`. Kept until 1.0.
 

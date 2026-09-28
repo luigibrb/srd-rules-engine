@@ -357,6 +357,10 @@ export function validateReferences(catalog: Catalog): void {
   for (const condition of Object.values(catalog.conditions)) {
     check(condition.implies, catalog.conditions, "condition", condition.id);
   }
+  for (const spell of Object.values(catalog.spells)) {
+    const applied = (spell.mechanics?.conditions ?? []).map((c) => c.condition);
+    check(applied, catalog.conditions, "condition", spell.id);
+  }
   check(
     Object.values(catalog.subclasses).map((s) => s.class),
     catalog.classes,

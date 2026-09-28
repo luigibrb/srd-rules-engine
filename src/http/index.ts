@@ -13,7 +13,8 @@ import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
 import { SpellSchema } from "../models/spell";
-import { CharacterStateSchema, PlayActionSchema } from "../models/state";
+import { type CharacterState, CharacterStateSchema, PlayActionSchema } from "../models/state";
+import { castSpell } from "../rules/casting";
 import { savingThrow } from "../rules/combat";
 import { makeAttack, ROLL_MODES } from "../rules/combatant";
 import { roll } from "../rules/dice";
@@ -100,6 +101,16 @@ const StateAttackRequest = z.object({
   attack: z.string(),
   mode: z.enum(ROLL_MODES).default("normal"),
   two_handed: z.boolean().default(false),
+});
+const StateCastRequest = z.object({
+  caster: StateRequest,
+  /** Catalog spell id; the caster must have it prepared (or know the cantrip). */
+  spell: z.string(),
+  targets: z.array(StateRequest).default([]),
+  slot_level: z.int().min(1).max(9).optional(),
+  pact: z.boolean().default(false),
+  spellcasting: z.string().optional(),
+  mode: z.enum(ROLL_MODES).default("normal"),
 });
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
@@ -436,6 +447,63 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         };
         const applied = applyAction(targetBuild, req.target.state, catalog, action, { rng });
         return { result, target_state: applied.state, notes: applied.notes };
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/state\/cast$/,
+      handle: ({ body }) => {
+        // Cast a spell: spend the caster's slot, then apply the effects to each target's state.
+        const req = StateCastRequest.parse(body);
+        const catalog = getCatalog();
+        const spell = lookup(catalog.spells, req.spell);
+        if (!spell) throw new HttpError(404, `No spells with id '${req.spell}'`);
+        const casterBuild = parseBuild(req.caster.build);
+        const casterSheet = computePlaySheet(casterBuild, req.caster.state, catalog);
+        if (!casterSheet.spells.some((s) => s.id === spell.id)) {
+          throw new PlayError([`${casterBuild.name || "The caster"} can't cast ${spell.name}`]);
+        }
+        const caster = combatantFromCharacter(casterBuild, req.caster.state, catalog);
+        const targets = req.targets.map((t) => ({ build: parseBuild(t.build), state: t.state }));
+        const combatants = targets.map((t) => combatantFromCharacter(t.build, t.state, catalog));
+        let result: ReturnType<typeof castSpell>;
+        try {
+          const { slot_level, pact, spellcasting, mode } = req;
+          result = castSpell(caster, spell, combatants, {
+            slot_level,
+            pact,
+            spellcasting,
+            mode,
+            rng,
+          });
+        } catch (e) {
+          if (e instanceof RangeError) throw new PlayError([e.message]);
+          throw e;
+        }
+        const notes = [...result.notes];
+        let casterState = req.caster.state;
+        for (const action of result.caster_actions) {
+          const applied = applyAction(casterBuild, casterState, catalog, action, { rng });
+          casterState = applied.state;
+          notes.push(...applied.notes);
+        }
+        const targetStates = targets.map((t) => t.state);
+        for (const hit of result.targets) {
+          const target = targets[hit.target];
+          if (!target) continue;
+          for (const action of hit.actions) {
+            const applied = applyAction(
+              target.build,
+              targetStates[hit.target] as CharacterState,
+              catalog,
+              action,
+              { rng },
+            );
+            targetStates[hit.target] = applied.state;
+            notes.push(...applied.notes);
+          }
+        }
+        return { result, caster_state: casterState, target_states: targetStates, notes };
       },
     },
     {
