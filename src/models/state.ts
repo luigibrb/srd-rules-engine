@@ -51,6 +51,8 @@ export const CharacterStateSchema = z.object({
   conditions: z.array(z.string()).default([]),
   /** The spell or effect you're concentrating on. */
   concentration: z.string().nullable().default(null),
+  /** Toggles switched on (`barbarian:rage`): their grants apply while active. */
+  active: z.array(z.string()).default([]),
   heroic_inspiration: z.boolean().default(false),
   /** Spent spell slots per spell level: `[1, 0, 2]`. */
   spell_slots_spent: z.array(z.int().min(0)).default([]),
@@ -128,6 +130,9 @@ export const PlayActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("set_exhaustion"), level: n.min(0).max(6) }),
   z.object({ type: z.literal("set_concentration"), spell: z.string().nullable() }),
   z.object({ type: z.literal("set_inspiration"), value: z.boolean() }),
+  /** Switch a toggle on (spending its use) or off: `barbarian:rage`. */
+  z.object({ type: z.literal("activate"), key: z.string() }),
+  z.object({ type: z.literal("deactivate"), key: z.string() }),
   /** Today's picks for a choice you can change after a rest (prepared spells…). */
   z.object({ type: z.literal("set_choice"), key: z.string(), values: z.array(id) }),
   /** Go back to the build's picks. */

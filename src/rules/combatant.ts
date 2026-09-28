@@ -8,9 +8,10 @@
  */
 
 import type { Character } from "../models/character";
-import { ABILITIES, type Ability } from "../models/content";
+import { ABILITIES, type Ability, type AdvantageTarget, DAMAGE_TYPES } from "../models/content";
 import {
   type DamageInstance,
+  type DamagePart,
   type DamageResult,
   type Defenses,
   type RolledDamage,
@@ -57,6 +58,10 @@ export interface Combatant {
   readonly critical_hit_on: number;
   readonly attacks_per_action: number;
   readonly spellcasting: readonly CombatantSpellcasting[];
+  /** Advantage on saving throws or checks (`save.str` while raging). */
+  readonly advantages: readonly AdvantageTarget[];
+  /** Can't cast spells or concentrate (Rage). */
+  readonly no_spells: boolean;
 }
 
 export interface D20Roll {
@@ -99,6 +104,8 @@ export interface AttackResult {
   readonly critical_miss: boolean;
   /** The damage rolled on a hit. */
   readonly damage: RolledDamage | null;
+  /** Names of the riders added to the damage. */
+  readonly riders: readonly string[];
   /** What the target takes, before its own defenses (the play action's `instances`). */
   readonly instances: readonly DamageInstance[];
   /** The damage applied to the target as it is now (a preview; nothing is changed). */
@@ -110,6 +117,14 @@ export interface AttackOptions {
   mode?: RollMode;
   /** Wield a Versatile weapon with two hands. */
   two_handed?: boolean;
+  /**
+   * Riders of the attack line to add on a hit (by id or name), with the damage type when there's
+   * a choice: `[{ rider: "sneak-attack" }, { rider: "divine-strike", type: "radiant" }]`.
+   * Once-per-turn limits are the caller's to track (turns come with encounters).
+   */
+  riders?: readonly { rider: string; type?: string }[];
+  /** An ally is within 5 feet of the target and not Incapacitated (Sneak Attack without Advantage). */
+  ally_adjacent?: boolean;
 }
 
 /**
@@ -123,13 +138,48 @@ export function makeAttack(
   attacker: Combatant,
   attack: string | AttackLine,
   target: Combatant,
-  { rng = mathRng, mode = "normal", two_handed = false }: AttackOptions = {},
+  {
+    rng = mathRng,
+    mode = "normal",
+    two_handed = false,
+    riders = [],
+    ally_adjacent = false,
+  }: AttackOptions = {},
 ): AttackResult {
   const line =
     typeof attack === "string" ? attacker.attacks.find((a) => a.name === attack) : attack;
   if (!line) {
     const known = attacker.attacks.map((a) => a.name).join(", ");
     throw new RangeError(`${attacker.name} has no attack '${String(attack)}' (${known})`);
+  }
+  // Check the riders before rolling, so a refused request rolls nothing.
+  const extra: DamagePart[] = [];
+  const riderNames: string[] = [];
+  for (const request of riders) {
+    const rider = line.riders.find((r) => r.id === request.rider || r.name === request.rider);
+    if (!rider) throw new RangeError(`${line.name} has no rider '${request.rider}'`);
+    if (rider.requires === "advantage_or_ally") {
+      const ok = mode === "advantage" || (ally_adjacent && mode !== "disadvantage");
+      if (!ok) {
+        throw new RangeError(
+          `${rider.name} needs Advantage, or an ally next to the target and no Disadvantage`,
+        );
+      }
+    }
+    let type: string;
+    if (typeof rider.type === "string") type = rider.type;
+    else {
+      const choice = request.type?.toLowerCase();
+      if (!choice || !rider.type.includes(choice)) {
+        throw new RangeError(`${rider.name}: choose a damage type (${rider.type.join(", ")})`);
+      }
+      type = choice;
+    }
+    if (!(DAMAGE_TYPES as readonly string[]).includes(type)) {
+      throw new RangeError(`${rider.name}: unknown damage type '${type}'`);
+    }
+    extra.push({ dice: rider.dice, bonus: rider.bonus, type });
+    riderNames.push(rider.name);
   }
   const roll = rollD20({ mode, rng });
   const total = roll.d20 + line.attack_bonus;
@@ -148,9 +198,13 @@ export function makeAttack(
     critical_hit,
     critical_miss,
   };
-  if (!hit) return { ...base, damage: null, instances: [], outcome: null };
-  const parts =
-    two_handed && line.two_handed_damage_parts ? line.two_handed_damage_parts : line.damage_parts;
+  if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
+  const parts = [
+    ...(two_handed && line.two_handed_damage_parts
+      ? line.two_handed_damage_parts
+      : line.damage_parts),
+    ...extra,
+  ];
   const damage = rollDamage(parts, { critical: critical_hit, rng });
   const instances = damage.parts.map((p) => ({ amount: p.total, type: p.type }));
   const outcome = takeDamage(
@@ -159,7 +213,7 @@ export function makeAttack(
     target.defenses,
     { critical: critical_hit },
   );
-  return { ...base, damage, instances, outcome };
+  return { ...base, damage, riders: riderNames, instances, outcome };
 }
 
 export interface SaveResult {
@@ -180,9 +234,19 @@ export function rollSavingThrow(
   { rng = mathRng, mode = "normal" }: { rng?: Rng; mode?: RollMode } = {},
 ): SaveResult {
   const bonus = combatant.saving_throws[ability];
-  const roll = rollD20({ mode, rng });
+  // Advantage from the combatant (Rage: Strength saves) combines with the one asked for.
+  const roll = rollD20({
+    mode: combineModes(mode, combatant.advantages.includes(`save.${ability}`)),
+    rng,
+  });
   const total = roll.d20 + bonus;
   return { name: combatant.name, ability, dc, bonus, roll, total, success: total >= dc };
+}
+
+/** Advantage and Disadvantage cancel; several of either count once (SRD "Advantage"). */
+export function combineModes(mode: RollMode, advantage: boolean): RollMode {
+  if (!advantage) return mode;
+  return mode === "disadvantage" ? "normal" : "advantage";
 }
 
 const FULL_NAMES = {
@@ -219,5 +283,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     critical_hit_on: 20,
     attacks_per_action: 1,
     spellcasting: [],
+    advantages: [],
+    no_spells: false,
   };
 }

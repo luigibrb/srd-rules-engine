@@ -14,7 +14,7 @@ import {
   seededRng,
   srdPack,
 } from "../src/index";
-import { catalog, fighterBuild } from "./helpers";
+import { autocomplete, catalog, classBuild, fighterBuild } from "./helpers";
 
 async function runScript(answers: string[], build?: CharacterBuild) {
   const out: string[] = [];
@@ -154,6 +154,19 @@ it("play mode tracks HP, slots and items, and saves a state file", async () => {
   const saved = parseState(JSON.parse(readFileSync(join(saveDir, "brakka.state.json"), "utf-8")));
   expect(saved).toEqual(state);
   expect(saved.hp.current).toBe(7);
+});
+
+it("play mode switches Rage on and off", async () => {
+  const out: string[] = [];
+  const input = scriptedInput(["on 1", "off 1", "quit"], (prompt) => out.push(prompt));
+  const con = new Console({ input, output: (text) => out.push(text), color: false });
+  const barbarian = autocomplete(classBuild("barbarian", { name: "Ulla" }));
+  const app = new PlayApp(con, catalog, barbarian, { rng: seededRng(1) });
+  const state = await app.run();
+  const output = out.join("\n");
+  expect(output).toContain("Toggle 1. Rage ON");
+  expect(state.uses_spent["barbarian:rage"]).toBe(1);
+  expect(state.active).toEqual([]);
 });
 
 it("save records the content packs the build was made with", () => {

@@ -66,6 +66,15 @@ multiclass:
 features:
   '1':
     languages: [thieves-cant]
+    damage_riders:
+    - id: sneak-attack
+      name: Sneak Attack
+      damage: {progression: Sneak Attack}
+      applies_to:
+        weapon: true
+        any_of: [finesse, ranged]
+      once_per_turn: true
+      requires: advantage_or_ally
     traits:
     - name: Expertise
       text: Your Proficiency Bonus is doubled for two skills you're proficient in.

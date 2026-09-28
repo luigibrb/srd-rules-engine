@@ -79,6 +79,22 @@ features:
         count: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
         max_spell_level: null
       rest_change: long
+    toggles:
+    - id: rage
+      name: Rage
+      uses: rage
+      blocked_when: [wearing_heavy_armor]
+      ends_on: [incapacitated]
+      no_spells: true
+      grants:
+        resistances: [bludgeoning, piercing, slashing]
+        advantages: [check.str, save.str]
+        damage_riders:
+        - id: rage-damage
+          name: Rage Damage
+          damage: {progression: Rage Damage}
+          applies_to: {ability: str}
+          automatic: true
     resources:
     - id: rage
       name: Rage

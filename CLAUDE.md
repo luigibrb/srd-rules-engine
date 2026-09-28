@@ -66,7 +66,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   entities by path; never copy an SRD entity to tweak it). `catalog.packs` = loaded manifests.
   Changing a public export updates `tests/__snapshots__/api.test.ts.snap`: note it in CHANGELOG.
 - Effect `target`/`when` values are closed lists in `src/models/content.ts`: a new target needs
-  an entry there and a consumer in `rules/sheet.ts`.
+  an entry there and a consumer in `rules/sheet.ts`. Extra attack damage = `damage_riders`
+  (automatic → in `damage_parts`; optional → `AttackLine.riders`, applied by `makeAttack`);
+  Advantage = `advantages`; features switched on in play = `toggles` (`state.active`,
+  `activate`/`deactivate`), whose grants apply while active.
 - A new class feature should be data first (grants, choice kinds, effects, `ac_calculations`);
   add a named rule in `rules/sheet.ts` only when it can't be expressed declaratively, and list
   it under "Named rules in code" in `docs/ARCHITECTURE.md`.

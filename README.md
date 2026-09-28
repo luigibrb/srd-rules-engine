@@ -158,6 +158,12 @@ if (result.hit) {
 }
 ```
 
+Features you switch on (Rage) are play actions: `{ type: "activate", key: "barbarian:rage" }`
+spends a use and applies Rage's Resistance, Rage Damage (already in the attack lines) and
+Strength Advantage until it ends (Incapacitated, Heavy armor, a rest, `deactivate`). Optional
+extra damage is listed on each attack line (`riders`) and added on request:
+`makeAttack(rogue, "Dagger", target, { mode: "advantage", riders: [{ rider: "sneak-attack" }] })`.
+
 A natural 1 always misses. A natural 20 (19 for a Champion) is a Critical Hit: it hits whatever
 the AC and doubles every damage die. `rollSavingThrow(combatant, "dex", 15)` rolls a save with
 the sheet's bonus. The older functions that take a hand-filled `Character` (`resolveAttack`,
@@ -246,7 +252,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
-| `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed? }` → the attack, and the target's state after the damage |
+| `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
 | `POST /v1/characters/{name}/passive-perception` | Passive Perception (`?proficient=true`) |
@@ -309,7 +315,8 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
-| Not yet | Shopping with starting gold, the full Effect engine, most magic items' active powers (shown as text) |
+| Effects | Numeric effects, features you switch on in play (Rage: Resistance, Rage Damage, Strength Advantage, no spells), damage riders from class tables (Sneak Attack, Divine Strike), Advantage on saves |
+| Not yet | Shopping with starting gold, most other class features' dice and triggers (shown as text), most magic items' active powers, turns and rounds |
 
 The design and the roadmap are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

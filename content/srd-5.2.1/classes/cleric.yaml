@@ -176,6 +176,24 @@ features:
       - id: divine-strike
         name: Divine Strike
         description: Once per turn, a weapon hit deals an extra 1d8 Necrotic or Radiant damage.
+        grants:
+          damage_riders:
+          - id: divine-strike
+            name: Divine Strike
+            damage: 1d8
+            type: [necrotic, radiant]
+            applies_to: {weapon: true}
+            once_per_turn: true
+          at_class_level:
+          - level: 14
+            grants:
+              damage_riders:
+              - id: divine-strike
+                name: Divine Strike
+                damage: 2d8
+                type: [necrotic, radiant]
+                applies_to: {weapon: true}
+                once_per_turn: true
       - id: potent-spellcasting
         name: Potent Spellcasting
         description: Add your Wisdom modifier to the damage of your Cleric cantrips.

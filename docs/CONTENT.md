@@ -141,6 +141,37 @@ Unarmored Defense go in `ac_calculations`, not effects, because they don't stack
 These targets and conditions are the complete list: anything else is rejected when the pack
 loads ("unknown effect target 'speeed'"), and the JSON Schemas offer them for autocompletion.
 
+### Damage riders, Advantage and toggles
+
+Extra damage on some attacks goes in `damage_riders`; `advantages` gives Advantage on saves or
+checks (`save.str`, `check.dex`); a feature you switch on in play is a `toggle`, whose grants apply
+while it's active:
+
+```yaml
+toggles:
+- id: rage                      # key in play: "barbarian:rage", like resources
+  name: Rage
+  uses: rage                    # the resource spent to switch it on
+  blocked_when: [wearing_heavy_armor]   # an effect condition: can't start, and ends
+  ends_on: [incapacitated]      # conditions (implied ones count) that end it
+  no_spells: true               # no Concentration or spellcasting while active
+  grants:
+    resistances: [bludgeoning, piercing, slashing]
+    advantages: [check.str, save.str]
+    damage_riders:
+    - id: rage-damage
+      name: Rage Damage
+      damage: {progression: Rage Damage}   # a class table column, or dice (1d8), or a flat +2
+      applies_to: {ability: str}           # also weapon: true, any_of: [finesse, ranged]
+      automatic: true                      # part of every matching attack's damage
+```
+
+A rider that isn't `automatic` (Sneak Attack, Divine Strike) is listed on matching attack lines
+and added when `makeAttack` is asked to; `type` is `weapon` (the default), a damage type, or a
+list to choose from; `once_per_turn` and `requires: advantage_or_ally` are checked or noted. A
+later rider with the same `id` replaces an earlier one (Divine Strike at Cleric 14:
+`at_class_level` gives the 2d8 version).
+
 This is a small stand-in for the full Effect engine planned in the roadmap. Anything these
 targets can't express goes in a trait's text, or in a feat's `unsupported` note, which the
 builder shows to the player.
