@@ -412,5 +412,6 @@ describe("random multiclass paths (seeded)", () => {
       // Round-trips as JSON.
       expect(parseBuild(JSON.parse(JSON.stringify(b)))).toEqual(b);
     }
-  });
+    // 12 characters resolved level by level to 20: ~4 s locally, over 6 s on CI runners.
+  }, 30_000);
 });
