@@ -32,8 +32,8 @@ scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homeb
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts)
-docs/              # ARCHITECTURE.md (design decisions), CONTENT.md (authoring guide),
-                   #   ROADMAP-REVIEW.md (roadmap, decisions, phase progress)
+docs/              # ARCHITECTURE.md (design, flagged interpretations), CONTENT.md (authoring
+                   #   guide), ROADMAP.md (next steps), ROADMAP-REVIEW.md (P0–P7 record)
   srd-5.2.1/       # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)
 tests/             # vitest; classes.test.ts: every class × species × background completes;
                    #   levels.test.ts: every class to 20, seeded random multiclass paths to 20
@@ -96,6 +96,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 - Character builder: a `CharacterBuild` stores only choices, keyed by choice key
   (`<source key>#<choice id>`, e.g. `class:fighter#skills`). Derived values are always
   recomputed by `rules/sheet.ts`, never stored. See `docs/ARCHITECTURE.md`.
+- Docs: a rules reading the SRD doesn't settle goes under "Interpretations (flagged, not
+  invented)" in `docs/ARCHITECTURE.md` (by area); something left for later goes in
+  `docs/ROADMAP.md` ("Next steps"). Behaviour changes update README (usage, status table,
+  routes), ARCHITECTURE, CONTENT and CHANGELOG.
 
 ## Common commands
 
@@ -109,6 +113,8 @@ npm run builder          # interactive builder from source (-- --load x.json --s
 npx tsx src/cli/main.ts validate examples/homebrew-pack   # validate a content pack
 npx tsx src/cli/main.ts play --load characters/x.json [--state x.state.json]   # play mode
 npm run serve            # HTTP API on localhost:8000
+npx tsx scripts/import-srd-spells.ts --report     # spell mechanics: drafts (NEW), reviewed, skips
+npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, what stayed text
 ```
 
 ## Where things go

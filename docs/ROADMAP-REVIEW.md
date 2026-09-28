@@ -1,5 +1,8 @@
 # Roadmap review (Step 0)
 
+> A record of the review that set the P0–P7 plan, the decisions, and what each phase did
+> (section 6). The plan is complete; current next steps are in [ROADMAP.md](ROADMAP.md).
+
 Checked against the code on 2026-09-28. **Confirmed** = the code works as the roadmap assumes;
 **Contradicted** = it doesn't; **Partly** = some of it exists. Paths are relative to the repo root.
 

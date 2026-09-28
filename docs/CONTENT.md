@@ -170,13 +170,12 @@ toggles:
 
 A rider that isn't `automatic` (Sneak Attack, Divine Strike) is listed on matching attack lines
 and added when `makeAttack` is asked to; `type` is `weapon` (the default), a damage type, or a
-list to choose from; `once_per_turn` and `requires: advantage_or_ally` are checked or noted. A
-later rider with the same `id` replaces an earlier one (Divine Strike at Cleric 14:
-`at_class_level` gives the 2d8 version).
+list to choose from. `requires: advantage_or_ally` is checked by `makeAttack`; `once_per_turn`
+is enforced in encounters (outside one, the caller tracks it). A later rider with the same `id`
+replaces an earlier one (Divine Strike at Cleric 14: `at_class_level` gives the 2d8 version).
 
-This is a small stand-in for the full Effect engine planned in the roadmap. Anything these
-targets can't express goes in a trait's text, or in a feat's `unsupported` note, which the
-builder shows to the player.
+Anything effects, riders, Advantage and toggles can't express goes in a trait's text, or in a
+feat's `unsupported` note, which the builder shows to the player.
 
 ### Choices
 
@@ -396,3 +395,28 @@ my-pack/feats[0] (Bad_ID):
   ✖ ids are lowercase slugs
     → at id
 ```
+
+## Writing your own pack, step by step
+
+For content from a book you own (kept in its own, private pack: this repository only holds the
+SRD and invented homebrew), the same steps the SRD importers follow work by hand:
+
+1. **Start the pack.** A folder with `pack.yaml` (`id`, `version`, `source` naming the book,
+   `requires: [srd-5.2.1]`) and one file per table, each with its `$schema` comment.
+2. **Transcribe the text** into `description` / `text` fields, and the fixed data into fields
+   (a spell's level, school, lists, casting time…; a monster's stat block).
+3. **Draft the mechanics** from the text: grants and choices for classes, feats and species
+   (selectable options such as maneuvers or infusions go in `features.yaml` with a `category`,
+   picked by `kind: feature` choices, like Eldritch Invocations); `mechanics` for spells; `attack`
+   and `save` for monster actions. Leave anything you can't express as text.
+4. **Review each entity against the book**, as the SRD importers' `REVIEWED` lists do: a draft
+   that isn't checked shouldn't drive the rules.
+5. **Change SRD entities with patches**, not copies (add your classes to a spell's `lists`,
+   adjust a choice's count), so SRD fixes keep reaching you.
+6. **Validate and pin it:** `srd-rules validate my-pack/`, then tests with concrete characters
+   ("a level 3 Battle Master has 4 superiority dice") and, for spells or monsters, a snapshot of
+   their mechanics, so a later change shows up in review.
+
+If you have many entities in a regular format, a script that drafts YAML from your transcription
+(like `scripts/import-srd-spells.ts`, with its `--report` of drafts and skips) saves time; the
+review step stays the same.
