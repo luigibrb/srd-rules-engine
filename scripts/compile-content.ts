@@ -13,6 +13,7 @@ import { createCatalog, TABLE_NAMES, TABLE_SCHEMAS } from "../src/content/catalo
 import { loadContentPack } from "../src/content/load";
 import { CharacterBuildSchema } from "../src/models/build";
 import { CreationSchema } from "../src/models/content";
+import { PackManifestSchema, PatchSchema } from "../src/models/pack";
 
 const root = join(import.meta.dirname, "..");
 const check = process.argv.includes("--check");
@@ -22,6 +23,7 @@ const outputs = new Map<string, string>();
 const catalog = createCatalog(loadContentPack(join(root, "content/srd-5.2.1")));
 const pack = {
   name: "srd-5.2.1",
+  manifest: catalog.packs[0],
   creation: catalog.creation,
   ...Object.fromEntries(TABLE_NAMES.map((t) => [t, Object.values(catalog[t])])),
 };
@@ -45,6 +47,8 @@ for (const table of TABLE_NAMES) {
     schema(TABLE_SCHEMAS[table], `${table} content`, true),
   );
 }
+outputs.set("schemas/pack.schema.json", schema(PackManifestSchema, "Content pack manifest", false));
+outputs.set("schemas/patches.schema.json", schema(PatchSchema, "Content patches", true));
 outputs.set("schemas/build.schema.json", schema(CharacterBuildSchema, "Character build", false));
 
 let stale = 0;

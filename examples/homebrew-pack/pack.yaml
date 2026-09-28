@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../../schemas/pack.schema.json
+id: homebrew-pack
+version: 0.1.0
+ruleset: "2024"
+source: homebrew
+requires: [srd-5.2.1]
+description: A sample pack layered over the SRD (invented content).

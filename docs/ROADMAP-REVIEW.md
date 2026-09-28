@@ -248,3 +248,10 @@ Approved with the recommendations above:
 - **P0 (done, branch `p0-guard-rails`):** closed effect `target`/`when` lists with load-time
   errors; `source` defaults to the pack's name; `npm run check:sources` leak guard in
   `npm run check`; the doc mismatches in §2 fixed.
+- **P1 (done, branch `p1-packs`):** `pack.yaml` manifests with `requires`; `patches.yaml`
+  (`set`/`append`/`remove`); `createCatalog(packs, { sources })`; optional `build.packs`,
+  recorded by the CLI on save; API export snapshot; `GET /v1/content/packs`. Deviations:
+  patches apply to the *parsed* entity and are validated again (not "before validation": with
+  defaults filled in, paths are stable); exports stay `export *`, with the snapshot as the guard
+  and the accidental internal exports listed for 1.0; no `version` field on builds and states
+  yet (a build without one is version 1, so it can wait for the first real migration).

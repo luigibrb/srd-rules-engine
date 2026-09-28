@@ -288,8 +288,18 @@ builder, a VTT client, an edge function and a server.
   so ids like `constructor` can't hit the prototype.
 - **Content packs.** `createCatalog(...packs)` layers packs in order: a later pack adds
   entities and replaces earlier ones with the same id. Duplicate ids within one pack are
-  errors. Cross-references are checked after layering. An entity without a `source` gets its
-  pack's name (the SRD folder is named `srd-5.2.1`; a pack without a name gives `homebrew`).
+  errors. Cross-references are checked after layering. A pack's manifest (`pack.yaml`) gives
+  its id, version, default `source` and the packs it `requires` (checked against load order);
+  without one, the pack's name is its id and default source (`homebrew` without a name).
+  `catalog.packs` keeps the manifests. Patches (`patches.yaml`) edit an entity from an earlier
+  pack by path; they apply to the parsed entity (defaults filled in, so paths are stable) and
+  the result is validated again, so a patch can't produce an invalid entity. `createCatalog(
+  packs, { sources })` keeps only entities and patches from those sources. Builds may list the
+  packs they need (`build.packs`); a missing one is a validation error.
+- **Public API.** `tests/api.test.ts` snapshots the names each entry point exports; changing
+  the snapshot is a deliberate API change. Some internal helpers are exported through
+  `export *` (`answers`, `definedEntries`, `replaceErrors`, `choiceIssues`, `classLevelKey`,
+  `entityName`…); they're candidates to hide before 1.0.
 - **Leak guard.** `npm run check:sources` (part of `npm run check`) fails if `content/` holds
   anything besides `srd-5.2.1/`, or if a `source` in `content/` or the bundled JSON isn't
   `srd-5.2.1`, or one in `examples/` or `tests/fixtures/` isn't `srd-5.2.1`, `homebrew` or

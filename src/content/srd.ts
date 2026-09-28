@@ -11,6 +11,9 @@ import data from "./data/srd-5.2.1.json" with { type: "json" };
 
 export const srdPack: ContentPack = data as ContentPack;
 
+/** The manifest id of the bundled SRD pack. */
+export const SRD_PACK_ID = "srd-5.2.1";
+
 let cached: Catalog | undefined;
 
 /** The validated SRD 5.2.1 catalog (built once, then cached). */

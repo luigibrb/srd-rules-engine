@@ -1,0 +1,3 @@
+# yaml-language-server: $schema=../../schemas/patches.schema.json
+# House rule: Warlocks can learn Light. A patch changes the SRD spell without copying it.
+- {target: spells/light, op: append, path: lists, value: warlock}

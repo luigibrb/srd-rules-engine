@@ -253,6 +253,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     },
     {
       method: "GET",
+      pattern: /^\/v1\/content\/packs\/?$/,
+      handle: () => getCatalog().packs,
+    },
+    {
+      method: "GET",
       pattern: /^\/v1\/content\/(?<table>[a-z]+)\/?$/,
       handle: ({ params }) => Object.values(getCatalog()[contentTable(params.table)]),
     },

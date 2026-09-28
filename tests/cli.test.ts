@@ -5,7 +5,15 @@ import { expect, it } from "vitest";
 import { BuilderApp } from "../src/cli/builder";
 import { Console, scriptedInput } from "../src/cli/console";
 import { PlayApp } from "../src/cli/play";
-import { type CharacterBuild, parseBuild, parseState, seededRng } from "../src/index";
+import {
+  type CharacterBuild,
+  createCatalog,
+  evaluate,
+  parseBuild,
+  parseState,
+  seededRng,
+  srdPack,
+} from "../src/index";
 import { catalog, fighterBuild } from "./helpers";
 
 async function runScript(answers: string[], build?: CharacterBuild) {
@@ -146,4 +154,19 @@ it("play mode tracks HP, slots and items, and saves a state file", async () => {
   const saved = parseState(JSON.parse(readFileSync(join(saveDir, "brakka.state.json"), "utf-8")));
   expect(saved).toEqual(state);
   expect(saved.hp.current).toBe(7);
+});
+
+it("save records the content packs the build was made with", () => {
+  const layered = createCatalog(srdPack, {
+    manifest: { id: "lantern", requires: ["srd-5.2.1"] },
+    gear: [{ id: "glow-jar", name: "Glow Jar" }],
+  });
+  const saveDir = mkdtempSync(join(tmpdir(), "builder-"));
+  const con = new Console({ input: scriptedInput([]), output: () => {}, color: false });
+  const app = new BuilderApp(con, layered, { build: fighterBuild(), saveDir });
+  const saved = parseBuild(JSON.parse(readFileSync(app.save(), "utf-8")));
+  expect(saved.packs).toEqual(["lantern"]);
+  expect(evaluate(saved, catalog).report.issues.map((i) => i.message)).toContain(
+    "Needs content pack 'lantern', which isn't loaded",
+  );
 });

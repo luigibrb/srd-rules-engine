@@ -54,6 +54,11 @@ export const CharacterBuildSchema = z.object({
   background_bonus: z.partialRecord(z.enum(ABILITIES), z.int()).default({}),
   choices: z.record(z.string(), z.array(z.string())).default({}),
   levels: z.array(LevelUpSchema).default([]),
+  /**
+   * Content packs the build needs besides the SRD (manifest ids). Optional; validation reports
+   * a listed pack that isn't loaded, instead of a list of unknown ids.
+   */
+  packs: z.array(z.string()).optional(),
 });
 
 type BuildShape = z.infer<typeof CharacterBuildSchema>;

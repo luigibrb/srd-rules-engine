@@ -8,6 +8,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { type Catalog, lookup } from "../content/catalog";
+import { SRD_PACK_ID } from "../content/srd";
 import {
   type AbilityMap,
   type AbilityMethod,
@@ -1065,6 +1066,14 @@ export class BuilderApp {
         .replace(/^-+|-+$/g, "") || "character";
     mkdirSync(this.saveDir, { recursive: true });
     const path = join(this.saveDir, `${slug}.json`);
+    // Record the packs this build was made with, so loading it without them says so.
+    const packs = [
+      ...new Set([
+        ...(this.build.packs ?? []),
+        ...this.catalog.packs.map((p) => p.id).filter((id) => id !== SRD_PACK_ID),
+      ]),
+    ];
+    if (packs.length) this.build = updateBuild(this.build, { packs });
     writeFileSync(path, `${JSON.stringify(this.build, null, 2)}\n`, "utf-8");
     this.dirty = false;
     this.con.say(this.con.style(`Saved to ${path}`, "green"));

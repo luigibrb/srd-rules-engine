@@ -58,7 +58,11 @@ export function validateBuild(
   catalog: Catalog,
   res: Resolution = resolve(build, catalog),
 ): ValidationReport {
+  const loaded = new Set(catalog.packs.map((p) => p.id));
   const issues: Issue[] = [
+    ...(build.packs ?? [])
+      .filter((id) => !loaded.has(id))
+      .map((id) => issue("class", "error", `Needs content pack '${id}', which isn't loaded`)),
     ...checkEntity("class", "class", build.class_id, catalog.classes),
     ...checkEntity("species", "species", build.species_id, catalog.species),
     ...checkEntity("background", "background", build.background_id, catalog.backgrounds),

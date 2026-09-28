@@ -6,8 +6,8 @@ import { parse as parseYaml } from "yaml";
 import { type Catalog, type ContentPack, createCatalog, TABLE_NAMES } from "./catalog";
 
 /**
- * Read a content directory laid out like `content/srd-5.2.1/`: `creation.yaml`, plus one file
- * per table (`TABLE_NAMES`: `classes.yaml`, `spells.yaml`, `magic-items.yaml`…) or a folder of
+ * Read a content directory laid out like `content/srd-5.2.1/`: `pack.yaml` (the manifest),
+ * `creation.yaml`, `patches.yaml`, plus one file per table (`TABLE_NAMES`: `classes.yaml`, `spells.yaml`, `magic-items.yaml`…) or a folder of
  * files per table (`classes/<id>.yaml`).
  *
  * Every file is optional, so a homebrew pack can contain just `feats.yaml`. A file may hold
@@ -16,8 +16,12 @@ import { type Catalog, type ContentPack, createCatalog, TABLE_NAMES } from "./ca
  */
 export function loadContentPack(dir: string, name: string = basename(dir)): ContentPack {
   const pack: ContentPack = { name };
+  const manifest = readFirst(dir, "pack");
+  if (manifest !== undefined) pack.manifest = manifest;
   const creation = readFirst(dir, "creation");
   if (creation !== undefined) pack.creation = creation;
+  const patches = readFirst(dir, "patches");
+  if (patches !== undefined) pack.patches = asList(patches);
   for (const table of TABLE_NAMES) {
     const entries: unknown[] = [];
     // `magic_items` → magic-items.yaml (either spelling works).

@@ -5,6 +5,8 @@ as `schemas/*.schema.json`). A **content pack** is a folder, and every file in i
 
 | File | Holds | Schema |
 |---|---|---|
+| `pack.yaml` | The manifest: pack id, version, default `source`, required packs | `pack.schema.json` |
+| `patches.yaml` | Changes to entities loaded by earlier packs | `patches.schema.json` |
 | `creation.yaml` | Standard array, point buy, base grants (languages) | `creation.schema.json` |
 | `species.yaml` | Species | `species.schema.json` |
 | `backgrounds.yaml` | Backgrounds | `backgrounds.schema.json` |
@@ -38,6 +40,48 @@ content comes from a specific book, so it can be told apart from the SRD.
 
 This repository only holds SRD 5.2.1 content and invented homebrew: `npm run check` fails if
 `content/` has anything but `srd-5.2.1/`, or if an example or test pack has another `source`.
+
+## Packs: manifest and patches
+
+`pack.yaml` names the pack and says what it needs:
+
+```yaml
+id: my-homebrew              # lowercase slug; what builds and other packs refer to
+version: 0.1.0
+ruleset: "2024"              # informational
+source: my-homebrew          # source of entities that don't declare one (default: id)
+requires: [srd-5.2.1]        # packs that must be loaded before this one
+```
+
+Without a manifest, the folder name is the pack id and the default source. Loading a pack
+twice, or before a pack it requires, is an error. `catalog.packs` lists the loaded manifests.
+
+`patches.yaml` changes an entity from an earlier pack without copying it. Patches run in order,
+after the pack's own entities, and the patched entity is validated again:
+
+```yaml
+- {target: spells/light, op: append, path: lists, value: warlock}
+- {target: classes/fighter, op: set, path: grants.choices.skills.count, value: 3}
+- {target: spells/fireball, op: remove, path: lists, value: [wizard]}
+- {target: classes/fighter, op: remove, path: grants.choices.skills}
+```
+
+- `target` is `<table>/<id>`; `path` is dotted. In a list, a segment is an index (`0`) or the
+  `id` of an element (`choices.skills`). Paths see the entity with its defaults filled in, so
+  `grants.effects` exists even if the YAML left it out.
+- `set` replaces a value (or adds a key); `append` adds one item or a list of items to a list;
+  `remove` deletes what's at `path`, or, with a `value`, removes those items (or the elements
+  with those ids) from the list.
+- A patch can't create an entity or change its id. It has a `source` too (default: the pack's),
+  so filtering by source drops it along with the pack's entities.
+
+To use only some sources (the books a campaign allows), pass them to `createCatalog`:
+`createCatalog([srdPack, mine], { sources: ["srd-5.2.1", "my-homebrew"] })`. Creation rules
+always load; an entity that refers to a filtered-out one fails the cross-reference check.
+
+A build can list the packs it needs (`packs: [my-homebrew]`); loading it without them gives
+"Needs content pack 'my-homebrew', which isn't loaded". The CLI builder records the packs
+loaded with `--content` when it saves.
 
 ## Grants
 

@@ -154,6 +154,12 @@
           "class_id"
         ]
       }
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "title": "Character build"

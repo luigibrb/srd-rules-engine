@@ -216,6 +216,7 @@ export default { fetch: handler };                // Cloudflare Workers
 |---|---|
 | `GET /health` | Liveness check |
 | `GET /v1/content` · `/v1/content/{table}` · `/v1/content/{table}/{id}` | Browse the catalog |
+| `GET /v1/content/packs` | The loaded content packs (manifests), in load order |
 | `POST /v1/builds/evaluate` | Build → validation report, derived sheet, level-up options, and every choice with its options |
 | `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` · `/v1/builds/set-level-class` · `/v1/builds/set-level-hp` | Change a build the same way the builder does (validated, repaired, with notes) |
 | `POST /v1/builds/preview` | What a `set-choice` or `set-level-class` change would remove and add, without applying it |
@@ -255,7 +256,11 @@ import { createCatalog, loadContentPack, srdPack } from "srd-rules-engine/node";
 const catalog = createCatalog(srdPack, loadContentPack("my-homebrew"));
 ```
 
-Leave out `source` and entities take the pack's name (`my-homebrew` above). The `$schema`
+Leave out `source` and entities take the pack's name (`my-homebrew` above). A pack can also
+have a manifest (`pack.yaml`: id, version, required packs) and `patches.yaml`, which changes
+SRD entities in place (`{target: spells/light, op: append, path: lists, value: warlock}`)
+instead of copying them. `createCatalog([srdPack, pack], { sources: [...] })` keeps only the
+sources a campaign allows. The `$schema`
 comment gives you autocompletion and inline errors in VS Code (with the YAML extension) and
 other editors. See [`examples/homebrew-pack`](examples/homebrew-pack) and
 [docs/CONTENT.md](docs/CONTENT.md).
