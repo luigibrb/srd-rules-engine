@@ -21,6 +21,7 @@ export * from "./rules/ability-scores";
 export * from "./rules/build-resolution";
 export * from "./rules/build-validation";
 export * from "./rules/combat";
+export * from "./rules/combatant";
 export * from "./rules/damage";
 export * from "./rules/dice";
 export * from "./rules/rng";
@@ -38,6 +39,7 @@ export {
 export * from "./services/combat";
 export {
   applyAction,
+  combatantFromCharacter,
   computePlaySheet,
   createState,
   PlayError,

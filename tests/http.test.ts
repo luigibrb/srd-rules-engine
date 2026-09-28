@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createHandler, type FetchHandler } from "../src/http/index";
-import { fixedRng } from "../src/index";
+import { fixedRng, scriptedRng } from "../src/index";
 import { fighterBuild } from "./helpers";
 
 const character = (overrides = {}) => ({
@@ -243,5 +243,31 @@ describe("HTTP play state", () => {
     expect(refused.body.detail).toEqual(["No level 1 spell slots left"]);
     const bad = await api.post("/v1/state/apply", { build, state, action: { type: "fly" } });
     expect(bad.status).toBe(422);
+  });
+
+  it("resolves an attack between two characters and damages the target's state", async () => {
+    const api = client(createHandler({ rng: scriptedRng([15, 4, 5]) }));
+    const build = fighterBuild();
+    const state = (await api.post("/v1/state/new", { build })).body;
+    const side = { build, state };
+    const res = await api.post("/v1/state/attack", {
+      attacker: side,
+      target: side,
+      attack: "Greatsword",
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.result).toMatchObject({ total: 20, hit: true, target_ac: 17 });
+    expect(res.body.result.instances).toEqual([{ amount: 12, type: "slashing" }]);
+    expect(res.body.target_state.hp.current).toBe(0);
+    expect(res.body.notes).toContain(
+      "Down to 0 Hit Points: Unconscious, making Death Saving Throws.",
+    );
+    const unknown = await api.post("/v1/state/attack", {
+      attacker: side,
+      target: side,
+      attack: "Laser",
+    });
+    expect(unknown.status).toBe(400);
+    expect(unknown.body.detail[0]).toMatch(/no attack 'Laser'/);
   });
 });

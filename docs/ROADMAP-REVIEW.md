@@ -262,3 +262,10 @@ Approved with the recommendations above:
   one amount and type: several instances (Flame Tongue) come with the combatant in P3. Two
   existing behaviours kept and flagged in ARCHITECTURE.md (Temporary Hit Points absorbing all the
   damage: no Concentration save, no death save failure).
+- **P3 (done, branch `p3-combatant`):** `Combatant` view (`combatantFromCharacter`,
+  `combatantFromSnapshot`), `makeAttack` (critical range, Advantage/Disadvantage, two-handed),
+  `rollSavingThrow`; the play `damage` action takes `instances`; `POST /v1/state/attack`;
+  `resolveAttack`/`attackRoll` and `/v1/combat/attack` deprecated. Deviation: the old functions
+  weren't rewritten on top of combatants (their results have a different shape); they stay
+  as they are, with `applyDamage` already on `takeDamage`. Spell casting moves to combatants in
+  P4, with the spell mechanics.

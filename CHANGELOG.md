@@ -24,6 +24,13 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Combatants (`rules/combatant.ts`): `combatantFromCharacter` (build + play state),
+  `combatantFromSnapshot` (the old `Character`), `makeAttack` (attack lines, critical range,
+  Advantage/Disadvantage, two-handed Versatile damage, a preview of the damage),
+  `rollSavingThrow`, `rollD20`. `POST /v1/state/attack` resolves an attack between two
+  characters and applies the damage to the target's state.
+- The play action `damage` accepts `instances: [{ amount, type }]` instead of `amount`, each
+  adjusted for its own type.
 - `rules/damage.ts`: `rollDamage`, `adjustDamage` (Immunity, Resistance, Vulnerability) and
   `takeDamage` (Temporary Hit Points, dropping to 0, massive damage, death save failures,
   Concentration DC), shared by the play action `damage` and the combat `applyDamage`.
@@ -96,6 +103,10 @@ All notable changes are documented here. This project follows
 - The SRD as one JSON file: `srd-rules-engine/srd-5.2.1.json`.
 - HTTP: `GET /v1/content/...` and `POST /v1/builds/evaluate`.
 - `seededRng`, `scriptedRng` and `fixedRng` for deterministic dice.
+
+### Deprecated
+- `resolveAttack` and `attackRoll` (hand-filled `Character`): use `makeAttack` with combatants.
+  `POST /v1/combat/attack` too: use `POST /v1/state/attack`. Kept until 1.0.
 
 ### Fixed
 - The Blowgun's fixed damage no longer adds the ability modifier (SRD "Damage Rolls").

@@ -51,6 +51,11 @@ export interface SaveOutcome {
   readonly target: Character;
 }
 
+/**
+ * @deprecated Use `makeAttack` with combatants (`combatantFromCharacter`, or
+ * `combatantFromSnapshot` for a `Character`): it takes the attack from the sheet's attack lines
+ * and applies Resistance and Temporary Hit Points. Kept until 1.0.
+ */
 export function resolveAttack(
   attacker: Character,
   target: Character,

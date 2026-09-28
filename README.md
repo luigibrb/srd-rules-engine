@@ -141,21 +141,30 @@ After the build changes (a level-up, an edit), `reconcileState` fits the state t
 ### Dice and combat
 
 ```ts
-import { CharacterSchema, resolveAttack, roll, seededRng } from "srd-rules-engine";
+import { applyAction, combatantFromCharacter, makeAttack, roll, seededRng } from "srd-rules-engine";
 
 roll("2d6+3", seededRng(42));
 // { dice_expression: "2d6+3", rolls: [4, 3], modifier: 3, total: 10 }  ← same result every time
 
-const { attack, damage, target } = resolveAttack(fighter, goblin, 5, "2d6+3", "slashing", {
-  rng: seededRng(1),
-});
-// attack.hit, attack.critical_hit, damage.roll.total, target.current_hit_points
+// A combatant is a character (build + play state) seen by combat: AC, HP, saves, attack lines.
+const attacker = combatantFromCharacter(fighterBuild, fighterState, catalog);
+const target = combatantFromCharacter(rogueBuild, rogueState, catalog);
+const result = makeAttack(attacker, "Greatsword", target, { mode: "advantage", rng: seededRng(1) });
+// result.hit, result.critical_hit, result.damage (rolled parts), result.outcome (a preview)
+if (result.hit) {
+  ({ state: rogueState } = applyAction(rogueBuild, rogueState, catalog, {
+    type: "damage", instances: [...result.instances], critical: result.critical_hit,
+  }));
+}
 ```
 
-A natural 20 always hits and doubles every damage die; a natural 1 always misses. Spells
-(`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) deal half damage on a successful save.
-These functions take a combat `Character` and a `Spell` (`SpellSchema`) that you fill in, damage
-dice included: they aren't derived from a build or from catalog spells yet.
+A natural 1 always misses. A natural 20 (19 for a Champion) is a Critical Hit: it hits whatever
+the AC and doubles every damage die. `rollSavingThrow(combatant, "dex", 15)` rolls a save with
+the sheet's bonus. The older functions that take a hand-filled `Character` (`resolveAttack`,
+`attackRoll`) are deprecated; `combatantFromSnapshot` turns a `Character` into a combatant.
+Spells (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) deal half damage on a
+successful save. They still take a `Character` and a `Spell` (`SpellSchema`) that you fill in,
+damage dice included: catalog spells don't carry mechanics yet.
 
 Attack lines on the sheet carry their damage ready to roll, and `takeDamage` applies the rules
 for Resistance, Vulnerability, Immunity, Temporary Hit Points and dropping to 0:
@@ -234,11 +243,12 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/new` | Build → a fresh play state |
 | `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
+| `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed? }` → the attack, and the target's state after the damage |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
 | `POST /v1/characters/{name}/passive-perception` | Passive Perception (`?proficient=true`) |
 | `POST /v1/combat/roll` | Roll a dice expression (`{"expression": "2d6+3"}`) |
-| `POST /v1/combat/attack` | Attack roll and damage (crits double all dice) |
+| `POST /v1/combat/attack` | Attack roll and damage (crits double all dice); deprecated, use `/v1/state/attack` |
 | `POST /v1/combat/saving-throw` | Saving throw |
 | `POST /v1/spells/stats` | Spell save DC and attack bonus |
 | `POST /v1/spells/attack` · `/v1/spells/save` | Spell attack or save (half damage on success) |

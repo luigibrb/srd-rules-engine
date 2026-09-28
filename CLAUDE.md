@@ -16,7 +16,7 @@ src/
                    #   character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
-  rules/           # pure logic: dice, rng, ability-scores, combat, damage, spells,
+  rules/           # pure logic: dice, rng, ability-scores, combat, combatant, damage, spells,
                    #   build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   combat.ts (HP, attacks, spells)
@@ -47,6 +47,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   `seededRng`, `scriptedRng`, `fixedRng`.
 - D&D 5e rule: critical hits double all dice (not the modifier); nat-1 always misses; nat-20 always hits.
 - Saving throw damage: half (rounded down) on success, full on failure.
+- Combat works on `Combatant`s (`rules/combatant.ts`: a read-only view; `combatantFromCharacter`
+  in `services/play.ts`). `makeAttack` returns rolls + damage `instances`; the caller applies
+  them (play action `{ type: "damage", instances, critical }`). The `Character`-based
+  `resolveAttack`/`attackRoll` are deprecated adapters kept until 1.0.
 - Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
   0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).
@@ -119,12 +123,13 @@ npm run serve            # HTTP API on localhost:8000
 `POST /v1/builds/evaluate` — build → `{ report, sheet, levels, level_up_options, choices (with options) }`  
 `POST /v1/builds/set-choice` · `/level-up` · `/remove-level` · `/set-level-class` · `/set-level-hp` — workflow setters  
 `POST /v1/builds/preview` — effect of a set-choice / set-level-class change, without applying it  
-`POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)  
+`POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)
+`POST /v1/state/attack` — one character attacks another (combatants); damage applied to the target's state  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  
 `POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  
 `POST /v1/combat/roll` — roll any dice expression (`{"expression": "2d6+3"}`)  
-`POST /v1/combat/attack` — full attack resolution  
+`POST /v1/combat/attack` — full attack resolution (deprecated `Character` API)  
 `POST /v1/combat/saving-throw` — saving throw  
 `POST /v1/spells/stats` — spell save DC + attack bonus  
 `POST /v1/spells/attack` — spell attack  

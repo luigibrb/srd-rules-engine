@@ -95,8 +95,13 @@ const id = z.string();
 export const PlayActionSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("damage"),
-    amount: n.min(0),
+    /** One amount of one type… */
+    amount: n.min(0).optional(),
     damage_type: z.string().optional(),
+    /** …or several, each adjusted for its own type (a Flame Tongue hit: slashing and fire). */
+    instances: z
+      .array(z.object({ amount: n.min(0), type: z.string().nullable().optional() }))
+      .optional(),
     critical: z.boolean().optional(),
   }),
   z.object({ type: z.literal("heal"), amount: n.min(0) }),
