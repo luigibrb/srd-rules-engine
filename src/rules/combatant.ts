@@ -401,7 +401,8 @@ export function combatantFromMonster(monster: MonsterDef, state: MonsterState = 
     conditions: state.conditions ?? [],
     attacks,
     critical_hit_on: 20,
-    attacks_per_action: 1,
+    // Multiattack: that many attacks for one action.
+    attacks_per_action: monster.multiattack ?? 1,
     spellcasting: [],
     advantages: [],
     no_spells: false,

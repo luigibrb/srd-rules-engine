@@ -425,6 +425,11 @@ export interface ToggleDef {
   ends_on: string[];
   /** No Concentration and no spellcasting while active. */
   no_spells: boolean;
+  /**
+   * In an encounter, it ends at the end of each of your turns unless you extended it that turn
+   * (Rage: an attack roll, forcing a save, or a Bonus Action), except the turn it started.
+   */
+  extends_each_turn: boolean;
 }
 
 export interface Grants {
@@ -548,6 +553,7 @@ const ToggleSchema: z.ZodType<ToggleDef, unknown> = z.lazy(() =>
     blocked_when: z.array(z.enum(EFFECT_CONDITIONS)).default([]),
     ends_on: z.array(z.string()).default([]),
     no_spells: z.boolean().default(false),
+    extends_each_turn: z.boolean().default(false),
   }),
 );
 
@@ -992,6 +998,8 @@ export const MonsterSchema = z.strictObject({
   cr: z.string(),
   xp: z.int(),
   proficiency_bonus: z.int(),
+  /** Attacks its Multiattack makes (`null`: no Multiattack, or not a plain count). */
+  multiattack: z.int().min(1).nullable().default(null),
   traits: z.array(MonsterActionSchema).default([]),
   actions: z.array(MonsterActionSchema).default([]),
   bonus_actions: z.array(MonsterActionSchema).default([]),

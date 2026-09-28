@@ -86,6 +86,7 @@ features:
       blocked_when: [wearing_heavy_armor]
       ends_on: [incapacitated]
       no_spells: true
+      extends_each_turn: true
       grants:
         resistances: [bludgeoning, piercing, slashing]
         advantages: [check.str, save.str]

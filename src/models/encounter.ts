@@ -40,8 +40,46 @@ export const EncounterCombatantSchema = z.object({
   /** Feet moved this turn, and extra movement from Dash. */
   moved: z.int().min(0).default(0),
   extra_movement: z.int().min(0).default(0),
+  /** Attacks left in this turn's Attack action (Extra Attack). */
+  attacks_left: z.int().min(0).default(0),
+  /** Once-per-turn riders already used this turn (Sneak Attack), reset at every turn's start. */
+  riders_used: z.array(z.string()).default([]),
+  /** Abilities with a Recharge that were used and haven't recharged (`Fire Breath`). */
+  expended: z.array(z.string()).default([]),
+  /** Monsters only: what it's concentrating on. */
+  concentration: z.string().nullable().default(null),
+  /** Toggles (Rage) switched on this turn, and whether one was extended this turn. */
+  toggled_on: z.array(z.string()).default([]),
+  extended: z.boolean().default(false),
 });
 export type EncounterCombatant = z.infer<typeof EncounterCombatantSchema>;
+
+/**
+ * When a timed effect ends: at the start or end of the `count`-th turn of combatant `of` (from
+ * now). "Until the end of its next turn" is `{ at: end, of: it, count: 1 }`; "1 minute" is
+ * `{ at: start, of: the source, count: 10 }`.
+ */
+export const EffectEndSchema = z.object({
+  at: z.enum(["start", "end"]),
+  of: z.string(),
+  count: z.int().min(1),
+  /** Created during `of`'s own turn: that turn's end doesn't count. */
+  skip_current: z.boolean().default(false),
+});
+export type EffectEnd = z.infer<typeof EffectEndSchema>;
+
+/** A condition with a duration or tied to someone's Concentration (Hold Person). */
+export const EncounterEffectSchema = z.object({
+  id: z.string(),
+  target: z.string(),
+  condition: z.string(),
+  /** What caused it: `Hold Person`. With `concentration`, the source's Concentration on it. */
+  label: z.string(),
+  source: z.string().nullable().default(null),
+  concentration: z.boolean().default(false),
+  ends: EffectEndSchema.nullable().default(null),
+});
+export type EncounterEffect = z.infer<typeof EncounterEffectSchema>;
 
 export const EncounterSchema = z.object({
   /** 0 before the fight starts. */
@@ -51,6 +89,10 @@ export const EncounterSchema = z.object({
   /** Combatant ids in initiative order (set when the fight starts). */
   order: z.array(z.string()).default([]),
   combatants: z.array(EncounterCombatantSchema).default([]),
+  /** Timed and Concentration effects in play. */
+  effects: z.array(EncounterEffectSchema).default([]),
+  /** Next effect id number. */
+  next_effect: z.int().min(1).default(1),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
@@ -105,6 +147,59 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
    * Apply play actions to a combatant (what `makeAttack`, `castSpell` and `useSaveAction` return):
    * a character's go to its state; a monster supports damage, heal, set_temp_hp and conditions.
    */
-  z.object({ type: z.literal("effects"), id: z.string(), actions: z.array(PlayActionSchema) }),
+  z.object({
+    type: z.literal("effects"),
+    id: z.string(),
+    actions: z.array(PlayActionSchema),
+    /** Who caused them: a condition added here becomes a timed effect when a duration is given. */
+    source: z.string().optional(),
+    /** `N` rounds (ends at the start of the source's turn, or the target's), or… */
+    rounds: n.min(1).optional(),
+    /** …until the start or end of someone's next turn (default: the source's). */
+    until: z.object({ at: z.enum(["start", "end"]), of: z.string().optional() }).optional(),
+    /** The conditions end when the source's Concentration on `label` ends. */
+    concentration: z.boolean().optional(),
+    label: z.string().optional(),
+  }),
+  z.object({ type: z.literal("end_effect"), effect: z.string() }),
+  /**
+   * One attack with an attack line (`makeAttack`), applied to the target. The first attack of a
+   * turn uses the action (Extra Attack allows more); `reaction: true` makes it an Opportunity
+   * Attack. Once-per-turn riders are enforced; an attack roll extends Rage.
+   */
+  z.object({
+    type: z.literal("attack"),
+    id: z.string(),
+    target: z.string(),
+    attack: z.string(),
+    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+    two_handed: z.boolean().optional(),
+    riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
+    ally_adjacent: z.boolean().optional(),
+    reaction: z.boolean().optional(),
+  }),
+  /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
+  z.object({
+    type: z.literal("save_action"),
+    id: z.string(),
+    ability: z.string(),
+    targets: z.array(z.string()),
+  }),
+  /**
+   * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
+   * time says, spends the slot, applies the effects; a Concentration spell's conditions last
+   * while the caster concentrates, up to its duration.
+   */
+  z.object({
+    type: z.literal("cast"),
+    id: z.string(),
+    spell: z.string(),
+    targets: z.array(z.string()).default([]),
+    slot_level: n.min(1).max(9).optional(),
+    pact: z.boolean().optional(),
+    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+  }),
+  /** Extend Rage this turn some other way (forcing a saving throw). */
+  z.object({ type: z.literal("extend"), id: z.string() }),
 ]);
 export type EncounterAction = z.infer<typeof EncounterActionSchema>;

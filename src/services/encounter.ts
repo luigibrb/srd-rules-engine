@@ -9,16 +9,31 @@
 
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
-import type { MonsterDef } from "../models/content";
+import type { MonsterDef, SpellDef } from "../models/content";
 import {
+  type EffectEnd,
   type Encounter,
   type EncounterAction,
   type EncounterCombatant,
   EncounterCombatantSchema,
+  type EncounterEffect,
   EncounterSchema,
 } from "../models/encounter";
 import type { CharacterState, PlayAction } from "../models/state";
-import { type Combatant, combatantFromMonster, rollD20 } from "../rules/combatant";
+import {
+  castSpell,
+  type SaveActionResult,
+  type SpellCastResult,
+  useSaveAction,
+} from "../rules/casting";
+import {
+  type AttackResult,
+  type Combatant,
+  combatantFromMonster,
+  makeAttack,
+  rollD20,
+  rollSavingThrow,
+} from "../rules/combatant";
 import { takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
@@ -50,6 +65,8 @@ export interface EncounterResult {
   /** Character states changed by the action, by character key. */
   readonly states: Readonly<Record<string, CharacterState>>;
   readonly notes: readonly string[];
+  /** The rolls of an `attack`, `save_action` or `cast`. */
+  readonly result: AttackResult | SaveActionResult | SpellCastResult | null;
 }
 
 export function createEncounter(): Encounter {
@@ -78,7 +95,14 @@ export function encounterCombatant(
       temp_hp: c.temp_hp,
       conditions: c.conditions,
     });
-    return { ...base, name: c.name };
+    // An ability waiting to recharge can't be used.
+    const ready = (name: string) => !c.expended.includes(name);
+    return {
+      ...base,
+      name: c.name,
+      attacks: base.attacks.filter((a) => ready(a.name)),
+      save_actions: base.save_actions.filter((a) => ready(a.name)),
+    };
   }
   const ref = characterRef(ctx, c);
   return { ...combatantFromCharacter(ref.build, ref.state, ctx.catalog), name: c.name };
@@ -87,12 +111,173 @@ export function encounterCombatant(
 export function applyEncounterAction(
   encounter: Encounter,
   action: EncounterAction,
-  ctx: EncounterContext,
+  outer: EncounterContext,
 ): EncounterResult {
   const e = structuredClone(encounter) as Encounter;
   const notes: string[] = [];
   const states: Record<string, CharacterState> = {};
+  // A working copy of the characters: several can change in one action (attacker and target).
+  const chars: Record<string, CharacterRef> = { ...(outer.characters ?? {}) };
+  const ctx: EncounterContext = { ...outer, characters: chars };
   const rng = ctx.rng ?? mathRng;
+  let result: EncounterResult["result"] = null;
+  const play = (c: EncounterCombatant, a: PlayAction): void => {
+    const ref = characterRef(ctx, c);
+    let r: ReturnType<typeof applyAction>;
+    try {
+      r = applyAction(ref.build, ref.state, ctx.catalog, a, { rng });
+    } catch (error) {
+      if (error instanceof PlayError) throw new EncounterError(error.messages);
+      throw error;
+    }
+    chars[c.character as string] = { build: ref.build, state: r.state };
+    states[c.character as string] = r.state;
+    notes.push(...r.notes);
+  };
+  const concentrationOf = (c: EncounterCombatant): string | null =>
+    c.monster !== null ? c.concentration : characterRef(ctx, c).state.concentration;
+  /** Apply play actions to a combatant; a concentrating one saves against damage. */
+  const applyTo = (c: EncounterCombatant, actions: readonly PlayAction[]): void => {
+    for (const a of actions) {
+      let dc: number | null = null;
+      if (a.type === "damage") {
+        const t = encounterCombatant(e, c.id, ctx);
+        const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
+        const vitals = { hp: t.hp, temp: t.temp_hp, max: t.max_hp };
+        dc = takeDamage(vitals, instances, t.defenses, { critical: a.critical }).concentration_dc;
+      }
+      if (c.monster !== null) notes.push(...monsterEffect(ctx, c, a));
+      else {
+        play(c, a);
+        if (a.type === "activate") c.toggled_on.push(a.key);
+      }
+      const spell = concentrationOf(c);
+      if (dc !== null && spell) {
+        const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng });
+        const outcome = `${save.total} vs DC ${dc}`;
+        if (save.success) notes.push(`${c.name} keeps Concentration on ${spell} (${outcome}).`);
+        else {
+          notes.push(`${c.name} loses Concentration on ${spell} (${outcome}).`);
+          if (c.monster !== null) c.concentration = null;
+          else play(c, { type: "set_concentration", spell: null });
+        }
+      }
+    }
+  };
+  /** End an effect; its condition goes unless another effect still gives it. */
+  const endEffect = (effect: EncounterEffect, why: string): void => {
+    e.effects = e.effects.filter((x) => x.id !== effect.id);
+    const target = e.combatants.find((c) => c.id === effect.target);
+    const still = e.effects.some(
+      (x) => x.target === effect.target && x.condition === effect.condition,
+    );
+    const name = lookup(ctx.catalog.conditions, effect.condition)?.name ?? effect.condition;
+    notes.push(`${name} on ${target?.name ?? effect.target} ends (${effect.label}: ${why}).`);
+    if (!target || still) return;
+    if (target.monster !== null) {
+      target.conditions = target.conditions.filter((x) => x !== effect.condition);
+    } else if (characterRef(ctx, target).state.conditions.includes(effect.condition)) {
+      play(target, { type: "remove_condition", condition: effect.condition });
+    }
+  };
+  /** Register timed or Concentration effects for the conditions a target now has. */
+  const addEffects = (
+    target: EncounterCombatant,
+    conditions: readonly string[],
+    opts: { source: string | null; label: string; concentration: boolean; ends: EffectEnd | null },
+  ): void => {
+    const has = conditionsOf(ctx, target);
+    for (const condition of conditions) {
+      if (!has.has(condition)) continue; // immune
+      e.effects.push({ id: `effect-${e.next_effect++}`, target: target.id, condition, ...opts });
+    }
+  };
+  const endsFrom = (
+    target: string,
+    source: string | undefined,
+    rounds: number | undefined,
+    until: { at: "start" | "end"; of?: string } | undefined,
+  ): EffectEnd | null => {
+    if (rounds !== undefined) {
+      return { at: "start", of: source ?? target, count: rounds, skip_current: false };
+    }
+    if (until) {
+      const of = until.of ?? source ?? target;
+      find(of);
+      return {
+        at: until.at,
+        of,
+        count: 1,
+        skip_current: until.at === "end" && current()?.id === of,
+      };
+    }
+    return null;
+  };
+  /** Count down effects that end at the start or end of `c`'s turn. */
+  const tick = (c: EncounterCombatant, at: "start" | "end"): void => {
+    for (const effect of [...e.effects]) {
+      const ends = effect.ends;
+      if (!ends || ends.at !== at || ends.of !== c.id) continue;
+      if (ends.skip_current) {
+        ends.skip_current = false;
+        continue;
+      }
+      ends.count -= 1;
+      if (ends.count <= 0) endEffect(effect, "its duration is over");
+    }
+  };
+  /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
+  const endTurn = (c: EncounterCombatant): void => {
+    tick(c, "end");
+    if (c.character !== null) {
+      const ref = characterRef(ctx, c);
+      const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+      for (const t of sheet.toggles) {
+        if (t.active && t.extends_each_turn && !c.extended && !c.toggled_on.includes(t.key)) {
+          notes.push(`${t.name} ends: it wasn't extended this turn.`);
+          play(c, { type: "deactivate", key: t.key });
+        }
+      }
+    }
+    c.toggled_on = [];
+    c.extended = false;
+  };
+  /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
+  const startTurn = (c: EncounterCombatant): void => {
+    for (const x of e.combatants) x.riders_used = [];
+    tick(c, "start");
+    if (c.monster !== null && c.expended.length) {
+      const def = monsterDef(ctx, c);
+      const all = [
+        ...def.actions,
+        ...def.bonus_actions,
+        ...def.reactions,
+        ...def.legendary_actions,
+      ];
+      for (const name of [...c.expended]) {
+        const min = Number(
+          /^(\d)/.exec(all.find((a) => a.name === name)?.recharge ?? "")?.[1] ?? 7,
+        );
+        const d6 = rng.int(1, 6);
+        if (d6 >= min) {
+          c.expended = c.expended.filter((x) => x !== name);
+          notes.push(`${c.name}'s ${name} recharges (${d6}).`);
+        } else notes.push(`${c.name}'s ${name} doesn't recharge (${d6}).`);
+      }
+    }
+  };
+  /** After every action: Concentration effects whose source stopped concentrating end. */
+  const sweep = (): void => {
+    for (const effect of [...e.effects]) {
+      const target = e.combatants.find((c) => c.id === effect.target);
+      const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
+      if (!target) endEffect(effect, "its target left");
+      else if (effect.source && !source) endEffect(effect, "its source left");
+      else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
+        endEffect(effect, "Concentration ended");
+      }
+    }
+  };
   const find = (id: string) =>
     e.combatants.find((c) => c.id === id) ?? fail(`No combatant '${id}' in the encounter`);
   const current = () => currentCombatant(e);
@@ -201,12 +386,16 @@ export function applyEncounterAction(
       for (const c of e.combatants) resetTurn(c);
       e.turn = 0;
       const first = skipToActive(e, ctx, notes, false);
+      startTurn(first);
       notes.push(`Round 1: ${first.name}'s turn.`);
       break;
     }
     case "next_turn": {
       if (e.round === 0) fail("The fight hasn't started");
+      const ending = current();
+      if (ending) endTurn(ending);
       const next = skipToActive(e, ctx, notes, true);
+      startTurn(next);
       notes.push(`Round ${e.round}: ${next.name}'s turn.`);
       break;
     }
@@ -234,6 +423,8 @@ export function applyEncounterAction(
         );
       }
       c.used[action.what] = true;
+      // A Bonus Action extends Rage.
+      if (action.what === "bonus_action") c.extended = true;
       break;
     }
     case "move": {
@@ -259,27 +450,183 @@ export function applyEncounterAction(
     }
     case "effects": {
       const c = find(action.id);
-      if (c.monster !== null) {
-        for (const a of action.actions) notes.push(...monsterEffect(ctx, c, a));
+      applyTo(c, action.actions);
+      const source = action.source;
+      if (source !== undefined) find(source);
+      const ends = endsFrom(c.id, source, action.rounds, action.until);
+      if (ends || action.concentration) {
+        if (action.concentration && !source) fail("A Concentration effect needs its source");
+        const conditions = action.actions.flatMap((a) =>
+          a.type === "add_condition" ? [a.condition] : [],
+        );
+        const label =
+          action.label ??
+          (action.concentration ? (concentrationOf(find(source as string)) ?? "") : "effect");
+        if (action.concentration && !label)
+          fail(`${find(source as string).name} isn't concentrating`);
+        addEffects(c, conditions, {
+          source: source ?? null,
+          label,
+          concentration: action.concentration ?? false,
+          ends,
+        });
+      }
+      break;
+    }
+    case "end_effect": {
+      const effect =
+        e.effects.find((x) => x.id === action.effect) ?? fail(`No effect '${action.effect}'`);
+      endEffect(effect, "ended");
+      break;
+    }
+    case "extend": {
+      find(action.id).extended = true;
+      break;
+    }
+    case "attack": {
+      const c = find(action.id);
+      const t = find(action.target);
+      canAct(c);
+      const attacker = encounterCombatant(e, c.id, ctx);
+      if (action.reaction) {
+        if (e.round === 0) fail("The fight hasn't started");
+        if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+        c.used.reaction = true;
       } else {
-        const ref = characterRef(ctx, c);
-        let state = ref.state;
-        try {
-          for (const a of action.actions) {
-            const r = applyAction(ref.build, state, ctx.catalog, a, { rng });
-            state = r.state;
-            notes.push(...r.notes);
-          }
-        } catch (error) {
-          if (error instanceof PlayError) throw new EncounterError(error.messages);
-          throw error;
+        onTurn(c, "attack");
+        if (c.attacks_left > 0) c.attacks_left -= 1;
+        else if (c.used.action) fail(`${c.name} has no attacks left this turn`);
+        else {
+          // The Attack action: Extra Attack or Multiattack give more attacks with it.
+          c.used.action = true;
+          c.attacks_left = attacker.attacks_per_action - 1;
         }
-        states[c.character as string] = state;
+      }
+      const line = attacker.attacks.find((a) => a.name === action.attack);
+      const riders = action.riders ?? [];
+      const onceIds = riders.flatMap((r) => {
+        const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
+        return rider?.once_per_turn ? [rider.id] : [];
+      });
+      const again = onceIds.find((id) => c.riders_used.includes(id));
+      if (again) fail(`${c.name} has already used ${again} this turn`);
+      const target = encounterCombatant(e, t.id, ctx);
+      let hit: AttackResult;
+      try {
+        hit = makeAttack(attacker, action.attack, target, {
+          rng,
+          mode: action.mode,
+          two_handed: action.two_handed,
+          riders,
+          ally_adjacent: action.ally_adjacent,
+        });
+      } catch (error) {
+        if (error instanceof RangeError) fail(error.message);
+        throw error;
+      }
+      result = hit;
+      c.extended = true; // an attack roll extends Rage
+      const roll = `${hit.total} vs AC ${hit.target_ac}`;
+      if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
+      else {
+        c.riders_used.push(...onceIds);
+        const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+        const crit = hit.critical_hit ? "Critical Hit! " : "";
+        notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
+        applyTo(t, [{ type: "damage", instances: [...hit.instances], critical: hit.critical_hit }]);
+      }
+      break;
+    }
+    case "save_action": {
+      const c = find(action.id);
+      onTurn(c, "act");
+      canAct(c);
+      if (c.expended.includes(action.ability))
+        fail(`${c.name}'s ${action.ability} hasn't recharged`);
+      if (c.used.action) fail(`${c.name} has already used its action this turn`);
+      const user = encounterCombatant(e, c.id, ctx);
+      const line = user.save_actions.find((a) => a.name === action.ability);
+      const targets = action.targets.map(find);
+      let r: SaveActionResult;
+      try {
+        r = useSaveAction(
+          user,
+          action.ability,
+          targets.map((t) => encounterCombatant(e, t.id, ctx)),
+          { rng },
+        );
+      } catch (error) {
+        if (error instanceof RangeError) fail(error.message);
+        throw error;
+      }
+      result = r;
+      c.used.action = true;
+      c.extended = true; // forcing a saving throw extends Rage
+      if (line?.recharge) c.expended.push(action.ability);
+      for (const hit of r.targets) {
+        const t = targets[hit.target] as EncounterCombatant;
+        notes.push(
+          `${t.name}: ${hit.save?.success ? "succeeds" : "fails"} (${hit.save?.total} vs DC ${r.dc}).`,
+        );
+        applyTo(t, hit.actions);
+      }
+      break;
+    }
+    case "cast": {
+      const c = find(action.id);
+      canAct(c);
+      const spell =
+        lookup(ctx.catalog.spells, action.spell) ?? fail(`Unknown spell '${action.spell}'`);
+      if (c.character !== null) {
+        const ref = characterRef(ctx, c);
+        const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
+        if (!known.some((x) => x.id === spell.id)) fail(`${c.name} can't cast ${spell.name}`);
+      }
+      const what = castingEconomy(spell);
+      if (what === "reaction") {
+        if (e.round === 0) fail("The fight hasn't started");
+      } else onTurn(c, "cast");
+      if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")}`);
+      const targets = action.targets.map(find);
+      let r: SpellCastResult;
+      try {
+        r = castSpell(
+          encounterCombatant(e, c.id, ctx),
+          spell,
+          targets.map((t) => encounterCombatant(e, t.id, ctx)),
+          { slot_level: action.slot_level, pact: action.pact, mode: action.mode, rng },
+        );
+      } catch (error) {
+        if (error instanceof RangeError) fail(error.message);
+        throw error;
+      }
+      result = r;
+      c.used[what] = true;
+      c.extended = true;
+      notes.push(`${c.name} casts ${spell.name}.`, ...r.notes);
+      applyTo(c, r.caster_actions);
+      for (const hit of r.targets) {
+        const t = targets[hit.target] as EncounterCombatant;
+        applyTo(t, hit.actions);
+      }
+      // A Concentration spell's conditions last while the caster concentrates, up to its duration.
+      if (spell.concentration) {
+        const rounds = durationRounds(spell);
+        for (const hit of r.targets) {
+          const t = targets[hit.target] as EncounterCombatant;
+          addEffects(t, hit.conditions, {
+            source: c.id,
+            label: spell.name,
+            concentration: true,
+            ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
+          });
+        }
       }
       break;
     }
   }
-  return { encounter: EncounterSchema.parse(e), states, notes };
+  sweep();
+  return { encounter: EncounterSchema.parse(e), states, notes, result };
 }
 
 // --- helpers ------------------------------------------------------------------------------------
@@ -480,7 +827,31 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       c.conditions = c.conditions.filter((x) => x !== a.condition);
       return [];
     }
+    case "set_concentration": {
+      const previous = c.concentration;
+      c.concentration = a.spell;
+      return previous && a.spell ? [`Concentration on ${previous} ends.`] : [];
+    }
+    case "spend_slot":
+    case "spend_pact_slot":
+      return []; // a monster's spell slots aren't tracked
     default:
       return fail(`A monster can't take the play action '${a.type}'`);
   }
+}
+
+/** The action economy a spell's casting time uses. */
+function castingEconomy(spell: SpellDef): "action" | "bonus_action" | "reaction" {
+  if (/^Action/i.test(spell.casting_time)) return "action";
+  if (/^Bonus Action/i.test(spell.casting_time)) return "bonus_action";
+  if (/^Reaction/i.test(spell.casting_time)) return "reaction";
+  return fail(`${spell.name} takes ${spell.casting_time} to cast: not in combat`);
+}
+
+/** "Concentration, up to 1 minute" → 10 rounds; `null` when it isn't counted in rounds. */
+function durationRounds(spell: SpellDef): number | null {
+  const m = /up to (\d+) (round|minute|hour)s?/i.exec(spell.duration);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return m[2] === "round" ? n : m[2] === "minute" ? n * 10 : n * 600;
 }
