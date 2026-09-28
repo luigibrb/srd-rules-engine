@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../schemas/creation.schema.json
+# Character creation rules — SRD 5.2.1 "Character Creation", Step 3 and Step 2 (languages).
+source: srd-5.2.1
+standard_array: [15, 14, 13, 12, 10, 8]
+point_buy:
+  budget: 27
+  min_score: 8
+  max_score: 15
+  costs: {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
+# Background increases can't raise a score above this.
+max_score_at_creation: 20
+base_grants:
+  languages: [common]
+  choices:
+    - id: languages
+      label: Languages
+      kind: language
+      count: 2
+      category: standard
+      hint: Every character knows Common plus two standard languages.
+# SRD 5.2.1 — "Character Creation" > "Multiclassing" > Multiclass Spellcaster table: spell slots
+# per spell level (index 0 = level 1 slots) for caster levels 1–20. Full casters count each class
+# level, Paladins and Rangers half (rounded up); a single-class caster's own table matches it.
+spell_slots:
+  - [2]
+  - [3]
+  - [4, 2]
+  - [4, 3]
+  - [4, 3, 2]
+  - [4, 3, 3]
+  - [4, 3, 3, 1]
+  - [4, 3, 3, 2]
+  - [4, 3, 3, 3, 1]
+  - [4, 3, 3, 3, 2]
+  - [4, 3, 3, 3, 2, 1]
+  - [4, 3, 3, 3, 2, 1]
+  - [4, 3, 3, 3, 2, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 2, 1, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 1, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 2, 1, 1, 1]
+  - [4, 3, 3, 3, 3, 2, 2, 1, 1]

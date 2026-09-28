@@ -1,0 +1,2 @@
+# yaml-language-server: $schema=../../schemas/gear.schema.json
+- {id: lucky-coin, name: Lucky Coin, source: homebrew, description: A coin that always lands heads.}

@@ -1,0 +1,244 @@
+import { describe, expect, it } from "vitest";
+import { createHandler, type FetchHandler } from "../src/http/index";
+import { fixedRng } from "../src/index";
+import { fighterBuild } from "./helpers";
+
+const character = (overrides = {}) => ({
+  name: "Test",
+  character_class: "fighter",
+  level: 5,
+  ability_scores: {
+    strength: 16,
+    dexterity: 14,
+    constitution: 15,
+    intelligence: 10,
+    wisdom: 12,
+    charisma: 8,
+  },
+  max_hit_points: 44,
+  current_hit_points: 44,
+  armor_class: 16,
+  proficiency_bonus: 3,
+  ...overrides,
+});
+
+function client(handler: FetchHandler) {
+  const call = async (method: string, path: string, body?: unknown) => {
+    const res = await handler(
+      new Request(`http://test${path}`, {
+        method,
+        headers: { "content-type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      }),
+    );
+    return { status: res.status, body: await res.json(), headers: res.headers };
+  };
+  return {
+    get: (path: string) => call("GET", path),
+    post: (path: string, body: unknown) => call("POST", path, body),
+  };
+}
+
+const api = client(createHandler({ rng: fixedRng(20) }));
+
+describe("HTTP API", () => {
+  it("health", async () => {
+    expect(await api.get("/health")).toMatchObject({ status: 200, body: { status: "ok" } });
+  });
+
+  it("validates characters", async () => {
+    expect((await api.post("/v1/characters/", character())).status).toBe(200);
+    const bad = await api.post("/v1/characters", character({ level: 25 }));
+    expect(bad.status).toBe(422);
+    expect(bad.body.message).toContain("level");
+  });
+
+  it("alive and passive perception", async () => {
+    expect((await api.post("/v1/characters/Bob/alive", character())).body).toEqual({
+      name: "Bob",
+      alive: true,
+    });
+    const pp = await api.post("/v1/characters/Bob/passive-perception?proficient=true", character());
+    expect(pp.body.passive_perception).toBe(14);
+  });
+
+  it("rolls dice", async () => {
+    const res = await api.post("/v1/combat/roll", { expression: "2d6+3" });
+    expect(res.body).toEqual({ dice_expression: "2d6+3", rolls: [20, 20], modifier: 3, total: 43 });
+    expect((await api.post("/v1/combat/roll", { expression: "nope" })).status).toBe(400);
+    expect((await api.post("/v1/combat/roll", { expression: "99999d6" })).status).toBe(400);
+  });
+
+  it("resolves an attack", async () => {
+    const res = await api.post("/v1/combat/attack", {
+      attacker: character(),
+      target: character(),
+      attack_bonus: 5,
+      damage_dice: "1d8",
+      damage_type: "slashing",
+    });
+    expect(res.body.attack.critical_hit).toBe(true);
+    expect(res.body.damage.dice_expression).toBe("2d8");
+    expect(res.body.target_hp).toBe(44 - 40);
+  });
+
+  it("saving throws accept any ability capitalization", async () => {
+    const res = await api.post("/v1/combat/saving-throw", {
+      character: character(),
+      ability: "Dexterity",
+      dc: 15,
+    });
+    expect(res.body.success).toBe(true);
+  });
+
+  it("spell stats", async () => {
+    const res = await api.post("/v1/spells/stats", {
+      caster: character(),
+      spellcasting_ability: "wisdom",
+    });
+    expect(res.body).toEqual({ save_dc: 12, attack_bonus: 4 });
+  });
+
+  it("serves content", async () => {
+    expect((await api.get("/v1/content")).body.weapons).toBe(38);
+    expect((await api.get("/v1/content/armor/chain-mail")).body.base_ac).toBe(16);
+    expect((await api.get("/v1/content/armor/nope")).status).toBe(404);
+    expect((await api.get("/v1/content/spaceships")).status).toBe(404);
+  });
+
+  it("evaluates a build", async () => {
+    const res = await api.post("/v1/builds/evaluate", fighterBuild());
+    expect(res.body.report.is_complete).toBe(true);
+    expect(res.body.sheet.armor_class.total).toBe(17);
+    const skills = res.body.choices.find((c: { key: string }) => c.key === "class:fighter#skills");
+    expect(skills.selected).toEqual(["acrobatics", "survival"]);
+    expect(skills.options.find((o: { id: string }) => o.id === "athletics").unavailable).toBe(
+      "already proficient from Soldier",
+    );
+  });
+
+  it("levels up and sets choices over HTTP", async () => {
+    const build = fighterBuild();
+    const up = await api.post("/v1/builds/level-up", { build, class_id: "fighter", hp: 7 });
+    expect(up.status).toBe(200);
+    expect(up.body.build.levels).toEqual([{ class_id: "fighter", hp: 7 }]);
+    const three = await api.post("/v1/builds/level-up", {
+      build: up.body.build,
+      class_id: "fighter",
+    });
+    const ev = await api.post("/v1/builds/evaluate", three.body.build);
+    const subclass = ev.body.choices.find(
+      (c: { key: string }) => c.key === "class:fighter:3#subclass",
+    );
+    expect(subclass).toMatchObject({ level: 3, required: 1, selected: [] });
+    const chosen = await api.post("/v1/builds/set-choice", {
+      build: three.body.build,
+      key: "class:fighter:3#subclass",
+      values: ["champion"],
+    });
+    const after = await api.post("/v1/builds/evaluate", chosen.body.build);
+    expect(after.body.sheet.critical_hit_on).toBe(19);
+    expect(after.body.sheet.level).toBe(3);
+    const down = await api.post("/v1/builds/remove-level", { build: chosen.body.build });
+    expect(down.body.build.levels).toHaveLength(1);
+    const bad = await api.post("/v1/builds/level-up", { build, class_id: "wizard" });
+    expect(bad).toMatchObject({
+      status: 400,
+      body: { detail: ["Wizard: Wizard needs Intelligence 13+"] },
+    });
+  });
+
+  it("previews and changes the past over HTTP", async () => {
+    let build = fighterBuild();
+    for (let i = 0; i < 2; i++) {
+      build = (await api.post("/v1/builds/level-up", { build, class_id: "fighter" })).body.build;
+    }
+    build = (
+      await api.post("/v1/builds/set-choice", {
+        build,
+        key: "class:fighter:3#subclass",
+        values: ["champion"],
+      })
+    ).body.build;
+    const preview = await api.post("/v1/builds/preview", {
+      build,
+      key: "class:fighter:3#subclass",
+      values: [],
+    });
+    expect(preview.status).toBe(200);
+    expect(preview.body.pending).toEqual([
+      { level: 3, message: "Fighter subclass: choose 1 more" },
+    ]);
+    const moved = await api.post("/v1/builds/set-level-class", {
+      build,
+      level: 2,
+      class_id: "rogue",
+    });
+    expect(moved.status).toBe(200);
+    expect(moved.body.build.levels.map((l: { class_id: string }) => l.class_id)).toEqual([
+      "rogue",
+      "fighter",
+    ]);
+    const refused = await api.post("/v1/builds/set-level-class", {
+      build,
+      level: 2,
+      class_id: "wizard",
+    });
+    expect(refused.status).toBe(400);
+    const ev = await api.post("/v1/builds/evaluate", build);
+    const swap = ev.body.choices.find((c: { key: string }) => c.key.includes("#replace:"));
+    expect(swap).toMatchObject({ required: 0, replaces: { family: "fighter:fighter-style" } });
+    expect(swap.replace_old_options.map((o: { id: string }) => o.id)).toEqual(["defense"]);
+  });
+
+  it("rejects bad requests", async () => {
+    expect((await api.get("/nope")).status).toBe(404);
+    expect((await api.get("/v1/combat/roll")).status).toBe(405);
+    const res = await createHandler()(
+      new Request("http://test/v1/combat/roll", { method: "POST", body: "{not json" }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("supports a base path and CORS", async () => {
+    const mounted = client(createHandler({ basePath: "/api", cors: true }));
+    const res = await mounted.get("/api/health");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("access-control-allow-origin")).toBe("*");
+  });
+});
+
+describe("HTTP play state", () => {
+  it("creates a state, applies actions and returns the play sheet", async () => {
+    const build = fighterBuild();
+    const created = await api.post("/v1/state/new", { build });
+    expect(created.status).toBe(200);
+    const applied = await api.post("/v1/state/apply", {
+      build,
+      state: created.body,
+      action: [
+        { type: "damage", amount: 5 },
+        { type: "add_condition", condition: "poisoned" },
+      ],
+    });
+    expect(applied.status).toBe(200);
+    const sheet = await api.post("/v1/state/sheet", { build, state: applied.body.state });
+    expect(sheet.body.sheet.play.hp).toEqual({ current: 7, max: 12, temp: 0 });
+    expect(sheet.body.sheet.play.conditions.map((c: { id: string }) => c.id)).toEqual(["poisoned"]);
+    expect(sheet.body.issues).toEqual([]);
+  });
+
+  it("refuses impossible actions and malformed ones", async () => {
+    const build = fighterBuild();
+    const state = (await api.post("/v1/state/new", { build })).body;
+    const refused = await api.post("/v1/state/apply", {
+      build,
+      state,
+      action: { type: "spend_slot", level: 1 },
+    });
+    expect(refused.status).toBe(400);
+    expect(refused.body.detail).toEqual(["No level 1 spell slots left"]);
+    const bad = await api.post("/v1/state/apply", { build, state, action: { type: "fly" } });
+    expect(bad.status).toBe(422);
+  });
+});

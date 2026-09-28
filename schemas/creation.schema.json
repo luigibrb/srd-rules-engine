@@ -1,0 +1,969 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "source": {
+      "default": "srd-5.2.1",
+      "type": "string"
+    },
+    "standard_array": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991
+      }
+    },
+    "point_buy": {
+      "type": "object",
+      "properties": {
+        "budget": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "min_score": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "max_score": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "costs": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        }
+      },
+      "required": [
+        "budget",
+        "min_score",
+        "max_score",
+        "costs"
+      ],
+      "additionalProperties": false
+    },
+    "max_score_at_creation": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "base_grants": {
+      "$ref": "#/$defs/Grants"
+    },
+    "max_level": {
+      "default": 20,
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "multiclass_min_score": {
+      "default": 13,
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "spell_slots": {
+      "minItems": 20,
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  },
+  "required": [
+    "standard_array",
+    "point_buy",
+    "max_score_at_creation",
+    "base_grants",
+    "spell_slots"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Grants": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "small",
+                "medium"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "skills": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "acrobatics",
+              "animal-handling",
+              "arcana",
+              "athletics",
+              "deception",
+              "history",
+              "insight",
+              "intimidation",
+              "investigation",
+              "medicine",
+              "nature",
+              "perception",
+              "performance",
+              "persuasion",
+              "religion",
+              "sleight-of-hand",
+              "stealth",
+              "survival"
+            ]
+          }
+        },
+        "tools": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "languages": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "saving_throws": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "armor_training": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "weapon_proficiencies": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "feats": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "feat": {
+                "type": "string"
+              },
+              "params": {
+                "default": {},
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "feat"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "resistances": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cantrips": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "spells": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "spellcasting": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "list": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ability": {
+                  "type": "string"
+                },
+                "progression": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half",
+                        "pact"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pact_slots": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "count": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "level": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "count",
+                      "level"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "ability"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ac_calculations": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "base": {
+                "default": 10,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "abilities": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "str",
+                    "dex",
+                    "con",
+                    "int",
+                    "wis",
+                    "cha"
+                  ]
+                }
+              },
+              "shield": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "abilities"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "ability_bonuses": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ability": {
+                "type": "string",
+                "enum": [
+                  "str",
+                  "dex",
+                  "con",
+                  "int",
+                  "wis",
+                  "cha"
+                ]
+              },
+              "value": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "max": {
+                "default": 20,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "ability",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "resources": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "max": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "progression": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "ability": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "str",
+                          "dex",
+                          "con",
+                          "int",
+                          "wis",
+                          "cha"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "proficiency": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "per_class_level": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "min": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              },
+              "recharge": {
+                "type": "string",
+                "enum": [
+                  "short",
+                  "long"
+                ]
+              },
+              "short_rest_regain": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "max",
+              "recharge"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "on_long_rest": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "heroic_inspiration"
+            ]
+          }
+        },
+        "effects": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "type": "string"
+              },
+              "op": {
+                "default": "add",
+                "type": "string",
+                "enum": [
+                  "add",
+                  "set",
+                  "max",
+                  "min"
+                ]
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "string",
+                    "const": "prof"
+                  },
+                  {
+                    "type": "string",
+                    "const": "half_prof"
+                  },
+                  {
+                    "type": "string",
+                    "enum": [
+                      "str",
+                      "dex",
+                      "con",
+                      "int",
+                      "wis",
+                      "cha"
+                    ]
+                  }
+                ]
+              },
+              "min": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "when": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "target",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "items": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "type": "string"
+              },
+              "qty": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "item"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "gp": {
+          "default": 0,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "traits": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "text"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceDef"
+          }
+        },
+        "at_class_level": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "grants": {
+                "$ref": "#/$defs/Grants"
+              }
+            },
+            "required": [
+              "level",
+              "grants"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChoiceDef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "option",
+            "ability",
+            "skill",
+            "tool",
+            "skill_or_tool",
+            "language",
+            "feat",
+            "weapon_mastery",
+            "spell",
+            "expertise",
+            "subclass",
+            "ability_increase",
+            "feature"
+          ]
+        },
+        "count": {
+          "default": 1,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "allowed": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "category": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "step": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "class",
+                "species",
+                "background",
+                "abilities",
+                "equipment",
+                "features",
+                "spells",
+                "proficiencies",
+                "languages",
+                "details"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hint": {
+          "default": "",
+          "type": "string"
+        },
+        "spell_level": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_spell_level": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spell_list": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "known_only": {
+          "default": false,
+          "type": "boolean"
+        },
+        "tag": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "max_score": {
+          "default": 20,
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "ritual": {
+          "default": false,
+          "type": "boolean"
+        },
+        "school": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "always_prepared": {
+          "default": false,
+          "type": "boolean"
+        },
+        "subset_of": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scaling": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "minItems": 20,
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "max_spell_level": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "minItems": 20,
+                      "maxItems": 20,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "swap": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "class_level",
+                "any_level"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "same_level": {
+          "default": false,
+          "type": "boolean"
+        },
+        "rest_change": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "short",
+                "long"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weapon_kind": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "melee",
+                "ranged"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "ChoiceOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "type": "string"
+        },
+        "grants": {
+          "default": {},
+          "$ref": "#/$defs/Grants"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "title": "Character creation rules"
+}

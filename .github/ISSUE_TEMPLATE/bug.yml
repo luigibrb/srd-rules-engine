@@ -1,0 +1,20 @@
+name: Bug
+description: Something computes or behaves incorrectly
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The saved build JSON (from `srd-rules build` → save) is the most useful thing to attach.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: Version and runtime
+      placeholder: srd-rules-engine 0.1.0, Node 24

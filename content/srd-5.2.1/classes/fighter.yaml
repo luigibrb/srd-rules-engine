@@ -1,0 +1,237 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Fighter". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from docs/srd-5.2.1/classes.md; mechanics were added by hand.
+id: fighter
+name: Fighter
+description: A master of martial combat, skilled with a variety of weapons and armor.
+primary_abilities: [str, dex]
+primary_mode: any
+hit_die: 10
+complexity: Low
+standard_array:
+  str: 15
+  dex: 14
+  con: 13
+  int: 8
+  wis: 10
+  cha: 12
+subclass_level: 3
+progression:
+  Second Wind: [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+  Weapon Mastery: [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+grants:
+  saving_throws: [str, con]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, heavy, shield]
+  choices:
+  - id: skills
+    label: Fighter skills
+    kind: skill
+    count: 2
+    allowed: [acrobatics, animal-handling, athletics, history, insight, intimidation, persuasion, perception,
+      survival]
+  - id: equipment
+    label: Fighter equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Heavy (Chain Mail)
+      description: Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer's Pack, 4 GP
+      grants:
+        items:
+        - {item: chain-mail}
+        - {item: greatsword}
+        - {item: flail}
+        - {item: javelin, qty: 8}
+        - {item: dungeoneers-pack}
+        gp: 4
+    - id: b
+      name: Light (Studded Leather)
+      description: Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeoneer's
+        Pack, 11 GP
+      grants:
+        items:
+        - {item: studded-leather-armor}
+        - {item: scimitar}
+        - {item: shortsword}
+        - {item: longbow}
+        - {item: arrow, qty: 20}
+        - {item: quiver}
+        - {item: dungeoneers-pack}
+        gp: 11
+    - id: c
+      name: Gold
+      description: 155 GP to buy your own gear (shopping is not automated yet)
+      grants: {gp: 155}
+multiclass:
+  weapon_proficiencies: [martial]
+  armor_training: [light, medium, shield]
+features:
+  '1':
+    traits:
+    - name: Second Wind
+      text: 'Bonus Action: regain 1d10 + Fighter level HP. 2 uses; regain one on a Short Rest, all on
+        a Long Rest.'
+    - name: Weapon Mastery
+      text: Use the mastery properties of three kinds of Simple or Martial weapons. After a Long Rest
+        you can swap one choice.
+    - name: Fighting Style
+      text: Gain a Fighting Style feat. Whenever you gain a Fighter level you can replace it.
+    choices:
+    - id: fighting_style
+      label: Fighting Style
+      kind: feat
+      category: fighting_style
+      hint: Defense is recommended.
+      tag: fighter-style
+      swap: class_level
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 3
+      hint: Pick weapons you will actually carry — check your starting equipment.
+      scaling:
+        count: [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6]
+        max_spell_level: null
+      rest_change: long
+    resources:
+    - id: second-wind
+      name: Second Wind
+      max: {progression: Second Wind}
+      recharge: long
+      short_rest_regain: 1
+  '2':
+    traits:
+    - name: Action Surge
+      text: |-
+        You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action, except the Magic action.
+
+        Once you use this feature, you can't do so again until you finish a Short or Long Rest. Starting at level 17, you can use it twice before a rest but only once on a turn.
+    - name: Tactical Mind
+      text: You have a mind for tactics on and off the battlefield. When you fail an ability check, you
+        can expend a use of your Second Wind to push yourself toward success. Rather than regaining Hit
+        Points, you roll 1d10 and add the number rolled to the ability check, potentially turning it into
+        a success. If the check still fails, this use of Second Wind isn't expended.
+    resources:
+    - id: action-surge
+      name: Action Surge
+      max: {value: 1}
+      recharge: short
+  '3':
+    traits:
+    - name: Fighter Subclass
+      text: You gain a Fighter subclass of your choice. The Champion subclass is detailed after this class's
+        description. A subclass is a specialization that grants you features at certain Fighter levels.
+        For the rest of your career, you gain each of your subclass's features that are of your Fighter
+        level or lower.
+    choices:
+    - {id: subclass, label: Fighter subclass, kind: subclass}
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '5':
+    traits:
+    - name: Extra Attack
+      text: You can attack twice instead of once whenever you take the Attack action on your turn.
+    - name: Tactical Shift
+      text: Whenever you activate your Second Wind with a Bonus Action, you can move up to half your Speed
+        without provoking Opportunity Attacks.
+    effects:
+    - {target: attacks, op: max, value: 2}
+  '6':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '9':
+    traits:
+    - name: Indomitable
+      text: |-
+        If you fail a saving throw, you can reroll it with a bonus equal to your Fighter level. You must use the new roll, and you can't use this feature again until you finish a Long Rest.
+
+        You can use this feature twice before a Long Rest starting at level 13 and three times before a Long Rest starting at level 17.
+    - name: Tactical Master
+      text: When you attack with a weapon whose mastery property you can use, you can replace that property
+        with the Push, Sap, or Slow property for that attack.
+    resources:
+    - id: indomitable
+      name: Indomitable
+      max: {value: 1}
+      recharge: long
+  '11':
+    traits:
+    - name: Two Extra Attacks
+      text: You can attack three times instead of once whenever you take the Attack action on your turn.
+    effects:
+    - {target: attacks, op: max, value: 3}
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '13':
+    traits:
+    - name: Studied Attacks
+      text: You study your opponents and learn from each attack you make. If you make an attack roll against
+        a creature and miss, you have Advantage on your next attack roll against that creature before
+        the end of your next turn.
+    resources:
+    - id: indomitable
+      name: Indomitable
+      max: {value: 2}
+      recharge: long
+  '14':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '17':
+    resources:
+    - id: action-surge
+      name: Action Surge
+      max: {value: 2}
+      recharge: short
+    - id: indomitable
+      name: Indomitable
+      max: {value: 3}
+      recharge: long
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of Combat Prowess is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.
+  '20':
+    traits:
+    - name: Three Extra Attacks
+      text: You can attack four times instead of once whenever you take the Attack action on your turn.
+    effects:
+    - {target: attacks, op: max, value: 4}

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../../schemas/feats.schema.json
+#
+# A homebrew content pack. Layer it over the SRD with:
+#   npx srd-rules validate examples/homebrew-pack
+#   npx srd-rules build --content examples/homebrew-pack
+# or in code: createCatalog(srdPack, loadContentPack("examples/homebrew-pack"))
+- id: lucky-streak
+  name: Lucky Streak
+  source: homebrew
+  category: origin
+  description: >-
+    Fortune favors you. Gain proficiency in one skill of your choice and +1 to Initiative.
+  grants:
+    effects: [{target: initiative, value: 1}]
+    choices:
+      - id: skill
+        label: Lucky Streak skill
+        kind: skill

@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local environment and editor state
+.env
+.env.*
+.DS_Store
+
+# Saved character builds from the CLI builder
+characters/
+
+# Private notes and assistant session files
+.CLAUDE
+claude.resume
+
+# Leftovers from the Python implementation
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

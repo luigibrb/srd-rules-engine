@@ -1,0 +1,254 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Paladin". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from docs/srd-5.2.1/classes.md; mechanics were added by hand.
+id: paladin
+name: Paladin
+description: A holy warrior bound by an oath, blending martial skill with divine magic.
+primary_abilities: [str, cha]
+primary_mode: all
+hit_die: 10
+complexity: Average
+standard_array:
+  str: 15
+  dex: 10
+  con: 13
+  int: 8
+  wis: 12
+  cha: 14
+subclass_level: 3
+progression:
+  Channel Divinity: [—, —, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+grants:
+  saving_throws: [wis, cha]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, heavy, shield]
+  choices:
+  - id: skills
+    label: Paladin skills
+    kind: skill
+    count: 2
+    allowed: [athletics, insight, intimidation, medicine, persuasion, religion]
+  - id: equipment
+    label: Paladin equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Package
+      description: Chain Mail, Shield, Longsword, 6 Javelins, Holy Symbol, Priest's Pack, 9 GP
+      grants:
+        items:
+        - {item: chain-mail}
+        - {item: shield}
+        - {item: longsword}
+        - {item: javelin, qty: 6}
+        - {item: holy-symbol}
+        - {item: priests-pack}
+        gp: 9
+    - id: b
+      name: Gold
+      description: 150 GP
+      grants: {gp: 150}
+multiclass:
+  weapon_proficiencies: [martial]
+  armor_training: [light, medium, shield]
+features:
+  '1':
+    spellcasting: {list: paladin, ability: cha, progression: half}
+    traits:
+    - name: Lay On Hands
+      text: 'Bonus Action: touch a creature and restore Hit Points from a pool of 5 × your Paladin level
+        (5 at level 1), or spend 5 from the pool to remove the Poisoned condition. The pool refills on
+        a Long Rest.'
+    - name: Spellcasting
+      text: Charisma is your spellcasting ability. You can use a Holy Symbol as a Spellcasting Focus.
+        After a Long Rest you can replace one prepared spell.
+    - name: Weapon Mastery
+      text: Use the mastery properties of two kinds of weapons you're proficient with. You can change
+        them after a Long Rest.
+    choices:
+    - id: prepared
+      label: Paladin prepared spells
+      kind: spell
+      count: 2
+      spell_list: paladin
+      hint: Heroism and Searing Smite are recommended. You can change these after a Long Rest.
+      scaling:
+        count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
+        max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      rest_change: long
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 2
+      hint: Longswords and Javelins come with your starting equipment.
+      rest_change: long
+    resources:
+    - id: lay-on-hands
+      name: Lay On Hands (Hit Point pool)
+      max: {per_class_level: 5}
+      recharge: long
+  '2':
+    traits:
+    - name: Fighting Style
+      text: |-
+        You gain a Fighting Style feat of your choice (see "Feats" for feats). Instead of choosing one of those feats, you can choose the option below.
+
+        **Blessed Warrior.** You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). _Guidance_ and _Sacred Flame_ are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.
+    - name: Paladin's Smite
+      text: You always have the _Divine Smite_ spell prepared. In addition, you can cast it without expending
+        a spell slot, but you must finish a Long Rest before you can cast it in this way again.
+    spells: [divine-smite]
+    choices:
+    - id: fighting_style
+      label: Fighting Style
+      kind: option
+      options:
+      - id: feat
+        name: Fighting Style feat
+        description: A Fighting Style feat of your choice.
+        grants:
+          choices:
+          - {id: style, label: Fighting Style feat, kind: feat, category: fighting_style}
+      - id: blessed-warrior
+        name: Blessed Warrior
+        description: Two Cleric cantrips; Charisma is your spellcasting ability for them.
+        grants:
+          choices:
+          - id: cantrips
+            label: Blessed Warrior cantrips
+            kind: spell
+            count: 2
+            spell_level: 0
+            spell_list: cleric
+            hint: Guidance and Sacred Flame are recommended.
+            tag: paladin-blessed-warrior
+            swap: class_level
+    resources:
+    - id: paladins-smite
+      name: Paladin's Smite (free Divine Smite)
+      max: {value: 1}
+      recharge: long
+  '3':
+    traits:
+    - name: Channel Divinity
+      text: |-
+        You can channel divine energy directly from the Outer Planes, using it to fuel magical effects. You start with one such effect: Divine Sense, which is described below. Other Paladin features give additional Channel Divinity effect options. Each time you use this class's Channel Divinity, you choose which effect from this class to create.
+
+        You can use this class's Channel Divinity twice. You regain one of its expended uses when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest. You gain an additional use when you reach Paladin level 11.
+
+        > ### Breaking Your Oath
+        >
+        > A Paladin tries to hold to the highest standards of conduct, but even the most dedicated are fallible. Sometimes a Paladin transgresses their oath.
+        >
+        > A Paladin who has broken a vow typically seeks absolution, spending an all-night vigil as a sign of penitence or undertaking a fast. After a rite of forgiveness, the Paladin starts fresh.
+        >
+        > If your Paladin unrepentantly violates their oath, talk to your GM. Your Paladin should probably take a more appropriate subclass or even abandon the class and adopt another one.
+        > If a Channel Divinity effect requires a saving throw, the DC equals the spell save DC from this class's Spellcasting feature.
+
+        _Divine Sense._ As a Bonus Action, you can open your awareness to detect Celestials, Fiends, and Undead. For the next 10 minutes or until you have the Incapacitated condition, you know the location of any creature of those types within 60 feet of yourself, and you know its creature type. Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the _Hallow_ spell.
+    - name: Paladin Subclass
+      text: You gain a Paladin subclass of your choice. The Oath of Devotion subclass is detailed after
+        this class's description. A subclass is a specialization that grants you features at certain Paladin
+        levels. For the rest of your career, you gain each of your subclass's features that are of your
+        Paladin level or lower.
+    choices:
+    - {id: subclass, label: Paladin subclass, kind: subclass}
+    resources:
+    - id: channel-divinity
+      name: Channel Divinity
+      max: {progression: Channel Divinity}
+      recharge: long
+      short_rest_regain: 1
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '5':
+    traits:
+    - name: Extra Attack
+      text: You can attack twice instead of once whenever you take the Attack action on your turn.
+    - name: Faithful Steed
+      text: |-
+        You can call on the aid of an otherworldly steed. You always have the _Find Steed_ spell prepared.
+
+        You can also cast the spell once without expending a spell slot, and you regain the ability to do so when you finish a Long Rest.
+    effects:
+    - {target: attacks, op: max, value: 2}
+    spells: [find-steed]
+  '6':
+    traits:
+    - name: Aura of Protection
+      text: |-
+        You radiate a protective, unseeable aura in a 10-foot Emanation that originates from you. The aura is inactive while you have the Incapacitated condition.
+
+        You and your allies in the aura gain a bonus to saving throws equal to your Charisma modifier (minimum bonus of +1).
+
+        If another Paladin is present, a creature can benefit from only one Aura of Protection at a time; the creature chooses which aura while in them.
+    effects:
+    - {target: saves, value: cha, min: 1}
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '9':
+    traits:
+    - name: Abjure Foes
+      text: 'As a Magic action, you can expend one use of this class''s Channel Divinity to overwhelm
+        foes with awe. As you present your Holy Symbol or weapon, you can target a number of creatures
+        equal to your Charisma modifier (minimum of one creature) that you can see within 60 feet of yourself.
+        Each target must succeed on a Wisdom saving throw or have the Frightened condition for 1 minute
+        or until it takes any damage. While Frightened in this way, a target can do only one of the following
+        on its turns: move, take an action, or take a Bonus Action.'
+  '10':
+    traits:
+    - name: Aura of Courage
+      text: You and your allies have Immunity to the Frightened condition while in your Aura of Protection.
+        If a Frightened ally enters the aura, that condition has no effect on that ally while there.
+  '11':
+    traits:
+    - name: Radiant Strikes
+      text: Your strikes now carry supernatural power. When you hit a target with an attack roll using
+        a Melee weapon or an Unarmed Strike, the target takes an extra 1d8 Radiant damage.
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '14':
+    traits:
+    - name: Restoring Touch
+      text: 'When you use Lay On Hands on a creature, you can also remove one or more of the following
+        conditions from the creature: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. You
+        must expend 5 Hit Points from the healing pool of Lay On Hands for each of these conditions you
+        remove; those points don''t also restore Hit Points to the creature.'
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '18':
+    traits:
+    - name: Aura Expansion
+      text: Your Aura of Protection is now a 30-foot Emanation.
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of Truesight is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.

@@ -1,0 +1,399 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Sorcerer". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from docs/srd-5.2.1/classes.md; mechanics were added by hand.
+id: sorcerer
+name: Sorcerer
+description: A spellcaster whose magic is an innate gift that flows from within.
+primary_abilities: [cha]
+hit_die: 6
+complexity: High
+standard_array:
+  str: 10
+  dex: 13
+  con: 14
+  int: 8
+  wis: 12
+  cha: 15
+subclass_level: 3
+progression:
+  Sorcery Points: [—, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+grants:
+  saving_throws: [con, cha]
+  weapon_proficiencies: [simple]
+  choices:
+  - id: skills
+    label: Sorcerer skills
+    kind: skill
+    count: 2
+    allowed: [arcana, deception, insight, intimidation, persuasion, religion]
+  - id: equipment
+    label: Sorcerer equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Package
+      description: Spear, 2 Daggers, Arcane Focus (crystal), Dungeoneer's Pack, 28 GP
+      grants:
+        items:
+        - {item: spear}
+        - {item: dagger, qty: 2}
+        - {item: arcane-focus-crystal}
+        - {item: dungeoneers-pack}
+        gp: 28
+    - id: b
+      name: Gold
+      description: 50 GP
+      grants: {gp: 50}
+multiclass: {}
+features:
+  '1':
+    spellcasting: {list: sorcerer, ability: cha, progression: full}
+    traits:
+    - name: Innate Sorcery
+      text: 'Bonus Action, twice per Long Rest: for 1 minute, your Sorcerer spell save DC rises by 1 and
+        you have Advantage on attack rolls of Sorcerer spells you cast.'
+    - name: Spellcasting
+      text: Charisma is your spellcasting ability. You can use an Arcane Focus as a Spellcasting Focus.
+        When you gain a Sorcerer level you can replace one cantrip and one prepared spell.
+    choices:
+    - id: cantrips
+      label: Sorcerer cantrips
+      kind: spell
+      count: 4
+      spell_level: 0
+      spell_list: sorcerer
+      hint: Light, Prestidigitation, Shocking Grasp, and Sorcerous Burst are recommended.
+      tag: sorcerer-cantrips
+      swap: class_level
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      spell_level: 1
+      spell_list: sorcerer
+      hint: Burning Hands and Detect Magic are recommended.
+      tag: sorcerer-prepared
+      swap: class_level
+    resources:
+    - id: innate-sorcery
+      name: Innate Sorcery
+      max: {value: 2}
+      recharge: long
+  '2':
+    traits:
+    - name: Font of Magic
+      text: |-
+        You can tap into the wellspring of magic within yourself. This wellspring is represented by Sorcery Points, which allow you to create a variety of magical effects.
+
+        You have 2 Sorcery Points, and you gain more as you reach higher levels, as shown in the Sorcery Points column of the Sorcerer Features table. You can't have more Sorcery Points than the number shown in the table for your level. You regain all expended Sorcery Points when you finish a Long Rest.
+
+        You can use your Sorcery Points to fuel the options below, along with other features, such as Metamagic, that use those points.
+
+        _Converting Spell Slots to Sorcery Points._ You can expend a spell slot to gain a number of Sorcery Points equal to the slot's level (no action required).
+
+        _Creating Spell Slots._ As a Bonus Action, you can transform unexpended Sorcery Points into one spell slot. The Creating Spell Slots table shows the cost of creating a spell slot of a given level, and it lists the minimum Sorcerer level you must be to create a slot. You can create a spell slot no higher than level 5.
+
+        Any spell slot you create with this feature vanishes when you finish a Long Rest.
+
+        **Creating Spell Slots**
+
+        <table>
+          <thead>
+            <tr>
+              <th>Spell Slot Level</th>
+              <th>Sorcery Point Cost</th>
+              <th>Min. Sorcerer Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>2</td>
+              <td>2</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>3</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>5</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>6</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>7</td>
+              <td>9</td>
+            </tr>
+          </tbody>
+        </table>
+    - name: Metamagic
+      text: |-
+        Because your magic flows from within, you can alter your spells to suit your needs; you gain two Metamagic options of your choice from "Metamagic Options" later in this class's description. You use the chosen options to temporarily modify spells you cast. To use an option, you must spend the number of Sorcery Points that it costs.
+
+        You can use only one Metamagic option on a spell when you cast it unless otherwise noted in one of those options.
+
+        Whenever you gain a Sorcerer level, you can replace one of your Metamagic options with one you don't know. You gain two more options at Sorcerer level 10 and two more at Sorcerer level 17.
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      max_spell_level: 1
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+    - id: metamagic
+      label: Metamagic options
+      kind: feature
+      count: 2
+      category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
+    resources:
+    - id: sorcery-points
+      name: Sorcery Points
+      max: {progression: Sorcery Points}
+      recharge: long
+  '3':
+    traits:
+    - name: Sorcerer Subclass
+      text: You gain a Sorcerer subclass of your choice. The Draconic Sorcery subclass is detailed after
+        this class's description. A subclass is a specialization that grants you features at certain Sorcerer
+        levels. For the rest of your career, you gain each of your subclass's features that are of your
+        Sorcerer level or lower.
+    choices:
+    - {id: subclass, label: Sorcerer subclass, kind: subclass}
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      max_spell_level: 2
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+    - id: cantrips
+      label: Sorcerer cantrips
+      kind: spell
+      count: 1
+      spell_level: 0
+      spell_list: sorcerer
+      tag: sorcerer-cantrips
+      swap: class_level
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 2
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '5':
+    traits:
+    - name: Sorcerous Restoration
+      text: When you finish a Short Rest, you can regain expended Sorcery Points, but no more than a number
+        equal to half your Sorcerer level (round down). Once you use this feature, you can't do so again
+        until you finish a Long Rest.
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      max_spell_level: 3
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '6':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 3
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '7':
+    traits:
+    - name: Sorcery Incarnate
+      text: |-
+        If you have no uses of Innate Sorcery left, you can use it if you spend 2 Sorcery Points when you take the Bonus Action to activate it.
+
+        In addition, while your Innate Sorcery feature is active, you can use up to two of your Metamagic options on each spell you cast.
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 4
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 4
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '9':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 2
+      max_spell_level: 5
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '10':
+    choices:
+    - id: cantrips
+      label: Sorcerer cantrips
+      kind: spell
+      count: 1
+      spell_level: 0
+      spell_list: sorcerer
+      tag: sorcerer-cantrips
+      swap: class_level
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 5
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+    - id: metamagic
+      label: Metamagic options
+      kind: feature
+      count: 2
+      category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
+  '11':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 6
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '13':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 7
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '15':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 8
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '17':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 9
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+    - id: metamagic
+      label: Metamagic options
+      kind: feature
+      count: 2
+      category: metamagic
+      tag: sorcerer-metamagic
+      swap: class_level
+  '18':
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 9
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of Dimensional Travel is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 9
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level
+  '20':
+    traits:
+    - name: Arcane Apotheosis
+      text: While your Innate Sorcery feature is active, you can use one Metamagic option on each of your
+        turns without spending Sorcery Points on it.
+    choices:
+    - id: prepared
+      label: Sorcerer prepared spells
+      kind: spell
+      count: 1
+      max_spell_level: 9
+      spell_list: sorcerer
+      tag: sorcerer-prepared
+      swap: class_level

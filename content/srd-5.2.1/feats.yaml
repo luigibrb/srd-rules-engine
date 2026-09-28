@@ -1,0 +1,252 @@
+# yaml-language-server: $schema=../../schemas/feats.schema.json
+# SRD 5.2.1 — "Feats": Origin, General, Fighting Style, and Epic Boon feats. Descriptions summarized.
+- id: alert
+  name: Alert
+  category: origin
+  description: 'Initiative Proficiency: add your Proficiency Bonus to Initiative. Initiative Swap: after
+    rolling Initiative, swap it with a willing ally''s (neither can be Incapacitated).'
+  grants:
+    effects:
+    - {target: initiative, value: prof}
+- id: magic-initiate
+  name: Magic Initiate
+  category: origin
+  repeatable: true
+  repeat_requires_different: spell_list
+  description: Learn two cantrips and one level 1 spell from the Cleric, Druid, or Wizard list. The level
+    1 spell is always prepared and you can cast it once per Long Rest without a slot (or with your slots).
+    Repeatable with a different list.
+  grants:
+    spellcasting: {list: $spell_list, ability: $spellcasting_ability}
+    choices:
+    - id: spell_list
+      label: Magic Initiate spell list
+      kind: option
+      step: features
+      options:
+      - {id: cleric, name: Cleric}
+      - {id: druid, name: Druid}
+      - {id: wizard, name: Wizard}
+    - id: spellcasting_ability
+      label: Magic Initiate spellcasting ability
+      kind: ability
+      step: features
+      allowed: [int, wis, cha]
+    - id: cantrips
+      label: Magic Initiate cantrips
+      kind: spell
+      count: 2
+      spell_level: 0
+      spell_list: $spell_list
+      tag: magic-initiate
+      swap: any_level
+      same_level: true
+    - id: spell
+      label: Magic Initiate level 1 spell
+      kind: spell
+      spell_level: 1
+      spell_list: $spell_list
+      always_prepared: true
+      tag: magic-initiate
+      swap: any_level
+      same_level: true
+    resources:
+    - id: free-cast
+      name: Magic Initiate (free level 1 spell)
+      max: {value: 1}
+      recharge: long
+- id: savage-attacker
+  name: Savage Attacker
+  category: origin
+  description: Once per turn when you hit a target with a weapon, roll the weapon's damage dice twice
+    and use either roll.
+- id: skilled
+  name: Skilled
+  category: origin
+  repeatable: true
+  description: Gain proficiency in any combination of three skills or tools of your choice.
+  grants:
+    choices:
+    - {id: proficiencies, label: Skilled proficiencies, kind: skill_or_tool, count: 3}
+- id: ability-score-improvement
+  name: Ability Score Improvement
+  category: general
+  repeatable: true
+  prerequisite: {level: 4}
+  description: Increase one ability score by 2, or two ability scores by 1 (maximum 20).
+  grants:
+    choices:
+    - id: increase
+      label: Ability Score Improvement
+      kind: ability_increase
+      count: 2
+      hint: Pick one ability twice for +2, or two abilities for +1 each.
+- id: grappler
+  name: Grappler
+  category: general
+  prerequisite:
+    level: 4
+    abilities:
+      any_of: [str, dex]
+      min: 13
+  description: Str or Dex +1; Punch and Grab, Advantage against creatures you Grapple, move grappled creatures
+    freely.
+  grants:
+    choices:
+    - id: increase
+      label: 'Grappler: +1 Strength or Dexterity'
+      kind: ability_increase
+      allowed: [str, dex]
+- id: archery
+  name: Archery
+  category: fighting_style
+  description: +2 bonus to attack rolls you make with Ranged weapons.
+  grants:
+    effects:
+    - {target: attack.ranged, value: 2}
+  prerequisite: {trait: Fighting Style}
+- id: defense
+  name: Defense
+  category: fighting_style
+  description: While wearing Light, Medium, or Heavy armor, +1 bonus to Armor Class.
+  grants:
+    effects:
+    - {target: ac, value: 1, when: wearing_armor}
+  prerequisite: {trait: Fighting Style}
+- id: great-weapon-fighting
+  name: Great Weapon Fighting
+  category: fighting_style
+  description: When you roll damage for a Melee attack with a weapon held in two hands (Two-Handed or
+    Versatile), treat any 1 or 2 on a damage die as a 3.
+  prerequisite: {trait: Fighting Style}
+- id: two-weapon-fighting
+  name: Two-Weapon Fighting
+  category: fighting_style
+  description: When you make the extra attack from the Light property, add your ability modifier to its
+    damage if you aren't already.
+  prerequisite: {trait: Fighting Style}
+- id: boon-of-combat-prowess
+  name: Boon of Combat Prowess
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: 'Peerless Aim: turn a missed attack into a hit, once per turn.'
+  grants:
+    choices:
+    - {id: increase, label: 'Boon of Combat Prowess: +1 ability', kind: ability_increase, max_score: 30}
+    traits:
+    - name: Boon of Combat Prowess
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase one ability score of your choice by 1, to a maximum of 30.
+
+        _Peerless Aim._ When you miss with an attack roll, you can hit instead. Once you use this benefit, you can't use it again until the start of your next turn.
+- id: boon-of-dimensional-travel
+  name: Boon of Dimensional Travel
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: 'Blink Steps: teleport 30 ft after the Attack or Magic action.'
+  grants:
+    choices:
+    - {id: increase, label: 'Boon of Dimensional Travel: +1 ability', kind: ability_increase, max_score: 30}
+    traits:
+    - name: Boon of Dimensional Travel
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase one ability score of your choice by 1, to a maximum of 30.
+
+        _Blink Steps._ Immediately after you take the Attack action or the Magic action, you can teleport up to 30 feet to an unoccupied space you can see.
+- id: boon-of-fate
+  name: Boon of Fate
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: 'Improve Fate: add or subtract 2d4 to a D20 Test within 60 ft.'
+  grants:
+    choices:
+    - {id: increase, label: 'Boon of Fate: +1 ability', kind: ability_increase, max_score: 30}
+    traits:
+    - name: Boon of Fate
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase one ability score of your choice by 1, to a maximum of 30.
+
+        _Improve Fate._ When you or another creature within 60 feet of you succeeds on or fails a D20 Test, you can roll 2d4 and apply the total rolled as a bonus or penalty to the d20 roll. Once you use this benefit, you can't use it again until you roll Initiative or finish a Short or Long Rest.
+- id: boon-of-irresistible-offense
+  name: Boon of Irresistible Offense
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: Your Bludgeoning, Piercing, and Slashing damage ignores Resistance; extra damage on a 20.
+  grants:
+    choices:
+    - id: increase
+      label: 'Boon of Irresistible Offense: +1 ability'
+      kind: ability_increase
+      max_score: 30
+      allowed: [str, dex]
+    traits:
+    - name: Boon of Irresistible Offense
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase your Strength or Dexterity score by 1, to a maximum of 30.
+
+        _Overcome Defenses._ The Bludgeoning, Piercing, and Slashing damage you deal always ignores Resistance.
+
+        _Overwhelming Strike._ When you roll a 20 on the d20 for an attack roll, you can deal extra damage to the target equal to the ability score increased by this feat. The extra damage's type is the same as the attack's type.
+- id: boon-of-spell-recall
+  name: Boon of Spell Recall
+  category: epic_boon
+  prerequisite: {level: 19, spellcasting: true}
+  description: 'Free Casting: level 1–4 slots may not be expended (1d4 roll).'
+  grants:
+    choices:
+    - id: increase
+      label: 'Boon of Spell Recall: +1 ability'
+      kind: ability_increase
+      max_score: 30
+      allowed: [int, wis, cha]
+    traits:
+    - name: Boon of Spell Recall
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 30.
+
+        _Free Casting._ Whenever you cast a spell with a level 1–4 spell slot, roll 1d4. If the number you roll is the same as the slot's level, the slot isn't expended.
+- id: boon-of-the-night-spirit
+  name: Boon of the Night Spirit
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: Invisible as a Bonus Action and resistant to most damage in Dim Light or Darkness.
+  grants:
+    choices:
+    - {id: increase, label: 'Boon of the Night Spirit: +1 ability', kind: ability_increase, max_score: 30}
+    traits:
+    - name: Boon of the Night Spirit
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase one ability score of your choice by 1, to a maximum of 30.
+
+        _Merge with Shadows._ While within Dim Light or Darkness, you can give yourself the Invisible condition as a Bonus Action. The condition ends on you immediately after you take an action, a Bonus Action, or a Reaction.
+
+        _Shadowy Form._ While within Dim Light or Darkness, you have Resistance to all damage except Psychic and Radiant.
+- id: boon-of-truesight
+  name: Boon of Truesight
+  category: epic_boon
+  prerequisite: {level: 19}
+  description: Truesight 60 ft.
+  grants:
+    choices:
+    - {id: increase, label: 'Boon of Truesight: +1 ability', kind: ability_increase, max_score: 30}
+    traits:
+    - name: Boon of Truesight
+      text: |-
+        You gain the following benefits.
+
+        _Ability Score Increase._ Increase one ability score of your choice by 1, to a maximum of 30.
+
+        _Truesight._ You have Truesight with a range of 60 feet.
+    effects: []

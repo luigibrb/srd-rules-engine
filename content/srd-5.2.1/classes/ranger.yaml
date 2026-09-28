@@ -1,0 +1,240 @@
+# yaml-language-server: $schema=../../../schemas/classes.schema.json
+# SRD 5.2.1 — "Classes" > "Ranger". Level 1 traits are summarized; level 2+ feature text is
+# the SRD's, generated from docs/srd-5.2.1/classes.md; mechanics were added by hand.
+id: ranger
+name: Ranger
+description: A wandering hunter and scout who blends martial skill with nature magic.
+primary_abilities: [dex, wis]
+primary_mode: all
+hit_die: 10
+complexity: Average
+standard_array:
+  str: 12
+  dex: 15
+  con: 13
+  int: 8
+  wis: 14
+  cha: 10
+subclass_level: 3
+progression:
+  Favored Enemy: [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6]
+grants:
+  saving_throws: [str, dex]
+  weapon_proficiencies: [simple, martial]
+  armor_training: [light, medium, shield]
+  choices:
+  - id: skills
+    label: Ranger skills
+    kind: skill
+    count: 3
+    allowed: [animal-handling, athletics, insight, investigation, nature, perception, stealth, survival]
+  - id: equipment
+    label: Ranger equipment
+    kind: option
+    step: equipment
+    options:
+    - id: a
+      name: Package
+      description: Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus
+        (sprig of mistletoe), Explorer's Pack, 7 GP
+      grants:
+        items:
+        - {item: studded-leather-armor}
+        - {item: scimitar}
+        - {item: shortsword}
+        - {item: longbow}
+        - {item: arrow, qty: 20}
+        - {item: quiver}
+        - {item: druidic-focus-mistletoe}
+        - {item: explorers-pack}
+        gp: 7
+    - id: b
+      name: Gold
+      description: 150 GP
+      grants: {gp: 150}
+multiclass:
+  weapon_proficiencies: [martial]
+  armor_training: [light, medium, shield]
+  choices:
+  - id: skills
+    label: Ranger multiclass skill
+    kind: skill
+    allowed: [animal-handling, athletics, insight, investigation, nature, perception, stealth, survival]
+features:
+  '1':
+    spells: [hunters-mark]
+    spellcasting: {list: ranger, ability: wis, progression: half}
+    traits:
+    - name: Favored Enemy
+      text: You always have Hunter's Mark prepared, and you can cast it twice without a spell slot; regain
+        both uses on a Long Rest.
+    - name: Spellcasting
+      text: Wisdom is your spellcasting ability. You can use a Druidic Focus as a Spellcasting Focus.
+        After a Long Rest you can replace one prepared spell.
+    - name: Weapon Mastery
+      text: Use the mastery properties of two kinds of weapons you're proficient with. You can change
+        them after a Long Rest.
+    choices:
+    - id: prepared
+      label: Ranger prepared spells
+      kind: spell
+      count: 2
+      spell_list: ranger
+      hint: Cure Wounds and Ensnaring Strike are recommended. You can change these after a Long Rest.
+      scaling:
+        count: [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15]
+        max_spell_level: [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5]
+      rest_change: long
+    - id: weapon_mastery
+      label: Weapon Mastery
+      kind: weapon_mastery
+      count: 2
+      hint: Longbows and Shortswords are a classic pair.
+      rest_change: long
+    resources:
+    - id: favored-enemy
+      name: Favored Enemy (free Hunter's Mark)
+      max: {progression: Favored Enemy}
+      recharge: long
+  '2':
+    traits:
+    - name: Deft Explorer
+      text: |-
+        Thanks to your travels, you gain the following benefits.
+
+        _Expertise._ Choose one of your skill proficiencies with which you lack Expertise. You gain Expertise in that skill.
+
+        _Languages._ You know two languages of your choice from the language tables in "Character Creation."
+    - name: Fighting Style
+      text: |-
+        You gain a Fighting Style feat of your choice (see "Feats"). Instead of choosing one of those feats, you can choose the option below.
+
+        _Druidic Warrior._ You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). _Guidance_ and _Starry Wisp_ are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.
+    choices:
+    - {id: expertise, label: Deft Explorer Expertise, kind: expertise, count: 1}
+    - {id: languages, label: Deft Explorer languages, kind: language, count: 2}
+    - id: fighting_style
+      label: Fighting Style
+      kind: option
+      options:
+      - id: feat
+        name: Fighting Style feat
+        description: A Fighting Style feat of your choice.
+        grants:
+          choices:
+          - {id: style, label: Fighting Style feat, kind: feat, category: fighting_style}
+      - id: druidic-warrior
+        name: Druidic Warrior
+        description: Two Druid cantrips; Wisdom is your spellcasting ability for them.
+        grants:
+          choices:
+          - id: cantrips
+            label: Druidic Warrior cantrips
+            kind: spell
+            count: 2
+            spell_level: 0
+            spell_list: druid
+            hint: Guidance and Starry Wisp are recommended.
+            tag: ranger-druidic-warrior
+            swap: class_level
+  '3':
+    traits:
+    - name: Ranger Subclass
+      text: You gain a Ranger subclass of your choice. The Hunter subclass is detailed after this class's
+        description. A subclass is a specialization that grants you features at certain Ranger levels.
+        For the rest of your career, you gain each of your subclass's features that are of your Ranger
+        level or lower.
+    choices:
+    - {id: subclass, label: Ranger subclass, kind: subclass}
+  '4':
+    traits:
+    - name: Ability Score Improvement
+      text: You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for
+        which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '5':
+    traits:
+    - name: Extra Attack
+      text: You can attack twice instead of once whenever you take the Attack action on your turn.
+    effects:
+    - {target: attacks, op: max, value: 2}
+  '6':
+    traits:
+    - name: Roving
+      text: Your Speed increases by 10 feet while you aren't wearing Heavy armor. You also have a Climb
+        Speed and a Swim Speed equal to your Speed.
+    effects:
+    - {target: speed, value: 10, when: not_wearing_heavy_armor}
+  '8':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '9':
+    traits:
+    - name: Expertise
+      text: Choose two of your skill proficiencies with which you lack Expertise. You gain Expertise in
+        those skills.
+    choices:
+    - {id: expertise, label: Ranger Expertise, kind: expertise, count: 2}
+  '10':
+    traits:
+    - name: Tireless
+      text: |-
+        Primal forces now help fuel you on your journeys, granting you the following benefits.
+
+        _Temporary Hit Points._ As a Magic action, you can give yourself a number of Temporary Hit Points equal to 1d8 plus your Wisdom modifier (minimum of 1). You can use this action a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
+
+        _Decrease Exhaustion._ Whenever you finish a Short Rest, your Exhaustion level, if any, decreases by 1.
+  '12':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '13':
+    traits:
+    - name: Relentless Hunter
+      text: Taking damage can't break your Concentration on _Hunter's Mark_.
+  '14':
+    traits:
+    - name: Nature's Veil
+      text: You invoke spirits of nature to magically hide yourself. As a Bonus Action, you can give yourself
+        the Invisible condition until the end of your next turn. You can use this feature a number of
+        times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you
+        finish a Long Rest.
+  '16':
+    choices:
+    - id: feat
+      label: Ability Score Improvement or feat
+      kind: feat
+      hint: The Ability Score Improvement feat, or another feat you qualify for.
+  '17':
+    traits:
+    - name: Precise Hunter
+      text: You have Advantage on attack rolls against the creature currently marked by your _Hunter's
+        Mark_.
+  '18':
+    traits:
+    - name: Feral Senses
+      text: Your connection to the forces of nature grants you Blindsight with a range of 30 feet.
+  '19':
+    traits:
+    - name: Epic Boon
+      text: You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify.
+        Boon of Dimensional Travel is recommended.
+    choices:
+    - id: feat
+      label: Epic Boon or feat
+      kind: feat
+      category: [epic_boon, general, origin, fighting_style]
+      hint: An Epic Boon feat, or another feat you qualify for.
+  '20':
+    traits:
+    - name: Foe Slayer
+      text: The damage die of your _Hunter's Mark_ is a d10 rather than a d6.
