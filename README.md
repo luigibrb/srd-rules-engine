@@ -173,9 +173,11 @@ attacks with `makeAttack(dragon, "Rend", target)` and breathes with `useSaveActi
 "Fire Breath", targets)`.
 
 An `Encounter` runs the fight: `applyEncounterAction(encounter, { type: "roll_initiative" },
-{ catalog, characters })`, then `start`, `next_turn`, `use`, `move`, and `effects` to apply what
-`makeAttack` or `castSpell` returned to a monster or a character (`encounterCombatant(encounter,
-id, ctx)` gives the combatant to attack with).
+{ catalog, characters })`, then `start` and `next_turn`, with `attack`, `cast` and `save_action`
+resolving and applying in one step (the action economy, riders once per turn, recharges,
+Concentration saves on damage, a Concentration spell's conditions ending with it), `use`, `move`,
+`dash`, and `effects` for anything applied by hand, optionally with a duration
+(`{ rounds: 10 }`, `{ until: { at: "end" } }`).
 
 `castSpell(caster, catalog.spells.fireball, targets, { slot_level: 5 })` casts a catalog spell
 whose `mechanics` are modeled: attack or save (half damage on a success), upcasting, Cantrip
@@ -326,7 +328,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks and saving throw effects (breath weapons) usable in combat; other traits as text |
-| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, monster HP and conditions, effects of attacks and spells routed to monsters and characters |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Extra Attack and Multiattack, Opportunity Attacks, casting in combat, recharges, once-per-turn riders, timed conditions, Concentration saves and Concentration effects, Rage's duration |
 | Effects | Numeric effects, features you switch on in play (Rage: Resistance, Rage Damage, Strength Advantage, no spells), damage riders from class tables (Sneak Attack, Divine Strike), Advantage on saves |
 | Not yet | Shopping with starting gold, most other class features' dice and triggers (shown as text), most magic items' active powers, turns and rounds |
 

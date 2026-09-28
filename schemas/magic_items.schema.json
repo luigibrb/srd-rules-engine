@@ -1229,6 +1229,10 @@
               "no_spells": {
                 "default": false,
                 "type": "boolean"
+              },
+              "extends_each_turn": {
+                "default": false,
+                "type": "boolean"
               }
             },
             "required": [

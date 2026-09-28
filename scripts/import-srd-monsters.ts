@@ -359,6 +359,20 @@ function parseBlock(name: string, group: string | null, lines: string[]): Record
       sections.set(current, []);
     } else if (current) sections.get(current)?.push(line);
   }
+  // Multiattack: the attacks it makes, summed from its first sentence ("makes two Claw attacks
+  // and one Bite attack": 3); `null` when it isn't a plain count (Hydra: one per head).
+  const multiattack = sections
+    .get("Actions")
+    ?.join("\n")
+    .match(/\*\*_Multiattack\._\*\* ([^.]*)\./)?.[1];
+  if (multiattack) {
+    const words = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 } as Record<string, number>;
+    const counts = [
+      ...multiattack.matchAll(/\b(one|two|three|four|five|six)\b (?:[\w'-]+ ){0,3}?attacks?\b/g),
+    ];
+    const total = counts.reduce((sum, m) => sum + (words[m[1] as string] ?? 0), 0);
+    monster.multiattack = total || null;
+  }
   for (const [section, key] of [
     ["Traits", "traits"],
     ["Actions", "actions"],

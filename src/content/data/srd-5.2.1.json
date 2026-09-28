@@ -579,7 +579,8 @@
                             "ends_on": [
                                 "incapacitated"
                             ],
-                            "no_spells": true
+                            "no_spells": true,
+                            "extends_each_turn": true
                         }
                     ],
                     "items": [],
@@ -53373,6 +53374,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -53548,6 +53550,7 @@
             "cr": "14",
             "xp": 11500,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -53720,6 +53723,7 @@
             "cr": "16",
             "xp": 15000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -53874,6 +53878,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -54055,6 +54060,7 @@
             "cr": "15",
             "xp": 13000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -54238,6 +54244,7 @@
             "cr": "14",
             "xp": 11500,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -54412,6 +54419,7 @@
             "cr": "17",
             "xp": 18000,
             "proficiency_bonus": 6,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -54597,6 +54605,7 @@
             "cr": "15",
             "xp": 13000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -54769,6 +54778,7 @@
             "cr": "17",
             "xp": 18000,
             "proficiency_bonus": 6,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -54921,6 +54931,7 @@
             "cr": "16",
             "xp": 15000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -55102,6 +55113,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Ice Walk",
@@ -55278,6 +55290,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Air Form",
@@ -55392,6 +55405,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -55494,6 +55508,7 @@
             "cr": "21",
             "xp": 33000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -55666,6 +55681,7 @@
             "cr": "23",
             "xp": 50000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -55820,6 +55836,7 @@
             "cr": "20",
             "xp": 25000,
             "proficiency_bonus": 6,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -56001,6 +56018,7 @@
             "cr": "22",
             "xp": 41000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -56191,6 +56209,7 @@
             "cr": "21",
             "xp": 33000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -56365,6 +56384,7 @@
             "cr": "24",
             "xp": 62000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -56550,6 +56570,7 @@
             "cr": "22",
             "xp": 41000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -56722,6 +56743,7 @@
             "cr": "24",
             "xp": 62000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -56874,6 +56896,7 @@
             "cr": "23",
             "xp": 50000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -57055,6 +57078,7 @@
             "cr": "20",
             "xp": 25000,
             "proficiency_bonus": 6,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Ice Walk",
@@ -57224,6 +57248,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -57318,6 +57343,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -57404,6 +57430,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -57480,6 +57507,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Tunneler",
@@ -57589,6 +57617,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -57675,6 +57704,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -57780,6 +57810,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -57876,6 +57907,7 @@
             "cr": "12",
             "xp": 8000,
             "proficiency_bonus": 4,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -57995,6 +58027,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Evasion",
@@ -58129,6 +58162,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -58209,6 +58243,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -58284,6 +58319,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -58364,6 +58400,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Fire Aura",
@@ -58461,6 +58498,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -58549,6 +58587,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -58637,6 +58676,7 @@
             "cr": "19",
             "xp": 22000,
             "proficiency_bonus": 6,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Death Throes",
@@ -58807,6 +58847,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -58905,6 +58946,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -59027,6 +59069,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Barbed Hide",
@@ -59171,6 +59214,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -59269,6 +59313,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -59352,6 +59397,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -59468,6 +59514,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 1,
             "traits": [],
             "actions": [
                 {
@@ -59607,6 +59654,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Bloodied Frenzy",
@@ -59694,6 +59742,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -59783,6 +59832,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -59913,6 +59963,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amorphous",
@@ -60021,6 +60072,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -60107,6 +60159,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -60197,6 +60250,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -60305,6 +60359,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Bloodied Fury",
@@ -60399,6 +60454,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -60529,6 +60585,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -60646,6 +60703,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -60774,6 +60832,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -60879,6 +60938,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Abduct",
@@ -61008,6 +61068,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Abduct",
@@ -61114,6 +61175,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -61226,6 +61288,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -61305,6 +61368,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Jumper",
@@ -61391,6 +61455,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -61526,6 +61591,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -61656,6 +61722,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -61805,6 +61872,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -61933,6 +62001,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 5,
             "traits": [
                 {
                     "name": "Acid Absorption",
@@ -62063,6 +62132,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Light Sensitivity",
@@ -62200,6 +62270,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -62326,6 +62397,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -62401,6 +62473,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Training",
@@ -62488,6 +62561,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -62592,6 +62666,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -62702,6 +62777,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Shielded Mind",
@@ -62826,6 +62902,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -62912,6 +62989,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -62998,6 +63076,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -63083,6 +63162,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -63182,6 +63262,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -63274,6 +63355,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -63358,6 +63440,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Agile",
@@ -63451,6 +63534,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Exalted Restoration",
@@ -63572,6 +63656,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -63659,6 +63744,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Elemental Restoration",
@@ -63816,6 +63902,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -63928,6 +64015,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -64006,6 +64094,7 @@
             "cr": "17",
             "xp": 18000,
             "proficiency_bonus": 6,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -64150,6 +64239,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -64244,6 +64334,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -64380,6 +64471,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -64498,6 +64590,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -64641,6 +64734,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Death Burst",
@@ -64762,6 +64856,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -64848,6 +64943,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Earth Glide",
@@ -64968,6 +65064,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Elemental Restoration",
@@ -65105,6 +65202,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -65210,6 +65308,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -65296,6 +65395,7 @@
             "cr": "12",
             "xp": 8400,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -65441,6 +65541,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -65596,6 +65697,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -65714,6 +65816,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Fire Aura",
@@ -65830,6 +65933,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -65954,6 +66058,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Aversion to Fire",
@@ -66080,6 +66185,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Flyby",
@@ -66173,6 +66279,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -66268,6 +66375,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -66399,6 +66507,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Flyby",
@@ -66498,6 +66607,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Ooze Cube",
@@ -66616,6 +66726,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Stench",
@@ -66756,6 +66867,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Ethereal Sight",
@@ -66903,6 +67015,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -67016,6 +67129,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -67131,6 +67245,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -67207,6 +67322,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -67282,6 +67398,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Bloodied Fury",
@@ -67366,6 +67483,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -67444,6 +67562,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 1,
             "traits": [],
             "actions": [
                 {
@@ -67551,6 +67670,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -67637,6 +67757,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -67753,6 +67874,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -67846,6 +67968,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -67930,6 +68053,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Illumination",
@@ -68017,6 +68141,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -68117,6 +68242,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -68194,6 +68320,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -68278,6 +68405,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -68365,6 +68493,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -68463,6 +68592,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Flyby",
@@ -68556,6 +68686,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -68639,6 +68770,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -68748,6 +68880,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -68842,6 +68975,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -68936,6 +69070,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -69048,6 +69183,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -69154,6 +69290,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -69240,6 +69377,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -69324,6 +69462,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Flyby",
@@ -69418,6 +69557,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -69497,6 +69637,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -69589,6 +69730,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Aberrant Ground",
@@ -69712,6 +69854,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Demonic Restoration",
@@ -69839,6 +69982,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -69949,6 +70093,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -70055,6 +70200,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -70132,6 +70278,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -70252,6 +70399,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -70337,6 +70485,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -70447,6 +70596,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -70569,6 +70719,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -70696,6 +70847,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amorphous",
@@ -70795,6 +70947,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -70917,6 +71070,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -71037,6 +71191,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -71142,6 +71297,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -71229,6 +71385,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -71312,6 +71469,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -71390,6 +71548,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -71505,6 +71664,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Celestial Restoration",
@@ -71634,6 +71794,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Draconic Origin",
@@ -71740,6 +71901,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -71834,6 +71996,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -71913,6 +72076,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -72037,6 +72201,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Demonic Restoration",
@@ -72165,6 +72330,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -72270,6 +72436,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Flyby",
@@ -72363,6 +72530,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -72453,6 +72621,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Aura of Authority",
@@ -72575,6 +72744,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -72690,6 +72860,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Telepathic Bond",
@@ -72781,6 +72952,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -72927,6 +73099,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -73020,6 +73193,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -73126,6 +73300,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -73219,6 +73394,7 @@
             "cr": "14",
             "xp": 11500,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -73367,6 +73543,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Death Burst",
@@ -73508,6 +73685,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -73623,6 +73801,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Succubus Form",
@@ -73747,6 +73926,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Air Form",
@@ -73877,6 +74057,7 @@
             "cr": "16",
             "xp": 15000,
             "proficiency_bonus": 5,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Fire Absorption",
@@ -74030,6 +74211,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -74109,6 +74291,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -74194,6 +74377,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -74316,6 +74500,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -74418,6 +74603,7 @@
             "cr": "23",
             "xp": 50000,
             "proficiency_bonus": 7,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -74612,6 +74798,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -74744,6 +74931,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Hellish Restoration",
@@ -74844,6 +75032,7 @@
             "cr": "21",
             "xp": 33000,
             "proficiency_bonus": 7,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Legendary Resistance (4/Day, or 5/Day in Lair)",
@@ -75014,6 +75203,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -75127,6 +75317,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -75214,6 +75405,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -75330,6 +75522,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Death Burst",
@@ -75454,6 +75647,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Death Burst",
@@ -75558,6 +75752,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -75662,6 +75857,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -75775,6 +75971,7 @@
             "cr": "16",
             "xp": 15000,
             "proficiency_bonus": 5,
+            "multiattack": 6,
             "traits": [
                 {
                     "name": "Demonic Restoration",
@@ -75926,6 +76123,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -76005,6 +76203,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 6,
             "traits": [],
             "actions": [
                 {
@@ -76149,6 +76348,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -76239,6 +76439,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -76375,6 +76576,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Adhesive (Object Form Only)",
@@ -76501,6 +76703,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -76609,6 +76812,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -76704,6 +76908,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Beast of Burden",
@@ -76798,6 +77003,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -76916,6 +77122,7 @@
             "cr": "15",
             "xp": 13000,
             "proficiency_bonus": 5,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -77115,6 +77322,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Demonic Restoration",
@@ -77266,6 +77474,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Coven Magic",
@@ -77395,6 +77604,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Confer Fire Resistance",
@@ -77502,6 +77712,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -77599,6 +77810,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amorphous",
@@ -77701,6 +77913,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Compression",
@@ -77799,6 +78012,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -77899,6 +78113,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Undead Fortitude",
@@ -77989,6 +78204,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Regeneration",
@@ -78127,6 +78343,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -78255,6 +78472,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Flyby",
@@ -78341,6 +78559,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -78427,6 +78646,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -78513,6 +78733,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -78597,6 +78818,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Ethereal Sight",
@@ -78716,6 +78938,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -78799,6 +79022,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -78899,6 +79123,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -79036,6 +79261,7 @@
             "cr": "20",
             "xp": 25000,
             "proficiency_bonus": 6,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Diabolical Restoration",
@@ -79217,6 +79443,7 @@
             "cr": "16",
             "xp": 15000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Divine Awareness",
@@ -79366,6 +79593,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Hold Breath",
@@ -79455,6 +79683,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -79537,6 +79766,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -79616,6 +79846,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -79742,6 +79973,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -79862,6 +80094,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -79977,6 +80210,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Flyby",
@@ -80061,6 +80295,7 @@
             "cr": "15",
             "xp": 13000,
             "proficiency_bonus": 5,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Tunneler",
@@ -80195,6 +80430,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -80314,6 +80550,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Greater Magic Resistance",
@@ -80450,6 +80687,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Agile",
@@ -80536,6 +80774,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Mimicry",
@@ -80626,6 +80865,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -80737,6 +80977,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -80831,6 +81072,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Heat Aura",
@@ -80928,6 +81170,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -81003,6 +81246,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -81081,6 +81325,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -81195,6 +81440,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -81305,6 +81551,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": 1,
             "traits": [
                 {
                     "name": "Iron Scent",
@@ -81420,6 +81667,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Running Leap",
@@ -81524,6 +81772,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Blood Frenzy",
@@ -81641,6 +81890,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Fire Aura",
@@ -81770,6 +82020,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -81873,6 +82124,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -81959,6 +82211,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -82062,6 +82315,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -82185,6 +82439,7 @@
             "cr": "0",
             "xp": 0,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Water Breathing",
@@ -82278,6 +82533,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Amorphous",
@@ -82387,6 +82643,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Lightning Absorption",
@@ -82507,6 +82764,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Bound",
@@ -82630,6 +82888,7 @@
             "cr": "0",
             "xp": 0,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [],
             "bonus_actions": [],
@@ -82698,6 +82957,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -82822,6 +83082,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -82928,6 +83189,7 @@
             "cr": "21",
             "xp": 33000,
             "proficiency_bonus": 7,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Divine Awareness",
@@ -83126,6 +83388,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Incorporeal Movement",
@@ -83230,6 +83493,7 @@
             "cr": "11",
             "xp": 7200,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Inscrutable",
@@ -83384,6 +83648,7 @@
             "cr": "17",
             "xp": 18000,
             "proficiency_bonus": 6,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Inscrutable",
@@ -83571,6 +83836,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Magic Resistance",
@@ -83671,6 +83937,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -83772,6 +84039,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Fiendish Restoration",
@@ -83899,6 +84167,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -84016,6 +84285,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -84140,6 +84410,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Blurred Form",
@@ -84270,6 +84541,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -84349,6 +84621,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -84482,6 +84755,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Immutable Form",
@@ -84625,6 +84899,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -84780,6 +85055,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 1,
             "traits": [
                 {
                     "name": "Incubus Form",
@@ -84919,6 +85195,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85022,6 +85299,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85118,6 +85396,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -85222,6 +85501,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85326,6 +85606,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85425,6 +85706,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85537,6 +85819,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Swarm",
@@ -85643,6 +85926,7 @@
             "cr": "30",
             "xp": 155000,
             "proficiency_bonus": 9,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Legendary Resistance (6/Day)",
@@ -85843,6 +86127,7 @@
             "cr": "1",
             "xp": 200,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -85926,6 +86211,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -86029,6 +86315,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -86144,6 +86431,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Siege Monster",
@@ -86261,6 +86549,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -86345,6 +86634,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Loathsome Limbs (4/Day)",
@@ -86450,6 +86740,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Regeneration",
@@ -86542,6 +86833,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -86650,6 +86942,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day)",
@@ -86803,6 +87096,7 @@
             "cr": "13",
             "xp": 10000,
             "proficiency_bonus": 5,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
@@ -87011,6 +87305,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Vampiric Connection",
@@ -87120,6 +87415,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Spider Climb",
@@ -87280,6 +87576,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -87366,6 +87663,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -87457,6 +87755,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Demonic Restoration",
@@ -87600,6 +87899,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -87683,6 +87983,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -87765,6 +88066,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -87840,6 +88142,7 @@
             "cr": "1/8",
             "xp": 25,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -87926,6 +88229,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -88051,6 +88355,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Freeze",
@@ -88173,6 +88478,7 @@
             "cr": "0",
             "xp": 10,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -88250,6 +88556,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -88382,6 +88689,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -88516,6 +88824,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -88649,6 +88958,7 @@
             "cr": "4",
             "xp": 1100,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -88789,6 +89099,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -88935,6 +89246,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Ice Walk",
@@ -89061,6 +89373,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": 2,
             "traits": [
                 {
                     "name": "Sunlight Sensitivity",
@@ -89224,6 +89537,7 @@
             "cr": "2",
             "xp": 450,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Ephemeral",
@@ -89341,6 +89655,7 @@
             "cr": "3",
             "xp": 700,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -89447,6 +89762,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Pack Tactics",
@@ -89532,6 +89848,7 @@
             "cr": "1/2",
             "xp": 100,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [],
             "actions": [
                 {
@@ -89628,6 +89945,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Incorporeal Movement",
@@ -89728,6 +90046,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 2,
             "traits": [],
             "actions": [
                 {
@@ -89846,6 +90165,7 @@
             "cr": "5",
             "xp": 1800,
             "proficiency_bonus": 3,
+            "multiattack": 4,
             "traits": [
                 {
                     "name": "Earth Glide",
@@ -89978,6 +90298,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -90101,6 +90422,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -90217,6 +90539,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -90342,6 +90665,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -90475,6 +90799,7 @@
             "cr": "7",
             "xp": 2900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -90593,6 +90918,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -90720,6 +91046,7 @@
             "cr": "8",
             "xp": 3900,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Amphibious",
@@ -90843,6 +91170,7 @@
             "cr": "10",
             "xp": 5900,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -90958,6 +91286,7 @@
             "cr": "9",
             "xp": 5000,
             "proficiency_bonus": 4,
+            "multiattack": 3,
             "traits": [],
             "actions": [
                 {
@@ -91083,6 +91412,7 @@
             "cr": "6",
             "xp": 2300,
             "proficiency_bonus": 3,
+            "multiattack": 3,
             "traits": [
                 {
                     "name": "Ice Walk",
@@ -91204,6 +91534,7 @@
             "cr": "1/4",
             "xp": 50,
             "proficiency_bonus": 2,
+            "multiattack": null,
             "traits": [
                 {
                     "name": "Undead Fortitude",

@@ -283,6 +283,19 @@
           "minimum": -9007199254740991,
           "maximum": 9007199254740991
         },
+        "multiattack": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "traits": {
           "default": [],
           "type": "array",
@@ -1775,6 +1788,19 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "multiattack": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "traits": {
             "default": [],

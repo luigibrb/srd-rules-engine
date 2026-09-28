@@ -309,3 +309,10 @@ Approved with the recommendations above:
   character states; Monster Death), `encounterCombatant`, `POST /v1/encounters/apply`. Not in
   P7a: no CLI for encounters yet; durations, Concentration saves, recharges, once-per-turn limits
   and Rage's extension are P7b.
+- **P7b (done, branch `p7b-turn-rules`):** encounter actions `attack`, `save_action`, `cast`,
+  `extend`, `end_effect`; timed and Concentration effects; Concentration saves rolled on damage;
+  recharges; once-per-turn riders; Rage's per-turn extension (`extends_each_turn`); monster
+  `multiattack`. Flagged interpretations in ARCHITECTURE.md ("Encounters"). Still open after the
+  roadmap: an encounter CLI, legendary actions and monster spellcasting (text), durations of
+  conditions from non-Concentration spells written only in their text (Color Spray), the 79
+  spells and 19 monster save effects left as text.

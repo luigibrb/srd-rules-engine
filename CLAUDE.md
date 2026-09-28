@@ -59,7 +59,9 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   and skips. `castSpell` in `rules/casting.ts`; `tests/casting.test.ts` snapshots all mechanics.
 - Encounters: `Encounter` is its own document (monsters inside, characters by key); change it only
   via `applyEncounterAction` (JSON actions, `EncounterError`); character changes come back in
-  `states` and go through `applyAction`.
+  `states` and go through `applyAction`. Turn hooks (`endTurn`/`startTurn` in
+  `services/encounter.ts`) run timed effects, Rage's extension, recharges and once-per-turn
+  resets; `sweep()` ends Concentration effects after every action.
 - Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
   0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).

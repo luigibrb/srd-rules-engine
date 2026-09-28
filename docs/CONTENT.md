@@ -156,6 +156,7 @@ toggles:
   blocked_when: [wearing_heavy_armor]   # an effect condition: can't start, and ends
   ends_on: [incapacitated]      # conditions (implied ones count) that end it
   no_spells: true               # no Concentration or spellcasting while active
+  extends_each_turn: true       # in an encounter: ends at the end of a turn it wasn't extended in
   grants:
     resistances: [bludgeoning, piercing, slashing]
     advantages: [check.str, save.str]
@@ -323,7 +324,8 @@ A stat block keeps the SRD's layout: `armor_class`, `initiative`, `hit_points` a
 only"), `abilities` and `saving_throws`, `skills`, damage `resistances`/`vulnerabilities`/
 `immunities`, `condition_immunities` (`defenses_note` for qualified entries), `senses`,
 `passive_perception`, `languages`, `cr`, `xp`, `proficiency_bonus`, and `traits`, `actions`,
-`bonus_actions`, `reactions`, `legendary_actions` (with `legendary_text`). Each action has its
+`bonus_actions`, `reactions`, `legendary_actions` (with `legendary_text`), and `multiattack`
+(how many attacks its Multiattack makes). Each action has its
 `text`, a `recharge` (`5–6`), and, when combat can resolve it:
 
 ```yaml

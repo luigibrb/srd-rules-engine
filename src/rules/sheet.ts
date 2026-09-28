@@ -153,6 +153,8 @@ export interface ToggleLine {
   readonly blocked: string | null;
   readonly ends_on: readonly string[];
   readonly no_spells: boolean;
+  /** In an encounter: ends at the end of a turn it wasn't extended in (Rage). */
+  readonly extends_each_turn: boolean;
 }
 
 export interface PlayContext {
@@ -640,6 +642,7 @@ export function computeSheet(
         blocked: armorBlock ?? conditionBlock ?? null,
         ends_on: toggle.ends_on,
         no_spells: toggle.no_spells,
+        extends_each_turn: toggle.extends_each_turn,
       };
     }),
     cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),

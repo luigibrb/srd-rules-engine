@@ -237,9 +237,32 @@ once until the start of your next turn; nothing while Incapacitated; movement up
 Points (SRD "Monster Death") and its turns are skipped, as are a dead character's; a character at
 0 HP is reminded to make a Death Saving Throw.
 
+Actions that resolve and apply in one step: `attack` (the first attack of a turn uses the
+action; Extra Attack or a monster's Multiattack allow more; `reaction: true` is an Opportunity
+Attack), `save_action` (a monster's saving throw effect; one with a Recharge is `expended` and
+rolled for on a d6 at the start of the monster's turns) and `cast` (the casting time decides the
+action, Bonus Action or reaction; the caster must have the spell; slot and Concentration go to
+the caster's state). Once-per-turn riders (Sneak Attack) are enforced: each turn, anyone's,
+resets them.
+
+**Timed effects** (`encounter.effects`) are conditions with a duration or tied to Concentration:
+`ends: { at: start|end, of, count }` counts that combatant's turn starts or ends ("until the end
+of its next turn", N rounds); one set during `of`'s own turn doesn't count that turn's end. A
+Concentration effect ends when its source stops concentrating on it: a failed Concentration save
+(rolled automatically when a concentrating combatant takes damage, DC 10 or half the damage),
+0 HP, Incapacitated, or a new Concentration spell. `cast` records a Concentration spell's
+conditions this way, for its duration ("up to 1 minute": 10 rounds). The condition goes when its
+last effect ends. **Toggles that extend each turn** (Rage) end at the end of a turn in which they
+weren't extended (an attack roll, a save forced, a Bonus Action, or `extend`), except the turn
+they started.
+
 Interpretations (flagged): ties go to the higher Initiative bonus, then the order combatants
-joined (the SRD leaves ties to the GM and players: `set_order`); Dash uses the walking Speed.
-Durations, Concentration saves, recharges and once-per-turn limits come in P7b.
+joined (the SRD leaves ties to the GM and players: `set_order`); Dash uses the walking Speed; a
+monster's Multiattack is a number of attacks for the action (summed from its text; the Hydra's
+is `null`), without checking which attacks; "once per turn" resets on every creature's turn
+(Divine Strike's "once on each of your turns" is treated the same); a monster's spell slots
+aren't tracked; ending the fight keeps active effects (they stop counting down); Rage's
+10-minute cap isn't enforced.
 
 ### Casting spells
 

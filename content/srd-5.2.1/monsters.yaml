@@ -45,6 +45,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The aboleth can breathe air and water.
@@ -174,6 +175,7 @@
   cr: "14"
   xp: 11500
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -292,6 +294,7 @@
   cr: "16"
   xp: 15000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -398,6 +401,7 @@
   cr: "13"
   xp: 10000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -529,6 +533,7 @@
   cr: "15"
   xp: 13000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -657,6 +662,7 @@
   cr: "14"
   xp: 11500
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -781,6 +787,7 @@
   cr: "17"
   xp: 18000
   proficiency_bonus: 6
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -910,6 +917,7 @@
   cr: "15"
   xp: 13000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -1027,6 +1035,7 @@
   cr: "17"
   xp: 18000
   proficiency_bonus: 6
+  multiattack: 3
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -1131,6 +1140,7 @@
   cr: "16"
   xp: 15000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -1263,6 +1273,7 @@
   cr: "13"
   xp: 10000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Ice Walk
       text: The dragon can move across and climb icy surfaces without needing to make an ability check.
@@ -1384,6 +1395,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Air Form
       text: The elemental can enter a creature's space and stop there. It can move through a space as
@@ -1535,6 +1547,7 @@
   cr: "21"
   xp: 33000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -1653,6 +1666,7 @@
   cr: "23"
   xp: 50000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -1759,6 +1773,7 @@
   cr: "20"
   xp: 25000
   proficiency_bonus: 6
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -1891,6 +1906,7 @@
   cr: "22"
   xp: 41000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -2021,6 +2037,7 @@
   cr: "21"
   xp: 33000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -2145,6 +2162,7 @@
   cr: "24"
   xp: 62000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -2274,6 +2292,7 @@
   cr: "22"
   xp: 41000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -2391,6 +2410,7 @@
   cr: "24"
   xp: 62000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -2495,6 +2515,7 @@
   cr: "23"
   xp: 50000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the dragon fails a saving throw, it can choose to succeed instead.
@@ -2628,6 +2649,7 @@
   cr: "20"
   xp: 25000
   proficiency_bonus: 6
+  multiattack: 3
   traits:
     - name: Ice Walk
       text: The dragon can move across and climb icy surfaces without needing to make an ability check.
@@ -2743,6 +2765,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The armor makes two Slam attacks.
@@ -3013,6 +3036,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The ankylosaurus makes two Tail attacks.
@@ -3073,6 +3097,7 @@
   cr: 1/2
   xp: 100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The ape makes two Fist attacks.
@@ -3144,6 +3169,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The archelon can breathe air and water.
@@ -3207,6 +3233,7 @@
   cr: "12"
   xp: 8000
   proficiency_bonus: 4
+  multiattack: 4
   traits:
     - name: Magic Resistance
       text: The archmage has Advantage on saving throws against spells and other magical effects.
@@ -3290,6 +3317,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Evasion
       text: If the assassin is subjected to an effect that allows it to make a Dexterity saving throw to
@@ -3739,6 +3767,7 @@
   cr: "19"
   xp: 22000
   proficiency_bonus: 6
+  multiattack: 2
   traits:
     - name: Death Throes
       text: The balor explodes when it dies. _Dexterity Saving Throw:_ DC 20, each creature in a 30-foot
@@ -3918,6 +3947,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The bandit makes two attacks, using Scimitar and Pistol in any combination.
@@ -3998,6 +4028,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 4
   traits:
     - name: Barbed Hide
       text: At the start of each of its turns, the devil deals 5 (1d10) Piercing damage to any creature it
@@ -4223,6 +4254,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
@@ -4306,6 +4338,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 1
   actions:
     - name: Multiattack
       text: The behir makes one Bite attack and uses Constrict.
@@ -4471,6 +4504,7 @@
   cr: 1/2
   xp: 100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The bear makes two Rend attacks.
@@ -4532,6 +4566,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -4830,6 +4865,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The dragon makes two Rend attacks.
@@ -4971,6 +5007,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Diabolical Restoration
       text: If the devil dies outside the Nine Hells, its body disappears in sulfurous smoke, and it gains
@@ -5142,6 +5179,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -5227,6 +5265,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The bear makes one Bite attack and one Claw attack.
@@ -5298,6 +5337,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Abduct
       text: The bugbear needn't spend extra movement to move a creature it is grappling.
@@ -5457,6 +5497,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The bulette makes two Bite attacks.
@@ -5649,6 +5690,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The centaur makes two attacks, using Pike or Longbow in any combination.
@@ -5742,6 +5784,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Diabolical Restoration
       text: If the devil dies outside the Nine Hells, its body disappears in sulfurous smoke, and it gains
@@ -5831,6 +5874,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The chimera makes one Ram attack, one Bite attack, and one Claw attack. It can replace the
@@ -5932,6 +5976,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The chuul can breathe air and water.
@@ -6021,6 +6066,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 5
   traits:
     - name: Acid Absorption
       text: Whenever the golem is subjected to Acid damage, it takes no damage and instead regains a
@@ -6103,6 +6149,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Light Sensitivity
       text: While in Bright Light, the cloaker has Disadvantage on attack rolls.
@@ -6202,6 +6249,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The giant makes two attacks, using Thunderous Mace or Thundercloud in any combination. It can
@@ -6988,6 +7036,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The death dog makes two Bite attacks.
@@ -7114,6 +7163,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Exalted Restoration
       text: If the deva dies outside Mount Celestia, its body disappears, and it gains a new body
@@ -7260,6 +7310,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Elemental Restoration
       text: If the djinni dies outside the Elemental Plane of Air, its body dissolves into mist, and it
@@ -7381,6 +7432,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The doppelganger makes two Slam attacks and uses Unsettling Visage if available.
@@ -7515,6 +7567,7 @@
   cr: "17"
   xp: 18000
   proficiency_bonus: 6
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -7681,6 +7734,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Spider Climb
       text: The drider can climb difficult surfaces, including along ceilings, without needing to make an
@@ -7766,6 +7820,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The druid makes two attacks, using Vine Staff or Verdant Wisp in any combination.
@@ -7851,6 +7906,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: null
   traits:
     - name: Magic Resistance
       text: The dryad has Advantage on saving throws against spells and other magical effects.
@@ -8092,6 +8148,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Earth Glide
       text: The elemental can burrow through nonmagical, unworked earth and stone. While doing so, the
@@ -8169,6 +8226,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Elemental Restoration
       text: If the efreeti dies outside the Elemental Plane of Fire, its body dissolves into ash, and it
@@ -8264,6 +8322,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The elephant makes two Gore attacks.
@@ -8400,6 +8459,7 @@
   cr: "12"
   xp: 8400
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Diabolical Restoration
       text: If the erinyes dies outside the Nine Hells, its body disappears in sulfurous smoke, and it
@@ -8497,6 +8557,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Spider Climb
       text: The ettercap can climb difficult surfaces, including along ceilings, without needing to make
@@ -8601,6 +8662,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The ettin makes one Battleaxe attack and one Morningstar attack.
@@ -8684,6 +8746,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Fire Aura
       text: At the end of each of the elemental's turns, each creature in a 10-foot Emanation originating
@@ -8758,6 +8821,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The giant makes two attacks, using Flame Sword or Hammer Throw in any combination.
@@ -8845,6 +8909,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Aversion to Fire
       text: If the golem takes Fire damage, it has Disadvantage on attack rolls and ability checks until
@@ -9057,6 +9122,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The giant makes two attacks, using Frost Axe or Great Bow in any combination.
@@ -9146,6 +9212,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Flyby
       text: The gargoyle doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
@@ -9414,6 +9481,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Ethereal Sight
       text: The ghost can see 60 feet into the Ethereal Plane when it is on the Material Plane.
@@ -9523,6 +9591,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The ghoul makes two Bite attacks.
@@ -9603,6 +9672,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The ape makes two Fist attacks.
@@ -9907,6 +9977,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 1
   actions:
     - name: Multiattack
       text: The snake makes one Bite attack and uses Constrict.
@@ -10041,6 +10112,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Hold Breath
       text: The crocodile can hold its breath for 1 hour.
@@ -10119,6 +10191,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The eagle makes two Rend attacks.
@@ -10751,6 +10824,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The scorpion makes two Claw attacks and one Sting attack.
@@ -10892,6 +10966,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Water Breathing
       text: The shark can breathe only underwater.
@@ -11520,6 +11595,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Demonic Restoration
       text: If the glabrezu dies outside the Abyss, its body dissolves into ichor, and it gains a new body
@@ -11607,6 +11683,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The gladiator makes three Spear attacks. It can replace one attack with a use of Shield Bash.
@@ -11810,6 +11887,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The goblin makes two attacks, using Scimitar or Shortbow in any combination.
@@ -12024,6 +12102,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -12277,6 +12356,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -12360,6 +12440,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The hag can breathe air and water.
@@ -12443,6 +12524,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The grick makes one Beak attack and one Tentacles attack.
@@ -12515,6 +12597,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The griffon makes two Rend attacks.
@@ -12694,6 +12777,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The guard makes two attacks, using Javelin or Longsword in any combination.
@@ -12773,6 +12857,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Celestial Restoration
       text: If the naga dies, it returns to life in 1d6 days and regains all its Hit Points unless _Dispel
@@ -12865,6 +12950,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Draconic Origin
       text: "The half-dragon is related to a type of dragon associated with one of the following damage
@@ -13066,6 +13152,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Pack Tactics
       text: The hound has Advantage on an attack roll against a creature if at least one of the hound's
@@ -13151,6 +13238,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Demonic Restoration
       text: If the hezrou dies outside the Abyss, its body dissolves into ichor, and it gains a new body
@@ -13233,6 +13321,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The giant makes two attacks, using Tree Club or Trash Lob in any combination.
@@ -13305,6 +13394,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Flyby
       text: The hippogriff doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
@@ -13366,6 +13456,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Hold Breath
       text: The hippopotamus can hold its breath for 10 minutes.
@@ -13425,6 +13516,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Aura of Authority
       text: While in a 10-foot Emanation originating from the hobgoblin, the hobgoblin and its allies have
@@ -13655,6 +13747,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Diabolical Restoration
       text: If the devil dies outside the Nine Hells, its body disappears in sulfurous smoke, and it gains
@@ -13821,6 +13914,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: null
   traits:
     - name: Hold Breath
       text: The hydra can hold its breath for 1 hour.
@@ -13956,6 +14050,7 @@
   cr: "14"
   xp: 11500
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Diabolical Restoration
       text: If the devil dies outside the Nine Hells, its body disappears in sulfurous smoke, and it gains
@@ -14234,6 +14329,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Succubus Form
       text: When the incubus finishes a Long Rest, it can shape-shift into a **Succubus**, using that stat
@@ -14326,6 +14422,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Air Form
       text: The stalker can enter an enemy's space and stop there. It can move through a space as narrow
@@ -14413,6 +14510,7 @@
   cr: "16"
   xp: 15000
   proficiency_bonus: 5
+  multiattack: 2
   traits:
     - name: Fire Absorption
       text: Whenever the golem is subjected to Fire damage, it regains a number of Hit Points equal to the
@@ -14625,6 +14723,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The knight makes two attacks, using Greatsword or Heavy Crossbow in any combination.
@@ -14778,6 +14877,7 @@
   cr: "23"
   xp: 50000
   proficiency_bonus: 7
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The kraken can breathe air and water.
@@ -14917,6 +15017,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The lamia makes two Claw attacks. It can replace one attack with a use of Corrupting Touch.
@@ -15081,6 +15182,7 @@
   cr: "21"
   xp: 33000
   proficiency_bonus: 7
+  multiattack: 3
   traits:
     - name: Legendary Resistance (4/Day, or 5/Day in Lair)
       text: If the lich fails a saving throw, it can choose to succeed instead.
@@ -15199,6 +15301,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Pack Tactics
       text: The lion has Advantage on an attack roll against a creature if at least one of the lion's
@@ -15334,6 +15437,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The mage makes three Arcane Burst attacks.
@@ -15579,6 +15683,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The mammoth makes two Gore attacks.
@@ -15652,6 +15757,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The manticore makes three attacks, using Rend or Tail Spike in any combination.
@@ -15727,6 +15833,7 @@
   cr: "16"
   xp: 15000
   proficiency_bonus: 5
+  multiattack: 6
   traits:
     - name: Demonic Restoration
       text: If the marilith dies outside the Abyss, its body dissolves into ichor, and it gains a new body
@@ -15879,6 +15986,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 6
   actions:
     - name: Multiattack
       text: The medusa makes two Claw attacks and one Snake Hair attack, or it makes three Poison Ray
@@ -16045,6 +16153,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The merrow can breathe air and water.
@@ -16437,6 +16546,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The mummy makes two Rotting Fist attacks and uses Dreadful Glare.
@@ -16523,6 +16633,7 @@
   cr: "15"
   xp: 13000
   proficiency_bonus: 5
+  multiattack: null
   traits:
     - name: Legendary Resistance (3/Day, or 4/Day in Lair)
       text: If the mummy fails a saving throw, it can choose to succeed instead.
@@ -16657,6 +16768,7 @@
   cr: "13"
   xp: 10000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Demonic Restoration
       text: If the nalfeshnee dies outside the Abyss, its body dissolves into ichor, and it gains a new
@@ -16759,6 +16871,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Coven Magic
       text: "While within 30 feet of at least two hag allies, the hag can cast one of the following
@@ -17268,6 +17381,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: null
   traits:
     - name: Regeneration
       text: The oni regains 10 Hit Points at the start of each of its turns if it has at least 1 Hit
@@ -17361,6 +17475,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The otyugh makes one Bite attack and two Tentacle attacks.
@@ -17512,6 +17627,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The owlbear makes two Rend attacks.
@@ -17691,6 +17807,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Ethereal Sight
       text: The spider can see 60 feet into the Ethereal Plane while on the Material Plane and vice versa.
@@ -17825,6 +17942,7 @@
   cr: "1"
   xp: 200
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The pirate makes two Dagger attacks. It can replace one attack with a use of Enthralling
@@ -17895,6 +18013,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The pirate makes three attacks, using Rapier or Pistol in any combination.
@@ -17987,6 +18106,7 @@
   cr: "20"
   xp: 25000
   proficiency_bonus: 6
+  multiattack: 4
   traits:
     - name: Diabolical Restoration
       text: If the pit fiend dies outside the Nine Hells, its body disappears in sulfurous smoke, and it
@@ -18108,6 +18228,7 @@
   cr: "16"
   xp: 15000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Divine Awareness
       text: The planetar knows if it hears a lie.
@@ -18267,6 +18388,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The bear makes two Rend attacks.
@@ -18380,6 +18502,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The priest makes two attacks, using Mace or Radiant Flame in any combination.
@@ -18549,6 +18672,7 @@
   cr: 1/4
   xp: 50
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Magic Resistance
       text: The pseudodragon has Advantage on saving throws against spells and other magical effects.
@@ -18685,6 +18809,7 @@
   cr: "15"
   xp: 13000
   proficiency_bonus: 5
+  multiattack: 2
   traits:
     - name: Tunneler
       text: The worm can burrow through solid rock at half its Burrow Speed and leaves a 10-foot-diameter
@@ -18867,6 +18992,7 @@
   cr: "13"
   xp: 10000
   proficiency_bonus: 5
+  multiattack: 3
   traits:
     - name: Greater Magic Resistance
       text: The rakshasa automatically succeeds on saving throws against spells and other magical effects,
@@ -19086,6 +19212,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The dragon makes two Rend attacks.
@@ -19419,6 +19546,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The roc makes two Beak attacks. It can replace one attack with a Talons attack.
@@ -19497,6 +19625,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 4
   traits:
     - name: Spider Climb
       text: The roper can climb difficult surfaces, including along ceilings, without needing to make an
@@ -19574,6 +19703,7 @@
   cr: 1/2
   xp: 100
   proficiency_bonus: 2
+  multiattack: 1
   traits:
     - name: Iron Scent
       text: The rust monster can pinpoint the location of ferrous metal within 30 feet of itself.
@@ -19648,6 +19778,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Running Leap
       text: With a 10-foot running start, the tiger can Long Jump up to 25 feet.
@@ -19714,6 +19845,7 @@
   cr: 1/2
   xp: 100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Blood Frenzy
       text: The sahuagin has Advantage on attack rolls against any creature that doesn't have all its Hit
@@ -19786,6 +19918,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Fire Aura
       text: At the end of each of the salamander's turns, each creature of the salamander's choice in a
@@ -20011,6 +20144,7 @@
   cr: 1/2
   xp: 100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The scout makes two attacks, using Shortsword and Longbow in any combination.
@@ -20304,6 +20438,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Lightning Absorption
       text: Whenever the shambling mound is subjected to Lightning damage, it regains a number of Hit
@@ -20392,6 +20527,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Bound
       text: The guardian is magically bound to an amulet. While the guardian and its amulet are on the
@@ -20530,6 +20666,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The dragon makes two Rend attacks.
@@ -20691,6 +20828,7 @@
   cr: "21"
   xp: 33000
   proficiency_bonus: 7
+  multiattack: 2
   traits:
     - name: Divine Awareness
       text: The solar knows if it hears a lie.
@@ -20899,6 +21037,7 @@
   cr: "11"
   xp: 7200
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Inscrutable
       text: No magic can observe the sphinx remotely or detect its thoughts without its permission. Wisdom
@@ -21007,6 +21146,7 @@
   cr: "17"
   xp: 18000
   proficiency_bonus: 6
+  multiattack: 2
   traits:
     - name: Inscrutable
       text: No magic can observe the sphinx remotely or detect its thoughts without its permission. Wisdom
@@ -21273,6 +21413,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Fiendish Restoration
       text: If it dies, the naga returns to life in 1d6 days and regains all its Hit Points. Only a _Wish_
@@ -21684,6 +21825,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The giant makes two attacks, using Stone Club or Boulder in any combination.
@@ -21779,6 +21921,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Immutable Form
       text: The golem can't shape-shift.
@@ -21871,6 +22014,7 @@
   cr: "13"
   xp: 10000
   proficiency_bonus: 5
+  multiattack: 2
   traits:
     - name: Amphibious
       text: The giant can breathe air and water.
@@ -21981,6 +22125,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 1
   traits:
     - name: Incubus Form
       text: When the succubus finishes a Long Rest, it can shape-shift into an **Incubus**, using that
@@ -22608,6 +22753,7 @@
   cr: "30"
   xp: 155000
   proficiency_bonus: 9
+  multiattack: 4
   traits:
     - name: Legendary Resistance (6/Day)
       text: If the tarrasque fails a saving throw, it can choose to succeed instead.
@@ -22878,6 +23024,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Pack Tactics
       text: The tough has Advantage on an attack roll against a creature if at least one of the tough's
@@ -22956,6 +23103,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 2
   traits:
     - name: Siege Monster
       text: The treant deals double damage to objects and structures.
@@ -23034,6 +23182,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The triceratops makes two Gore attacks.
@@ -23093,6 +23242,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Loathsome Limbs (4/Day)
       text: If the troll ends any turn Bloodied and took 15+ Slashing damage during that turn, one of the
@@ -23226,6 +23376,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The tyrannosaurus makes one Bite attack and one Tail attack.
@@ -23301,6 +23452,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Legendary Resistance (3/Day)
       text: If the unicorn fails a saving throw, it can choose to succeed instead.
@@ -23551,6 +23703,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Vampiric Connection
       text: While the familiar and its vampire master are on the same plane of existence, the vampire can
@@ -23625,6 +23778,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Spider Climb
       text: The vampire can climb difficult surfaces, including along ceilings, without needing to make an
@@ -23785,6 +23939,7 @@
   cr: 1/4
   xp: 50
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The fungus makes two Rotting Touch attacks.
@@ -23847,6 +24002,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Demonic Restoration
       text: If the vrock dies outside the Abyss, its body dissolves into ichor, and it gains a new body
@@ -24182,6 +24338,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: null
   actions:
     - name: Multiattack
       text: The warrior makes two Greatsword or Heavy Crossbow attacks.
@@ -24266,6 +24423,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   traits:
     - name: Freeze
       text: If the elemental takes Cold damage, its Speed decreases by 20 feet until the end of its next
@@ -24409,6 +24567,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The werebear makes two attacks, using Handaxe or Rend in any combination. It can replace one
@@ -24501,6 +24660,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The wereboar makes two attacks, using Javelin or Tusk in any combination. It can replace one
@@ -24598,6 +24758,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The wererat makes two attacks, using Scratch or Hand Crossbow in any combination. It can
@@ -24690,6 +24851,7 @@
   cr: "4"
   xp: 1100
   proficiency_bonus: 2
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The weretiger makes two attacks, using Scratch or Longbow in any combination. It can replace
@@ -24785,6 +24947,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Pack Tactics
       text: The werewolf has Advantage on an attack roll against a creature if at least one of the
@@ -24886,6 +25049,7 @@
   cr: "2"
   xp: 450
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Ice Walk
       text: The dragon can move across and climb icy surfaces without needing to make an ability check.
@@ -24971,6 +25135,7 @@
   cr: "3"
   xp: 700
   proficiency_bonus: 2
+  multiattack: 2
   traits:
     - name: Sunlight Sensitivity
       text: While in sunlight, the wight has Disadvantage on ability checks and attack rolls.
@@ -25440,6 +25605,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 2
   actions:
     - name: Multiattack
       text: The wyvern makes one Bite attack and one Sting attack.
@@ -25520,6 +25686,7 @@
   cr: "5"
   xp: 1800
   proficiency_bonus: 3
+  multiattack: 4
   traits:
     - name: Earth Glide
       text: The xorn can burrow through nonmagical, unworked earth and stone. While doing so, the xorn
@@ -25602,6 +25769,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -25685,6 +25853,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The dragon makes three Rend attacks.
@@ -25766,6 +25935,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The dragon makes three Rend attacks. It can replace two attacks with a use of Sleep Breath.
@@ -25855,6 +26025,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -25944,6 +26115,7 @@
   cr: "7"
   xp: 2900
   proficiency_bonus: 3
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The dragon makes three Rend attacks. It can replace one attack with a use of Slowing Breath.
@@ -26025,6 +26197,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -26110,6 +26283,7 @@
   cr: "8"
   xp: 3900
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Amphibious
       text: The dragon can breathe air and water.
@@ -26193,6 +26367,7 @@
   cr: "10"
   xp: 5900
   proficiency_bonus: 4
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The dragon makes three Rend attacks.
@@ -26273,6 +26448,7 @@
   cr: "9"
   xp: 5000
   proficiency_bonus: 4
+  multiattack: 3
   actions:
     - name: Multiattack
       text: The dragon makes three Rend attacks. It can replace one attack with a use of Paralyzing
@@ -26363,6 +26539,7 @@
   cr: "6"
   xp: 2300
   proficiency_bonus: 3
+  multiattack: 3
   traits:
     - name: Ice Walk
       text: The dragon can move across and climb icy surfaces without needing to make an ability check.

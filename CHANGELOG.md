@@ -24,6 +24,12 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Encounter turn rules: `attack` (Attack action with Extra Attack / Multiattack, Opportunity
+  Attacks, once-per-turn riders), `save_action` (Recharge), `cast` (casting time, prepared
+  spells, Concentration spells' conditions as effects), timed effects with durations
+  (`effects` with `rounds` / `until`, `end_effect`), automatic Concentration saves on damage,
+  Rage ending when not extended (`extends_each_turn` toggles, `extend`). Monsters have
+  `multiattack`. `applyEncounterAction` also returns the `result` of an attack, save or cast.
 - Encounters: an `Encounter` document and `applyEncounterAction` (add monsters and characters,
   Initiative with surprise and group rolls, turn order and ties, rounds and turns, action /
   Bonus Action / reaction, movement and Dash, `effects` routing attack and spell results to
