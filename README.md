@@ -156,6 +156,17 @@ A natural 20 always hits and doubles every damage die; a natural 1 always misses
 (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) deal half damage on a successful save.
 These functions take a combat `Character` and a `Spell` (`SpellSchema`) that you fill in, damage
 dice included: they aren't derived from a build or from catalog spells yet.
+
+Attack lines on the sheet carry their damage ready to roll, and `takeDamage` applies the rules
+for Resistance, Vulnerability, Immunity, Temporary Hit Points and dropping to 0:
+
+```ts
+const greatsword = sheet.attacks.find((a) => a.name === "Greatsword")!;
+const hit = rollDamage(greatsword.damage_parts, { critical: true, rng: seededRng(3) });
+takeDamage({ hp: 7, temp: 0, max: 7 }, hit.parts.map((p) => ({ amount: p.total, type: p.type })),
+  { resistances: ["slashing"] });
+// { dealt, absorbed, hp, temp, dropped_to_zero, died, death_save_failures, concentration_dc, notes }
+```
 Without an `rng`, rolls use `Math.random()`.
 
 ## Command line

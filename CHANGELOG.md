@@ -24,6 +24,11 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- `rules/damage.ts`: `rollDamage`, `adjustDamage` (Immunity, Resistance, Vulnerability) and
+  `takeDamage` (Temporary Hit Points, dropping to 0, massive damage, death save failures,
+  Concentration DC), shared by the play action `damage` and the combat `applyDamage`.
+- Attack lines have `kind`, `damage_parts` and `two_handed_damage_parts` (structured damage,
+  ready for `rollDamage`); the `damage` string is built from them.
 - Content pack manifests (`pack.yaml`: id, version, ruleset, default `source`, `requires`),
   checked against load order; `catalog.packs` lists them and `GET /v1/content/packs` serves them.
 - Patches (`patches.yaml`): `set`, `append` and `remove` on a path of an entity from an earlier
@@ -91,3 +96,7 @@ All notable changes are documented here. This project follows
 - The SRD as one JSON file: `srd-rules-engine/srd-5.2.1.json`.
 - HTTP: `GET /v1/content/...` and `POST /v1/builds/evaluate`.
 - `seededRng`, `scriptedRng` and `fixedRng` for deterministic dice.
+
+### Fixed
+- The Blowgun's fixed damage no longer adds the ability modifier (SRD "Damage Rolls").
+- While Petrified, untyped damage is halved too (Resistance to all damage).

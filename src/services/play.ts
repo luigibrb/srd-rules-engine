@@ -21,6 +21,7 @@ import {
 } from "../models/state";
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
+import { takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import {
@@ -531,54 +532,39 @@ export function applyAction(
   switch (action.type) {
     case "damage": {
       if (s.dead) fail("The character is dead");
-      let amount = Math.max(0, Math.floor(action.amount));
-      const type = action.damage_type?.toLowerCase();
-      if (type && (sheet.resistances.includes(type) || conditionsNow.has("petrified"))) {
-        amount = Math.floor(amount / 2);
-        notes.push(`Resistance to ${type}: ${action.amount} damage halved to ${amount}.`);
-      }
-      const absorbed = Math.min(s.hp.temp, amount);
-      s.hp.temp -= absorbed;
-      const rest = amount - absorbed;
-      if (absorbed) notes.push(`${absorbed} absorbed by Temporary Hit Points.`);
-      if (current === 0) {
-        if (rest >= p.hp.max) {
+      // Petrified: Resistance to all damage.
+      const resistances = conditionsNow.has("petrified")
+        ? [...sheet.resistances, "all"]
+        : sheet.resistances;
+      const hit = takeDamage(
+        { hp: current, temp: s.hp.temp, max: p.hp.max },
+        [{ amount: action.amount, type: action.damage_type ?? null }],
+        { resistances },
+        { critical: action.critical },
+      );
+      notes.push(...hit.notes);
+      s.hp.temp = hit.temp;
+      if (current > 0) s.hp.current = hit.hp;
+      if (hit.death_save_failures) {
+        s.stable = false;
+        s.death_saves.failures = Math.min(3, s.death_saves.failures + hit.death_save_failures);
+        if (s.death_saves.failures >= 3) {
           s.dead = true;
-          notes.push("Damage at 0 HP equal to the Hit Point maximum: the character dies.");
-        } else if (rest > 0) {
-          s.stable = false;
-          s.death_saves.failures = Math.min(3, s.death_saves.failures + (action.critical ? 2 : 1));
-          notes.push(
-            `Damage at 0 HP: ${action.critical ? "two Death Saving Throw failures" : "a Death Saving Throw failure"}.`,
-          );
-          if (s.death_saves.failures >= 3) {
-            s.dead = true;
-            notes.push("Three failures: the character dies.");
-          }
+          notes.push("Three failures: the character dies.");
         }
-        break;
       }
-      const after = current - rest;
-      if (after > 0) {
-        s.hp.current = after;
-      } else {
-        s.hp.current = 0;
-        if (-after >= p.hp.max) {
-          s.dead = true;
-          notes.push(
-            "Massive damage: the rest of the damage equals the Hit Point maximum. The character dies.",
-          );
-        } else {
-          if (!s.conditions.includes("unconscious")) s.conditions.push("unconscious");
-          s.death_saves = { successes: 0, failures: 0 };
-          s.stable = false;
-          notes.push("Down to 0 Hit Points: Unconscious, making Death Saving Throws.");
-        }
-        dropConcentration("down to 0 HP");
+      if (hit.died) s.dead = true;
+      if (hit.dropped_to_zero) {
+        if (!s.conditions.includes("unconscious")) s.conditions.push("unconscious");
+        s.death_saves = { successes: 0, failures: 0 };
+        s.stable = false;
+        notes.push("Down to 0 Hit Points: Unconscious, making Death Saving Throws.");
       }
-      if (rest > 0 && s.concentration) {
-        const dc = Math.min(30, Math.max(10, Math.floor(rest / 2)));
-        notes.push(`Concentration on ${s.concentration}: Constitution saving throw, DC ${dc}.`);
+      if (current > 0 && hit.hp === 0) dropConcentration("down to 0 HP");
+      if (current > 0 && hit.concentration_dc !== null && s.concentration) {
+        notes.push(
+          `Concentration on ${s.concentration}: Constitution saving throw, DC ${hit.concentration_dc}.`,
+        );
       }
       break;
     }

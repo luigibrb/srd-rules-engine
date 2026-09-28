@@ -16,7 +16,7 @@ src/
                    #   character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
-  rules/           # pure logic: dice, rng, ability-scores, combat, spells,
+  rules/           # pure logic: dice, rng, ability-scores, combat, damage, spells,
                    #   build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   combat.ts (HP, attacks, spells)
@@ -47,6 +47,8 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   `seededRng`, `scriptedRng`, `fixedRng`.
 - D&D 5e rule: critical hits double all dice (not the modifier); nat-1 always misses; nat-20 always hits.
 - Saving throw damage: half (rounded down) on success, full on failure.
+- Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
+  0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).
   After editing `content/`, run `npm run content` and commit the generated files.
 - This repo holds only SRD 5.2.1 content and invented homebrew (`source: homebrew` or `test`),
