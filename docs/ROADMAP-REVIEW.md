@@ -293,3 +293,13 @@ Approved with the recommendations above:
   Strike (optional rider, Necrotic or Radiant, 2d8 at 14). Deviations: no new `when` conditions
   (a toggle's grants apply while it's active, which covers "while raging"); once-per-turn limits
   and Rage's per-round extension wait for turns (P7).
+- **P6 (done, branch `p6-monsters`):** `monsters` table (330 stat blocks) from
+  `import-srd-monsters.ts`; `combatantFromMonster`, `useSaveAction` (sharing the save logic with
+  `castSpell`), condition immunities. Review as agreed: invariants on every stat block plus 15
+  golden ones. The review found and fixed: conditional extra damage read as always dealt
+  (Goblin Warrior), form-only speeds overwriting the walking speed (Werebear), damage after an
+  em-dash aside lost (Mimic), attack bonuses followed by "(with Advantage…)" or "to hit" missed
+  (10 stat blocks), misplaced italics, condition sentences read too loosely (Swallow, "the
+  Grappled condition ends"). Two Markdown typos corrected in FIXES. Deviation: the bundled SRD JSON
+  grows to ~3.9 MB; splitting monsters into a separate entry point can come later if bundle size
+  matters for the web app.

@@ -19,6 +19,7 @@ as `schemas/*.schema.json`). A **content pack** is a folder, and every file in i
 | `spells.yaml` | Spells: level, school, class `lists`, ritual, concentration, text | `spells.schema.json` |
 | `magic-items.yaml` | Magic items: base item, bonuses, Attunement, charges, grants while active | `magic_items.schema.json` |
 | `conditions.yaml` | Conditions: `implies`, `speed_zero`, levels (Exhaustion) | `conditions.schema.json` |
+| `monsters.yaml` | Monster stat blocks: AC, HP, speed, abilities and saves, defenses, CR, traits and actions | `monsters.schema.json` |
 
 A file can hold a single entity or a list. `.yml` and `.json` work too.
 
@@ -314,6 +315,29 @@ mechanics:
 
 A spell has an attack roll or a save, not both. Damage from a save is rolled once for every
 target; each damage type is halved separately on a successful save (`on_success: half`).
+
+### Monsters
+
+A stat block keeps the SRD's layout: `armor_class`, `initiative`, `hit_points` and `hit_dice`
+(`19d12+133`), `speed` by mode (`{walk: 40, fly: 80}`, `hover`, `speed_note` for "bear form
+only"), `abilities` and `saving_throws`, `skills`, damage `resistances`/`vulnerabilities`/
+`immunities`, `condition_immunities` (`defenses_note` for qualified entries), `senses`,
+`passive_perception`, `languages`, `cr`, `xp`, `proficiency_bonus`, and `traits`, `actions`,
+`bonus_actions`, `reactions`, `legendary_actions` (with `legendary_text`). Each action has its
+`text`, a `recharge` (`5–6`), and, when combat can resolve it:
+
+```yaml
+attack: {kind: melee, bonus: 14, reach: 10, range: null,
+         damage: [{average: 13, dice: 1d10, bonus: 8, type: slashing}, {average: 5, dice: 2d4, bonus: 0, type: fire}]}
+save: {ability: dex, dc: 21, damage: [{average: 59, dice: 17d6, bonus: 0, type: fire}],
+       on_success: half, conditions: []}   # conditions on a failed save
+```
+
+Damage that depends on something ("plus 2 (1d4) if the attack roll had Advantage"), later
+effects (swallowed, a second failure) and size-dependent conditions stay in the text.
+`combatantFromMonster(monster, { hp, conditions })` makes a combatant: attacks for
+`makeAttack`, saving throw effects for `useSaveAction`. Who can be targeted (size, range) is the
+caller's to decide.
 
 ### Magic items and conditions
 

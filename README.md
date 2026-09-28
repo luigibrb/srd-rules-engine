@@ -168,6 +168,10 @@ A natural 1 always misses. A natural 20 (19 for a Champion) is a Critical Hit: i
 the AC and doubles every damage die. `rollSavingThrow(combatant, "dex", 15)` rolls a save with
 the sheet's bonus. The older functions that take a hand-filled `Character` (`resolveAttack`,
 `attackRoll`) are deprecated; `combatantFromSnapshot` turns a `Character` into a combatant.
+Monsters come from the catalog: `combatantFromMonster(catalog.monsters["adult-red-dragon"])`
+attacks with `makeAttack(dragon, "Rend", target)` and breathes with `useSaveAction(dragon,
+"Fire Breath", targets)`.
+
 `castSpell(caster, catalog.spells.fireball, targets, { slot_level: 5 })` casts a catalog spell
 whose `mechanics` are modeled: attack or save (half damage on a success), upcasting, Cantrip
 Upgrade, healing and conditions, with the play actions that apply the result. 53 SRD spells have
@@ -315,6 +319,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
+| Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks and saving throw effects (breath weapons) usable in combat; other traits as text |
 | Effects | Numeric effects, features you switch on in play (Rage: Resistance, Rage Damage, Strength Advantage, no spells), damage riders from class tables (Sneak Attack, Divine Strike), Advantage on saves |
 | Not yet | Shopping with starting gold, most other class features' dice and triggers (shown as text), most magic items' active powers, turns and rounds |
 

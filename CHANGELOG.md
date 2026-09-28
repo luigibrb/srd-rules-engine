@@ -24,6 +24,10 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Monsters: a `monsters` content table with all 330 SRD stat blocks (`import-srd-monsters.ts`),
+  `combatantFromMonster`, and `useSaveAction` for saving throw effects such as breath weapons.
+  Combatants have `condition_immunities` (respected by spells and save effects) and
+  `save_actions`; attack lines' `ability` can be `null` (monsters).
 - Effects, step 1: `damage_riders` (dice, flat or a class table column; automatic or optional;
   Rage Damage, Sneak Attack, Divine Strike), `advantages` (`save.str`…, applied by
   `rollSavingThrow`) and `toggles` (features switched on in play: Rage). Play state `active`,
@@ -124,5 +128,6 @@ All notable changes are documented here. This project follows
   `POST /v1/combat/attack` too: use `POST /v1/state/attack`. Kept until 1.0.
 
 ### Fixed
+- `GET /v1/content/magic_items` (and `magic-items`) returned 404: table names with `_` didn't match.
 - The Blowgun's fixed damage no longer adds the ability modifier (SRD "Damage Rolls").
 - While Petrified, untyped damage is halved too (Resistance to all damage).

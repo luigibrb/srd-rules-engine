@@ -32,6 +32,8 @@ import {
   MagicItemSchema,
   type MasteryDef,
   MasterySchema,
+  type MonsterDef,
+  MonsterSchema,
   type SpeciesDef,
   SpeciesSchema,
   type SpellDef,
@@ -73,6 +75,8 @@ export interface Catalog {
   readonly features: Table<FeatDef>;
   readonly magic_items: Table<MagicItemDef>;
   readonly conditions: Table<ConditionDef>;
+  /** Monster and animal stat blocks. */
+  readonly monsters: Table<MonsterDef>;
   /** The loaded packs, in load order (a pack without `pack.yaml` gets a minimal manifest). */
   readonly packs: readonly PackManifest[];
 }
@@ -104,6 +108,7 @@ export interface ContentPack {
   features?: unknown[];
   magic_items?: unknown[];
   conditions?: unknown[];
+  monsters?: unknown[];
 }
 
 export const TABLE_SCHEMAS = {
@@ -122,6 +127,7 @@ export const TABLE_SCHEMAS = {
   features: FeatSchema,
   magic_items: MagicItemSchema,
   conditions: ConditionSchema,
+  monsters: MonsterSchema,
 } as const;
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
@@ -356,6 +362,19 @@ export function validateReferences(catalog: Catalog): void {
   }
   for (const condition of Object.values(catalog.conditions)) {
     check(condition.implies, catalog.conditions, "condition", condition.id);
+  }
+  for (const monster of Object.values(catalog.monsters)) {
+    const applied = [
+      ...monster.actions,
+      ...monster.bonus_actions,
+      ...monster.legendary_actions,
+    ].flatMap((a) => a.save?.conditions ?? []);
+    check(
+      [...monster.condition_immunities, ...applied],
+      catalog.conditions,
+      "condition",
+      monster.id,
+    );
   }
   for (const spell of Object.values(catalog.spells)) {
     const applied = (spell.mechanics?.conditions ?? []).map((c) => c.condition);

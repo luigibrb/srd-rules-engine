@@ -282,12 +282,12 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     },
     {
       method: "GET",
-      pattern: /^\/v1\/content\/(?<table>[a-z]+)\/?$/,
+      pattern: /^\/v1\/content\/(?<table>[a-z_-]+)\/?$/,
       handle: ({ params }) => Object.values(getCatalog()[contentTable(params.table)]),
     },
     {
       method: "GET",
-      pattern: /^\/v1\/content\/(?<table>[a-z]+)\/(?<id>[a-z0-9-]+)$/,
+      pattern: /^\/v1\/content\/(?<table>[a-z_-]+)\/(?<id>[a-z0-9-]+)$/,
       handle: ({ params }) => {
         const entity = lookup(getCatalog()[contentTable(params.table)], params.id);
         if (!entity) throw new HttpError(404, `No ${params.table} with id '${params.id}'`);
@@ -555,11 +555,13 @@ const CORS_HEADERS = {
   "access-control-allow-headers": "content-type",
 };
 
-function contentTable(name: string | undefined): TableName {
+/** A table by name: `magic_items`, or `magic-items` like the YAML file. */
+function contentTable(raw: string | undefined): TableName {
+  const name = raw?.replaceAll("-", "_");
   if (!name || !(TABLE_NAMES as string[]).includes(name)) {
     throw new HttpError(
       404,
-      `Unknown content table '${name}'. Try one of: ${TABLE_NAMES.join(", ")}`,
+      `Unknown content table '${raw}'. Try one of: ${TABLE_NAMES.join(", ")}`,
     );
   }
   return name as TableName;

@@ -40,6 +40,8 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   spellcasting: [],
   advantages: [],
   no_spells: false,
+  condition_immunities: [],
+  save_actions: [],
   ...o,
 });
 const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizardLine] });
