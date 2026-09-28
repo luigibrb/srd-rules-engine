@@ -172,6 +172,11 @@ Monsters come from the catalog: `combatantFromMonster(catalog.monsters["adult-re
 attacks with `makeAttack(dragon, "Rend", target)` and breathes with `useSaveAction(dragon,
 "Fire Breath", targets)`.
 
+An `Encounter` runs the fight: `applyEncounterAction(encounter, { type: "roll_initiative" },
+{ catalog, characters })`, then `start`, `next_turn`, `use`, `move`, and `effects` to apply what
+`makeAttack` or `castSpell` returned to a monster or a character (`encounterCombatant(encounter,
+id, ctx)` gives the combatant to attack with).
+
 `castSpell(caster, catalog.spells.fireball, targets, { slot_level: 5 })` casts a catalog spell
 whose `mechanics` are modeled: attack or save (half damage on a success), upcasting, Cantrip
 Upgrade, healing and conditions, with the play actions that apply the result. 53 SRD spells have
@@ -256,6 +261,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
+| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list) → `{ encounter, states, notes }`: Initiative, turns and rounds, action economy, damage and conditions on monsters and characters |
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/characters/` | Validate a combat-ready `Character` |
 | `POST /v1/characters/{name}/alive` | Is the character above 0 HP |
@@ -320,6 +326,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks and saving throw effects (breath weapons) usable in combat; other traits as text |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, monster HP and conditions, effects of attacks and spells routed to monsters and characters |
 | Effects | Numeric effects, features you switch on in play (Rage: Resistance, Rage Damage, Strength Advantage, no spells), damage riders from class tables (Sneak Attack, Divine Strike), Advantage on saves |
 | Not yet | Shopping with starting gold, most other class features' dice and triggers (shown as text), most magic items' active powers, turns and rounds |
 
