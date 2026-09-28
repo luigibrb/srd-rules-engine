@@ -184,8 +184,12 @@ Interpretations (flagged): on a successful save for half, each damage type is ha
 rolled once, like damage; each beam's damage preview is against the target as it was before
 the spell.
 
-Only a reviewed set of spells has mechanics so far (`tests/casting.test.ts` lists them); the
-old `Spell` model and the `Character` spell functions (`resolveSpellSave`…) are deprecated.
+53 SRD spells have mechanics: 11 hand-written golden spells with worked tests, 38 drafts from
+the importer's parser reviewed against their text, and 4 corrected by hand (`tests/casting.test.ts`
+snapshots them all). The other 286 are cast with their text: 207 have nothing to model (utility
+spells), and 79 have effects the parser deliberately doesn't guess (damage after casting, several
+saves, tables…). The old `Spell` model and the `Character` spell functions (`resolveSpellSave`…)
+are deprecated.
 
 ### Changing choices: replacements and lists
 

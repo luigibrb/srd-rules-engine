@@ -25,7 +25,8 @@ All notable changes are documented here. This project follows
 
 ### Added
 - Spell `mechanics` (attack or save, damage by type, healing, targets, upcasting, Cantrip
-  Upgrade, conditions, area) for 11 reviewed SRD spells, and `castSpell` to resolve them between
+  Upgrade, conditions, area) for 53 reviewed SRD spells (drafted by a parser in
+  `import-srd-spells.ts`, each checked against its text), and `castSpell` to resolve them between
   combatants, with the play actions that apply the result. `POST /v1/state/cast`.
 - Combatants have `level` and `spellcasting` (save DC, attack bonus, modifier per feature).
 - Combatants (`rules/combatant.ts`): `combatantFromCharacter` (build + play state),

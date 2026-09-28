@@ -55,6 +55,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and
     17 (4d10).
+  mechanics:
+    attack: melee
+    damage:
+      - dice: 1d10
+        type: necrotic
+    targets: 1
+    cantrip_scaling: dice
 - id: dancing-lights
   name: Dancing Lights
   level: 0
@@ -375,6 +382,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d12 when you reach levels 5 (2d12), 11 (3d12), and
     17 (4d12).
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d12
+        type: poison
+    targets: 1
+    cantrip_scaling: dice
 - id: prestidigitation
   name: Prestidigitation
   level: 0
@@ -462,6 +476,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17
     (4d8).
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d8
+        type: cold
+    targets: 1
+    cantrip_scaling: dice
 - id: resistance
   name: Resistance
   level: 0
@@ -499,6 +520,15 @@
 
     _Cantrip Upgrade._ The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17
     (4d8).
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    damage:
+      - dice: 1d8
+        type: radiant
+    targets: 1
+    cantrip_scaling: dice
 - id: shillelagh
   name: Shillelagh
   level: 0
@@ -543,6 +573,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17
     (4d8).
+  mechanics:
+    attack: melee
+    damage:
+      - dice: 1d8
+        type: lightning
+    targets: 1
+    cantrip_scaling: dice
 - id: sorcerous-burst
   name: Sorcerous Burst
   level: 0
@@ -610,6 +647,13 @@
 
     _Cantrip Upgrade._ The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17
     (4d8).
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d8
+        type: radiant
+    targets: 1
+    cantrip_scaling: dice
 - id: thaumaturgy
   name: Thaumaturgy
   level: 0
@@ -690,6 +734,15 @@
 
     _Cantrip Upgrade._ The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17
     (4d6).
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    damage:
+      - dice: 1d6
+        type: psychic
+    targets: 1
+    cantrip_scaling: dice
 - id: alarm
   name: Alarm
   level: 1
@@ -739,6 +792,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional Beast for each spell slot level
     above 1.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+    targets: 1
+    upcast:
+      targets: 1
 - id: bane
   name: Bane
   level: 1
@@ -844,6 +907,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 1.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+    targets: 1
+    upcast:
+      targets: 1
 - id: chromatic-orb
   name: Chromatic Orb
   level: 1
@@ -888,6 +961,16 @@
   description: You launch a dazzling array of flashing, colorful light. Each creature in a 15-foot
     Cone originating from you must succeed on a Constitution saving throw or have the Blinded
     condition until the end of your next turn.
+  mechanics:
+    save:
+      ability: con
+      on_success: none
+    conditions:
+      - condition: blinded
+        on: failed_save
+    area:
+      shape: cone
+      size: 15
 - id: command
   name: Command
   level: 1
@@ -1124,6 +1207,18 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 3d6
+        type: psychic
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d6
+          type: psychic
 - id: divine-favor
   name: Divine Favor
   level: 1
@@ -1205,6 +1300,13 @@
     saving throw or have the Restrained condition until the spell ends. A Restrained creature can
     take an action to make a Strength (Athletics) check against your spell save DC. On a success, it
     frees itself from the grasping plants and is no longer Restrained by them.
+  mechanics:
+    save:
+      ability: str
+      on_success: none
+    conditions:
+      - condition: restrained
+        on: failed_save
 - id: expeditious-retreat
   name: Expeditious Retreat
   level: 1
@@ -1494,6 +1596,17 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 2d10
+        type: fire
+    upcast:
+      damage:
+        - dice: 1d10
+          type: fire
 - id: heroism
   name: Heroism
   level: 1
@@ -1568,6 +1681,18 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 1.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: prone
+        on: failed_save
+      - condition: incapacitated
+        on: failed_save
+    targets: 1
+    upcast:
+      targets: 1
 - id: hunters-mark
   name: Hunter's Mark
   level: 1
@@ -1837,6 +1962,19 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     1.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 2d8
+        type: poison
+    conditions:
+      - condition: poisoned
+        on: hit
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d8
+          type: poison
 - id: sanctuary
   name: Sanctuary
   level: 1
@@ -1965,6 +2103,16 @@
 
     Creatures that don't sleep, such as elves, or that have Immunity to the Exhaustion condition
     automatically succeed on saves against this spell.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: incapacitated
+        on: failed_save
+    area:
+      shape: sphere
+      size: 5
 - id: speak-with-animals
   name: Speak with Animals
   level: 1
@@ -2015,6 +2163,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 2d8
+        type: thunder
+    area:
+      shape: cube
+      size: 15
+    upcast:
+      damage:
+        - dice: 1d8
+          type: thunder
 - id: unseen-servant
   name: Unseen Servant
   level: 1
@@ -3099,6 +3261,18 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     2.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 3d8
+        type: psychic
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d8
+          type: psychic
 - id: mirror-image
   name: Mirror Image
   level: 2
@@ -3370,6 +3544,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     2.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 3d8
+        type: thunder
+    area:
+      shape: sphere
+      size: 10
+    upcast:
+      damage:
+        - dice: 1d8
+          type: thunder
 - id: shining-smite
   name: Shining Smite
   level: 2
@@ -3506,6 +3694,14 @@
     to the best of its ability. The suggested activity can continue for the entire duration, but if
     the suggested activity can be completed in a shorter time, the spell ends for the target upon
     completing it.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+    targets: 1
 - id: warding-bond
   name: Warding Bond
   level: 2
@@ -3733,6 +3929,17 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     3.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 3d10
+        type: lightning
+    upcast:
+      damage:
+        - dice: 1d10
+          type: lightning
 - id: clairvoyance
   name: Clairvoyance
   level: 3
@@ -4114,6 +4321,18 @@
 
     The spell ends for an affected creature if it takes any damage or if someone else uses an action
     to shake the creature out of its stupor.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+      - condition: incapacitated
+        on: failed_save
+    area:
+      shape: cube
+      size: 30
 - id: lightning-bolt
   name: Lightning Bolt
   level: 3
@@ -4135,6 +4354,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     3.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 8d6
+        type: lightning
+    area:
+      shape: line
+      size: 100
+    upcast:
+      damage:
+        - dice: 1d6
+          type: lightning
 - id: magic-circle
   name: Magic Circle
   level: 3
@@ -4236,6 +4469,13 @@
 
     _Using a Higher-Level Spell Slot._ The healing increases by 1d4 for each spell slot level above
     3.
+  mechanics:
+    heal:
+      dice: 2d4
+      add_modifier: true
+    targets: 6
+    upcast:
+      heal: 1d4
 - id: meld-into-stone
   name: Meld into Stone
   level: 3
@@ -4731,6 +4971,13 @@
     upward. Arrows, bolts, and other ordinary projectiles launched at targets behind the wall are
     deflected upward and miss automatically. Boulders hurled by Giants or siege engines, and similar
     projectiles, are unaffected. Creatures in gaseous form can't pass through it.
+  mechanics:
+    save:
+      ability: str
+      on_success: half
+    damage:
+      - dice: 4d8
+        type: bludgeoning
 - id: arcane-eye
   name: Arcane Eye
   level: 4
@@ -4850,6 +5097,18 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     4.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 8d8
+        type: necrotic
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d8
+          type: necrotic
 - id: charm-monster
   name: Charm Monster
   level: 4
@@ -4875,6 +5134,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 4.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+    targets: 1
+    upcast:
+      targets: 1
 - id: compulsion
   name: Compulsion
   level: 4
@@ -4896,6 +5165,13 @@
     you. Each Charmed target must use as much of its movement as possible to move in that direction
     on its next turn, taking the safest route. After moving in this way, a target repeats the save,
     ending the spell on itself on a success.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
 - id: confusion
   name: Confusion
   level: 4
@@ -5563,6 +5839,18 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     4.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 4d10
+        type: psychic
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d10
+          type: psychic
 - id: polymorph
   name: Polymorph
   level: 4
@@ -6125,6 +6413,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     5.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 8d8
+        type: cold
+    area:
+      shape: cone
+      size: 60
+    upcast:
+      damage:
+        - dice: 1d8
+          type: cold
 - id: conjure-elemental
   name: Conjure Elemental
   level: 5
@@ -6543,6 +6845,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 5.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: paralyzed
+        on: failed_save
+    targets: 1
+    upcast:
+      targets: 1
 - id: insect-plague
   name: Insect Plague
   level: 5
@@ -6620,6 +6932,16 @@
 
     _Using a Higher-Level Spell Slot._ The healing increases by 1d8 for each spell slot level above
     5.
+  mechanics:
+    heal:
+      dice: 5d8
+      add_modifier: true
+    targets: 6
+    upcast:
+      heal: 1d8
+    area:
+      shape: sphere
+      size: 30
 - id: mislead
   name: Mislead
   level: 5
@@ -7342,6 +7664,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 2d8 for each spell slot level above
     6.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 8d8
+        type: necrotic
+    area:
+      shape: sphere
+      size: 60
+    upcast:
+      damage:
+        - dice: 2d8
+          type: necrotic
 - id: conjure-fey
   name: Conjure Fey
   level: 6
@@ -7563,6 +7899,14 @@
 
     If you maintain your Concentration on this spell for the entire possible duration, the target is
     Petrified until the condition is ended by _Greater Restoration_ or similar magic.
+  mechanics:
+    save:
+      ability: con
+      on_success: none
+    conditions:
+      - condition: restrained
+        on: failed_save
+    targets: 1
 - id: forbiddance
   name: Forbiddance
   level: 6
@@ -7633,6 +7977,20 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     6.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 10d6
+        type: cold
+    area:
+      shape: sphere
+      size: 60
+    upcast:
+      damage:
+        - dice: 1d6
+          type: cold
 - id: globe-of-invulnerability
   name: Globe of Invulnerability
   level: 6
@@ -7734,6 +8092,14 @@
     Constitution saving throw. On a failed save, it takes 14d6 Necrotic damage, and its Hit Point
     maximum is reduced by an amount equal to the Necrotic damage it took. On a successful save, it
     takes half as much damage only. This spell can't reduce a target's Hit Point maximum below 1.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 14d6
+        type: necrotic
+    targets: 1
 - id: heal
   name: Heal
   level: 6
@@ -8052,6 +8418,19 @@
 
     For the duration, a mote of brilliant radiance shines above you. It sheds Bright Light in a
     30-foot radius and Dim Light for an additional 30 feet. This light is sunlight.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 6d8
+        type: radiant
+    conditions:
+      - condition: blinded
+        on: failed_save
+    area:
+      shape: line
+      size: 60
 - id: transport-via-plants
   name: Transport via Plants
   level: 6
@@ -8431,6 +8810,13 @@
 
 
     Flammable objects in the area that aren't being worn or carried start burning.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 7d10
+        type: fire
 - id: forcecage
   name: Forcecage
   level: 7
@@ -9120,6 +9506,14 @@
 
 
     On a successful save, the target takes half as much damage only.
+  mechanics:
+    save:
+      ability: int
+      on_success: half
+    damage:
+      - dice: 10d12
+        type: psychic
+    targets: 1
 - id: clone
   name: Clone
   level: 8
@@ -9539,6 +9933,19 @@
 
 
     This spell dispels Darkness in its area that was created by any spell.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 12d6
+        type: radiant
+    conditions:
+      - condition: blinded
+        on: failed_save
+    area:
+      shape: sphere
+      size: 60
 - id: tsunami
   name: Tsunami
   level: 8
@@ -9759,6 +10166,18 @@
 
     A nonmagical object that isn't being worn or carried also takes the damage if it's in the
     spell's area, and the object starts burning if it's flammable.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 20d6
+        type: fire
+      - dice: 20d6
+        type: bludgeoning
+    area:
+      shape: sphere
+      size: 40
 - id: power-word-heal
   name: Power Word Heal
   level: 9
@@ -10070,6 +10489,19 @@
 
     A Frightened target makes a Wisdom saving throw at the end of each of its turns. On a failed
     save, it takes 5d10 Psychic damage. On a successful save, the spell ends on that target.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 10d10
+        type: psychic
+    conditions:
+      - condition: frightened
+        on: failed_save
+    area:
+      shape: sphere
+      size: 30
 - id: wish
   name: Wish
   level: 9

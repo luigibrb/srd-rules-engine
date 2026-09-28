@@ -7,6 +7,7 @@ import {
   lookup,
   type SpellDef,
   scriptedRng,
+  seededRng,
 } from "../src/index";
 import * as svc from "../src/services/builder";
 import { apply, autocomplete, catalog, classBuild } from "./helpers";
@@ -42,21 +43,26 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
 const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizardLine] });
 
 describe("golden spells (mechanics checked against the SRD text)", () => {
-  it("only the reviewed spells have mechanics so far", () => {
+  it("every spell's mechanics, as reviewed (a change here needs a review against the SRD)", () => {
     const withMechanics = Object.values(catalog.spells).filter((s) => s.mechanics);
-    expect(withMechanics.map((s) => s.id).sort()).toEqual([
-      "acid-splash",
-      "burning-hands",
-      "cure-wounds",
-      "eldritch-blast",
-      "fire-bolt",
-      "fireball",
-      "guiding-bolt",
-      "healing-word",
-      "hold-person",
-      "ice-storm",
-      "inflict-wounds",
-    ]);
+    expect(withMechanics).toHaveLength(53);
+    expect(Object.fromEntries(withMechanics.map((s) => [s.id, s.mechanics]))).toMatchSnapshot();
+  });
+
+  it("every spell with mechanics casts, at its level and with a 9th-level slot", () => {
+    for (const s of Object.values(catalog.spells)) {
+      const m = s.mechanics;
+      if (!m) continue;
+      if (m.cantrip_scaling) expect(s.level, s.id).toBe(0);
+      if (m.upcast) expect(s.level, s.id).toBeGreaterThan(0);
+      const count = Math.min(m.targets ?? 2, 2);
+      const targets = Array.from({ length: count }, () => creature());
+      const slots = s.level === 0 ? [undefined] : [s.level, 9];
+      for (const slot_level of slots) {
+        const r = castSpell(mage(20), s, targets, { slot_level, rng: seededRng(s.level) });
+        expect(r.targets.length, s.id).toBeGreaterThanOrEqual(count);
+      }
+    }
   });
 
   it("Fire Bolt: a ranged spell attack for 1d10 Fire, more dice at 5, 11 and 17", () => {
@@ -178,6 +184,43 @@ describe("golden spells (mechanics checked against the SRD text)", () => {
     expect(() =>
       castSpell(mage(), spell("hold-person"), [creature(), creature()], { slot_level: 2 }),
     ).toThrow(/at most 1/);
+  });
+});
+
+describe("parsed and corrected spells", () => {
+  it("Hideous Laughter gives both Prone and Incapacitated", () => {
+    const r = castSpell(mage(), spell("hideous-laughter"), [creature()], { rng: scriptedRng([1]) });
+    expect(r.targets[0]?.conditions).toEqual(["prone", "incapacitated"]);
+  });
+
+  it("Hypnotic Pattern also gives Incapacitated (while Charmed)", () => {
+    const r = castSpell(mage(), spell("hypnotic-pattern"), [creature()], { rng: scriptedRng([1]) });
+    expect(r.targets[0]?.conditions).toEqual(["charmed", "incapacitated"]);
+  });
+
+  it("Mass Cure Wounds heals up to six creatures", () => {
+    const six = Array.from({ length: 6 }, () => creature());
+    const r = castSpell(mage(), spell("mass-cure-wounds"), six, { rng: seededRng(1) });
+    expect(new Set(r.targets.map((t) => t.healing)).size).toBe(1); // rolled once
+    expect(() => castSpell(mage(), spell("mass-cure-wounds"), [...six, creature()])).toThrow(
+      /at most 6/,
+    );
+  });
+
+  it("Weird deals only its first 10d10 when cast", () => {
+    expect(spell("weird").mechanics?.damage).toEqual([
+      { dice: "10d10", type: "psychic", add_modifier: false },
+    ]);
+  });
+
+  it("Starry Wisp doesn't make its target Invisible", () => {
+    expect(spell("starry-wisp").mechanics?.conditions).toEqual([]);
+  });
+
+  it("rejected drafts stay text", () => {
+    expect(spell("holy-aura").mechanics).toBeNull();
+    expect(spell("produce-flame").mechanics).toBeNull();
+    expect(spell("contact-other-plane").mechanics).toBeNull();
   });
 });
 

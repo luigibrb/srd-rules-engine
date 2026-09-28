@@ -22018,7 +22018,23 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "melee",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d10",
+                        "type": "necrotic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "dancing-lights",
@@ -22291,7 +22307,23 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d12",
+                        "type": "poison",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "prestidigitation",
@@ -22349,7 +22381,23 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d8",
+                        "type": "cold",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "resistance",
@@ -22386,7 +22434,26 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [
+                    {
+                        "dice": "1d8",
+                        "type": "radiant",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "shillelagh",
@@ -22423,7 +22490,23 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "melee",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d8",
+                        "type": "lightning",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "sorcerous-burst",
@@ -22479,7 +22562,23 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d8",
+                        "type": "radiant",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "thaumaturgy",
@@ -22536,7 +22635,26 @@
             "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [
+                    {
+                        "dice": "1d6",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": "dice",
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "alarm",
@@ -22575,7 +22693,29 @@
             "components": "V, S, M (a morsel of food)",
             "duration": "24 hours",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "bane",
@@ -22686,7 +22826,29 @@
             "components": "V, S",
             "duration": "1 hour",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "chromatic-orb",
@@ -22725,7 +22887,28 @@
             "components": "V, S, M (a pinch of colorful sand)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "blinded",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "cone",
+                    "size": 15
+                }
+            }
         },
         {
             "id": "command",
@@ -22927,7 +23110,35 @@
             "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d6",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "psychic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "divine-favor",
@@ -23000,7 +23211,25 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "str",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "restrained",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "expeditious-retreat",
@@ -23271,7 +23500,35 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d10",
+                        "type": "fire",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "heroism",
@@ -23328,7 +23585,33 @@
             "components": "V, S, M (a tart and a feather)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "prone",
+                        "on": "failed_save"
+                    },
+                    {
+                        "condition": "incapacitated",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "hunters-mark",
@@ -23592,7 +23875,37 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "2d8",
+                        "type": "poison",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "poison"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "poisoned",
+                        "on": "hit"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "sanctuary",
@@ -23706,7 +24019,28 @@
             "components": "V, S, M (a pinch of sand or rose petals)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "incapacitated",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "sphere",
+                    "size": 5
+                }
+            }
         },
         {
             "id": "speak-with-animals",
@@ -23748,7 +24082,38 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d8",
+                        "type": "thunder",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "thunder"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cube",
+                    "size": 15
+                }
+            }
         },
         {
             "id": "unseen-servant",
@@ -24511,7 +24876,35 @@
             "components": "S",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d8",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "psychic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "mirror-image",
@@ -24745,7 +25138,38 @@
             "components": "V, S, M (a chip of mica)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d8",
+                        "type": "thunder",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "thunder"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 10
+                }
+            }
         },
         {
             "id": "shining-smite",
@@ -24861,7 +25285,25 @@
             "components": "V, M (a drop of honey)",
             "duration": "Concentration, up to 8 hours",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "warding-bond",
@@ -25013,7 +25455,35 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d10",
+                        "type": "lightning",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "lightning"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "clairvoyance",
@@ -25310,7 +25780,32 @@
             "components": "S, M (a pinch of confetti)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    },
+                    {
+                        "condition": "incapacitated",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "cube",
+                    "size": 30
+                }
+            }
         },
         {
             "id": "lightning-bolt",
@@ -25329,7 +25824,38 @@
             "components": "V, S, M (a bit of fur and a crystal rod)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "8d6",
+                        "type": "lightning",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "lightning"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "line",
+                    "size": 100
+                }
+            }
         },
         {
             "id": "magic-circle",
@@ -25390,7 +25916,24 @@
             "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": {
+                    "dice": "2d4",
+                    "add_modifier": true
+                },
+                "targets": 6,
+                "upcast": {
+                    "damage": [],
+                    "heal": "1d4",
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "meld-into-stone",
@@ -25792,7 +26335,26 @@
             "components": "V, S, M (a fan and a feather)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "str",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "4d8",
+                        "type": "bludgeoning",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "arcane-eye",
@@ -25890,7 +26452,35 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "8d8",
+                        "type": "necrotic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "necrotic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "charm-monster",
@@ -25912,7 +26502,29 @@
             "components": "V, S",
             "duration": "1 hour",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "compulsion",
@@ -25930,7 +26542,25 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "confusion",
@@ -26341,7 +26971,35 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "4d10",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "psychic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "polymorph",
@@ -26648,7 +27306,38 @@
             "components": "V, S, M (a small crystal or glass cone)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "8d8",
+                        "type": "cold",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "cold"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cone",
+                    "size": 60
+                }
+            }
         },
         {
             "id": "conjure-elemental",
@@ -26884,7 +27573,29 @@
             "components": "V, S, M (a straight piece of iron)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "paralyzed",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "insect-plague",
@@ -26944,7 +27655,27 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": {
+                    "dice": "5d8",
+                    "add_modifier": true
+                },
+                "targets": 6,
+                "upcast": {
+                    "damage": [],
+                    "heal": "1d8",
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 30
+                }
+            }
         },
         {
             "id": "mislead",
@@ -27294,7 +28025,38 @@
             "components": "V, S, M (the powder of a crushed black pearl worth 500+ GP)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "8d8",
+                        "type": "necrotic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "2d8",
+                            "type": "necrotic"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 60
+                }
+            }
         },
         {
             "id": "conjure-fey",
@@ -27430,7 +28192,25 @@
             "components": "V, S, M (a cockatrice feather)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "restrained",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": null
+            }
         },
         {
             "id": "forbiddance",
@@ -27467,7 +28247,38 @@
             "components": "V, S, M (a miniature crystal sphere)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "10d6",
+                        "type": "cold",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "cold"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 60
+                }
+            }
         },
         {
             "id": "globe-of-invulnerability",
@@ -27523,7 +28334,26 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "14d6",
+                        "type": "necrotic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "heal",
@@ -27715,7 +28545,34 @@
             "components": "V, S, M (a magnifying glass)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "6d8",
+                        "type": "radiant",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "blinded",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "line",
+                    "size": 60
+                }
+            }
         },
         {
             "id": "transport-via-plants",
@@ -27963,7 +28820,26 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "7d10",
+                        "type": "fire",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "forcecage",
@@ -28297,7 +29173,26 @@
             "components": "V, S, M (a key ring with no keys)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "int",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "10d12",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null
+            }
         },
         {
             "id": "clone",
@@ -28532,7 +29427,34 @@
             "components": "V, S, M (a piece of sunstone)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "12d6",
+                        "type": "radiant",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "blinded",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "sphere",
+                    "size": 60
+                }
+            }
         },
         {
             "id": "tsunami",
@@ -28668,7 +29590,34 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "20d6",
+                        "type": "fire",
+                        "add_modifier": false
+                    },
+                    {
+                        "dice": "20d6",
+                        "type": "bludgeoning",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 40
+                }
+            }
         },
         {
             "id": "power-word-heal",
@@ -28841,7 +29790,34 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "10d10",
+                        "type": "psychic",
+                        "add_modifier": false
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "frightened",
+                        "on": "failed_save"
+                    }
+                ],
+                "area": {
+                    "shape": "sphere",
+                    "size": 30
+                }
+            }
         },
         {
             "id": "wish",

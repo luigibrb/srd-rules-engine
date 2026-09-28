@@ -253,8 +253,22 @@ on_long_rest: [heroic_inspiration]   # Human: Resourceful
 ### Spell mechanics
 
 A spell's `mechanics` says what it does, so `castSpell` can resolve it; anything it doesn't
-cover stays in the text. The SRD's are generated from the MECHANICS overlay in
-`scripts/import-srd-spells.ts` (edit that, not `spells.yaml`).
+cover stays in the text. For the SRD, `scripts/import-srd-spells.ts` writes them (edit it, not
+`spells.yaml`):
+
+- `parseMechanics` drafts mechanics from the common phrasings ("makes a Dexterity saving
+  throw, taking 8d6 Fire damage on a failed save or half as much…", "Make a ranged spell
+  attack… On a hit…", "regains Hit Points equal to…", upcasting, Cantrip Upgrade, conditions,
+  areas). It skips, with a reason, anything that happens after casting, several saves, damage
+  outside the sentence that resolves the save or hit, tables and fixed DCs.
+- A draft is used only if its id is in `REVIEWED`, after a check against the spell's text;
+  `REJECTED` records drafts the review found wrong, and `MECHANICS` holds hand-written ones
+  (they win over drafts).
+- `npx tsx scripts/import-srd-spells.ts --report` lists every draft (`NEW` = not reviewed yet)
+  and every skip. `tests/casting.test.ts` snapshots all mechanics, so a change shows in review.
+
+The same approach suits your own packs: transcribe the text, draft mechanics with a parser or by
+hand, validate with `srd-rules validate`, and pin the result with a test.
 
 ```yaml
 id: fireball

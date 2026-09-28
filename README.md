@@ -164,8 +164,8 @@ the sheet's bonus. The older functions that take a hand-filled `Character` (`res
 `attackRoll`) are deprecated; `combatantFromSnapshot` turns a `Character` into a combatant.
 `castSpell(caster, catalog.spells.fireball, targets, { slot_level: 5 })` casts a catalog spell
 whose `mechanics` are modeled: attack or save (half damage on a success), upcasting, Cantrip
-Upgrade, healing and conditions, with the play actions that apply the result. Mechanics cover a
-first reviewed set of spells; the others are cast with their text. The older `Character` spell
+Upgrade, healing and conditions, with the play actions that apply the result. 53 SRD spells have
+reviewed mechanics; the others are cast with their text. The older `Character` spell
 functions (`resolveSpellAttack`, `resolveSpellSave`, `spellSaveDc`) are deprecated.
 
 Attack lines on the sheet carry their damage ready to roll, and `takeDamage` applies the rules
@@ -305,7 +305,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Character creation | Complete: all 12 SRD classes, 9 species, 4 backgrounds |
 | Levels | 1–20 with multiclassing (prerequisites, partial proficiencies, combined spell slots, Pact Magic), fixed or rolled Hit Points, Ability Score Improvements, feats with prerequisites, Epic Boons |
 | Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells; the rest is shown as the SRD text |
-| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions) for a first set of 11 spells |
+| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions) for 53 reviewed spells; the rest are cast with their text |
 | Combat | Attacks, damage, crits, saving throws, save-for-half spells |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, conditions and Exhaustion, concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
