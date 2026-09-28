@@ -51,9 +51,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   in `services/play.ts`). `makeAttack` returns rolls + damage `instances`; the caller applies
   them (play action `{ type: "damage", instances, critical }`). The `Character`-based
   `resolveAttack`/`attackRoll` are deprecated adapters kept until 1.0.
-- Spells: `mechanics` on catalog spells (from the MECHANICS overlay in import-srd-spells.ts,
-  never hand-edited in spells.yaml); `castSpell` in `rules/casting.ts`. A new spell's mechanics
-  need a golden test in `tests/casting.test.ts` checked against the SRD text.
+- Spells: `mechanics` on catalog spells, written by import-srd-spells.ts (never hand-edited in
+  spells.yaml): parser drafts used only for ids in `REVIEWED` (each checked against the SRD
+  text), `REJECTED` drafts with a reason, hand-written `MECHANICS` (win). `--report` lists drafts
+  and skips. `castSpell` in `rules/casting.ts`; `tests/casting.test.ts` snapshots all mechanics.
 - Taking damage always goes through `takeDamage` in `rules/damage.ts` (Resistance, temp HP,
   0 HP, death); attack damage is `DamagePart[]` (`rollDamage`), never parsed from display text.
 - Rules content is data: every entity has a slug `id` and a `source` (default: the pack's name).

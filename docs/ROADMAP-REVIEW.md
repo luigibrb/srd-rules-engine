@@ -276,3 +276,13 @@ Approved with the recommendations above:
   11 golden spells; the `Spell` model and `Character` spell functions deprecated. Not modeled
   yet: Magic Missile-style darts (a flat bonus per dart), spells with both an attack and a save,
   riders such as Guiding Bolt's Advantage (text).
+- **P4b (done, branch `p4b-spell-parser`):** `parseMechanics` in `import-srd-spells.ts` drafts
+  mechanics from the text; `--report` lists drafts and skips. All 43 drafts were reviewed against
+  their text: 38 used as drafted (`REVIEWED`), 2 rejected (`REJECTED`: Holy Aura, Produce Flame),
+  3 corrected by hand (Hypnotic Pattern, Mass Cure Wounds, Mass Healing Word), plus Weird written
+  by hand. The review found parser bugs, fixed before use: capitalized "A/One creature", plural
+  "conditions", "can't benefit from the Invisible condition", a caster's own fixed-DC save, and
+  damage from repeated saves. 53 spells have mechanics; 207 have nothing to model; 79 stay text
+  (damage after casting 46, no resolving effect 10, damage elsewhere 9, unread upcasts 5, tables 3,
+  rejected 2, attack and save 2, several saves 1, fixed DC 1). Those need P5/P7 concepts (ongoing
+  effects, triggers) or hand-written entries.

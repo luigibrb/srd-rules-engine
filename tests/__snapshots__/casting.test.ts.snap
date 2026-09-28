@@ -1,0 +1,1296 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden spells (mechanics checked against the SRD text) > every spell's mechanics, as reviewed (a change here needs a review against the SRD) 1`] = `
+{
+  "acid-splash": {
+    "area": {
+      "shape": "sphere",
+      "size": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d6",
+        "type": "acid",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "animal-friendship": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "befuddlement": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "10d12",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "int",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "blight": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "8d8",
+        "type": "necrotic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "necrotic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "burning-hands": {
+    "area": {
+      "shape": "cone",
+      "size": 15,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "3d6",
+        "type": "fire",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "fire",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "call-lightning": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "3d10",
+        "type": "lightning",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "lightning",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "charm-monster": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "charm-person": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "chill-touch": {
+    "area": null,
+    "attack": "melee",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d10",
+        "type": "necrotic",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "circle-of-death": {
+    "area": {
+      "shape": "sphere",
+      "size": 60,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "8d8",
+        "type": "necrotic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "2d8",
+          "type": "necrotic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "color-spray": {
+    "area": {
+      "shape": "cone",
+      "size": 15,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "blinded",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "compulsion": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "cone-of-cold": {
+    "area": {
+      "shape": "cone",
+      "size": 60,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "8d8",
+        "type": "cold",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "cold",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "cure-wounds": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "heal": {
+      "add_modifier": true,
+      "dice": "2d8",
+    },
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": "2d8",
+      "targets": 0,
+    },
+  },
+  "dissonant-whispers": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "3d6",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "psychic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "eldritch-blast": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": "beams",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d10",
+        "type": "force",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "entangle": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "restrained",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "str",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "fire-bolt": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d10",
+        "type": "fire",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "fire-storm": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "7d10",
+        "type": "fire",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "fireball": {
+    "area": {
+      "shape": "sphere",
+      "size": 20,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "8d6",
+        "type": "fire",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "fire",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "flesh-to-stone": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "restrained",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "freezing-sphere": {
+    "area": {
+      "shape": "sphere",
+      "size": 60,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "10d6",
+        "type": "cold",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "cold",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "guiding-bolt": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "4d6",
+        "type": "radiant",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "radiant",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "harm": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "14d6",
+        "type": "necrotic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "healing-word": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "heal": {
+      "add_modifier": true,
+      "dice": "2d4",
+    },
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": "2d4",
+      "targets": 0,
+    },
+  },
+  "hellish-rebuke": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "2d10",
+        "type": "fire",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "fire",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "hideous-laughter": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "prone",
+        "on": "failed_save",
+      },
+      {
+        "condition": "incapacitated",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "hold-monster": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "paralyzed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "hold-person": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "paralyzed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+  },
+  "hypnotic-pattern": {
+    "area": {
+      "shape": "cube",
+      "size": 30,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+      {
+        "condition": "incapacitated",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "ice-storm": {
+    "area": {
+      "shape": "cylinder",
+      "size": 20,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "2d10",
+        "type": "bludgeoning",
+      },
+      {
+        "add_modifier": false,
+        "dice": "4d6",
+        "type": "cold",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "bludgeoning",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "inflict-wounds": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "2d10",
+        "type": "necrotic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "necrotic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "lightning-bolt": {
+    "area": {
+      "shape": "line",
+      "size": 100,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "8d6",
+        "type": "lightning",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "lightning",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "mass-cure-wounds": {
+    "area": {
+      "shape": "sphere",
+      "size": 30,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "heal": {
+      "add_modifier": true,
+      "dice": "5d8",
+    },
+    "save": null,
+    "targets": 6,
+    "upcast": {
+      "damage": [],
+      "heal": "1d8",
+      "targets": 0,
+    },
+  },
+  "mass-healing-word": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "heal": {
+      "add_modifier": true,
+      "dice": "2d4",
+    },
+    "save": null,
+    "targets": 6,
+    "upcast": {
+      "damage": [],
+      "heal": "1d4",
+      "targets": 0,
+    },
+  },
+  "meteor-swarm": {
+    "area": {
+      "shape": "sphere",
+      "size": 40,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "20d6",
+        "type": "fire",
+      },
+      {
+        "add_modifier": false,
+        "dice": "20d6",
+        "type": "bludgeoning",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "mind-spike": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "3d8",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "psychic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "phantasmal-killer": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "4d10",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "half",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "psychic",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "poison-spray": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d12",
+        "type": "poison",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "ray-of-frost": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d8",
+        "type": "cold",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "ray-of-sickness": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "poisoned",
+        "on": "hit",
+      },
+    ],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "2d8",
+        "type": "poison",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "poison",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "sacred-flame": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d8",
+        "type": "radiant",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "shatter": {
+    "area": {
+      "shape": "sphere",
+      "size": 10,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "3d8",
+        "type": "thunder",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "thunder",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "shocking-grasp": {
+    "area": null,
+    "attack": "melee",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d8",
+        "type": "lightning",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "sleep": {
+    "area": {
+      "shape": "sphere",
+      "size": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "incapacitated",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "starry-wisp": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d8",
+        "type": "radiant",
+      },
+    ],
+    "heal": null,
+    "save": null,
+    "targets": 1,
+    "upcast": null,
+  },
+  "suggestion": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "charmed",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "sunbeam": {
+    "area": {
+      "shape": "line",
+      "size": 60,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "blinded",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "6d8",
+        "type": "radiant",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "sunburst": {
+    "area": {
+      "shape": "sphere",
+      "size": 60,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "blinded",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "12d6",
+        "type": "radiant",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "thunderwave": {
+    "area": {
+      "shape": "cube",
+      "size": 15,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "2d8",
+        "type": "thunder",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "thunder",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+  },
+  "vicious-mockery": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": "dice",
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "1d6",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": null,
+  },
+  "weird": {
+    "area": {
+      "shape": "sphere",
+      "size": 30,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "frightened",
+        "on": "failed_save",
+      },
+    ],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "10d10",
+        "type": "psychic",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+  "wind-wall": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "dice": "4d8",
+        "type": "bludgeoning",
+      },
+    ],
+    "heal": null,
+    "save": {
+      "ability": "str",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+  },
+}
+`;
