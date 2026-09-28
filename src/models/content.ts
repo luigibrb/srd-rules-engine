@@ -899,6 +899,109 @@ export const MagicItemSchema = z.strictObject({
 });
 export type MagicItemDef = z.infer<typeof MagicItemSchema>;
 
+/** Damage as a stat block writes it: `13 (1d10 + 8) Slashing`, or a fixed `1 Piercing`. */
+const MonsterDamageSchema = z.strictObject({
+  average: z.int(),
+  dice: Dice.nullable().default(null),
+  bonus: z.int().default(0),
+  type: z.enum(DAMAGE_TYPES),
+});
+export type MonsterDamage = z.infer<typeof MonsterDamageSchema>;
+
+/**
+ * A trait or action of a stat block. `text` is always the SRD's; `attack` (an attack roll) or
+ * `save` (a saving throw effect, like a breath weapon) hold what combat can resolve.
+ */
+export const MonsterActionSchema = z.strictObject({
+  name: z.string(),
+  text: z.string(),
+  /** `5–6`: it recharges on those d6 rolls. */
+  recharge: z.string().nullable().default(null),
+  attack: z
+    .strictObject({
+      kind: z.enum(["melee", "ranged", "melee_or_ranged"]),
+      bonus: z.int(),
+      reach: z.int().nullable().default(null),
+      /** `80/320` feet. */
+      range: z.string().nullable().default(null),
+      /** On a hit; conditions and other riders stay in the text. */
+      damage: z.array(MonsterDamageSchema).default([]),
+    })
+    .nullable()
+    .default(null),
+  save: z
+    .strictObject({
+      ability: z.enum(ABILITIES),
+      dc: z.int(),
+      /** On a failed save. */
+      damage: z.array(MonsterDamageSchema).default([]),
+      on_success: z.enum(["half", "none"]).default("none"),
+      /** Conditions on a failed save. */
+      conditions: z.array(z.string()).default([]),
+    })
+    .nullable()
+    .default(null),
+});
+export type MonsterAction = z.infer<typeof MonsterActionSchema>;
+
+const abilityRecord = z.strictObject({
+  str: z.int(),
+  dex: z.int(),
+  con: z.int(),
+  int: z.int(),
+  wis: z.int(),
+  cha: z.int(),
+});
+
+/** A monster or animal stat block (SRD "Monsters A–Z", "Animals"). */
+export const MonsterSchema = z.strictObject({
+  ...entity,
+  /** The SRD heading it's listed under, when several stat blocks share one (Animated Objects). */
+  group: z.string().nullable().default(null),
+  /** `Large`, or `Medium or Small`. */
+  size: z.string(),
+  /** `Dragon (Chromatic)`. */
+  creature_type: z.string(),
+  alignment: z.string(),
+  armor_class: z.int(),
+  initiative: z.int(),
+  hit_points: z.int(),
+  /** `19d12+133`; `null` when the stat block gives only a number. */
+  hit_dice: z.string().nullable().default(null),
+  /** Feet by mode: `{ walk: 40, fly: 80 }`. */
+  speed: z.record(z.string(), z.int()),
+  hover: z.boolean().default(false),
+  /** Speeds with a qualifier: "Climb 30 ft. (bear form only)". */
+  speed_note: z.string().default(""),
+  /** Ability scores. */
+  abilities: abilityRecord,
+  /** Saving throw bonuses (the stat block's SAVE column). */
+  saving_throws: abilityRecord,
+  skills: z.record(z.string(), z.int()).default({}),
+  resistances: z.array(z.enum(DAMAGE_TYPES)).default([]),
+  vulnerabilities: z.array(z.enum(DAMAGE_TYPES)).default([]),
+  immunities: z.array(z.enum(DAMAGE_TYPES)).default([]),
+  condition_immunities: z.array(z.string()).default([]),
+  /** Defense entries that aren't plain damage types ("…from weapons wielded by…"). */
+  defenses_note: z.string().default(""),
+  gear: z.string().default(""),
+  senses: z.string().default(""),
+  passive_perception: z.int(),
+  languages: z.string().default(""),
+  /** Challenge Rating: `17`, `1/4`. */
+  cr: z.string(),
+  xp: z.int(),
+  proficiency_bonus: z.int(),
+  traits: z.array(MonsterActionSchema).default([]),
+  actions: z.array(MonsterActionSchema).default([]),
+  bonus_actions: z.array(MonsterActionSchema).default([]),
+  reactions: z.array(MonsterActionSchema).default([]),
+  /** The paragraph before the Legendary Actions (uses per round). */
+  legendary_text: z.string().default(""),
+  legendary_actions: z.array(MonsterActionSchema).default([]),
+});
+export type MonsterDef = z.infer<typeof MonsterSchema>;
+
 export const PointBuySchema = z.strictObject({
   budget: z.int(),
   min_score: z.int(),

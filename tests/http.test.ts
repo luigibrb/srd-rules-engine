@@ -104,6 +104,9 @@ describe("HTTP API", () => {
     expect((await api.get("/v1/content/armor/chain-mail")).body.base_ac).toBe(16);
     expect((await api.get("/v1/content/armor/nope")).status).toBe(404);
     expect((await api.get("/v1/content/spaceships")).status).toBe(404);
+    expect((await api.get("/v1/content/magic_items/weapon-1")).body.name).toBe("Weapon, +1");
+    expect((await api.get("/v1/content/magic-items/weapon-1")).status).toBe(200);
+    expect((await api.get("/v1/content/monsters/goblin-warrior")).body.cr).toBe("1/4");
     expect((await api.get("/v1/content/packs")).body).toEqual([
       expect.objectContaining({ id: "srd-5.2.1", version: "5.2.1" }),
     ]);

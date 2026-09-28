@@ -72,8 +72,8 @@ export interface AttackRider {
 export interface AttackLine {
   readonly name: string;
   readonly kind: "melee" | "ranged";
-  /** The ability the attack uses. */
-  readonly ability: Ability;
+  /** The ability the attack uses (`null` for a monster's attack, which doesn't say). */
+  readonly ability: Ability | null;
   /** A weapon attack (not an Unarmed Strike). */
   readonly weapon: boolean;
   readonly properties: readonly string[];

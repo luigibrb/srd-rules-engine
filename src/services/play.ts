@@ -316,6 +316,8 @@ export function combatantFromCharacter(
     attacks_per_action: sheet.attacks_per_action,
     advantages: sheet.advantages.map((a) => a.target),
     no_spells: sheet.toggles.some((t) => t.active && t.no_spells),
+    condition_immunities: [],
+    save_actions: [],
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []

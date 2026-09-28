@@ -6,7 +6,7 @@
  * `caster_actions` (spend the slot, start Concentration) and each target's `actions`.
  */
 
-import type { SpellDef } from "../models/content";
+import type { Ability, SpellDef } from "../models/content";
 import type { PlayAction } from "../models/state";
 import {
   type Combatant,
@@ -201,22 +201,14 @@ export function castSpell(
       results.push(targetResult(index, target, r));
     }
   } else if (m.save) {
-    const save = m.save;
-    const dc = line?.save_dc ?? 0;
-    const saves = targets.map((t) => rollSavingThrow(t, save.ability, dc, { rng }));
-    const rolled = sharedDamage();
-    targets.forEach((target, i) => {
-      const result = saves[i] as SaveResult;
-      let instances = rolled ? toInstances(rolled) : [];
-      if (result.success) {
-        instances =
-          save.on_success === "half"
-            ? instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }))
-            : [];
-      }
-      const conditions = result.success ? [] : conditionsOn(m, "failed_save");
-      results.push(targetResult(i, target, { save: result, instances, conditions }));
-    });
+    const effect = {
+      ...m.save,
+      dc: line?.save_dc ?? 0,
+      conditions: conditionsOn(m, "failed_save"),
+    };
+    const resolved = resolveSave(effect, parts, targets, rng);
+    shared = resolved.damage;
+    results.push(...resolved.targets);
   } else {
     const rolled = sharedDamage();
     for (const [i, target] of targets.entries()) {
@@ -249,45 +241,6 @@ export function castSpell(
     targets: results,
     notes: [],
   };
-
-  function targetResult(
-    index: number,
-    target: Combatant,
-    r: {
-      attack?: SpellAttackRoll;
-      save?: SaveResult;
-      instances?: DamageInstance[];
-      critical?: boolean;
-      conditions?: string[];
-    },
-  ): SpellTargetResult {
-    const instances = r.instances ?? [];
-    const critical = r.critical ?? false;
-    const conditions = r.conditions ?? [];
-    const outcome = instances.length
-      ? takeDamage(
-          { hp: target.hp, temp: target.temp_hp, max: target.max_hp },
-          instances,
-          target.defenses,
-          { critical },
-        )
-      : null;
-    const actions: PlayAction[] = [];
-    if (instances.length) actions.push({ type: "damage", instances, critical });
-    for (const condition of conditions) actions.push({ type: "add_condition", condition });
-    return {
-      target: index,
-      name: target.name,
-      attack: r.attack ?? null,
-      save: r.save ?? null,
-      instances,
-      critical,
-      outcome,
-      healing: 0,
-      conditions,
-      actions,
-    };
-  }
 }
 
 /**
@@ -319,4 +272,115 @@ function conditionsOn(m: NonNullable<SpellDef["mechanics"]>, on: "hit" | "failed
 
 function toInstances(rolled: RolledDamage): DamageInstance[] {
   return rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
+}
+
+/** One target's result: the damage preview and the play actions that apply it. */
+function targetResult(
+  index: number,
+  target: Combatant,
+  r: {
+    attack?: SpellAttackRoll;
+    save?: SaveResult;
+    instances?: DamageInstance[];
+    critical?: boolean;
+    conditions?: string[];
+  },
+): SpellTargetResult {
+  const instances = r.instances ?? [];
+  const critical = r.critical ?? false;
+  // A target immune to a condition doesn't get it (a monster's condition Immunities).
+  const conditions = (r.conditions ?? []).filter((c) => !target.condition_immunities.includes(c));
+  const outcome = instances.length
+    ? takeDamage(
+        { hp: target.hp, temp: target.temp_hp, max: target.max_hp },
+        instances,
+        target.defenses,
+        { critical },
+      )
+    : null;
+  const actions: PlayAction[] = [];
+  if (instances.length) actions.push({ type: "damage", instances, critical });
+  for (const condition of conditions) actions.push({ type: "add_condition", condition });
+  return {
+    target: index,
+    name: target.name,
+    attack: r.attack ?? null,
+    save: r.save ?? null,
+    instances,
+    critical,
+    outcome,
+    healing: 0,
+    conditions,
+    actions,
+  };
+}
+
+/** A saving throw effect: an ability, a DC, what happens on a success and on a failure. */
+interface SaveEffect {
+  readonly ability: Ability;
+  readonly dc: number;
+  readonly on_success: "half" | "none";
+  readonly conditions: readonly string[];
+}
+
+/**
+ * Every target saves; the damage is rolled once for all of them (SRD "Damage against Multiple
+ * Targets") and each damage type is halved (rounded down) or ignored on a success.
+ */
+function resolveSave(
+  effect: SaveEffect,
+  parts: readonly DamagePart[],
+  targets: readonly Combatant[],
+  rng: Rng,
+): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
+  const saves = targets.map((t) => rollSavingThrow(t, effect.ability, effect.dc, { rng }));
+  const damage = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
+  const results = targets.map((target, i) => {
+    const save = saves[i] as SaveResult;
+    let instances = damage ? toInstances(damage) : [];
+    if (save.success) {
+      instances =
+        effect.on_success === "half"
+          ? instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }))
+          : [];
+    }
+    const conditions = save.success ? [] : [...effect.conditions];
+    return targetResult(i, target, { save, instances, conditions });
+  });
+  return { damage, targets: results };
+}
+
+export interface SaveActionResult {
+  readonly action: string;
+  readonly ability: Ability;
+  readonly dc: number;
+  /** Damage rolled once for every target. */
+  readonly damage: RolledDamage | null;
+  readonly targets: readonly SpellTargetResult[];
+}
+
+/**
+ * Use one of the combatant's saving throw effects (a monster's breath weapon) against targets.
+ * Like `castSpell`, it changes nothing: each target's `actions` apply the result. Recharge is
+ * the caller's to track.
+ */
+export function useSaveAction(
+  user: Combatant,
+  name: string,
+  targets: readonly Combatant[],
+  { rng = mathRng }: { rng?: Rng } = {},
+): SaveActionResult {
+  const action = user.save_actions.find((a) => a.name === name);
+  if (!action) {
+    const known = user.save_actions.map((a) => a.name).join(", ");
+    throw new RangeError(`${user.name} has no saving throw action '${name}' (${known})`);
+  }
+  const resolved = resolveSave(action, action.damage_parts, targets, rng);
+  return {
+    action: action.name,
+    ability: action.ability,
+    dc: action.dc,
+    damage: resolved.damage,
+    targets: resolved.targets,
+  };
 }

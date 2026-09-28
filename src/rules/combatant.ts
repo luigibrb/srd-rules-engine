@@ -8,12 +8,20 @@
  */
 
 import type { Character } from "../models/character";
-import { ABILITIES, type Ability, type AdvantageTarget, DAMAGE_TYPES } from "../models/content";
+import {
+  ABILITIES,
+  type Ability,
+  type AdvantageTarget,
+  DAMAGE_TYPES,
+  type MonsterDamage,
+  type MonsterDef,
+} from "../models/content";
 import {
   type DamageInstance,
   type DamagePart,
   type DamageResult,
   type Defenses,
+  formatDamage,
   type RolledDamage,
   rollDamage,
   takeDamage,
@@ -62,6 +70,24 @@ export interface Combatant {
   readonly advantages: readonly AdvantageTarget[];
   /** Can't cast spells or concentrate (Rage). */
   readonly no_spells: boolean;
+  /** Conditions it can't have (a monster's Immunities). */
+  readonly condition_immunities: readonly string[];
+  /** Saving throw effects it can use (a breath weapon), resolved by `useSaveAction`. */
+  readonly save_actions: readonly SaveActionLine[];
+}
+
+/** A saving throw effect with a fixed DC (a monster's breath weapon or gaze). */
+export interface SaveActionLine {
+  readonly name: string;
+  readonly ability: Ability;
+  readonly dc: number;
+  /** Damage on a failed save. */
+  readonly damage_parts: readonly DamagePart[];
+  readonly on_success: "half" | "none";
+  /** Conditions on a failed save. */
+  readonly conditions: readonly string[];
+  /** `5–6`: recharges on those d6 rolls (tracked by the caller). */
+  readonly recharge: string | null;
 }
 
 export interface D20Roll {
@@ -285,5 +311,101 @@ export function combatantFromSnapshot(character: Character): Combatant {
     spellcasting: [],
     advantages: [],
     no_spells: false,
+    condition_immunities: [],
+    save_actions: [],
+  };
+}
+
+/** A monster's current state in play (the stat block holds the maxima). */
+export interface MonsterState {
+  readonly hp?: number;
+  readonly temp_hp?: number;
+  readonly conditions?: readonly string[];
+}
+
+/**
+ * A combatant from a monster stat block: its attacks become attack lines (for `makeAttack`), its
+ * saving throw effects become `save_actions` (for `useSaveAction`); spellcasting, recharges and
+ * legendary actions stay in the stat block's text.
+ */
+export function combatantFromMonster(monster: MonsterDef, state: MonsterState = {}): Combatant {
+  const modifiers = Object.fromEntries(
+    ABILITIES.map((a) => [a, abilityModifier(monster.abilities[a])]),
+  ) as Record<Ability, number>;
+  const parts = (damage: readonly MonsterDamage[]): DamagePart[] =>
+    damage.map((d) =>
+      d.dice === null
+        ? { dice: null, bonus: d.average, type: d.type }
+        : { dice: d.dice, bonus: d.bonus, type: d.type },
+    );
+  const all = [...monster.actions, ...monster.bonus_actions, ...monster.reactions];
+  const attacks: AttackLine[] = all.flatMap((action) => {
+    const a = action.attack;
+    if (!a || !a.damage.length) return [];
+    const damage = parts(a.damage);
+    const notes = [
+      ...(a.reach !== null ? [`reach ${a.reach} ft.`] : []),
+      ...(a.range !== null ? [`range ${a.range} ft.`] : []),
+      ...(action.recharge ? [`Recharge ${action.recharge}`] : []),
+    ];
+    return [
+      {
+        name: action.name,
+        kind: a.kind === "ranged" ? "ranged" : "melee",
+        ability: null,
+        weapon: false,
+        properties: [],
+        riders: [],
+        attack_bonus: a.bonus,
+        damage: formatDamage(damage),
+        damage_type: damage[0]?.type ?? "",
+        damage_parts: damage,
+        two_handed_damage_parts: null,
+        mastery: null,
+        notes,
+      },
+    ];
+  });
+  const saveActions: SaveActionLine[] = [...all, ...monster.legendary_actions].flatMap((action) =>
+    action.save
+      ? [
+          {
+            name: action.name,
+            ability: action.save.ability,
+            dc: action.save.dc,
+            damage_parts: parts(action.save.damage),
+            on_success: action.save.on_success,
+            conditions: action.save.conditions,
+            recharge: action.recharge,
+          },
+        ]
+      : [],
+  );
+  const hp = Math.min(state.hp ?? monster.hit_points, monster.hit_points);
+  return {
+    name: monster.name,
+    // Cantrip Upgrade doesn't apply to monsters (their spells are text).
+    level: 1,
+    armor_class: monster.armor_class,
+    hp,
+    temp_hp: state.temp_hp ?? 0,
+    max_hp: monster.hit_points,
+    proficiency_bonus: monster.proficiency_bonus,
+    modifiers,
+    saving_throws: monster.saving_throws,
+    defenses: {
+      resistances: monster.resistances,
+      vulnerabilities: monster.vulnerabilities,
+      immunities: monster.immunities,
+    },
+    conditions: state.conditions ?? [],
+    attacks,
+    critical_hit_on: 20,
+    attacks_per_action: 1,
+    spellcasting: [],
+    advantages: [],
+    no_spells: false,
+    condition_immunities: monster.condition_immunities,
+    save_actions: saveActions,
   };
 }

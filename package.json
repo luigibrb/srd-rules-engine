@@ -80,6 +80,7 @@
     "prepublishOnly": "npm run check && npm run build",
     "content:import-classes": "python3 scripts/import-srd-classes.py",
     "content:import-items": "tsx scripts/import-srd-items.ts",
+    "content:import-monsters": "tsx scripts/import-srd-monsters.ts",
     "content:import-spells": "tsx scripts/import-srd-spells.ts"
   },
   "dependencies": {
