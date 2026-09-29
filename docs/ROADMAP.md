@@ -21,6 +21,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P9 | Legendary actions and Legendary Resistance: uses per round and per day (lair values), once-per-round actions, attacks, used actions and saving throw effects resolved in encounters | Legendary Resistance is spent automatically unless turned off per monster; legendary actions that cast spells stay text until monster spellcasting |
 | P10 | Ability checks and skills (`rollAbilityCheck`, the encounter `check` action); Death Saving Throws rolled at the start of a dying character's turn | Automatic death saves can be turned off per encounter |
 | P11 | Standard combat actions: Dodge, Disengage, Help, Grapple and Shove (with escaping and standing up), two-weapon fighting | Help and Dodge live in the encounter (`helps`, `dodging`), not in conditions; Help's Advantage covers weapon attacks, not spell attacks |
+| P12 | Weapon Mastery effects in encounters: Graze, Vex, Sap, Slow, Topple, Push (noted), Cleave, Nick | Applied by default (`mastery: false` skips them); Vex, Sap and Slow are encounter marks with the same turn-based ends as effects |
 
 ## Decisions
 
@@ -47,13 +48,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Combat rules
 
-- **Weapon Mastery effects (M).** Masteries are chosen and shown on attack lines but not applied:
-  Graze (damage on a miss), Vex (Advantage on the next attack), Sap (Disadvantage on the target's
-  next attack), Slow (−10 feet of Speed), Topple (Constitution save or Prone), Push (10 feet),
-  Cleave and Nick (an extra attack). Most fit riders, timed effects and save effects.
 - **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
   Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM; Help's
-  Advantage doesn't reach spell attack rolls yet.
+  Advantage and Sap's Disadvantage don't reach spell attack rolls yet.
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
   who is in range and in an area, and whether an attack is within 5 feet.

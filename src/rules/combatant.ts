@@ -346,6 +346,8 @@ export interface AttackOptions {
    * modifier). Throws for an attack that isn't with a Light weapon.
    */
   light_extra?: boolean;
+  /** The Cleave mastery's attack: the line's `cleave_damage_parts`. */
+  cleave?: boolean;
 }
 
 /**
@@ -370,6 +372,7 @@ export function makeAttack(
     against_source_of = [],
     modes = [],
     light_extra = false,
+    cleave = false,
   }: AttackOptions = {},
 ): AttackResult {
   const line =
@@ -386,6 +389,9 @@ export function makeAttack(
   });
   if (light_extra && !line.light_extra_damage_parts) {
     throw new RangeError(`${line.name} isn't a Light weapon`);
+  }
+  if (cleave && !line.cleave_damage_parts) {
+    throw new RangeError(`${line.name} doesn't have the Cleave mastery property`);
   }
   // Check the riders before rolling, so a refused request rolls nothing.
   const extra: DamagePart[] = [];
@@ -437,12 +443,10 @@ export function makeAttack(
     reasons: effective.reasons,
   };
   if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
-  const base_parts =
-    light_extra && line.light_extra_damage_parts
-      ? line.light_extra_damage_parts
-      : two_handed && line.two_handed_damage_parts
-        ? line.two_handed_damage_parts
-        : line.damage_parts;
+  let base_parts = line.damage_parts;
+  if (light_extra && line.light_extra_damage_parts) base_parts = line.light_extra_damage_parts;
+  else if (cleave && line.cleave_damage_parts) base_parts = line.cleave_damage_parts;
+  else if (two_handed && line.two_handed_damage_parts) base_parts = line.two_handed_damage_parts;
   const parts = [...base_parts, ...extra];
   const damage = rollDamage(parts, { critical: critical_hit, rng });
   const instances = damage.parts.map((p) => ({ amount: p.total, type: p.type }));
@@ -665,7 +669,7 @@ export function combatantFromMonster(
   const all = [...monster.actions, ...monster.bonus_actions, ...monster.reactions];
   const attacks: AttackLine[] = all.flatMap((action) => {
     const a = action.attack;
-    if (!a || !a.damage.length) return [];
+    if (!a?.damage.length) return [];
     const damage = parts(a.damage);
     const notes = [
       ...(a.reach !== null ? [`reach ${a.reach} ft.`] : []),
@@ -686,6 +690,7 @@ export function combatantFromMonster(
         damage_parts: damage,
         two_handed_damage_parts: null,
         light_extra_damage_parts: null,
+        cleave_damage_parts: null,
         mastery: null,
         notes,
       },

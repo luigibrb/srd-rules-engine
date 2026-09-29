@@ -31,6 +31,11 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Weapon Mastery properties in encounters: Graze (damage on a miss), Vex, Sap and Slow (encounter
+  `masteries`, ending on the attacker's turns), Topple (Constitution save or Prone), Push (noted),
+  Cleave (`attack` with `cleave: true`, once per turn; `AttackLine.cleave_damage_parts`), Nick
+  (the Light extra attack as part of the Attack action). `attack` takes `mastery: false` to skip
+  them; `makeAttack` takes `cleave`.
 - Standard combat actions in encounters: `dodge`, `disengage` (and `dash`) with `bonus_action`
   for features that allow it; `help` (an ally's next attack roll against an enemy, or its next
   check with a skill you're proficient in); `unarmed` (Grapple and Shove: a Strength or

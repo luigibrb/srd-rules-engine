@@ -425,6 +425,15 @@ list of actions.
   a Bonus Action after attacking with a Light weapon in the Attack action, with a different
   Light weapon, using the line's `light_extra_damage_parts` (no positive ability modifier unless
   the Two-Weapon Fighting feat).
+- **Weapon Mastery:** an `attack` with a line that has a mastery applies it unless
+  `mastery: false`: Graze deals the ability modifier on a miss; Vex (Advantage on the attacker's
+  next attack roll against the target, until the end of its next turn), Sap (Disadvantage on the
+  target's next attack roll) and Slow (−10 feet of Speed, not cumulative; both until the start of
+  the attacker's next turn) are `encounter.masteries`, used up by the roll they change; Topple
+  forces a Constitution save (DC 8 + the attack's modifier + Proficiency Bonus) or Prone; Push is
+  noted; Cleave allows one `attack` with `cleave: true` against a second creature per turn
+  (`cleave_damage_parts`: no positive modifier), not counted among the Attack action's attacks;
+  Nick makes the Light extra attack part of the Attack action once per turn.
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
@@ -539,6 +548,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   and one grapple per hand aren't checked; a stat block's "Medium or Small" counts as Medium.
 - Dodge's Disadvantage applies to every attacker ("if you can see the attacker" isn't modeled),
   and Help's attack benefit to any ally's attack roll against the enemy, wherever the helper is.
+- Nick applies when the weapon making the Light property's extra attack has it. Vex and Slow need
+  damage dealt after Immunity and Resistance (damage to Temporary Hit Points counts). Push and Cleave's "within 5
+  feet of the first" are the caller's to handle (no positions).
 - An Opportunity Attack (`opportunity: true`) is checked only against Disengage and for being a
   melee attack; whether the target left the attacker's reach is the caller's to decide.
 - Legendary Resistance is spent automatically on the first failed save while uses are left
@@ -571,7 +583,8 @@ Most rules are data; these are code, by name:
 - `services/encounter.ts`: `incapacitated` stops actions and reactions, `petrified` gives a
   monster Resistance to all damage, a monster at 0 HP is defeated (SRD "Monster Death"),
   `grappled` is what `unarmed` gives and `escape` ends (and ends with an Incapacitated grappler),
-  and `prone` is what a shove gives and `stand` ends.
+  and `prone` is what a shove or Topple gives and `stand` ends; the eight SRD mastery properties
+  are matched by name in `applyMastery`.
 
 ## Runtime and packaging (TypeScript)
 
