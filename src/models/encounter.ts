@@ -51,6 +51,14 @@ export const EncounterCombatantSchema = z.object({
   /** Toggles (Rage) switched on this turn, and whether one was extended this turn. */
   toggled_on: z.array(z.string()).default([]),
   extended: z.boolean().default(false),
+  /** Monsters only: in its lair (more legendary uses, when the stat block says so). */
+  in_lair: z.boolean().default(false),
+  /** Legendary action uses spent since the start of its last turn, and once-per-round ones taken. */
+  legendary_used: z.int().min(0).default(0),
+  legendary_taken: z.array(z.string()).default([]),
+  /** Legendary Resistance uses spent, and whether it spends them automatically on a failed save. */
+  legendary_resistance_used: z.int().min(0).default(0),
+  auto_legendary_resistance: z.boolean().default(true),
 });
 export type EncounterCombatant = z.infer<typeof EncounterCombatantSchema>;
 
@@ -115,6 +123,10 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     /** Fixed HP; default the stat block's average, or `roll_hp` to roll its Hit Dice. */
     hp: n.min(1).optional(),
     roll_hp: z.boolean().optional(),
+    /** In its lair: the stat block's lair values for legendary uses. */
+    in_lair: z.boolean().optional(),
+    /** `false`: don't spend Legendary Resistance automatically on a failed save. */
+    auto_legendary_resistance: z.boolean().optional(),
   }),
   z.object({
     type: z.literal("add_character"),
@@ -203,5 +215,20 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
   }),
   /** Extend Rage this turn some other way (forcing a saving throw). */
   z.object({ type: z.literal("extend"), id: z.string() }),
+  /**
+   * A legendary action, taken right after another creature's turn: an attack (`target`, and
+   * `attack` when it offers a choice), a saving throw effect (`targets`), another action it uses,
+   * or text. Uses per round come back at the start of the monster's turn.
+   */
+  z.object({
+    type: z.literal("legendary"),
+    id: z.string(),
+    action: z.string(),
+    target: z.string().optional(),
+    targets: z.array(z.string()).optional(),
+    attack: z.string().optional(),
+    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+    within_5ft: z.boolean().optional(),
+  }),
 ]);
 export type EncounterAction = z.infer<typeof EncounterActionSchema>;

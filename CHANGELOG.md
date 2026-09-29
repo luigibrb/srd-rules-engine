@@ -6,6 +6,8 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- A monster's legendary saving throw effects are no longer in `save_actions`: only the
+  encounter action `legendary` uses them.
 - The published `srd-5.2.1.json` is minified (about 2 MB instead of 3.8 MB).
 - Docs: README reorganized by use (builder, play, combat, spells, monsters, encounters, packs);
   ARCHITECTURE.md restructured, with every flagged interpretation in one section;
@@ -29,6 +31,13 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Legendary actions and Legendary Resistance: monster fields `legendary_uses`,
+  `legendary_resistance`, and `once_per_round`, `attacks`, `uses` on legendary actions;
+  combatants' `legendary_actions` and `legendary_resistance` (a failed save succeeds instead,
+  `SaveResult.legendary_resistance`); `MonsterState` `in_lair`, `legendary_resistance_used`,
+  `auto_legendary_resistance`. Encounter action `legendary` (after another creature's turn, uses per
+  round and in the lair, once-per-round limits), Legendary Resistance counted in encounters,
+  `add_monster` `in_lair` and `auto_legendary_resistance`.
 - Conditions change rolls: condition fields `attack_rolls`, `attacked`, `attacked_beyond_5ft`,
   `critical_within_5ft`, `fail_saves`, `save_disadvantage`, `initiative`,
   `except_against_source`; `Combatant.condition_rolls`, `conditionRolls`, `attackMode`,

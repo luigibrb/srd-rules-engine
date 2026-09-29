@@ -391,10 +391,10 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
-| Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack and saving throw effects (breath weapons) usable in combat; other traits as text |
+| Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), legendary actions and Legendary Resistance usable in combat; other traits as text |
 | Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Rage's duration |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
-| Not yet | Positions, reach and cover, legendary actions, monster spellcasting, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
+| Not yet | Positions, reach and cover, monster spellcasting, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 
 What comes next is in [docs/ROADMAP.md](docs/ROADMAP.md); the design is in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

@@ -315,6 +315,24 @@
                   "null"
                 ]
               },
+              "once_per_round": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attacks": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uses": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "attack": {
                 "default": null,
                 "anyOf": [
@@ -546,6 +564,24 @@
                 "type": "string"
               },
               "recharge": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "once_per_round": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attacks": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uses": {
                 "default": null,
                 "type": [
                   "string",
@@ -789,6 +825,24 @@
                   "null"
                 ]
               },
+              "once_per_round": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attacks": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uses": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "attack": {
                 "default": null,
                 "anyOf": [
@@ -1026,6 +1080,24 @@
                   "null"
                 ]
               },
+              "once_per_round": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attacks": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uses": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "attack": {
                 "default": null,
                 "anyOf": [
@@ -1248,6 +1320,76 @@
           "default": "",
           "type": "string"
         },
+        "legendary_uses": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "uses": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "in_lair": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "uses"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "legendary_resistance": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "uses": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "in_lair": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "uses"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "legendary_actions": {
           "default": [],
           "type": "array",
@@ -1261,6 +1403,24 @@
                 "type": "string"
               },
               "recharge": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "once_per_round": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attacks": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uses": {
                 "default": null,
                 "type": [
                   "string",
@@ -1821,6 +1981,24 @@
                     "null"
                   ]
                 },
+                "once_per_round": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attacks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "uses": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "attack": {
                   "default": null,
                   "anyOf": [
@@ -2052,6 +2230,24 @@
                   "type": "string"
                 },
                 "recharge": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "once_per_round": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attacks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "uses": {
                   "default": null,
                   "type": [
                     "string",
@@ -2295,6 +2491,24 @@
                     "null"
                   ]
                 },
+                "once_per_round": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attacks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "uses": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "attack": {
                   "default": null,
                   "anyOf": [
@@ -2532,6 +2746,24 @@
                     "null"
                   ]
                 },
+                "once_per_round": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attacks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "uses": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "attack": {
                   "default": null,
                   "anyOf": [
@@ -2754,6 +2986,76 @@
             "default": "",
             "type": "string"
           },
+          "legendary_uses": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "uses": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "in_lair": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "uses"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "legendary_resistance": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "uses": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "in_lair": {
+                    "default": null,
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "uses"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "legendary_actions": {
             "default": [],
             "type": "array",
@@ -2767,6 +3069,24 @@
                   "type": "string"
                 },
                 "recharge": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "once_per_round": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attacks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "uses": {
                   "default": null,
                   "type": [
                     "string",

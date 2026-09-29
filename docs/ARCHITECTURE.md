@@ -363,7 +363,16 @@ with the Markdown.
 its attacks become attack lines (`ability: null`), its Multiattack the number of attacks per
 action, its saving throw effects `save_actions`, its condition Immunities
 `condition_immunities`. `useSaveAction(user, name, targets)` resolves a breath weapon like a save
-spell (one damage roll, half per type on a success, conditions on a failure). Legendary actions,
+spell (one damage roll, half per type on a success, conditions on a failure).
+
+**Legendary actions and Legendary Resistance.** A stat block's `legendary_uses` (per round, and
+in its lair) and `legendary_resistance` (per day, and in its lair) are read from its text, and
+each legendary action records whether it's once per round, the attacks it makes and another
+action it uses. A combatant's `legendary_actions` list them (their own saving throw effects are
+only there, not in `save_actions`), and `legendary_resistance` holds the uses left:
+`rollSavingThrow` turns a failed save into a success while it's above 0, automatic failures
+included, and marks the result (`legendary_resistance`). `MonsterState` gives `in_lair`, the uses
+already spent, and `auto_legendary_resistance: false` to leave the choice to the GM. Monster
 spellcasting and "X/Day" uses are text for now.
 
 ### Encounters
@@ -405,6 +414,13 @@ list of actions.
   `end_effect` ends one early, and an effect whose condition was removed another way is dropped.
   An effect's source is how the encounter knows a Grappled attacker's grappler, against whom
   Grappled gives no Disadvantage.
+- **Legendary actions:** `legendary` takes one right after another creature's turn (never on the
+  monster's own), within its uses per round (its lair's when `in_lair`) and once-per-round
+  limits; uses come back at the start of its turn. It resolves the action's attack (a choice of
+  attacks needs `attack`), the action it uses, or its own saving throw effect through the same
+  code as `attack` and `save_action`, without spending the monster's action; otherwise it notes
+  that the effect is in the text. Legendary Resistance uses spent on saves are counted
+  (`legendary_resistance_used`) and noted.
 - **Conditions in turns:** `attack` takes `within_5ft`; Initiative rolls with Advantage while
   Invisible and with Disadvantage while Incapacitated or surprised; notes give the reasons.
 - **Concentration saves** are rolled automatically when a concentrating combatant takes damage
@@ -490,13 +506,18 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - "Once per turn" resets on every creature's turn; Divine Strike's "once on each of your turns"
   is treated the same.
 - A monster's spell slots aren't tracked.
+- Legendary Resistance is spent automatically on the first failed save while uses are left
+  (`auto_legendary_resistance: false` leaves it to the GM); the SRD says the monster "can choose".
+- A legendary action that makes an attack or uses another action resolves just that roll; what
+  else it does (moving, teleporting, regaining Hit Points) is in its text.
 - Ending the fight keeps active effects; they stop counting down.
 - Rage's 10-minute cap isn't enforced.
 
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there are no positions, reach or cover (so "within 5 feet" is given, not measured), legendary actions and monster spellcasting are text,
+there are no positions, reach or cover (so "within 5 feet" is given, not measured), monster
+spellcasting is text,
 79 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.

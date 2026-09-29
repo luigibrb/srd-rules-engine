@@ -945,6 +945,12 @@ export const MonsterActionSchema = z.strictObject({
   text: z.string(),
   /** `5–6`: it recharges on those d6 rolls. */
   recharge: z.string().nullable().default(null),
+  /** A legendary action it can't take again until the start of its next turn. */
+  once_per_round: z.boolean().default(false),
+  /** A legendary action's attacks, by the monster's action names (one of them). */
+  attacks: z.array(z.string()).default([]),
+  /** A legendary action that uses another of its actions ("uses Lightning Strike"). */
+  uses: z.string().nullable().default(null),
   attack: z
     .strictObject({
       kind: z.enum(["melee", "ranged", "melee_or_ranged"]),
@@ -1028,6 +1034,16 @@ export const MonsterSchema = z.strictObject({
   reactions: z.array(MonsterActionSchema).default([]),
   /** The paragraph before the Legendary Actions (uses per round). */
   legendary_text: z.string().default(""),
+  /** Legendary action uses per round, and in its lair. */
+  legendary_uses: z
+    .strictObject({ uses: z.int().min(1), in_lair: z.int().min(1).nullable().default(null) })
+    .nullable()
+    .default(null),
+  /** Legendary Resistance uses per day, and in its lair: a failed save can succeed instead. */
+  legendary_resistance: z
+    .strictObject({ uses: z.int().min(1), in_lair: z.int().min(1).nullable().default(null) })
+    .nullable()
+    .default(null),
   legendary_actions: z.array(MonsterActionSchema).default([]),
 });
 export type MonsterDef = z.infer<typeof MonsterSchema>;
