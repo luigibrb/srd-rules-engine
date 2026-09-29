@@ -17,6 +17,8 @@ import {
   DAMAGE_TYPES,
   type MonsterDamage,
   type MonsterDef,
+  SKILL_ABILITY,
+  type Skill,
 } from "../models/content";
 import {
   type DamageInstance,
@@ -60,6 +62,10 @@ export interface Combatant {
   readonly modifiers: Readonly<Record<Ability, number>>;
   /** Saving throw bonuses (proficiency and penalties such as Exhaustion included). */
   readonly saving_throws: Readonly<Record<Ability, number>>;
+  /** Ability check bonuses without a skill. */
+  readonly ability_checks: Readonly<Record<Ability, number>>;
+  /** Skill check bonuses by skill id (a monster lists only its proficient skills). */
+  readonly skills: Readonly<Record<string, number>>;
   readonly defenses: Readonly<Required<Defenses>>;
   /** Active condition ids, implied ones included. */
   readonly conditions: readonly string[];
@@ -123,6 +129,7 @@ export interface ConditionRolls {
   /** Ability → the condition that gives Disadvantage on that saving throw. */
   readonly save_disadvantage: Readonly<Partial<Record<Ability, string>>>;
   readonly initiative: readonly ConditionMode[];
+  readonly ability_checks: readonly ConditionMode[];
 }
 
 export const NO_CONDITION_ROLLS: ConditionRolls = {
@@ -133,6 +140,7 @@ export const NO_CONDITION_ROLLS: ConditionRolls = {
   fail_saves: {},
   save_disadvantage: {},
   initiative: [],
+  ability_checks: [],
 };
 
 /** Condition ids with the ones they imply (Unconscious → Incapacitated, Prone). */
@@ -157,6 +165,7 @@ export function conditionRolls(ids: readonly string[], table: Table<ConditionDef
     fail_saves: {} as Partial<Record<Ability, string>>,
     save_disadvantage: {} as Partial<Record<Ability, string>>,
     initiative: [] as ConditionMode[],
+    ability_checks: [] as ConditionMode[],
   };
   for (const id of expandConditions(ids, table)) {
     const def = Object.hasOwn(table, id) ? table[id] : undefined;
@@ -172,6 +181,7 @@ export function conditionRolls(ids: readonly string[], table: Table<ConditionDef
     if (def.attacked_beyond_5ft) rolls.attacked_beyond_5ft.push(entry(def.attacked_beyond_5ft));
     if (def.critical_within_5ft) rolls.critical_within_5ft.push(def.name);
     if (def.initiative) rolls.initiative.push(entry(def.initiative));
+    if (def.ability_checks) rolls.ability_checks.push(entry(def.ability_checks));
     for (const a of def.fail_saves) rolls.fail_saves[a] ??= def.name;
     for (const a of def.save_disadvantage) rolls.save_disadvantage[a] ??= def.name;
   }
@@ -492,6 +502,58 @@ export function rollSavingThrow(
   };
 }
 
+export interface CheckResult {
+  readonly name: string;
+  readonly ability: Ability;
+  /** The skill, when it's a skill check. */
+  readonly skill: string | null;
+  readonly dc: number | null;
+  readonly bonus: number;
+  readonly roll: D20Roll;
+  readonly total: number;
+  /** Against a DC; `null` when none was given (a contest, or the GM decides). */
+  readonly success: boolean | null;
+  readonly reasons: readonly string[];
+}
+
+/**
+ * An ability check (SRD "Ability Check"): with a skill, the skill's bonus (proficiency,
+ * Expertise, Jack of All Trades on the sheet; a monster's listed skills), else the ability's.
+ * Advantage from features (`check.str` while raging) and conditions (Poisoned, Frightened:
+ * Disadvantage) combine with `mode`.
+ */
+export function rollAbilityCheck(
+  combatant: Combatant,
+  what: { skill: Skill } | { ability: Ability },
+  dc: number | null = null,
+  { rng = mathRng, mode = "normal" }: { rng?: Rng; mode?: RollMode } = {},
+): CheckResult {
+  const skill = "skill" in what ? what.skill : null;
+  const ability = skill ? SKILL_ABILITY[skill] : (what as { ability: Ability }).ability;
+  const bonus = (skill ? combatant.skills[skill] : undefined) ?? combatant.ability_checks[ability];
+  const reasons: ModeReason[] = [];
+  if (combatant.advantages.includes(`check.${ability}`)) {
+    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
+  }
+  for (const c of combatant.condition_rolls.ability_checks) {
+    reasons.push({ mode: c.mode, reason: `${combatant.name} is ${c.condition}` });
+  }
+  const resolved = resolveMode(mode, reasons);
+  const roll = rollD20({ mode: resolved.mode, rng });
+  const total = roll.d20 + bonus;
+  return {
+    name: combatant.name,
+    ability,
+    skill,
+    dc,
+    bonus,
+    roll,
+    total,
+    success: dc === null ? null : total >= dc,
+    reasons: resolved.reasons,
+  };
+}
+
 /** Advantage and Disadvantage cancel; several of either count once (SRD "Advantage"). */
 export function combineModes(mode: RollMode, advantage: boolean): RollMode {
   if (!advantage) return mode;
@@ -526,6 +588,8 @@ export function combatantFromSnapshot(character: Character): Combatant {
     proficiency_bonus: character.proficiency_bonus,
     modifiers,
     saving_throws: modifiers,
+    ability_checks: modifiers,
+    skills: {},
     defenses: { resistances: [], vulnerabilities: [], immunities: [] },
     conditions: [],
     attacks: [],
@@ -647,6 +711,8 @@ export function combatantFromMonster(
     proficiency_bonus: monster.proficiency_bonus,
     modifiers,
     saving_throws: monster.saving_throws,
+    ability_checks: modifiers,
+    skills: monster.skills,
     defenses: {
       resistances: monster.resistances,
       vulnerabilities: monster.vulnerabilities,

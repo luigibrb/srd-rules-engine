@@ -854,6 +854,8 @@ export const ConditionSchema = z.strictObject({
   save_disadvantage: z.array(z.enum(ABILITIES)).default([]),
   /** Advantage or Disadvantage on Initiative (Invisible, Incapacitated). */
   initiative: RollModeSchema.nullable().default(null),
+  /** Advantage or Disadvantage on ability checks (Poisoned, Frightened: Disadvantage). */
+  ability_checks: RollModeSchema.nullable().default(null),
   /**
    * `attack_rolls` doesn't apply to attacks against the condition's source (Grappled: "any
    * target other than the grappler"), when the source is known.

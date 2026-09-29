@@ -252,9 +252,9 @@ describe("attacks in an encounter", () => {
     expect(notes).toContain("Skeleton is immune to Poisoned.");
   });
 
-  it("reminds a character at 0 HP to make a Death Saving Throw", () => {
+  it("reminds a character at 0 HP to make a Death Saving Throw (when not rolled automatically)", () => {
     const { encounter } = fight();
-    const down = run(encounter, [
+    const down = run({ ...encounter, auto_death_saves: false }, [
       { type: "effects", id: "brakka", actions: [{ type: "damage", amount: 12 }] },
       { type: "next_turn" },
       { type: "next_turn" },

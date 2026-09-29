@@ -31,6 +31,10 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Ability checks and skills: `rollAbilityCheck`, the sheet's `ability_checks`, combatants'
+  `ability_checks` and `skills`, the condition field `ability_checks` (Poisoned, Frightened), the
+  encounter action `check`. Encounters roll a dying character's Death Saving Throw at the start of
+  its turn (`createEncounter({ auto_death_saves: false })` to keep the reminder instead).
 - Legendary actions and Legendary Resistance: monster fields `legendary_uses`,
   `legendary_resistance`, and `once_per_round`, `attacks`, `uses` on legendary actions;
   combatants' `legendary_actions` and `legendary_resistance` (a failed save succeeds instead,

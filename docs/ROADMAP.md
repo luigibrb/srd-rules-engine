@@ -19,6 +19,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P7 | Encounters: Initiative, turns and rounds, action economy, attacks and spells in turns, timed effects, Concentration saves, recharges, once-per-turn riders, Rage's duration | Split in two: the encounter document and turns (P7a), then the rules that need turns (P7b) |
 | P8 | Conditions change rolls: Advantage and Disadvantage on attacks, automatic Critical Hits within 5 feet, automatic save failures, Initiative | "Within 5 feet" is given per attack (no positions yet). Encounters now track any condition with a known source, which gives Grappled's exception for the grappler |
 | P9 | Legendary actions and Legendary Resistance: uses per round and per day (lair values), once-per-round actions, attacks, used actions and saving throw effects resolved in encounters | Legendary Resistance is spent automatically unless turned off per monster; legendary actions that cast spells stay text until monster spellcasting |
+| P10 | Ability checks and skills (`rollAbilityCheck`, the encounter `check` action); Death Saving Throws rolled at the start of a dying character's turn | Automatic death saves can be turned off per encounter |
 
 ## Decisions
 
@@ -53,11 +54,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   turn), Help (Advantage for an ally), Grapple and Shove (Unarmed Strike options: a save against
   DC 8 + Strength modifier + Proficiency Bonus), two-weapon fighting (the Light property's extra
   attack), Disengage (no Opportunity Attacks). Nothing can apply Grappled yet except by hand.
-- **Ability checks and skills (S).** A roll for ability checks and skills with the sheet's
-  bonuses, Exhaustion and Advantage (`check.<ability>`: Rage's Strength checks), for Stealth,
-  Perception or escaping a grapple.
-- **Death Saving Throws in encounters (S).** Rolled at the start of a dying character's turn
-  instead of a reminder.
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
   who is in range and in an area, and whether an attack is within 5 feet.

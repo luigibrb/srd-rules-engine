@@ -33,6 +33,8 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   proficiency_bonus: 2,
   modifiers: zero,
   saving_throws: zero,
+  ability_checks: zero,
+  skills: {},
   defenses: { resistances: [], vulnerabilities: [], immunities: [] },
   conditions: [],
   attacks: [],

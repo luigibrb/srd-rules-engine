@@ -376,6 +376,7 @@ critical_within_5ft: false          # Paralyzed, Unconscious: a hit within 5 fee
 fail_saves: []                      # Paralyzed: [str, dex]
 save_disadvantage: []               # Restrained: [dex]
 initiative: null                    # Invisible: advantage; Incapacitated: disadvantage
+ability_checks: null                # Poisoned, Frightened: disadvantage
 except_against_source: false        # Grappled: not against the grappler
 ```
 

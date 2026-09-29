@@ -65,6 +65,7 @@
 
     _Can't Approach._ You can't willingly move closer to the source of fear.
   attack_rolls: disadvantage
+  ability_checks: disadvantage
 - id: grappled
   name: Grappled
   description: >-
@@ -190,6 +191,7 @@
 
     _Ability Checks and Attacks Affected._ You have Disadvantage on attack rolls and ability checks.
   attack_rolls: disadvantage
+  ability_checks: disadvantage
 - id: prone
   name: Prone
   description: >-

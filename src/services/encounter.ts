@@ -28,11 +28,13 @@ import {
 } from "../rules/casting";
 import {
   type AttackResult,
+  type CheckResult,
   type Combatant,
   combatantFromMonster,
   type ModeReason,
   makeAttack,
   resolveMode,
+  rollAbilityCheck,
   rollD20,
   rollSavingThrow,
   type SaveResult,
@@ -68,12 +70,13 @@ export interface EncounterResult {
   /** Character states changed by the action, by character key. */
   readonly states: Readonly<Record<string, CharacterState>>;
   readonly notes: readonly string[];
-  /** The rolls of an `attack`, `save_action` or `cast`. */
-  readonly result: AttackResult | SaveActionResult | SpellCastResult | null;
+  /** The rolls of an `attack`, `save_action`, `cast`, `legendary` or `check`. */
+  readonly result: AttackResult | SaveActionResult | SpellCastResult | CheckResult | null;
 }
 
-export function createEncounter(): Encounter {
-  return EncounterSchema.parse({});
+/** A new encounter. `auto_death_saves: false` leaves Death Saving Throws to the players. */
+export function createEncounter(options: { auto_death_saves?: boolean } = {}): Encounter {
+  return EncounterSchema.parse(options);
 }
 
 /** Whose turn it is, or `null` before the fight starts. */
@@ -255,6 +258,13 @@ export function applyEncounterAction(
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
+    // A dying character makes a Death Saving Throw at the start of its turn (SRD).
+    if (c.character !== null) {
+      const ref = characterRef(ctx, c);
+      const play = computePlaySheet(ref.build, ref.state, ctx.catalog).play;
+      if (play.dying && e.auto_death_saves) applyTo(c, [{ type: "death_save" }]);
+      else if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
+    }
     for (const x of e.combatants) x.riders_used = [];
     // Legendary action uses come back at the start of the monster's turn.
     c.legendary_used = 0;
@@ -516,8 +526,8 @@ export function applyEncounterAction(
       for (const c of e.combatants) resetTurn(c);
       e.turn = 0;
       const first = skipToActive(e, ctx, notes, false);
-      startTurn(first);
       notes.push(`Round 1: ${first.name}'s turn.`);
+      startTurn(first);
       break;
     }
     case "next_turn": {
@@ -525,8 +535,8 @@ export function applyEncounterAction(
       const ending = current();
       if (ending) endTurn(ending);
       const next = skipToActive(e, ctx, notes, true);
-      startTurn(next);
       notes.push(`Round ${e.round}: ${next.name}'s turn.`);
+      startTurn(next);
       break;
     }
     case "end": {
@@ -609,6 +619,24 @@ export function applyEncounterAction(
       const effect =
         e.effects.find((x) => x.id === action.effect) ?? fail(`No effect '${action.effect}'`);
       endEffect(effect, "ended");
+      break;
+    }
+    case "check": {
+      const c = find(action.id);
+      if (c.defeated) fail(`${c.name} is defeated`);
+      const what = action.skill
+        ? { skill: action.skill }
+        : { ability: action.ability ?? fail("A check needs a skill or an ability") };
+      const check = rollAbilityCheck(encounterCombatant(e, c.id, ctx), what, action.dc ?? null, {
+        rng,
+        mode: action.mode,
+      });
+      result = check;
+      const label = check.skill ?? check.ability;
+      const dc = check.dc === null ? "" : ` vs DC ${check.dc}`;
+      const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
+      const outcome = check.success === null ? "" : check.success ? ": success" : ": failure";
+      notes.push(`${c.name}'s ${label} check: ${check.total}${dc}${why}${outcome}.`);
       break;
     }
     case "extend": {
@@ -906,11 +934,6 @@ function skipToActive(
     }
     e.turn = index;
     resetTurn(c);
-    if (c.character !== null) {
-      const ref = characterRef(ctx, c);
-      const play = computePlaySheet(ref.build, ref.state, ctx.catalog).play;
-      if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
-    }
     return c;
   }
   return fail("No one is left to take a turn");

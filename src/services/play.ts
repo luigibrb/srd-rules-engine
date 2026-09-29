@@ -309,6 +309,8 @@ export function combatantFromCharacter(
     proficiency_bonus: sheet.proficiency_bonus,
     modifiers: sheet.modifiers,
     saving_throws: saves,
+    ability_checks: sheet.ability_checks,
+    skills: Object.fromEntries(sheet.skills.map((line) => [line.skill, line.modifier])),
     defenses: characterDefenses(sheet, new Set(conditions)),
     conditions,
     attacks: sheet.attacks,

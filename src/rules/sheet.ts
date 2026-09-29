@@ -184,6 +184,8 @@ export interface DerivedSheet {
   readonly size: Size | null;
   readonly darkvision: number;
   readonly saving_throws: Readonly<Record<Ability, SaveLine>>;
+  /** Ability check bonuses without a skill (the modifier, `checks` effects, Exhaustion). */
+  readonly ability_checks: Readonly<Record<Ability, number>>;
   readonly skills: readonly SkillLine[];
   readonly passive_perception: number;
   /** Attacks you make when you take the Attack action (Extra Attack and its upgrades). */
@@ -615,6 +617,7 @@ export function computeSheet(
     size,
     darkvision,
     saving_throws: savingThrows,
+    ability_checks: mapAbilities((a) => mod[a] + checks + d20Penalty),
     skills,
     passive_perception: 10 + perception.modifier,
     attacks_per_action: attacksPerAction,

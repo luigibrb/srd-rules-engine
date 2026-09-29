@@ -53192,6 +53192,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53209,6 +53210,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53226,6 +53228,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53243,6 +53246,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53260,6 +53264,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": "disadvantage",
             "except_against_source": false
         },
         {
@@ -53277,6 +53282,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": true
         },
         {
@@ -53294,6 +53300,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": "disadvantage",
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53311,6 +53318,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": "advantage",
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53333,6 +53341,7 @@
             ],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53355,6 +53364,7 @@
             ],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53372,6 +53382,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": "disadvantage",
             "except_against_source": false
         },
         {
@@ -53389,6 +53400,7 @@
             "fail_saves": [],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53408,6 +53420,7 @@
                 "dex"
             ],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53430,6 +53443,7 @@
             ],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         },
         {
@@ -53453,6 +53467,7 @@
             ],
             "save_disadvantage": [],
             "initiative": null,
+            "ability_checks": null,
             "except_against_source": false
         }
     ],
