@@ -42,6 +42,7 @@ import {
 import { takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
+import type { AttackLine } from "../rules/sheet";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
 
 export class EncounterError extends Error {
@@ -116,7 +117,7 @@ export function encounterCombatant(
     );
     // An ability waiting to recharge can't be used.
     const ready = (name: string) => !c.expended.includes(name);
-    return withDodge(ctx, c, {
+    return withDodge(ctx, encounter, c, {
       ...base,
       name: c.name,
       attacks: base.attacks.filter((a) => ready(a.name)),
@@ -124,7 +125,7 @@ export function encounterCombatant(
     });
   }
   const ref = characterRef(ctx, c);
-  return withDodge(ctx, c, {
+  return withDodge(ctx, encounter, c, {
     ...combatantFromCharacter(ref.build, ref.state, ctx.catalog),
     name: c.name,
   });
@@ -134,8 +135,13 @@ export function encounterCombatant(
  * The Dodge action's benefits (SRD "Dodge"): attack rolls against it have Disadvantage, and it
  * makes Dexterity saves with Advantage; lost while Incapacitated or at Speed 0.
  */
-function withDodge(ctx: EncounterContext, c: EncounterCombatant, base: Combatant): Combatant {
-  if (!c.dodging || base.conditions.includes("incapacitated") || speedOf(ctx, c) === 0) {
+function withDodge(
+  ctx: EncounterContext,
+  encounter: Encounter,
+  c: EncounterCombatant,
+  base: Combatant,
+): Combatant {
+  if (!c.dodging || base.conditions.includes("incapacitated") || speedOf(ctx, c, encounter) === 0) {
     return base;
   }
   const dodge = {
@@ -286,6 +292,12 @@ export function applyEncounterAction(
       ends.count -= 1;
       if (ends.count <= 0) endEffect(effect, "its duration is over");
     }
+    for (const mark of [...e.masteries]) {
+      const ends = mark.ends;
+      if (ends.at !== at || ends.of !== c.id) continue;
+      if (ends.skip_current) ends.skip_current = false;
+      else if (--ends.count <= 0) e.masteries = e.masteries.filter((m) => m !== mark);
+    }
   };
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
@@ -304,6 +316,9 @@ export function applyEncounterAction(
     c.extended = false;
     c.disengaged = false;
     c.light_attacks = [];
+    c.nick_used = false;
+    c.cleave = null;
+    c.cleave_used = false;
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
@@ -367,6 +382,8 @@ export function applyEncounterAction(
       ally_adjacent?: boolean;
       within_5ft?: boolean;
       light_extra?: boolean;
+      cleave?: boolean;
+      mastery?: boolean;
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
@@ -386,6 +403,11 @@ export function applyEncounterAction(
     const modes: ModeReason[] = help
       ? [{ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` }]
       : [];
+    // Vex: Advantage on c's next attack roll against t; Sap: Disadvantage on c's next attack roll.
+    const vex = e.masteries.find((m) => m.mastery === "vex" && m.by === c.id && m.on === t.id);
+    const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id);
+    if (vex) modes.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
+    if (sap) modes.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
     let hit: AttackResult;
     try {
       // The attacker's conditions caused by this target (Grappled by it), from the effects.
@@ -402,6 +424,7 @@ export function applyEncounterAction(
         against_source_of,
         modes,
         light_extra: options.light_extra,
+        cleave: options.cleave,
       });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
@@ -409,6 +432,7 @@ export function applyEncounterAction(
     }
     c.extended = true; // an attack roll extends Rage
     if (help) e.helps = e.helps.filter((h) => h !== help);
+    e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
     const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
     if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
@@ -419,7 +443,64 @@ export function applyEncounterAction(
       notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
       applyTo(t, [{ type: "damage", instances: [...hit.instances], critical: hit.critical_hit }]);
     }
+    if (line?.mastery && options.mastery !== false) {
+      applyMastery(c, t, attacker, line, hit, options.cleave ?? false);
+    }
     return hit;
+  };
+  /** The attack's weapon mastery property (SRD "Mastery Properties"), after the attack. */
+  const applyMastery = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    attacker: Combatant,
+    line: AttackLine,
+    hit: AttackResult,
+    cleaving: boolean,
+  ): void => {
+    const mastery = line.mastery?.toLowerCase();
+    const modifier = line.ability ? attacker.modifiers[line.ability] : 0;
+    const dealt = (hit.outcome?.dealt ?? 0) > 0;
+    const until = (at: "start" | "end") => ({
+      at,
+      of: c.id,
+      count: 1,
+      skip_current: at === "end" && current()?.id === c.id,
+    });
+    if (!hit.hit) {
+      // Graze: damage equal to the ability modifier on a miss.
+      if (mastery === "graze" && modifier > 0 && !outOfFight(ctx, t)) {
+        notes.push(`Graze: ${t.name} takes ${modifier} ${line.damage_type} damage.`);
+        applyTo(t, [{ type: "damage", instances: [{ amount: modifier, type: line.damage_type }] }]);
+      }
+      return;
+    }
+    if (outOfFight(ctx, t) || t.defeated) return;
+    if (mastery === "vex" && dealt) {
+      e.masteries.push({ mastery: "vex", by: c.id, on: t.id, ends: until("end") });
+      notes.push(`Vex: ${c.name}'s next attack roll against ${t.name} has Advantage.`);
+    } else if (mastery === "sap") {
+      e.masteries.push({ mastery: "sap", by: c.id, on: t.id, ends: until("start") });
+      notes.push(`Sap: ${t.name}'s next attack roll has Disadvantage.`);
+    } else if (mastery === "slow" && dealt) {
+      e.masteries.push({ mastery: "slow", by: c.id, on: t.id, ends: until("start") });
+      notes.push(`Slow: ${t.name}'s Speed is 10 feet lower until ${c.name}'s next turn.`);
+    } else if (mastery === "topple") {
+      const dc = 8 + modifier + attacker.proficiency_bonus;
+      const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), "con", dc, { rng });
+      notes.push(`Topple: ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);
+      spendLegendaryResistance(t, save);
+      if (!save.success) applyTo(t, [{ type: "add_condition", condition: "prone" }]);
+    } else if (mastery === "push") {
+      const size = encounterCombatant(e, t.id, ctx).size;
+      if (!["huge", "gargantuan"].includes(size ?? "")) {
+        notes.push(`Push: ${c.name} can push ${t.name} up to 10 feet straight away.`);
+      }
+    } else if (mastery === "cleave" && line.kind === "melee" && !cleaving && !c.cleave_used) {
+      c.cleave = { attack: line.name, target: t.id };
+      notes.push(
+        `Cleave: ${c.name} can attack a second creature within 5 feet of ${t.name} with ${line.name}.`,
+      );
+    }
   };
   /** A saving throw effect used by `user` against targets, applied. */
   const saveEffectOn = (
@@ -449,6 +530,8 @@ export function applyEncounterAction(
   };
   /** After every action: Concentration effects whose source stopped concentrating end. */
   const sweep = (): void => {
+    const present = (id: string) => e.combatants.some((c) => c.id === id);
+    e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
     for (const effect of [...e.effects]) {
       const target = e.combatants.find((c) => c.id === effect.target);
       const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
@@ -674,7 +757,7 @@ export function applyEncounterAction(
       const c = find(action.id);
       onTurn(c, "move");
       if (c.defeated) fail(`${c.name} is defeated`);
-      const budget = speedOf(ctx, c) + c.extra_movement;
+      const budget = speedOf(ctx, c, e) + c.extra_movement;
       if (c.moved + action.feet > budget) {
         fail(`${c.name} can move ${Math.max(0, budget - c.moved)} more feet this turn`);
       }
@@ -684,8 +767,8 @@ export function applyEncounterAction(
     case "dash": {
       const c = find(action.id);
       takeAction(c, "Dash", action.bonus_action);
-      c.extra_movement += speedOf(ctx, c);
-      notes.push(`${c.name} Dashes: ${speedOf(ctx, c) + c.extra_movement - c.moved} feet left.`);
+      c.extra_movement += speedOf(ctx, c, e);
+      notes.push(`${c.name} Dashes: ${speedOf(ctx, c, e) + c.extra_movement - c.moved} feet left.`);
       break;
     }
     case "disengage": {
@@ -809,7 +892,7 @@ export function applyEncounterAction(
       if (c.defeated) fail(`${c.name} is defeated`);
       const own = c.monster !== null ? c.conditions : characterRef(ctx, c).state.conditions;
       if (!own.includes("prone")) fail(`${c.name} isn't Prone`);
-      const speed = speedOf(ctx, c);
+      const speed = speedOf(ctx, c, e);
       if (speed === 0) fail(`${c.name} can't right itself at Speed 0`);
       // "spend an amount of movement equal to half your Speed (round down)"
       const cost = Math.floor(speed / 2);
@@ -885,7 +968,18 @@ export function applyEncounterAction(
       const attacker = encounterCombatant(e, c.id, ctx);
       const line = attacker.attacks.find((a) => a.name === action.attack);
       const light = line?.properties.includes("light") ?? false;
-      if (action.light_extra) {
+      if (action.cleave) {
+        // SRD "Cleave": after a melee hit with this weapon, an attack against a second creature
+        // within 5 feet of the first, once per turn; it isn't one of the Attack action's attacks.
+        onTurn(c, "attack");
+        if (c.cleave_used) fail(`${c.name} has already made its Cleave attack this turn`);
+        const from =
+          c.cleave ?? fail(`${c.name} hasn't hit a creature with a Cleave weapon this turn`);
+        if (from.attack !== action.attack) fail(`The Cleave attack is made with ${from.attack}`);
+        if (from.target === t.id) fail("The Cleave attack is against a second creature");
+        c.cleave = null;
+        c.cleave_used = true;
+      } else if (action.light_extra) {
         // SRD "Light": after attacking with a Light weapon in the Attack action, one extra attack
         // as a Bonus Action with a different Light weapon.
         onTurn(c, "attack");
@@ -897,8 +991,14 @@ export function applyEncounterAction(
         if (same < 2 && c.light_attacks.every((name) => name === action.attack)) {
           fail(`The extra attack must be made with a different Light weapon than ${action.attack}`);
         }
-        if (c.used.bonus_action) fail(`${c.name} has already used its bonus action this turn`);
-        c.used.bonus_action = true;
+        // Nick: "as part of the Attack action instead of as a Bonus Action", once per turn.
+        if (line?.mastery === "Nick" && action.mastery !== false && !c.nick_used) {
+          c.nick_used = true;
+          notes.push(`Nick: ${c.name}'s extra attack is part of the Attack action.`);
+        } else {
+          if (c.used.bonus_action) fail(`${c.name} has already used its bonus action this turn`);
+          c.used.bonus_action = true;
+        }
       } else {
         const reaction = action.reaction || action.opportunity;
         if (action.opportunity) {
@@ -1111,15 +1211,20 @@ function conditionsOf(ctx: EncounterContext, c: EncounterCombatant): Set<string>
 }
 
 /** Walking Speed now (0 while a condition sets it to 0: Grappled, Restrained…). */
-function speedOf(ctx: EncounterContext, c: EncounterCombatant): number {
+function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encounter): number {
+  let speed: number;
   if (c.monster === null) {
     const ref = characterRef(ctx, c);
-    return computePlaySheet(ref.build, ref.state, ctx.catalog).speed.total;
+    speed = computePlaySheet(ref.build, ref.state, ctx.catalog).speed.total;
+  } else {
+    const stopped = [...conditionsOf(ctx, c)].some(
+      (id) => lookup(ctx.catalog.conditions, id)?.speed_zero,
+    );
+    speed = stopped ? 0 : (monsterDef(ctx, c).speed.walk ?? 0);
   }
-  const stopped = [...conditionsOf(ctx, c)].some(
-    (id) => lookup(ctx.catalog.conditions, id)?.speed_zero,
-  );
-  return stopped ? 0 : (monsterDef(ctx, c).speed.walk ?? 0);
+  // Slow: −10 feet, however many times it was hit by Slow weapons.
+  const slowed = e.masteries.some((m) => m.mastery === "slow" && m.on === c.id);
+  return slowed ? Math.max(0, speed - 10) : speed;
 }
 
 /** Out of the fight: a defeated monster, or a dead character. */

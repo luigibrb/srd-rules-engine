@@ -92,6 +92,8 @@ export interface AttackLine {
    * unless the Two-Weapon Fighting feat adds it back. `null` for other attacks.
    */
   readonly light_extra_damage_parts: readonly DamagePart[] | null;
+  /** The Cleave mastery's attack damage: no positive ability modifier. `null` without Cleave. */
+  readonly cleave_damage_parts: readonly DamagePart[] | null;
   readonly mastery: string | null;
   readonly notes: readonly string[];
 }
@@ -995,6 +997,7 @@ function unarmedStrike(ctx: AttackContext): AttackLine {
     damage_parts: parts,
     two_handed_damage_parts: null,
     light_extra_damage_parts: null,
+    cleave_damage_parts: null,
     mastery: null,
     notes,
   });
@@ -1056,16 +1059,17 @@ function attackLine(
   // The Light property's extra attack: "you don't add your ability modifier to the extra
   // attack's damage unless that modifier is negative" (Two-Weapon Fighting: you do).
   const keepModifier = abilityMod < 0 || ctx.featIds.has("two-weapon-fighting");
-  const lightExtra = w.properties.includes("light")
-    ? parts.map((p) =>
-        keepModifier || p.dice === null ? p : { ...p, bonus: p.bonus - abilityMod },
-      )
-    : null;
+  const withoutModifier = (keep: boolean) =>
+    parts.map((p) => (keep || p.dice === null ? p : { ...p, bonus: p.bonus - abilityMod }));
+  const lightExtra = w.properties.includes("light") ? withoutModifier(keepModifier) : null;
   let damage = formatDamage(parts);
   if (twoHanded) damage += ` (${formatDamage(twoHanded)} two-handed)`;
   const mastery = ctx.masteries.includes(w.id)
     ? (lookup(ctx.catalog.masteries, w.mastery)?.name ?? null)
     : null;
+  // Cleave: "don't add your ability modifier to that damage unless that modifier is negative".
+  const cleave =
+    mastery !== null && w.mastery === "cleave" ? withoutModifier(abilityMod < 0) : null;
   return {
     name: magic.name,
     kind: w.kind,
@@ -1079,6 +1083,7 @@ function attackLine(
     damage_parts: parts,
     two_handed_damage_parts: twoHanded,
     light_extra_damage_parts: lightExtra,
+    cleave_damage_parts: cleave,
     mastery,
     notes,
   };
@@ -1130,6 +1135,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
   let parts = [...line.damage_parts];
   let twoHanded = line.two_handed_damage_parts ? [...line.two_handed_damage_parts] : null;
   let lightExtra = line.light_extra_damage_parts ? [...line.light_extra_damage_parts] : null;
+  let cleave = line.cleave_damage_parts ? [...line.cleave_damage_parts] : null;
   const notes = [...line.notes];
   const optional: AttackRider[] = [];
   for (const r of riders) {
@@ -1140,6 +1146,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
       parts = [...parts, part];
       if (twoHanded) twoHanded = [...twoHanded, part];
       if (lightExtra) lightExtra = [...lightExtra, part];
+      if (cleave) cleave = [...cleave, part];
       notes.push(`${r.def.name} ${formatDamage([part]).replace(/^(\d)/, "+$1")}`);
     } else {
       optional.push({
@@ -1161,6 +1168,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
     damage_parts: parts,
     two_handed_damage_parts: twoHanded,
     light_extra_damage_parts: lightExtra,
+    cleave_damage_parts: cleave,
     riders: optional,
     notes,
   };

@@ -255,7 +255,7 @@ describe("in an encounter", () => {
     );
     // Two d20s against anyone else.
     const atOther = run(fight(), [12, 3], grapple, attack("goblin-warrior-2"));
-    expect(atOther.notes.at(-1)).toBe(
+    expect(atOther.notes.at(-2)).toBe(
       "Brakka misses Goblin Warrior 2 with Greatsword (8 vs AC 15; Disadvantage: Brakka is Grappled).",
     );
   });

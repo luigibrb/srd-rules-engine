@@ -247,7 +247,8 @@ const { states, notes } = applyEncounterAction(encounter,
 The encounter enforces the turn rules: one action and one Bonus Action on your turn, a reaction
 once a round, movement up to your Speed (Dash doubles it), Extra Attack and Multiattack,
 Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a grapple), the
-Light property's extra attack (two-weapon fighting), casting times (`cast`), once-per-turn riders (Sneak Attack), recharges (a
+Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
+Slow, Topple, Push, Cleave, Nick), casting times (`cast`), once-per-turn riders (Sneak Attack), recharges (a
 breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10 }` or
 `{ until: { at: "end" } }`), Concentration saves when damaged, a Concentration spell's
 conditions ending with it, and Rage ending when it isn't extended.
@@ -393,7 +394,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, ability and skill checks, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), legendary actions and Legendary Resistance usable in combat; other traits as text |
-| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
 | Not yet | Positions, reach and cover, monster spellcasting, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 
