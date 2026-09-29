@@ -11,6 +11,9 @@
 
     _Attacks Affected._ Attack rolls against you have Advantage, and your attack rolls have
     Disadvantage.
+  attack_rolls: disadvantage
+  attacked: advantage
+  attacked_beyond_5ft: advantage
 - id: charmed
   name: Charmed
   description: >-
@@ -61,6 +64,7 @@
 
 
     _Can't Approach._ You can't willingly move closer to the source of fear.
+  attack_rolls: disadvantage
 - id: grappled
   name: Grappled
   description: >-
@@ -77,6 +81,8 @@
     _Movable._ The grappler can drag or carry you when it moves, but every foot of movement costs it
     1 extra foot unless you are Tiny or two or more sizes smaller than it.
   speed_zero: true
+  attack_rolls: disadvantage
+  except_against_source: true
 - id: incapacitated
   name: Incapacitated
   description: >-
@@ -94,6 +100,7 @@
 
     _Surprised._ If you're Incapacitated when you roll Initiative, you have Disadvantage on the
     roll.
+  initiative: disadvantage
 - id: invisible
   name: Invisible
   description: >-
@@ -110,6 +117,10 @@
 
     _Attacks Affected._ Attack rolls against you have Disadvantage, and your attack rolls have
     Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.
+  attack_rolls: advantage
+  attacked: disadvantage
+  attacked_beyond_5ft: disadvantage
+  initiative: advantage
 - id: paralyzed
   name: Paralyzed
   description: >-
@@ -133,6 +144,12 @@
   speed_zero: true
   implies:
     - incapacitated
+  attacked: advantage
+  attacked_beyond_5ft: advantage
+  critical_within_5ft: true
+  fail_saves: &a1
+    - str
+    - dex
 - id: petrified
   name: Petrified
   description: >-
@@ -163,12 +180,16 @@
   speed_zero: true
   implies:
     - incapacitated
+  attacked: advantage
+  attacked_beyond_5ft: advantage
+  fail_saves: *a1
 - id: poisoned
   name: Poisoned
   description: |-
     While you have the Poisoned condition, you experience the following effect.
 
     _Ability Checks and Attacks Affected._ You have Disadvantage on attack rolls and ability checks.
+  attack_rolls: disadvantage
 - id: prone
   name: Prone
   description: >-
@@ -182,6 +203,9 @@
 
     _Attacks Affected._ You have Disadvantage on attack rolls. An attack roll against you has
     Advantage if the attacker is within 5 feet of you. Otherwise, that attack roll has Disadvantage.
+  attack_rolls: disadvantage
+  attacked: advantage
+  attacked_beyond_5ft: disadvantage
 - id: restrained
   name: Restrained
   description: >-
@@ -197,6 +221,11 @@
 
     _Saving Throws Affected._ You have Disadvantage on Dexterity saving throws.
   speed_zero: true
+  attack_rolls: disadvantage
+  attacked: advantage
+  attacked_beyond_5ft: advantage
+  save_disadvantage:
+    - dex
 - id: stunned
   name: Stunned
   description: |-
@@ -209,6 +238,9 @@
     _Attacks Affected._ Attack rolls against you have Advantage.
   implies:
     - incapacitated
+  attacked: advantage
+  attacked_beyond_5ft: advantage
+  fail_saves: *a1
 - id: unconscious
   name: Unconscious
   description: >-
@@ -237,3 +269,7 @@
   implies:
     - incapacitated
     - prone
+  attacked: advantage
+  attacked_beyond_5ft: advantage
+  critical_within_5ft: true
+  fail_saves: *a1

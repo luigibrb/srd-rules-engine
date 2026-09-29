@@ -5,6 +5,7 @@ import {
   cantripTier,
   castSpell,
   lookup,
+  NO_CONDITION_ROLLS,
   type SpellDef,
   scriptedRng,
   seededRng,
@@ -42,6 +43,7 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   no_spells: false,
   condition_immunities: [],
   save_actions: [],
+  condition_rolls: NO_CONDITION_ROLLS,
   ...o,
 });
 const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizardLine] });

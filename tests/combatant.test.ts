@@ -100,14 +100,17 @@ describe("makeAttack", () => {
     expect(r.damage?.parts[0]).toMatchObject({ dice: "1d10", rolls: [10], total: 13 });
   });
 
-  it("the target's defenses apply", () => {
+  it("the target's defenses and conditions apply", () => {
     const petrified = applyAction(fighter, fresh(), catalog, {
       type: "add_condition",
       condition: "petrified",
     }).state;
+    // Petrified: attacks against it have Advantage (two d20s), and Resistance to all damage.
     const r = makeAttack(brakka(), "Greatsword", brakka(petrified), {
-      rng: scriptedRng([15, 3, 3]),
+      rng: scriptedRng([15, 2, 3, 3]),
     });
+    expect(r.roll).toMatchObject({ rolls: [15, 2], mode: "advantage" });
+    expect(r.reasons).toEqual(["Advantage: Brakka is Petrified (within 5 ft)"]);
     expect(r.outcome).toMatchObject({ dealt: 4, hp: 8 }); // 9 halved
   });
 

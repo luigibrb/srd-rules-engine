@@ -33,6 +33,104 @@
         "levels": {
           "default": false,
           "type": "boolean"
+        },
+        "attack_rolls": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "advantage",
+                "disadvantage"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attacked": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "advantage",
+                "disadvantage"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attacked_beyond_5ft": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "advantage",
+                "disadvantage"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "critical_within_5ft": {
+          "default": false,
+          "type": "boolean"
+        },
+        "fail_saves": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "save_disadvantage": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "str",
+              "dex",
+              "con",
+              "int",
+              "wis",
+              "cha"
+            ]
+          }
+        },
+        "initiative": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "advantage",
+                "disadvantage"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "except_against_source": {
+          "default": false,
+          "type": "boolean"
         }
       },
       "required": [
@@ -73,6 +171,104 @@
             }
           },
           "levels": {
+            "default": false,
+            "type": "boolean"
+          },
+          "attack_rolls": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "advantage",
+                  "disadvantage"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attacked": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "advantage",
+                  "disadvantage"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attacked_beyond_5ft": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "advantage",
+                  "disadvantage"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "critical_within_5ft": {
+            "default": false,
+            "type": "boolean"
+          },
+          "fail_saves": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "str",
+                "dex",
+                "con",
+                "int",
+                "wis",
+                "cha"
+              ]
+            }
+          },
+          "save_disadvantage": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "str",
+                "dex",
+                "con",
+                "int",
+                "wis",
+                "cha"
+              ]
+            }
+          },
+          "initiative": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "advantage",
+                  "disadvantage"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "except_against_source": {
             "default": false,
             "type": "boolean"
           }

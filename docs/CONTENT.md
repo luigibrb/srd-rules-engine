@@ -362,8 +362,20 @@ variants: [{id: fire, name: Fire, grants: {resistances: [fire]}}]   # Ring of Re
 A magic item's grants apply while it's active: worn or held (or carried, for `active_when:
 carried`), and attuned if it needs Attunement. Effect targets only items use: `score.<ability>`
 (`op: max` sets a floor, like Gauntlets of Ogre Power) and `checks` (Stone of Good Luck).
-Conditions have `speed_zero`, `implies` (Unconscious → Incapacitated, Prone) and `levels`
-(Exhaustion).
+Conditions have `speed_zero`, `implies` (Unconscious → Incapacitated, Prone), `levels`
+(Exhaustion), and their effects on rolls:
+
+```yaml
+id: prone
+attack_rolls: disadvantage          # its own attack rolls
+attacked: advantage                 # attack rolls against it from within 5 feet…
+attacked_beyond_5ft: disadvantage   # …and from farther
+critical_within_5ft: false          # Paralyzed, Unconscious: a hit within 5 feet is a Critical Hit
+fail_saves: []                      # Paralyzed: [str, dex]
+save_disadvantage: []               # Restrained: [dex]
+initiative: null                    # Invisible: advantage; Incapacitated: disadvantage
+except_against_source: false        # Grappled: not against the grappler
+```
 
 Feats and features can have a `prerequisite`:
 

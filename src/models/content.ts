@@ -828,6 +828,9 @@ export const SpellDefSchema = z.strictObject({
 });
 export type SpellDef = z.infer<typeof SpellDefSchema>;
 
+/** Advantage or Disadvantage on a D20 Test. */
+const RollModeSchema = z.enum(["advantage", "disadvantage"]);
+
 /** A condition (SRD Rules Glossary). Exhaustion has levels; others are on or off. */
 export const ConditionSchema = z.strictObject({
   ...entity,
@@ -837,6 +840,25 @@ export const ConditionSchema = z.strictObject({
   implies: z.array(z.string()).default([]),
   /** Stacks in levels (Exhaustion: 1–6). */
   levels: z.boolean().default(false),
+  /** Advantage or Disadvantage on its own attack rolls (Blinded, Poisoned: Disadvantage). */
+  attack_rolls: RollModeSchema.nullable().default(null),
+  /** On attack rolls against it from within 5 feet… */
+  attacked: RollModeSchema.nullable().default(null),
+  /** …and from farther away (Prone: Advantage within 5 feet, Disadvantage beyond). */
+  attacked_beyond_5ft: RollModeSchema.nullable().default(null),
+  /** A hit on it from within 5 feet is a Critical Hit (Paralyzed, Unconscious). */
+  critical_within_5ft: z.boolean().default(false),
+  /** Saving throws it fails automatically (Paralyzed: Strength and Dexterity). */
+  fail_saves: z.array(z.enum(ABILITIES)).default([]),
+  /** Saving throws it makes with Disadvantage (Restrained: Dexterity). */
+  save_disadvantage: z.array(z.enum(ABILITIES)).default([]),
+  /** Advantage or Disadvantage on Initiative (Invisible, Incapacitated). */
+  initiative: RollModeSchema.nullable().default(null),
+  /**
+   * `attack_rolls` doesn't apply to attacks against the condition's source (Grappled: "any
+   * target other than the grappler"), when the source is known.
+   */
+  except_against_source: z.boolean().default(false),
 });
 export type ConditionDef = z.infer<typeof ConditionSchema>;
 

@@ -9,6 +9,7 @@
 import type { Ability, SpellDef } from "../models/content";
 import type { PlayAction } from "../models/state";
 import {
+  attackMode,
   type Combatant,
   type CombatantSpellcasting,
   type D20Roll,
@@ -46,6 +47,8 @@ export interface SpellAttackRoll {
   readonly hit: boolean;
   readonly critical_hit: boolean;
   readonly critical_miss: boolean;
+  /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
+  readonly reasons: readonly string[];
 }
 
 export interface SpellTargetResult {
@@ -188,11 +191,15 @@ export function castSpell(
     const bonus = line?.attack_bonus ?? 0;
     for (const index of aimed) {
       const target = targets[index] as Combatant;
-      const roll = rollD20({ mode, rng });
+      // Conditions change the roll like a weapon attack's; a melee spell attack is within 5 ft.
+      const effective = attackMode(caster, target, { mode, within_5ft: m.attack === "melee" });
+      const roll = rollD20({ mode: effective.mode, rng });
       const critical_miss = roll.d20 === 1;
-      const critical_hit = roll.d20 === 20;
-      const hit = critical_hit || (!critical_miss && roll.d20 + bonus >= target.armor_class);
-      const attack = { roll, total: roll.d20 + bonus, hit, critical_hit, critical_miss };
+      const hit = roll.d20 === 20 || (!critical_miss && roll.d20 + bonus >= target.armor_class);
+      const critical_hit = roll.d20 === 20 || (hit && effective.critical_on_hit);
+      const total = roll.d20 + bonus;
+      const reasons = effective.reasons;
+      const attack = { roll, total, hit, critical_hit, critical_miss, reasons };
       const rolled =
         hit && parts.length ? rollDamage(parts, { critical: critical_hit, rng }) : null;
       const instances = rolled ? toInstances(rolled) : [];

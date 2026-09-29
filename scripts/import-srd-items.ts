@@ -143,13 +143,52 @@ const MECHANICS: Record<string, Partial<Item>> = {
   },
 };
 
+// Rolls, from each condition's "Attacks Affected", "Saving Throws Affected" and "Automatic
+// Critical Hits" entries (SRD 5.2.1 Rules Glossary).
+const ADV = "advantage";
+const DIS = "disadvantage";
+const STR_DEX_FAIL = { fail_saves: ["str", "dex"] };
 const CONDITIONS: Record<string, Partial<Item>> = {
-  grappled: { speed_zero: true },
-  restrained: { speed_zero: true },
-  paralyzed: { speed_zero: true, implies: ["incapacitated"] },
-  petrified: { speed_zero: true, implies: ["incapacitated"] },
-  stunned: { implies: ["incapacitated"] },
-  unconscious: { speed_zero: true, implies: ["incapacitated", "prone"] },
+  blinded: { attack_rolls: DIS, attacked: ADV, attacked_beyond_5ft: ADV },
+  // "while the source of fear is within line of sight": applied as if it were.
+  frightened: { attack_rolls: DIS },
+  grappled: { speed_zero: true, attack_rolls: DIS, except_against_source: true },
+  incapacitated: { initiative: DIS },
+  // "If a creature can somehow see you, you don't gain this benefit against that creature."
+  invisible: { attack_rolls: ADV, attacked: DIS, attacked_beyond_5ft: DIS, initiative: ADV },
+  paralyzed: {
+    speed_zero: true,
+    implies: ["incapacitated"],
+    attacked: ADV,
+    attacked_beyond_5ft: ADV,
+    critical_within_5ft: true,
+    ...STR_DEX_FAIL,
+  },
+  petrified: {
+    speed_zero: true,
+    implies: ["incapacitated"],
+    attacked: ADV,
+    attacked_beyond_5ft: ADV,
+    ...STR_DEX_FAIL,
+  },
+  poisoned: { attack_rolls: DIS },
+  prone: { attack_rolls: DIS, attacked: ADV, attacked_beyond_5ft: DIS },
+  restrained: {
+    speed_zero: true,
+    attack_rolls: DIS,
+    attacked: ADV,
+    attacked_beyond_5ft: ADV,
+    save_disadvantage: ["dex"],
+  },
+  stunned: { implies: ["incapacitated"], attacked: ADV, attacked_beyond_5ft: ADV, ...STR_DEX_FAIL },
+  unconscious: {
+    speed_zero: true,
+    implies: ["incapacitated", "prone"],
+    attacked: ADV,
+    attacked_beyond_5ft: ADV,
+    critical_within_5ft: true,
+    ...STR_DEX_FAIL,
+  },
   exhaustion: { levels: true },
 };
 
