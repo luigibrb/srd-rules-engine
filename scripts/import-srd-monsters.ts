@@ -386,7 +386,53 @@ function parseBlock(name: string, group: string | null, lines: string[]): Record
     monster[key] = actions;
     if (section === "Legendary Actions" && intro) monster.legendary_text = intro;
   }
+  legendary(monster, where);
   return monster;
+}
+
+/**
+ * Legendary actions and Legendary Resistance as data: uses per round ("Legendary Action Uses: 3
+ * (4 in Lair)") and per day ("Legendary Resistance (3/Day, or 4/Day in Lair)"); for each
+ * legendary action, whether it's once per round, the attacks it makes ("makes one Rend attack",
+ * "one Claw or Tail attack") and the action it uses ("uses Lightning Strike").
+ */
+function legendary(monster: Record<string, unknown>, where: string): void {
+  const text = (monster.legendary_text as string | undefined) ?? "";
+  const uses = /^Legendary Action Uses: (\d+)(?: \((\d+) in Lair\))?/.exec(text);
+  const actions = (monster.legendary_actions as Action[] | undefined) ?? [];
+  if (actions.length && !uses) throw new Error(`${where}: can't read the Legendary Action Uses`);
+  if (uses)
+    monster.legendary_uses = { uses: Number(uses[1]), in_lair: uses[2] ? Number(uses[2]) : null };
+  const resistance = ((monster.traits as Action[] | undefined) ?? [])
+    .map((t) => /^Legendary Resistance \((\d+)\/Day(?:, or (\d+)\/Day in Lair)?\)$/.exec(t.name))
+    .find(Boolean);
+  if (resistance) {
+    monster.legendary_resistance = {
+      uses: Number(resistance[1]),
+      in_lair: resistance[2] ? Number(resistance[2]) : null,
+    };
+  }
+  const own = [
+    ...((monster.actions as Action[] | undefined) ?? []),
+    ...((monster.bonus_actions as Action[] | undefined) ?? []),
+  ].map((a) => a.name);
+  // "Grave Strike" matches the action "Grave Strike (Vampire Form Only)".
+  const named = (name: string) =>
+    own.find((n) => n === name || n.startsWith(`${name} (`)) ??
+    fail(`${where}: a legendary action names '${name}', which isn't one of its actions`);
+  function fail(message: string): never {
+    throw new Error(message);
+  }
+  for (const action of actions) {
+    action.once_per_round = /can't take this action again until the start of its next turn/.test(
+      action.text,
+    );
+    const attack = /makes one ([\w' ]+?) attack\b/.exec(action.text);
+    if (attack) action.attacks = (attack[1] as string).split(" or ").map(named);
+    const used = /\buses ([A-Z][\w' -]+?)(?: and|\.|,)/.exec(action.text);
+    // "uses Spellcasting to cast Fear" stays text (monster spellcasting isn't modeled yet).
+    if (used && !used[1]?.startsWith("Spellcasting")) action.uses = named(used[1] as string);
+  }
 }
 
 /** Split a file into stat blocks: a heading followed by a size and type line. */

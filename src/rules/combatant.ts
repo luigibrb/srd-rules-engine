@@ -78,6 +78,26 @@ export interface Combatant {
   readonly save_actions: readonly SaveActionLine[];
   /** How its conditions change rolls (`conditionRolls`). */
   readonly condition_rolls: ConditionRolls;
+  /** Legendary actions it can take after another creature's turn (a monster's). */
+  readonly legendary_actions: readonly LegendaryActionLine[];
+  /**
+   * Legendary Resistance uses left: while above 0, a failed saving throw succeeds instead (SRD
+   * "Legendary Resistance"), and the result says so.
+   */
+  readonly legendary_resistance: number;
+}
+
+/** A legendary action: an attack it makes, an action it uses, a saving throw effect, or text. */
+export interface LegendaryActionLine {
+  readonly name: string;
+  /** Can't be taken again until the start of the monster's next turn. */
+  readonly once_per_round: boolean;
+  /** Attack lines it can make (one of them). */
+  readonly attacks: readonly string[];
+  /** Another action it uses (an attack line or a saving throw effect). */
+  readonly uses: string | null;
+  readonly save: SaveActionLine | null;
+  readonly text: string;
 }
 
 /** Advantage or Disadvantage from a condition, with the condition's name for notes. */
@@ -417,6 +437,8 @@ export interface SaveResult {
   readonly success: boolean;
   /** The condition that made it fail without a roll (Paralyzed: Strength and Dexterity). */
   readonly automatic_failure: string | null;
+  /** It failed, and Legendary Resistance made it a success (one use spent). */
+  readonly legendary_resistance: boolean;
   /** Why the roll had Advantage or Disadvantage, if it did. */
   readonly reasons: readonly string[];
 }
@@ -434,10 +456,20 @@ export function rollSavingThrow(
 ): SaveResult {
   const bonus = combatant.saving_throws[ability];
   const base = { name: combatant.name, ability, dc, bonus };
+  // Legendary Resistance: "If the monster fails a saving throw, it can choose to succeed instead."
+  const resisted = combatant.legendary_resistance > 0;
   const failing = combatant.condition_rolls.fail_saves[ability];
   if (failing) {
     const roll = { rolls: [], d20: 0, mode: "normal" as const };
-    return { ...base, roll, total: 0, success: false, automatic_failure: failing, reasons: [] };
+    return {
+      ...base,
+      roll,
+      total: 0,
+      success: resisted,
+      automatic_failure: failing,
+      legendary_resistance: resisted,
+      reasons: [],
+    };
   }
   const reasons: ModeReason[] = [];
   if (combatant.advantages.includes(`save.${ability}`)) {
@@ -448,12 +480,14 @@ export function rollSavingThrow(
   const resolved = resolveMode(mode, reasons);
   const roll = rollD20({ mode: resolved.mode, rng });
   const total = roll.d20 + bonus;
+  const legendary = total < dc && resisted;
   return {
     ...base,
     roll,
     total,
-    success: total >= dc,
+    success: total >= dc || legendary,
     automatic_failure: null,
+    legendary_resistance: legendary,
     reasons: resolved.reasons,
   };
 }
@@ -503,6 +537,8 @@ export function combatantFromSnapshot(character: Character): Combatant {
     condition_immunities: [],
     save_actions: [],
     condition_rolls: NO_CONDITION_ROLLS,
+    legendary_actions: [],
+    legendary_resistance: 0,
   };
 }
 
@@ -511,6 +547,12 @@ export interface MonsterState {
   readonly hp?: number;
   readonly temp_hp?: number;
   readonly conditions?: readonly string[];
+  /** In its lair: more legendary action and Legendary Resistance uses, when it has lair values. */
+  readonly in_lair?: boolean;
+  /** Legendary Resistance uses already spent today. */
+  readonly legendary_resistance_used?: number;
+  /** `false`: never spend Legendary Resistance automatically (the GM decides). Default true. */
+  readonly auto_legendary_resistance?: boolean;
 }
 
 /**
@@ -561,21 +603,38 @@ export function combatantFromMonster(
       },
     ];
   });
-  const saveActions: SaveActionLine[] = [...all, ...monster.legendary_actions].flatMap((action) =>
+  const saveLine = (action: MonsterDef["actions"][number]): SaveActionLine | null =>
     action.save
-      ? [
-          {
-            name: action.name,
-            ability: action.save.ability,
-            dc: action.save.dc,
-            damage_parts: parts(action.save.damage),
-            on_success: action.save.on_success,
-            conditions: action.save.conditions,
-            recharge: action.recharge,
-          },
-        ]
-      : [],
-  );
+      ? {
+          name: action.name,
+          ability: action.save.ability,
+          dc: action.save.dc,
+          damage_parts: parts(action.save.damage),
+          on_success: action.save.on_success,
+          conditions: action.save.conditions,
+          recharge: action.recharge,
+        }
+      : null;
+  // Legendary actions' own saving throw effects are only usable as legendary actions.
+  const saveActions = all.flatMap((action) => saveLine(action) ?? []);
+  const legendaryActions: LegendaryActionLine[] = monster.legendary_actions.map((action) => ({
+    name: action.name,
+    once_per_round: action.once_per_round,
+    attacks: action.attacks,
+    uses: action.uses,
+    save: saveLine(action),
+    text: action.text,
+  }));
+  const resistance = monster.legendary_resistance;
+  const resistanceUses = resistance
+    ? state.in_lair && resistance.in_lair !== null
+      ? resistance.in_lair
+      : resistance.uses
+    : 0;
+  const resistanceLeft =
+    state.auto_legendary_resistance === false
+      ? 0
+      : Math.max(0, resistanceUses - (state.legendary_resistance_used ?? 0));
   const hp = Math.min(state.hp ?? monster.hit_points, monster.hit_points);
   return {
     name: monster.name,
@@ -604,5 +663,7 @@ export function combatantFromMonster(
     condition_immunities: monster.condition_immunities,
     save_actions: saveActions,
     condition_rolls: table ? conditionRolls(state.conditions ?? [], table) : NO_CONDITION_ROLLS,
+    legendary_actions: legendaryActions,
+    legendary_resistance: resistanceLeft,
   };
 }

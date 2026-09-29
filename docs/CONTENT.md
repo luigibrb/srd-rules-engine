@@ -323,8 +323,10 @@ A stat block keeps the SRD's layout: `armor_class`, `initiative`, `hit_points` a
 only"), `abilities` and `saving_throws`, `skills`, damage `resistances`/`vulnerabilities`/
 `immunities`, `condition_immunities` (`defenses_note` for qualified entries), `senses`,
 `passive_perception`, `languages`, `cr`, `xp`, `proficiency_bonus`, and `traits`, `actions`,
-`bonus_actions`, `reactions`, `legendary_actions` (with `legendary_text`), and `multiattack`
-(how many attacks its Multiattack makes). Each action has its
+`bonus_actions`, `reactions`, `legendary_actions` (with `legendary_text`), `multiattack`
+(how many attacks its Multiattack makes), `legendary_uses` and `legendary_resistance`
+(`{uses: 3, in_lair: 4}`). A legendary action also has `once_per_round`, `attacks` (the actions
+whose attack it makes, one of them) and `uses` (another action it uses). Each action has its
 `text`, a `recharge` (`5–6`), and, when combat can resolve it:
 
 ```yaml

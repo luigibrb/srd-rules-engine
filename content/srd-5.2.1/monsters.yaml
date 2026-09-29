@@ -123,12 +123,23 @@
   legendary_actions:
     - name: Lash
       text: The aboleth makes one Tentacle attack.
+      once_per_round: false
+      attacks:
+        - Tentacle
     - name: Psychic Drain
       text: If the aboleth has at least one creature Charmed or Grappled, it uses Consume Memories and
         regains 5 (1d10) Hit Points.
+      once_per_round: false
+      uses: Consume Memories
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the aboleth can expend a use to take one of the following actions. The aboleth regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-black-dragon
   name: Adult Black Dragon
   group: Black Dragons
@@ -240,14 +251,25 @@
             type: poison
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Frightful Presence
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
         start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-blue-dragon
   name: Adult Blue Dragon
   group: Blue Dragons
@@ -345,14 +367,25 @@
     - name: Cloaked Flight
       text: The dragon uses Spellcasting to cast _Invisibility_ on itself, and it can fly up to half its
         Fly Speed. The dragon can't take this action again until the start of its next turn.
+      once_per_round: true
     - name: Sonic Boom
       text: The dragon uses Spellcasting to cast _Shatter_. The dragon can't take this action again until
         the start of its next turn.
+      once_per_round: true
     - name: Tail Swipe
       text: The dragon makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-brass-dragon
   name: Adult Brass Dragon
   group: Brass Dragons
@@ -466,8 +499,12 @@
   legendary_actions:
     - name: Blazing Light
       text: The dragon uses Spellcasting to cast _Scorching Ray_.
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
     - name: Scorching Sands
       text: _Dexterity Saving Throw:_ DC 16, one creature the dragon can see within 120 feet. _Failure:_
         27 (6d8) Fire damage, and the target's Speed is halved until the end of its next turn.
@@ -483,9 +520,16 @@
             type: fire
         on_success: none
         conditions: []
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-bronze-dragon
   name: Adult Bronze Dragon
   group: Bronze Dragons
@@ -597,8 +641,12 @@
   legendary_actions:
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
     - name: Thunderclap
       text: >-
         _Constitution Saving Throw:_ DC 17, each creature in a 20-foot-radius Sphere centered on a
@@ -612,9 +660,16 @@
         on_success: none
         conditions:
           - deafened
+      once_per_round: false
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-copper-dragon
   name: Adult Copper Dragon
   group: Copper Dragons
@@ -731,14 +786,25 @@
             type: psychic
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Mind Jolt
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 4 version). The dragon can't take
         this action again until the start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-gold-dragon
   name: Adult Gold Dragon
   group: Gold Dragons
@@ -861,13 +927,24 @@
         on_success: none
         conditions:
           - incapacitated
+      once_per_round: true
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-green-dragon
   name: Adult Green Dragon
   group: Green Dragons
@@ -969,6 +1046,7 @@
   legendary_actions:
     - name: Mind Invasion
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 3 version).
+      once_per_round: false
     - name: Noxious Miasma
       text: _Constitution Saving Throw:_ DC 17, each creature in a 20-foot-radius Sphere centered on a
         point the dragon can see within 90 feet. _Failure:_ 7 (2d6) Poison damage, and the target
@@ -984,11 +1062,21 @@
             type: poison
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-red-dragon
   name: Adult Red Dragon
   group: Red Dragons
@@ -1086,14 +1174,25 @@
     - name: Commanding Presence
       text: The dragon uses Spellcasting to cast _Command_ (level 2 version). The dragon can't take this
         action again until the start of its next turn.
+      once_per_round: true
     - name: Fiery Rays
       text: The dragon uses Spellcasting to cast _Scorching Ray_. The dragon can't take this action again
         until the start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-silver-dragon
   name: Adult Silver Dragon
   group: Silver Dragons
@@ -1206,6 +1305,7 @@
     - name: Chill
       text: The dragon uses Spellcasting to cast _Hold Monster_. The dragon can't take this action again
         until the start of its next turn.
+      once_per_round: true
     - name: Cold Gale
       text: _Dexterity Saving Throw:_ DC 19, each creature in a 60-foot-long, 10-foot-wide Line.
         _Failure:_ 14 (4d6) Cold damage, and the target is pushed up to 30 feet straight away from
@@ -1221,11 +1321,21 @@
             type: cold
         on_success: half
         conditions: []
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: adult-white-dragon
   name: Adult White Dragon
   group: White Dragons
@@ -1330,15 +1440,26 @@
             type: cold
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Frightful Presence
       text: The dragon casts _Fear_, requiring no Material components and using Charisma as the
         spellcasting ability (spell save DC 14). The dragon can't take this action again until the
         start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: air-elemental
   name: Air Elemental
   group: null
@@ -1612,14 +1733,25 @@
             type: poison
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Frightful Presence
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
         start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-blue-dragon
   name: Ancient Blue Dragon
   group: Blue Dragons
@@ -1717,14 +1849,25 @@
     - name: Cloaked Flight
       text: The dragon uses Spellcasting to cast _Invisibility_ on itself, and it can fly up to half its
         Fly Speed. The dragon can't take this action again until the start of its next turn.
+      once_per_round: true
     - name: Sonic Boom
       text: The dragon uses Spellcasting to cast _Shatter_ (level 3 version). The dragon can't take this
         action again until the start of its next turn.
+      once_per_round: true
     - name: Tail Swipe
       text: The dragon makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-brass-dragon
   name: Ancient Brass Dragon
   group: Brass Dragons
@@ -1839,8 +1982,12 @@
   legendary_actions:
     - name: Blazing Light
       text: The dragon uses Spellcasting to cast _Scorching Ray_ (level 3 version).
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
     - name: Scorching Sands
       text: _Dexterity Saving Throw:_ DC 20, one creature the dragon can see within 120 feet. _Failure:_
         36 (8d8) Fire damage, and the target's Speed is halved until the end of its next turn.
@@ -1856,9 +2003,16 @@
             type: fire
         on_success: none
         conditions: []
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-bronze-dragon
   name: Ancient Bronze Dragon
   group: Bronze Dragons
@@ -1970,8 +2124,12 @@
   legendary_actions:
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
     - name: Thunderclap
       text: _Constitution Saving Throw:_ DC 22, each creature in a 20-foot-radius Sphere centered on a
         point the dragon can see within 120 feet. _Failure:_ 13 (3d8) Thunder damage, and the target
@@ -1987,9 +2145,16 @@
         on_success: none
         conditions:
           - deafened
+      once_per_round: false
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-copper-dragon
   name: Ancient Copper Dragon
   group: Copper Dragons
@@ -2106,14 +2271,25 @@
             type: psychic
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Mind Jolt
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 5 version). The dragon can't take
         this action again until the start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-gold-dragon
   name: Ancient Gold Dragon
   group: Gold Dragons
@@ -2236,13 +2412,24 @@
         on_success: none
         conditions:
           - incapacitated
+      once_per_round: true
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 4 version).
+      once_per_round: false
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-green-dragon
   name: Ancient Green Dragon
   group: Green Dragons
@@ -2344,6 +2531,7 @@
   legendary_actions:
     - name: Mind Invasion
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 5 version).
+      once_per_round: false
     - name: Noxious Miasma
       text: _Constitution Saving Throw:_ DC 21, each creature in a 30-foot-radius Sphere centered on a
         point the dragon can see within 90 feet. _Failure:_ 17 (5d6) Poison damage, and the target
@@ -2359,11 +2547,21 @@
             type: poison
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-red-dragon
   name: Ancient Red Dragon
   group: Red Dragons
@@ -2461,14 +2659,25 @@
     - name: Commanding Presence
       text: The dragon uses Spellcasting to cast _Command_ (level 2 version). The dragon can't take this
         action again until the start of its next turn.
+      once_per_round: true
     - name: Fiery Rays
       text: The dragon uses Spellcasting to cast _Scorching Ray_ (level 3 version). The dragon can't take
         this action again until the start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-silver-dragon
   name: Ancient Silver Dragon
   group: Silver Dragons
@@ -2582,6 +2791,7 @@
     - name: Chill
       text: The dragon uses Spellcasting to cast _Hold Monster_. The dragon can't take this action again
         until the start of its next turn.
+      once_per_round: true
     - name: Cold Gale
       text: _Dexterity Saving Throw:_ DC 23, each creature in a 60-foot-long, 10-foot-wide Line.
         _Failure:_ 14 (4d6) Cold damage, and the target is pushed up to 30 feet straight away from
@@ -2597,11 +2807,21 @@
             type: cold
         on_success: half
         conditions: []
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: ancient-white-dragon
   name: Ancient White Dragon
   group: White Dragons
@@ -2706,15 +2926,26 @@
             type: cold
         on_success: none
         conditions: []
+      once_per_round: true
     - name: Frightful Presence
       text: The dragon casts _Fear_, requiring no Material components and using Charisma as the
         spellcasting ability (spell save DC 18). The dragon can't take this action again until the
         start of its next turn.
+      once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
+      once_per_round: false
+      attacks:
+        - Rend
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: animated-armor
   name: Animated Armor
   group: Animated Objects
@@ -3838,6 +4069,9 @@
     - name: Teleport
       text: The balor teleports itself or a willing demon within 10 feet of itself up to 60 feet to an
         unoccupied space the balor can see.
+  legendary_resistance:
+    uses: 3
+    in_lair: null
 - id: bandit
   name: Bandit
   group: Bandits
@@ -14957,6 +15191,8 @@
   legendary_actions:
     - name: Storm Bolt
       text: The kraken uses Lightning Strike.
+      once_per_round: false
+      uses: Lightning Strike
     - name: Toxic Ink
       text: _Constitution Saving Throw:_ DC 23, each creature in a 15-foot Emanation originating from the
         kraken while it is underwater. _Failure:_ The target has the Blinded and Poisoned conditions
@@ -14970,9 +15206,16 @@
         conditions:
           - blinded
           - poisoned
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the kraken can expend a use to take one of the following actions. The kraken regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: lamia
   name: Lamia
   group: null
@@ -15237,6 +15480,7 @@
     - name: Deathly Teleport
       text: The lich teleports up to 60 feet to an unoccupied space it can see, and each creature within
         10 feet of the space it left takes 11 (2d10) Necrotic damage.
+      once_per_round: false
     - name: Disrupt Life
       text: _Constitution Saving Throw:_ DC 20, each creature that isn't an Undead in a 20-foot Emanation
         originating from the lich. _Failure:_ 31 (9d6) Necrotic damage. _Success:_ Half damage.
@@ -15252,12 +15496,20 @@
             type: necrotic
         on_success: half
         conditions: []
+      once_per_round: true
     - name: Frightening Gaze
       text: The lich casts _Fear_, using the same spellcasting ability as Spellcasting. The lich can't
         take this action again until the start of its next turn.
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the lich can expend a use to take one of the following actions. The lich regains all expended
     uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 4
+    in_lair: 5
 - id: lion
   name: Lion
   group: null
@@ -16712,14 +16964,27 @@
     - name: Dread Command
       text: The mummy casts _Command_ (level 2 version), using the same spellcasting ability as
         Spellcasting. The mummy can't take this action again until the start of its next turn.
+      once_per_round: true
     - name: Glare
       text: The mummy uses Dreadful Glare. The mummy can't take this action again until the start of its
         next turn.
+      once_per_round: true
+      uses: Dreadful Glare
     - name: Necrotic Strike
       text: The mummy makes one Rotting Fist or Channel Negative Energy attack.
+      once_per_round: false
+      attacks:
+        - Rotting Fist
+        - Channel Negative Energy
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the mummy can expend a use to take one of the following actions. The mummy regains all expended
     uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: nalfeshnee
   name: Nalfeshnee
   group: null
@@ -18181,6 +18446,9 @@
         using Charisma as the spellcasting ability (spell save DC 21). It can replace one _Fireball_
         with _Hold Monster_ (level 7 version) or _Wall of Fire_.
       recharge: 4–6
+  legendary_resistance:
+    uses: 4
+    in_lair: null
 - id: planetar
   name: Planetar
   group: null
@@ -20888,6 +21156,7 @@
         on_success: none
         conditions:
           - blinded
+      once_per_round: true
     - name: Radiant Teleport
       text: The solar teleports up to 60 feet to an unoccupied space it can see. _Dexterity Saving Throw:_
         DC 25, each creature in a 10-foot Emanation originating from the solar at its destination
@@ -20902,9 +21171,16 @@
             type: radiant
         on_success: half
         conditions: []
+      once_per_round: false
   legendary_text: "Legendary Action Uses: 3. Immediately after another creature's turn, the solar can
     expend a use to take one of the following actions. The solar regains all expended uses at the
     start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: null
+  legendary_resistance:
+    uses: 4
+    in_lair: null
 - id: specter
   name: Specter
   group: null
@@ -21088,14 +21364,24 @@
     - name: Arcane Prowl
       text: The sphinx can teleport up to 30 feet to an unoccupied space it can see, and it makes one Claw
         attack.
+      once_per_round: false
+      attacks:
+        - Claw
     - name: Weight of Years
       text: _Constitution Saving Throw:_ DC 16, one creature the sphinx can see within 120 feet.
         _Failure:_ The target gains 1 Exhaustion level. While the target has any Exhaustion levels,
         it appears 3d10 years older. _Failure or Success:_ The sphinx can't take this action again
         until the start of its next turn.
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the sphinx can expend a use to take one of the following actions. The sphinx regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: sphinx-of-valor
   name: Sphinx of Valor
   group: Sphinxes
@@ -21221,14 +21507,24 @@
     - name: Arcane Prowl
       text: The sphinx can teleport up to 30 feet to an unoccupied space it can see, and it makes one Claw
         attack.
+      once_per_round: false
+      attacks:
+        - Claw
     - name: Weight of Years
       text: _Constitution Saving Throw:_ DC 16, one creature the sphinx can see within 120 feet.
         _Failure:_ The target gains 1 Exhaustion level. While the target has any Exhaustion levels,
         it appears 3d10 years older. _Failure or Success:_ The sphinx can't take this action again
         until the start of its next turn.
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the sphinx can expend a use to take one of the following actions. The sphinx regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: sphinx-of-wonder
   name: Sphinx of Wonder
   group: Sphinxes
@@ -22844,14 +23140,25 @@
   legendary_actions:
     - name: Onslaught
       text: The tarrasque moves up to half its Speed, and it makes one Claw or Tail attack.
+      once_per_round: false
+      attacks:
+        - Claw
+        - Tail
     - name: World-Shaking Movement
       text: The tarrasque moves up to its Speed. At the end of this movement, the tarrasque creates an
         instantaneous shock wave in a 60-foot Emanation originating from itself. Creatures in that
         area lose Concentration and, if Medium or smaller, have the Prone condition. The tarrasque
         can't take this action again until the start of its next turn.
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3. Immediately after another creature's turn, the tarrasque
     can expend a use to take one of the following actions. The tarrasque regains all expended uses
     at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: null
+  legendary_resistance:
+    uses: 6
+    in_lair: null
 - id: tiger
   name: Tiger
   group: null
@@ -23502,6 +23809,9 @@
     - name: Charging Horn
       text: The unicorn moves up to half its Speed without provoking Opportunity Attacks, and it makes one
         Radiant Horn attack.
+      once_per_round: false
+      attacks:
+        - Radiant Horn
     - name: Shimmering Shield
       text: >-
         The unicorn targets itself or one creature it can see within 60 feet of itself. The target
@@ -23509,9 +23819,16 @@
         unicorn's next turn.
 
         The unicorn can't take this action again until the start of its next turn.
+      once_per_round: true
   legendary_text: "Legendary Action Uses: 3. Immediately after another creature's turn, the unicorn
     can expend a use to take one of the following actions. The unicorn regains all expended uses at
     the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: null
+  legendary_resistance:
+    uses: 3
+    in_lair: null
 - id: vampire
   name: Vampire
   group: Vampires
@@ -23652,11 +23969,21 @@
       text: The vampire casts _Command_, requiring no spell components and using Charisma as the
         spellcasting ability (spell save DC 17). The vampire can't take this action again until the
         start of its next turn.
+      once_per_round: true
     - name: Deathless Strike
       text: The vampire moves up to half its Speed, and it makes one Grave Strike attack.
+      once_per_round: false
+      attacks:
+        - Grave Strike (Vampire Form Only)
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the vampire can expend a use to take one of the following actions. The vampire regains all
     expended uses at the start of each of its turns."
+  legendary_uses:
+    uses: 3
+    in_lair: 4
+  legendary_resistance:
+    uses: 3
+    in_lair: 4
 - id: vampire-familiar
   name: Vampire Familiar
   group: Vampires

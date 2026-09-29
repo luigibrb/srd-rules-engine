@@ -95,7 +95,14 @@ export function encounterCombatant(
     const def = monsterDef(ctx, c);
     const base = combatantFromMonster(
       def,
-      { hp: c.hp ?? def.hit_points, temp_hp: c.temp_hp, conditions: c.conditions },
+      {
+        hp: c.hp ?? def.hit_points,
+        temp_hp: c.temp_hp,
+        conditions: c.conditions,
+        in_lair: c.in_lair,
+        legendary_resistance_used: c.legendary_resistance_used,
+        auto_legendary_resistance: c.auto_legendary_resistance,
+      },
       { conditions: ctx.catalog.conditions },
     );
     // An ability waiting to recharge can't be used.
@@ -157,6 +164,7 @@ export function applyEncounterAction(
       const spell = concentrationOf(c);
       if (dc !== null && spell) {
         const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng });
+        spendLegendaryResistance(c, save);
         const outcome = saveText(save);
         if (save.success) notes.push(`${c.name} keeps Concentration on ${spell} (${outcome}).`);
         else {
@@ -248,6 +256,9 @@ export function applyEncounterAction(
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
     for (const x of e.combatants) x.riders_used = [];
+    // Legendary action uses come back at the start of the monster's turn.
+    c.legendary_used = 0;
+    c.legendary_taken = [];
     tick(c, "start");
     if (c.monster !== null && c.expended.length) {
       const def = monsterDef(ctx, c);
@@ -268,6 +279,100 @@ export function applyEncounterAction(
         } else notes.push(`${c.name}'s ${name} doesn't recharge (${d6}).`);
       }
     }
+  };
+  /** A monster's save turned into a success by Legendary Resistance: one use spent. */
+  const spendLegendaryResistance = (c: EncounterCombatant, save: SaveResult | null): void => {
+    if (!save?.legendary_resistance || c.monster === null) return;
+    c.legendary_resistance_used += 1;
+    const def = monsterDef(ctx, c);
+    const max = def.legendary_resistance
+      ? c.in_lair && def.legendary_resistance.in_lair !== null
+        ? def.legendary_resistance.in_lair
+        : def.legendary_resistance.uses
+      : 0;
+    const left = Math.max(0, max - c.legendary_resistance_used);
+    notes.push(`${c.name} uses Legendary Resistance to succeed instead (${left} left today).`);
+  };
+  /** One attack by `c` on `t`, applied: riders once per turn, notes, damage. */
+  const attackOn = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    attackName: string,
+    options: {
+      mode?: "normal" | "advantage" | "disadvantage";
+      two_handed?: boolean;
+      riders?: readonly { rider: string; type?: string }[];
+      ally_adjacent?: boolean;
+      within_5ft?: boolean;
+    },
+  ): AttackResult => {
+    const attacker = encounterCombatant(e, c.id, ctx);
+    const line = attacker.attacks.find((a) => a.name === attackName);
+    const riders = options.riders ?? [];
+    const onceIds = riders.flatMap((r) => {
+      const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
+      return rider?.once_per_turn ? [rider.id] : [];
+    });
+    const again = onceIds.find((id) => c.riders_used.includes(id));
+    if (again) fail(`${c.name} has already used ${again} this turn`);
+    const target = encounterCombatant(e, t.id, ctx);
+    let hit: AttackResult;
+    try {
+      // The attacker's conditions caused by this target (Grappled by it), from the effects.
+      const against_source_of = e.effects
+        .filter((x) => x.target === c.id && x.source === t.id)
+        .map((x) => x.condition);
+      hit = makeAttack(attacker, attackName, target, {
+        rng,
+        mode: options.mode,
+        two_handed: options.two_handed,
+        riders,
+        ally_adjacent: options.ally_adjacent,
+        within_5ft: options.within_5ft,
+        against_source_of,
+      });
+    } catch (error) {
+      if (error instanceof RangeError) fail(error.message);
+      throw error;
+    }
+    c.extended = true; // an attack roll extends Rage
+    const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
+    const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
+    if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
+    else {
+      c.riders_used.push(...onceIds);
+      const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+      const crit = hit.critical_hit ? "Critical Hit! " : "";
+      notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
+      applyTo(t, [{ type: "damage", instances: [...hit.instances], critical: hit.critical_hit }]);
+    }
+    return hit;
+  };
+  /** A saving throw effect used by `user` against targets, applied. */
+  const saveEffectOn = (
+    c: EncounterCombatant,
+    user: Combatant,
+    name: string,
+    targetIds: readonly string[],
+  ): SaveActionResult => {
+    const targets = targetIds.map(find);
+    let r: SaveActionResult;
+    try {
+      const combatants = targets.map((t) => encounterCombatant(e, t.id, ctx));
+      r = useSaveAction(user, name, combatants, { rng });
+    } catch (error) {
+      if (error instanceof RangeError) fail(error.message);
+      throw error;
+    }
+    c.extended = true; // forcing a saving throw extends Rage
+    for (const hit of r.targets) {
+      const t = targets[hit.target] as EncounterCombatant;
+      const outcome = hit.save?.success ? "succeeds" : "fails";
+      notes.push(`${t.name}: ${outcome} (${hit.save ? saveText(hit.save) : ""}).`);
+      spendLegendaryResistance(t, hit.save);
+      applyTo(t, hit.actions);
+    }
+    return r;
   };
   /** After every action: Concentration effects whose source stopped concentrating end. */
   const sweep = (): void => {
@@ -308,7 +413,15 @@ export function applyEncounterAction(
       }
       const numbered = id === def.id ? def.name : `${def.name} ${id.slice(def.id.length + 1)}`;
       e.combatants.push(
-        combatant({ id, name: action.name ?? numbered, monster: def.id, side: action.side, hp }),
+        combatant({
+          id,
+          name: action.name ?? numbered,
+          monster: def.id,
+          side: action.side,
+          hp,
+          in_lair: action.in_lair ?? false,
+          auto_legendary_resistance: action.auto_legendary_resistance ?? true,
+        }),
       );
       notes.push(`${action.name ?? numbered} joins with ${hp} HP.`);
       break;
@@ -521,46 +634,7 @@ export function applyEncounterAction(
           c.attacks_left = attacker.attacks_per_action - 1;
         }
       }
-      const line = attacker.attacks.find((a) => a.name === action.attack);
-      const riders = action.riders ?? [];
-      const onceIds = riders.flatMap((r) => {
-        const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
-        return rider?.once_per_turn ? [rider.id] : [];
-      });
-      const again = onceIds.find((id) => c.riders_used.includes(id));
-      if (again) fail(`${c.name} has already used ${again} this turn`);
-      const target = encounterCombatant(e, t.id, ctx);
-      let hit: AttackResult;
-      try {
-        // The attacker's conditions caused by this target (Grappled by it), from the effects.
-        const against_source_of = e.effects
-          .filter((x) => x.target === c.id && x.source === t.id)
-          .map((x) => x.condition);
-        hit = makeAttack(attacker, action.attack, target, {
-          rng,
-          mode: action.mode,
-          two_handed: action.two_handed,
-          riders,
-          ally_adjacent: action.ally_adjacent,
-          within_5ft: action.within_5ft,
-          against_source_of,
-        });
-      } catch (error) {
-        if (error instanceof RangeError) fail(error.message);
-        throw error;
-      }
-      result = hit;
-      c.extended = true; // an attack roll extends Rage
-      const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
-      const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
-      if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
-      else {
-        c.riders_used.push(...onceIds);
-        const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
-        const crit = hit.critical_hit ? "Critical Hit! " : "";
-        notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
-        applyTo(t, [{ type: "damage", instances: [...hit.instances], critical: hit.critical_hit }]);
-      }
+      result = attackOn(c, t, action.attack, action);
       break;
     }
     case "save_action": {
@@ -572,29 +646,68 @@ export function applyEncounterAction(
       if (c.used.action) fail(`${c.name} has already used its action this turn`);
       const user = encounterCombatant(e, c.id, ctx);
       const line = user.save_actions.find((a) => a.name === action.ability);
-      const targets = action.targets.map(find);
-      let r: SaveActionResult;
-      try {
-        r = useSaveAction(
-          user,
-          action.ability,
-          targets.map((t) => encounterCombatant(e, t.id, ctx)),
-          { rng },
-        );
-      } catch (error) {
-        if (error instanceof RangeError) fail(error.message);
-        throw error;
-      }
-      result = r;
+      result = saveEffectOn(c, user, action.ability, action.targets);
       c.used.action = true;
-      c.extended = true; // forcing a saving throw extends Rage
       if (line?.recharge) c.expended.push(action.ability);
-      for (const hit of r.targets) {
-        const t = targets[hit.target] as EncounterCombatant;
-        notes.push(
-          `${t.name}: ${hit.save?.success ? "succeeds" : "fails"} (${hit.save ? saveText(hit.save) : ""}).`,
+      break;
+    }
+    case "legendary": {
+      const c = find(action.id);
+      if (c.monster === null) fail(`${c.name} has no legendary actions`);
+      if (e.round === 0) fail("The fight hasn't started");
+      if (current()?.id === c.id) {
+        fail(`${c.name} takes legendary actions after another creature's turn, not on its own`);
+      }
+      canAct(c);
+      const def = monsterDef(ctx, c);
+      const perRound = def.legendary_uses
+        ? c.in_lair && def.legendary_uses.in_lair !== null
+          ? def.legendary_uses.in_lair
+          : def.legendary_uses.uses
+        : 0;
+      if (c.legendary_used >= perRound) {
+        fail(`${c.name} has no legendary action uses left until the start of its turn`);
+      }
+      const user = encounterCombatant(e, c.id, ctx);
+      const line =
+        user.legendary_actions.find((a) => a.name === action.action) ??
+        fail(
+          `${c.name} has no legendary action '${action.action}' (${user.legendary_actions.map((a) => a.name).join(", ")})`,
         );
-        applyTo(t, hit.actions);
+      if (line.once_per_round && c.legendary_taken.includes(line.name)) {
+        fail(`${c.name} can't take ${line.name} again until the start of its next turn`);
+      }
+      c.legendary_used += 1;
+      if (line.once_per_round) c.legendary_taken.push(line.name);
+      notes.push(
+        `${c.name} takes a legendary action: ${line.name} (${perRound - c.legendary_used} left this round).`,
+      );
+      const needTarget = () => find(action.target ?? fail(`${line.name} needs a target`));
+      const attackable = (name: string) => user.attacks.some((a) => a.name === name);
+      if (line.attacks.length) {
+        const attack =
+          action.attack ??
+          (line.attacks.length === 1
+            ? (line.attacks[0] as string)
+            : fail(`${line.name}: choose the attack (${line.attacks.join(" or ")})`));
+        if (!line.attacks.includes(attack)) {
+          fail(`${line.name} makes one ${line.attacks.join(" or ")} attack, not ${attack}`);
+        }
+        if (!attackable(attack)) fail(`${attack} has no attack roll to resolve: see its text`);
+        result = attackOn(c, needTarget(), attack, action);
+      } else if (line.uses && attackable(line.uses)) {
+        result = attackOn(c, needTarget(), line.uses, action);
+      } else if (line.uses && user.save_actions.some((a) => a.name === line.uses)) {
+        result = saveEffectOn(c, user, line.uses, action.targets ?? []);
+      } else if (line.save) {
+        result = saveEffectOn(
+          c,
+          { ...user, save_actions: [line.save] },
+          line.name,
+          action.targets ?? [],
+        );
+      } else {
+        notes.push(`${line.name}: its effect is in the stat block's text.`);
       }
       break;
     }
@@ -633,6 +746,7 @@ export function applyEncounterAction(
       applyTo(c, r.caster_actions);
       for (const hit of r.targets) {
         const t = targets[hit.target] as EncounterCombatant;
+        spendLegendaryResistance(t, hit.save);
         applyTo(t, hit.actions);
       }
       // A Concentration spell's conditions last while the caster concentrates, up to its duration.

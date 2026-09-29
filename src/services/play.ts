@@ -319,6 +319,8 @@ export function combatantFromCharacter(
     condition_immunities: [],
     save_actions: [],
     condition_rolls: conditionRolls(conditions, catalog.conditions),
+    legendary_actions: [],
+    legendary_resistance: 0,
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []
