@@ -330,6 +330,13 @@ Strength and Dexterity saves without a roll while Paralyzed, Petrified, Stunned 
 (`automatic_failure`), and gives Disadvantage on Dexterity saves while Restrained. Sneak Attack's
 requirement uses the combined mode.
 
+**Ability checks.** `rollAbilityCheck(combatant, { skill } | { ability }, dc)` uses the skill's
+bonus (the sheet's skill lines: proficiency, Expertise, Jack of All Trades; a monster's listed
+skills, else its ability modifier) or the ability's (`ability_checks` on the sheet: the modifier,
+`checks` effects, Exhaustion). Advantage from features (`check.str` while raging) and conditions
+(Poisoned, Frightened: Disadvantage, from the condition field `ability_checks`) combine as for
+other rolls; without a DC, `success` is `null` (a contest, or the GM decides).
+
 ### Casting spells
 
 Catalog spells can carry `mechanics` (attack or save, damage by type, healing, targets,
@@ -430,7 +437,10 @@ list of actions.
   or `extend`) end, except in the turn they started. At the start of a turn: effects counting
   turn starts, recharge rolls, and once-per-turn riders reset for everyone.
 - A monster dies at 0 Hit Points (SRD "Monster Death") and its turns are skipped, as are a dead
-  character's; a character at 0 HP is reminded to make a Death Saving Throw.
+  character's. A dying character's Death Saving Throw is rolled at the start of its turn
+  (`createEncounter({ auto_death_saves: false })` leaves it to the player, with a reminder).
+- **Checks:** the `check` action rolls an ability or skill check, with or without a DC; it uses no
+  action by itself.
 
 ## Interpretations (flagged, not invented)
 

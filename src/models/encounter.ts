@@ -8,6 +8,7 @@
  */
 
 import { z } from "zod";
+import { ABILITIES, SKILLS } from "./content";
 import { PlayActionSchema } from "./state";
 
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs");
@@ -101,6 +102,8 @@ export const EncounterSchema = z.object({
   effects: z.array(EncounterEffectSchema).default([]),
   /** Next effect id number. */
   next_effect: z.int().min(1).default(1),
+  /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
+  auto_death_saves: z.boolean().default(true),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
@@ -211,6 +214,15 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     targets: z.array(z.string()).default([]),
     slot_level: n.min(1).max(9).optional(),
     pact: z.boolean().optional(),
+    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+  }),
+  /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
+  z.object({
+    type: z.literal("check"),
+    id: z.string(),
+    skill: z.enum(SKILLS).optional(),
+    ability: z.enum(ABILITIES).optional(),
+    dc: n.optional(),
     mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
   }),
   /** Extend Rage this turn some other way (forcing a saving throw). */

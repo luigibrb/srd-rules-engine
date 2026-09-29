@@ -128,6 +128,21 @@
             }
           ]
         },
+        "ability_checks": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "advantage",
+                "disadvantage"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "except_against_source": {
           "default": false,
           "type": "boolean"
@@ -254,6 +269,21 @@
             }
           },
           "initiative": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "advantage",
+                  "disadvantage"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ability_checks": {
             "default": null,
             "anyOf": [
               {
