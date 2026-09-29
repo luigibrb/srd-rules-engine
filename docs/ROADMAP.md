@@ -45,6 +45,19 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Combat rules
 
+- **Weapon Mastery effects (M).** Masteries are chosen and shown on attack lines but not applied:
+  Graze (damage on a miss), Vex (Advantage on the next attack), Sap (Disadvantage on the target's
+  next attack), Slow (−10 feet of Speed), Topple (Constitution save or Prone), Push (10 feet),
+  Cleave and Nick (an extra attack). Most fit riders, timed effects and save effects.
+- **Standard combat actions (M).** Dodge (attacks against you have Disadvantage until your next
+  turn), Help (Advantage for an ally), Grapple and Shove (Unarmed Strike options: a save against
+  DC 8 + Strength modifier + Proficiency Bonus), two-weapon fighting (the Light property's extra
+  attack), Disengage (no Opportunity Attacks). Nothing can apply Grappled yet except by hand.
+- **Ability checks and skills (S).** A roll for ability checks and skills with the sheet's
+  bonuses, Exhaustion and Advantage (`check.<ability>`: Rage's Strength checks), for Stealth,
+  Perception or escaping a grapple.
+- **Death Saving Throws in encounters (S).** Rolled at the start of a dying character's turn
+  instead of a reminder.
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
   who is in range and in an area, and whether an attack is within 5 feet.
@@ -54,6 +67,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **Ongoing area effects (L).** Spells and traits that deal damage when a creature enters an area
   or starts its turn there (Moonbeam, Spirit Guardians, Cloud of Daggers, a Remorhaz's swallowed
   creature): an encounter "zone" with triggers. Most of the 79 spells left as text need this.
+- **Legendary actions, what's left (M).** Legendary actions and Legendary Resistance are resolved
+  (P9); still text: legendary actions that cast spells (22, waiting for monster spellcasting) and
+  the movement, teleports or healing that come with some of them.
 - **Smaller flagged items (S each).** Divine Strike only on your own turns; which attacks a
   Multiattack allows; Rage's 10-minute cap; Dash with a Fly or Swim Speed; durations written only
   in a spell's text (Color Spray's blindness "until the end of your next turn").
