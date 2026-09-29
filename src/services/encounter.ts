@@ -9,7 +9,7 @@
 
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
-import type { MonsterDef, SpellDef } from "../models/content";
+import { ABILITY_NAMES, type MonsterDef, type SpellDef } from "../models/content";
 import {
   type EffectEnd,
   type Encounter,
@@ -70,8 +70,14 @@ export interface EncounterResult {
   /** Character states changed by the action, by character key. */
   readonly states: Readonly<Record<string, CharacterState>>;
   readonly notes: readonly string[];
-  /** The rolls of an `attack`, `save_action`, `cast`, `legendary` or `check`. */
-  readonly result: AttackResult | SaveActionResult | SpellCastResult | CheckResult | null;
+  /** The rolls of an `attack`, `save_action`, `cast`, `legendary`, `check`, `unarmed` or `escape`. */
+  readonly result:
+    | AttackResult
+    | SaveActionResult
+    | SpellCastResult
+    | CheckResult
+    | SaveResult
+    | null;
 }
 
 /** A new encounter. `auto_death_saves: false` leaves Death Saving Throws to the players. */
@@ -110,15 +116,44 @@ export function encounterCombatant(
     );
     // An ability waiting to recharge can't be used.
     const ready = (name: string) => !c.expended.includes(name);
-    return {
+    return withDodge(ctx, c, {
       ...base,
       name: c.name,
       attacks: base.attacks.filter((a) => ready(a.name)),
       save_actions: base.save_actions.filter((a) => ready(a.name)),
-    };
+    });
   }
   const ref = characterRef(ctx, c);
-  return { ...combatantFromCharacter(ref.build, ref.state, ctx.catalog), name: c.name };
+  return withDodge(ctx, c, {
+    ...combatantFromCharacter(ref.build, ref.state, ctx.catalog),
+    name: c.name,
+  });
+}
+
+/**
+ * The Dodge action's benefits (SRD "Dodge"): attack rolls against it have Disadvantage, and it
+ * makes Dexterity saves with Advantage; lost while Incapacitated or at Speed 0.
+ */
+function withDodge(ctx: EncounterContext, c: EncounterCombatant, base: Combatant): Combatant {
+  if (!c.dodging || base.conditions.includes("incapacitated") || speedOf(ctx, c) === 0) {
+    return base;
+  }
+  const dodge = {
+    mode: "disadvantage",
+    condition: "Dodging",
+    id: "dodging",
+    except_against_source: false,
+  } as const;
+  const rolls = base.condition_rolls;
+  return {
+    ...base,
+    advantages: [...base.advantages, "save.dex"],
+    condition_rolls: {
+      ...rolls,
+      attacked: [...rolls.attacked, dodge],
+      attacked_beyond_5ft: [...rolls.attacked_beyond_5ft, dodge],
+    },
+  };
 }
 
 export function applyEncounterAction(
@@ -198,12 +233,24 @@ export function applyEncounterAction(
   const addEffects = (
     target: EncounterCombatant,
     conditions: readonly string[],
-    opts: { source: string | null; label: string; concentration: boolean; ends: EffectEnd | null },
+    opts: {
+      source: string | null;
+      label: string;
+      concentration: boolean;
+      ends: EffectEnd | null;
+      escape_dc?: number | null;
+    },
   ): void => {
     const has = conditionsOf(ctx, target);
     for (const condition of conditions) {
       if (!has.has(condition)) continue; // immune
-      e.effects.push({ id: `effect-${e.next_effect++}`, target: target.id, condition, ...opts });
+      e.effects.push({
+        id: `effect-${e.next_effect++}`,
+        target: target.id,
+        condition,
+        ...opts,
+        escape_dc: opts.escape_dc ?? null,
+      });
     }
   };
   const endsFrom = (
@@ -255,6 +302,8 @@ export function applyEncounterAction(
     }
     c.toggled_on = [];
     c.extended = false;
+    c.disengaged = false;
+    c.light_attacks = [];
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
@@ -266,6 +315,9 @@ export function applyEncounterAction(
       else if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
     }
     for (const x of e.combatants) x.riders_used = [];
+    // Dodge lasts, and Help can be used, until the start of the creature's next turn.
+    c.dodging = false;
+    e.helps = e.helps.filter((h) => h.by !== c.id);
     // Legendary action uses come back at the start of the monster's turn.
     c.legendary_used = 0;
     c.legendary_taken = [];
@@ -314,6 +366,7 @@ export function applyEncounterAction(
       riders?: readonly { rider: string; type?: string }[];
       ally_adjacent?: boolean;
       within_5ft?: boolean;
+      light_extra?: boolean;
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
@@ -326,6 +379,13 @@ export function applyEncounterAction(
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
     const target = encounterCombatant(e, t.id, ctx);
+    // Help: Advantage on the next attack roll by one of the helper's allies against the target.
+    const help = e.helps.find(
+      (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
+    );
+    const modes: ModeReason[] = help
+      ? [{ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` }]
+      : [];
     let hit: AttackResult;
     try {
       // The attacker's conditions caused by this target (Grappled by it), from the effects.
@@ -340,12 +400,15 @@ export function applyEncounterAction(
         ally_adjacent: options.ally_adjacent,
         within_5ft: options.within_5ft,
         against_source_of,
+        modes,
+        light_extra: options.light_extra,
       });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
       throw error;
     }
     c.extended = true; // an attack roll extends Rage
+    if (help) e.helps = e.helps.filter((h) => h !== help);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
     const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
     if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
@@ -394,7 +457,14 @@ export function applyEncounterAction(
         // The condition was removed some other way (remove_condition, a rest): forget it.
         e.effects = e.effects.filter((x) => x.id !== effect.id);
       } else if (effect.source && !source) endEffect(effect, "its source left");
-      else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
+      else if (
+        effect.condition === "grappled" &&
+        source &&
+        conditionsOf(ctx, source).has("incapacitated")
+      ) {
+        // SRD "Grappling": the condition ends if the grappler has the Incapacitated condition.
+        endEffect(effect, `${source.name} is Incapacitated`);
+      } else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
         endEffect(effect, "Concentration ended");
       }
     }
@@ -409,6 +479,39 @@ export function applyEncounterAction(
   const canAct = (c: EncounterCombatant) => {
     if (c.defeated) fail(`${c.name} is defeated`);
     if (conditionsOf(ctx, c).has("incapacitated")) fail(`${c.name} is Incapacitated`);
+  };
+  /** One attack's place in the economy: the Attack action (and its extra attacks) or a reaction. */
+  const spendAttack = (c: EncounterCombatant, reaction: boolean | undefined): void => {
+    if (reaction) {
+      if (e.round === 0) fail("The fight hasn't started");
+      if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+      c.used.reaction = true;
+      return;
+    }
+    onTurn(c, "attack");
+    if (c.attacks_left > 0) c.attacks_left -= 1;
+    else if (c.used.action) fail(`${c.name} has no attacks left this turn`);
+    else {
+      // The Attack action: Extra Attack or Multiattack give more attacks with it.
+      c.used.action = true;
+      c.attacks_left = encounterCombatant(e, c.id, ctx).attacks_per_action - 1;
+    }
+  };
+  /** An action on its turn (or a Bonus Action, when a feature allows it: Cunning Action). */
+  const takeAction = (c: EncounterCombatant, name: string, bonus?: boolean): void => {
+    onTurn(c, name);
+    canAct(c);
+    const what = bonus ? "bonus_action" : "action";
+    if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")} this turn`);
+    c.used[what] = true;
+    if (bonus) c.extended = true; // a Bonus Action extends Rage
+  };
+  /** Help on `c`'s next check with `skill`, used up by it. */
+  const helpOnCheck = (c: EncounterCombatant, skill: string | null): ModeReason[] => {
+    const help = skill ? e.helps.find((h) => h.on === c.id && h.skill === skill) : undefined;
+    if (!help) return [];
+    e.helps = e.helps.filter((h) => h !== help);
+    return [{ mode: "advantage", reason: `${find(help.by).name} Helps` }];
   };
 
   switch (action.type) {
@@ -580,12 +683,141 @@ export function applyEncounterAction(
     }
     case "dash": {
       const c = find(action.id);
-      onTurn(c, "Dash");
-      canAct(c);
-      if (c.used.action) fail(`${c.name} has already used its action this turn`);
-      c.used.action = true;
+      takeAction(c, "Dash", action.bonus_action);
       c.extra_movement += speedOf(ctx, c);
       notes.push(`${c.name} Dashes: ${speedOf(ctx, c) + c.extra_movement - c.moved} feet left.`);
+      break;
+    }
+    case "disengage": {
+      const c = find(action.id);
+      takeAction(c, "Disengage", action.bonus_action);
+      c.disengaged = true;
+      notes.push(
+        `${c.name} Disengages: its movement doesn't provoke Opportunity Attacks this turn.`,
+      );
+      break;
+    }
+    case "dodge": {
+      const c = find(action.id);
+      takeAction(c, "Dodge", action.bonus_action);
+      c.dodging = true;
+      notes.push(
+        `${c.name} Dodges: until the start of its next turn, attack rolls against it have Disadvantage and it has Advantage on Dexterity saving throws.`,
+      );
+      break;
+    }
+    case "help": {
+      const c = find(action.id);
+      const t = find(action.target);
+      if (t.id === c.id) fail(`${c.name} can't Help itself`);
+      if (action.skill) {
+        if (!alliesOf(e, c.id, t)) fail(`${t.name} isn't ${c.name}'s ally`);
+        if (!proficientIn(ctx, c, action.skill)) {
+          fail(`${c.name} isn't proficient in ${action.skill}: Help assists with a proficiency`);
+        }
+      } else if (c.side && c.side === t.side) fail(`${t.name} is on ${c.name}'s side`);
+      takeAction(c, "Help");
+      e.helps.push({ by: c.id, on: t.id, skill: action.skill ?? null });
+      notes.push(
+        action.skill
+          ? `${c.name} Helps ${t.name}: Advantage on its next ${action.skill} check before the start of ${c.name}'s next turn.`
+          : `${c.name} Helps against ${t.name}: Advantage on an ally's next attack roll against it before the start of ${c.name}'s next turn.`,
+      );
+      break;
+    }
+    case "unarmed": {
+      const c = find(action.id);
+      const t = find(action.target);
+      canAct(c);
+      if (action.option === "shove" && !action.shove)
+        fail("A shove pushes or knocks Prone: `shove`");
+      const user = encounterCombatant(e, c.id, ctx);
+      const target = encounterCombatant(e, t.id, ctx);
+      // "possible only if the target is no more than one size larger than you"
+      const sizes = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
+      const [mine, theirs] = [sizes.indexOf(user.size ?? ""), sizes.indexOf(target.size ?? "")];
+      if (mine >= 0 && theirs > mine + 1) {
+        fail(`${t.name} is too large for ${c.name} to ${action.option}`);
+      }
+      spendAttack(c, action.reaction);
+      c.extended = true; // forcing a saving throw extends Rage
+      const dc = 8 + user.modifiers.str + user.proficiency_bonus;
+      // The target chooses Strength or Dexterity: by default, its better bonus.
+      const ability =
+        action.save ?? (target.saving_throws.dex > target.saving_throws.str ? "dex" : "str");
+      const save = rollSavingThrow(target, ability, dc, { rng });
+      result = save;
+      const verb = action.option === "grapple" ? "grapple" : "shove";
+      const outcome = save.success ? "succeeds on" : "fails";
+      notes.push(
+        `${c.name} tries to ${verb} ${t.name}: ${t.name} ${outcome} a ${ABILITY_NAMES[ability]} saving throw (${saveText(save)}).`,
+      );
+      spendLegendaryResistance(t, save);
+      if (save.success) break;
+      if (action.option === "grapple") {
+        applyTo(t, [{ type: "add_condition", condition: "grappled" }]);
+        addEffects(t, ["grappled"], {
+          source: c.id,
+          label: "Grapple",
+          concentration: false,
+          ends: null,
+          escape_dc: dc,
+        });
+        if (conditionsOf(ctx, t).has("grappled")) {
+          notes.push(`${t.name} is Grappled by ${c.name} (escape DC ${dc}).`);
+        }
+      } else if (action.shove === "prone") {
+        applyTo(t, [{ type: "add_condition", condition: "prone" }]);
+      } else notes.push(`${t.name} is pushed 5 feet away from ${c.name}.`);
+      break;
+    }
+    case "escape": {
+      const c = find(action.id);
+      const grapples = e.effects.filter(
+        (x) => x.target === c.id && x.condition === "grappled" && x.escape_dc !== null,
+      );
+      const grapple = action.effect
+        ? (grapples.find((x) => x.id === action.effect) ??
+          fail(`${action.effect} isn't a grapple on ${c.name}`))
+        : grapples.length === 1
+          ? (grapples[0] as EncounterEffect)
+          : grapples.length
+            ? fail(`Choose the grapple to escape: ${grapples.map((x) => x.id).join(", ")}`)
+            : fail(`${c.name} has no grapple with an escape DC`);
+      takeAction(c, "escape");
+      const me = encounterCombatant(e, c.id, ctx);
+      const bonus = (skill: "athletics" | "acrobatics") =>
+        me.skills[skill] ?? me.ability_checks[skill === "athletics" ? "str" : "dex"];
+      const skill =
+        action.skill ?? (bonus("acrobatics") > bonus("athletics") ? "acrobatics" : "athletics");
+      const check = rollAbilityCheck(me, { skill }, grapple.escape_dc, {
+        rng,
+        modes: helpOnCheck(c, skill),
+      });
+      result = check;
+      const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
+      const outcome = check.success ? "escapes" : "stays Grappled";
+      notes.push(
+        `${c.name} tries to escape (${skill} ${check.total} vs DC ${grapple.escape_dc}${why}): ${outcome}.`,
+      );
+      if (check.success) endEffect(grapple, "escaped");
+      break;
+    }
+    case "stand": {
+      const c = find(action.id);
+      onTurn(c, "stand up");
+      if (c.defeated) fail(`${c.name} is defeated`);
+      const own = c.monster !== null ? c.conditions : characterRef(ctx, c).state.conditions;
+      if (!own.includes("prone")) fail(`${c.name} isn't Prone`);
+      const speed = speedOf(ctx, c);
+      if (speed === 0) fail(`${c.name} can't right itself at Speed 0`);
+      // "spend an amount of movement equal to half your Speed (round down)"
+      const cost = Math.floor(speed / 2);
+      const budget = speed + c.extra_movement;
+      if (c.moved + cost > budget) fail(`${c.name} needs ${cost} feet of movement to stand up`);
+      c.moved += cost;
+      applyTo(c, [{ type: "remove_condition", condition: "prone" }]);
+      notes.push(`${c.name} stands up (${cost} feet of movement).`);
       break;
     }
     case "effects": {
@@ -606,11 +838,13 @@ export function applyEncounterAction(
           (action.concentration ? (concentrationOf(find(source as string)) ?? "") : "effect");
         if (action.concentration && !label)
           fail(`${find(source as string).name} isn't concentrating`);
+        if (action.escape_dc !== undefined && !source) fail("A grapple needs its source");
         addEffects(c, conditions, {
           source: source ?? null,
           label,
           concentration: action.concentration ?? false,
           ends,
+          escape_dc: action.escape_dc,
         });
       }
       break;
@@ -630,6 +864,7 @@ export function applyEncounterAction(
       const check = rollAbilityCheck(encounterCombatant(e, c.id, ctx), what, action.dc ?? null, {
         rng,
         mode: action.mode,
+        modes: helpOnCheck(c, action.skill ?? null),
       });
       result = check;
       const label = check.skill ?? check.ability;
@@ -648,19 +883,31 @@ export function applyEncounterAction(
       const t = find(action.target);
       canAct(c);
       const attacker = encounterCombatant(e, c.id, ctx);
-      if (action.reaction) {
-        if (e.round === 0) fail("The fight hasn't started");
-        if (c.used.reaction) fail(`${c.name} has already used its reaction`);
-        c.used.reaction = true;
-      } else {
+      const line = attacker.attacks.find((a) => a.name === action.attack);
+      const light = line?.properties.includes("light") ?? false;
+      if (action.light_extra) {
+        // SRD "Light": after attacking with a Light weapon in the Attack action, one extra attack
+        // as a Bonus Action with a different Light weapon.
         onTurn(c, "attack");
-        if (c.attacks_left > 0) c.attacks_left -= 1;
-        else if (c.used.action) fail(`${c.name} has no attacks left this turn`);
-        else {
-          // The Attack action: Extra Attack or Multiattack give more attacks with it.
-          c.used.action = true;
-          c.attacks_left = attacker.attacks_per_action - 1;
+        if (!light) fail(`${action.attack} isn't a Light weapon`);
+        if (!c.light_attacks.length) {
+          fail(`${c.name} hasn't attacked with a Light weapon in the Attack action this turn`);
         }
+        const same = attacker.attacks.filter((a) => a.name === action.attack).length;
+        if (same < 2 && c.light_attacks.every((name) => name === action.attack)) {
+          fail(`The extra attack must be made with a different Light weapon than ${action.attack}`);
+        }
+        if (c.used.bonus_action) fail(`${c.name} has already used its bonus action this turn`);
+        c.used.bonus_action = true;
+      } else {
+        const reaction = action.reaction || action.opportunity;
+        if (action.opportunity) {
+          if (line && line.kind !== "melee") fail("An Opportunity Attack is a melee attack");
+          if (t.disengaged)
+            fail(`${t.name} Disengaged: its movement doesn't provoke Opportunity Attacks`);
+        }
+        spendAttack(c, reaction);
+        if (light && !reaction) c.light_attacks.push(action.attack);
       }
       result = attackOn(c, t, action.attack, action);
       break;
@@ -1024,4 +1271,18 @@ function durationRounds(spell: SpellDef): number | null {
   if (!m) return null;
   const n = Number(m[1]);
   return m[2] === "round" ? n : m[2] === "minute" ? n * 10 : n * 600;
+}
+
+/** Whether `c` is an ally of combatant `id`: on its side (combatants without a side are all allies). */
+function alliesOf(e: Encounter, id: string, c: EncounterCombatant): boolean {
+  const other = e.combatants.find((x) => x.id === id);
+  return !!other && other.side === c.side;
+}
+
+/** Proficient in a skill: a character's sheet, or a skill a monster's stat block lists. */
+function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill: string): boolean {
+  if (c.monster !== null) return Object.hasOwn(monsterDef(ctx, c).skills, skill);
+  const ref = characterRef(ctx, c);
+  const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+  return sheet.skills.some((line) => line.skill === skill && line.proficient_from !== null);
 }

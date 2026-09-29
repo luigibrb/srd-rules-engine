@@ -20,6 +20,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P8 | Conditions change rolls: Advantage and Disadvantage on attacks, automatic Critical Hits within 5 feet, automatic save failures, Initiative | "Within 5 feet" is given per attack (no positions yet). Encounters now track any condition with a known source, which gives Grappled's exception for the grappler |
 | P9 | Legendary actions and Legendary Resistance: uses per round and per day (lair values), once-per-round actions, attacks, used actions and saving throw effects resolved in encounters | Legendary Resistance is spent automatically unless turned off per monster; legendary actions that cast spells stay text until monster spellcasting |
 | P10 | Ability checks and skills (`rollAbilityCheck`, the encounter `check` action); Death Saving Throws rolled at the start of a dying character's turn | Automatic death saves can be turned off per encounter |
+| P11 | Standard combat actions: Dodge, Disengage, Help, Grapple and Shove (with escaping and standing up), two-weapon fighting | Help and Dodge live in the encounter (`helps`, `dodging`), not in conditions; Help's Advantage covers weapon attacks, not spell attacks |
 
 ## Decisions
 
@@ -50,10 +51,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Graze (damage on a miss), Vex (Advantage on the next attack), Sap (Disadvantage on the target's
   next attack), Slow (−10 feet of Speed), Topple (Constitution save or Prone), Push (10 feet),
   Cleave and Nick (an extra attack). Most fit riders, timed effects and save effects.
-- **Standard combat actions (M).** Dodge (attacks against you have Disadvantage until your next
-  turn), Help (Advantage for an ally), Grapple and Shove (Unarmed Strike options: a save against
-  DC 8 + Strength modifier + Proficiency Bonus), two-weapon fighting (the Light property's extra
-  attack), Disengage (no Opportunity Attacks). Nothing can apply Grappled yet except by hand.
+- **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
+  Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM; Help's
+  Advantage doesn't reach spell attack rolls yet.
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
   who is in range and in an area, and whether an attack is within 5 feet.
