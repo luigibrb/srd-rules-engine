@@ -496,6 +496,10 @@ builder, a VTT client, an edge function and a server.
   filesystem or YAML parser is needed at runtime. Node-only code (reading content
   directories, the `node:http` adapter, the CLI) is in `src/content/load.ts`,
   `src/http/node-server.ts` and `src/cli/`.
+- **Content size.** The SRD is bundled into the core entry and also published, minified, as
+  `srd-5.2.1.json` (the repository copy stays formatted). `npm run content` reports its minified
+  and gzipped size and fails when the gzipped size exceeds `MAX_GZIP_KB`
+  (`scripts/compile-content.ts`); see "Split content by table" in [ROADMAP.md](ROADMAP.md).
 - **Schemas: Zod.** Content, builds, play states, encounters and API payloads are Zod schemas.
   The TypeScript types are inferred from them, except for the recursive `Grants`/`ChoiceDef`/
   `ChoiceOption`/`ToggleDef`, which are written by hand. The same schemas generate

@@ -1,4 +1,4 @@
-import { copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { defineConfig } from "tsdown";
 
 export default defineConfig([
@@ -12,7 +12,11 @@ export default defineConfig([
     dts: true,
     clean: true,
     hooks: {
-      "build:done": () => copyFileSync("src/content/data/srd-5.2.1.json", "dist/srd-5.2.1.json"),
+      // The published JSON is minified (the repo copy stays formatted for reading).
+      "build:done": () => {
+        const data = JSON.parse(readFileSync("src/content/data/srd-5.2.1.json", "utf-8"));
+        writeFileSync("dist/srd-5.2.1.json", JSON.stringify(data));
+      },
     },
   },
   {

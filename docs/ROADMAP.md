@@ -92,9 +92,11 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   `Spell` model, the `Character` spell functions, `/v1/combat/attack`, `/v1/spells/attack` and
   `/save`), and stop exporting internal helpers (`answers`, `definedEntries`, `replaceErrors`,
   `choiceIssues`, `classLevelKey`, `entityName`…) with explicit exports.
-- **Smaller browser bundle (S).** The bundled SRD JSON is about 3.9 MB with monsters; a separate
-  `srd-rules-engine/monsters` entry point would keep the core near 2.3 MB. A breaking change for
-  code that reads `catalog.monsters` from `srdCatalog()`.
+- **Split content by table (M).** The whole SRD is bundled into the core entry (about 2 MB
+  minified, 290 KB gzipped; monsters, magic items and spells are three quarters of it). When
+  `npm run content` reports it over its gzip budget, publish the large tables as separate JSON
+  assets loaded on demand (monsters and magic items first), with `srdCatalog()` still returning
+  every table for servers.
 - **JSON Schemas for play documents (S).** `CharacterState` and `Encounter` have Zod schemas but
   no generated JSON Schema yet (builds and content do).
 

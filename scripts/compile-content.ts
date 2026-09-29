@@ -4,10 +4,14 @@
  *
  *   npm run content             write the outputs
  *   npm run content -- --check  fail if the outputs are out of date (used in CI)
+ *
+ * Both report the bundle's size and fail if its gzipped size is over MAX_GZIP_KB: past that,
+ * the content should be split by table (docs/ROADMAP.md, "Split content by table").
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { gzipSync } from "node:zlib";
 import { z } from "zod";
 import { createCatalog, TABLE_NAMES, TABLE_SCHEMAS } from "../src/content/catalog";
 import { loadContentPack } from "../src/content/load";
@@ -16,6 +20,8 @@ import { CreationSchema } from "../src/models/content";
 import { PackManifestSchema, PatchSchema } from "../src/models/pack";
 
 const root = join(import.meta.dirname, "..");
+/** Budget for the bundled SRD, gzipped (what a browser downloads). */
+const MAX_GZIP_KB = 1024;
 const check = process.argv.includes("--check");
 const outputs = new Map<string, string>();
 
@@ -72,3 +78,24 @@ if (stale) {
 console.log(
   `content ok: ${TABLE_NAMES.map((t) => `${Object.keys(catalog[t]).length} ${t}`).join(", ")}`,
 );
+
+// 3. Size: minified and gzipped, and the largest tables.
+const minified = JSON.stringify(pack);
+const kb = (bytes: number) => Math.round(bytes / 1024);
+const gzipKb = kb(gzipSync(minified).length);
+const largest = TABLE_NAMES.map(
+  (t) => [t, JSON.stringify(Object.values(catalog[t])).length] as const,
+)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3)
+  .map(([t, size]) => `${t} ${Math.round((100 * size) / minified.length)}%`);
+console.log(
+  `bundle: ${kb(minified.length)} KB minified, ${gzipKb} KB gzip (${largest.join(", ")})`,
+);
+if (gzipKb > MAX_GZIP_KB) {
+  console.error(
+    `The bundled SRD is over its budget (${gzipKb} KB > ${MAX_GZIP_KB} KB gzipped): ` +
+      'split content by table (docs/ROADMAP.md, "Split content by table").',
+  );
+  process.exit(1);
+}

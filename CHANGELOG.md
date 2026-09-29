@@ -6,6 +6,7 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- The published `srd-5.2.1.json` is minified (about 2 MB instead of 3.8 MB).
 - Docs: README reorganized by use (builder, play, combat, spells, monsters, encounters, packs);
   ARCHITECTURE.md restructured, with every flagged interpretation in one section;
   `docs/ROADMAP.md` (what's done, decisions, next steps) replaces the roadmap review;
@@ -28,6 +29,8 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- `npm run content` reports the bundled SRD's size (minified, gzipped, largest tables) and
+  fails when the gzipped size is over the budget (`MAX_GZIP_KB`).
 - Encounter turn rules: `attack` (Attack action with Extra Attack / Multiattack, Opportunity
   Attacks, once-per-turn riders), `save_action` (Recharge), `cast` (casting time, prepared
   spells, Concentration spells' conditions as effects), timed effects with durations

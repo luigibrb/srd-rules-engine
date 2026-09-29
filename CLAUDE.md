@@ -132,7 +132,9 @@ npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, 
 ## Generated files (don't edit by hand)
 
 - `src/content/data/srd-5.2.1.json` and `schemas/*.schema.json`: from `npm run content`.
-  CI fails (`npm run content -- --check`) if they're out of date, so commit them.
+  CI fails (`npm run content -- --check`) if they're out of date, so commit them. It also reports
+  the bundle's size and fails over `MAX_GZIP_KB` (gzipped, in `scripts/compile-content.ts`).
+- `dist/srd-5.2.1.json` is written minified by the build (`tsdown.config.ts`).
 - `dist/`: from `npm run build` (git-ignored).
 
 ## API base
