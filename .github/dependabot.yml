@@ -5,6 +5,11 @@ updates:
     schedule: { interval: weekly }
     groups:
       dev-dependencies: { dependency-type: development }
+    ignore:
+      # Keep the types at the oldest supported Node (engines: >=22): newer ones would accept APIs
+      # that Node 22 doesn't have. Bump by hand with the minimum version.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
