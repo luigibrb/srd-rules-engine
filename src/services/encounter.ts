@@ -30,9 +30,12 @@ import {
   type AttackResult,
   type Combatant,
   combatantFromMonster,
+  type ModeReason,
   makeAttack,
+  resolveMode,
   rollD20,
   rollSavingThrow,
+  type SaveResult,
 } from "../rules/combatant";
 import { takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
@@ -90,11 +93,11 @@ export function encounterCombatant(
     encounter.combatants.find((x) => x.id === id) ?? fail(`No combatant '${id}' in the encounter`);
   if (c.monster !== null) {
     const def = monsterDef(ctx, c);
-    const base = combatantFromMonster(def, {
-      hp: c.hp ?? def.hit_points,
-      temp_hp: c.temp_hp,
-      conditions: c.conditions,
-    });
+    const base = combatantFromMonster(
+      def,
+      { hp: c.hp ?? def.hit_points, temp_hp: c.temp_hp, conditions: c.conditions },
+      { conditions: ctx.catalog.conditions },
+    );
     // An ability waiting to recharge can't be used.
     const ready = (name: string) => !c.expended.includes(name);
     return {
@@ -154,7 +157,7 @@ export function applyEncounterAction(
       const spell = concentrationOf(c);
       if (dc !== null && spell) {
         const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng });
-        const outcome = `${save.total} vs DC ${dc}`;
+        const outcome = saveText(save);
         if (save.success) notes.push(`${c.name} keeps Concentration on ${spell} (${outcome}).`);
         else {
           notes.push(`${c.name} loses Concentration on ${spell} (${outcome}).`);
@@ -272,7 +275,10 @@ export function applyEncounterAction(
       const target = e.combatants.find((c) => c.id === effect.target);
       const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
       if (!target) endEffect(effect, "its target left");
-      else if (effect.source && !source) endEffect(effect, "its source left");
+      else if (!conditionsOf(ctx, target).has(effect.condition)) {
+        // The condition was removed some other way (remove_condition, a rest): forget it.
+        e.effects = e.effects.filter((x) => x.id !== effect.id);
+      } else if (effect.source && !source) endEffect(effect, "its source left");
       else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
         endEffect(effect, "Concentration ended");
       }
@@ -344,7 +350,18 @@ export function applyEncounterAction(
         const key = action.group && c.monster ? c.monster : null;
         let d20 = key !== null ? groupRolls.get(key) : undefined;
         if (d20 === undefined) {
-          d20 = rollD20({ mode: surprised.has(c.id) ? "disadvantage" : "normal", rng }).d20;
+          // Surprised: Disadvantage; conditions too (Invisible: Advantage, Incapacitated:
+          // Disadvantage).
+          const reasons: ModeReason[] = encounterCombatant(
+            e,
+            c.id,
+            ctx,
+          ).condition_rolls.initiative.map((x) => ({
+            mode: x.mode,
+            reason: `${c.name} is ${x.condition}`,
+          }));
+          if (surprised.has(c.id)) reasons.push({ mode: "disadvantage", reason: "surprised" });
+          d20 = rollD20({ mode: resolveMode("normal", reasons).mode, rng }).d20;
           if (key !== null) groupRolls.set(key, d20);
         }
         c.initiative = d20 + bonus;
@@ -454,7 +471,9 @@ export function applyEncounterAction(
       const source = action.source;
       if (source !== undefined) find(source);
       const ends = endsFrom(c.id, source, action.rounds, action.until);
-      if (ends || action.concentration) {
+      // Tracked when it has a duration, depends on Concentration, or has a known source (a
+      // grapple: Grappled's Disadvantage doesn't apply against the grappler).
+      if (ends || action.concentration || source !== undefined) {
         if (action.concentration && !source) fail("A Concentration effect needs its source");
         const conditions = action.actions.flatMap((a) =>
           a.type === "add_condition" ? [a.condition] : [],
@@ -513,12 +532,18 @@ export function applyEncounterAction(
       const target = encounterCombatant(e, t.id, ctx);
       let hit: AttackResult;
       try {
+        // The attacker's conditions caused by this target (Grappled by it), from the effects.
+        const against_source_of = e.effects
+          .filter((x) => x.target === c.id && x.source === t.id)
+          .map((x) => x.condition);
         hit = makeAttack(attacker, action.attack, target, {
           rng,
           mode: action.mode,
           two_handed: action.two_handed,
           riders,
           ally_adjacent: action.ally_adjacent,
+          within_5ft: action.within_5ft,
+          against_source_of,
         });
       } catch (error) {
         if (error instanceof RangeError) fail(error.message);
@@ -526,7 +551,8 @@ export function applyEncounterAction(
       }
       result = hit;
       c.extended = true; // an attack roll extends Rage
-      const roll = `${hit.total} vs AC ${hit.target_ac}`;
+      const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
+      const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
       if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
       else {
         c.riders_used.push(...onceIds);
@@ -566,7 +592,7 @@ export function applyEncounterAction(
       for (const hit of r.targets) {
         const t = targets[hit.target] as EncounterCombatant;
         notes.push(
-          `${t.name}: ${hit.save?.success ? "succeeds" : "fails"} (${hit.save?.total} vs DC ${r.dc}).`,
+          `${t.name}: ${hit.save?.success ? "succeeds" : "fails"} (${hit.save ? saveText(hit.save) : ""}).`,
         );
         applyTo(t, hit.actions);
       }
@@ -838,6 +864,13 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
     default:
       return fail(`A monster can't take the play action '${a.type}'`);
   }
+}
+
+/** "14 vs DC 13", or "fails automatically: Paralyzed". */
+function saveText(save: SaveResult): string {
+  if (save.automatic_failure) return `fails automatically: ${save.automatic_failure}`;
+  const mode = save.roll.mode === "normal" ? "" : `, ${save.roll.mode}`;
+  return `${save.total} vs DC ${save.dc}${mode}`;
 }
 
 /** The action economy a spell's casting time uses. */

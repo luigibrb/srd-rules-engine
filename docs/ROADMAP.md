@@ -17,6 +17,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P5 | Effects: damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage, toggles (Rage) | A toggle's grants apply while it's active, so no new `when` conditions were needed |
 | P6 | Monsters: all 330 SRD stat blocks, `combatantFromMonster`, `useSaveAction` | Reviewed by invariants on every stat block plus 15 golden ones; two Markdown typos corrected in the importer's `FIXES`. The bundled JSON grew to ~3.9 MB |
 | P7 | Encounters: Initiative, turns and rounds, action economy, attacks and spells in turns, timed effects, Concentration saves, recharges, once-per-turn riders, Rage's duration | Split in two: the encounter document and turns (P7a), then the rules that need turns (P7b) |
+| P8 | Conditions change rolls: Advantage and Disadvantage on attacks, automatic Critical Hits within 5 feet, automatic save failures, Initiative | "Within 5 feet" is given per attack (no positions yet). Encounters now track any condition with a known source, which gives Grappled's exception for the grappler |
 
 ## Decisions
 
@@ -43,16 +44,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Combat rules
 
-- **Conditions that change rolls (M).** Advantage and Disadvantage from conditions are the
-  caller's today (`mode`): an attacker that's Blinded, Invisible, Prone, Restrained or Poisoned;
-  a target that's Blinded, Paralyzed, Prone (within 5 ft or not), Restrained, Stunned or
-  Unconscious; automatic Critical Hits on a Paralyzed or Unconscious target within 5 feet;
-  automatic failures on Strength and Dexterity saves while Paralyzed, Stunned or Unconscious.
-  Needs the conditions' mechanics as data (like `speed_zero`) and positions or a "within 5 feet"
-  flag on attacks.
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
-  who is in range and in an area.
+  who is in range and in an area, and whether an attack is within 5 feet.
 - **Legendary actions and Legendary Resistance (M).** Uses per round, spent after another
   creature's turn and regained at the start of the monster's turn; Legendary Resistance uses per
   day. Both are in the stat blocks' text (`legendary_text`, the trait's name).

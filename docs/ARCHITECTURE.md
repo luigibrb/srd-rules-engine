@@ -317,6 +317,19 @@ requested riders, rolls the damage parts, and previews `takeDamage` on the targe
 `rollSavingThrow` rolls a save with the combatant's bonus and Advantage. `POST /v1/state/attack`
 does an attack between two characters and applies it.
 
+**Conditions change rolls.** Conditions carry their effects on rolls as data (`attack_rolls`,
+`attacked`, `attacked_beyond_5ft`, `critical_within_5ft`, `fail_saves`, `save_disadvantage`,
+`initiative`), and every combatant has them merged in `condition_rolls` (`conditionRolls`,
+implied conditions included; `combatantFromMonster` needs the catalog's `conditions` for it).
+`attackMode` combines the caller's `mode` with the attacker's and the target's conditions: any
+Advantage and any Disadvantage together make a normal roll (`resolveMode`), and the result lists
+the reasons ("Advantage: Goblin Warrior is Prone (within 5 ft)"). `makeAttack` and spell attacks
+use it, with `within_5ft` defaulting to true for melee attacks and false for ranged ones; a hit
+on a Paralyzed or Unconscious target within 5 feet is a Critical Hit. `rollSavingThrow` fails
+Strength and Dexterity saves without a roll while Paralyzed, Petrified, Stunned or Unconscious
+(`automatic_failure`), and gives Disadvantage on Dexterity saves while Restrained. Sneak Attack's
+requirement uses the combined mode.
+
 ### Casting spells
 
 Catalog spells can carry `mechanics` (attack or save, damage by type, healing, targets,
@@ -383,12 +396,17 @@ list of actions.
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
-- **Timed effects** (`encounter.effects`) are conditions with a duration or tied to
-  Concentration: `ends: { at: start|end, of, count }` counts that combatant's turn starts or ends
-  ("until the end of its next turn", N rounds); one set during `of`'s own turn doesn't count that
-  turn's end. A Concentration effect ends when its source stops concentrating on it. `cast`
-  records a Concentration spell's conditions this way, for its duration ("up to 1 minute": 10
-  rounds). A condition goes when its last effect ends; `end_effect` ends one early.
+- **Tracked effects** (`encounter.effects`) are conditions with a duration, tied to
+  Concentration, or with a known source: `ends: { at: start|end, of, count }` counts that
+  combatant's turn starts or ends ("until the end of its next turn", N rounds); one set during
+  `of`'s own turn doesn't count that turn's end. A Concentration effect ends when its source stops
+  concentrating on it. `cast` records a Concentration spell's conditions this way, for its
+  duration ("up to 1 minute": 10 rounds). A condition goes when its last effect ends;
+  `end_effect` ends one early, and an effect whose condition was removed another way is dropped.
+  An effect's source is how the encounter knows a Grappled attacker's grappler, against whom
+  Grappled gives no Disadvantage.
+- **Conditions in turns:** `attack` takes `within_5ft`; Initiative rolls with Advantage while
+  Invisible and with Disadvantage while Incapacitated or surprised; notes give the reasons.
 - **Concentration saves** are rolled automatically when a concentrating combatant takes damage
   (DC 10 or half the damage); a failure ends its Concentration effects.
 - **Turn hooks.** At the end of a turn: effects counting turn ends, and `extends_each_turn`
@@ -451,6 +469,17 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Advantage").
 - Who can be targeted (size limits, range) is the caller's to decide.
 
+**Conditions and rolls**
+
+- Frightened gives Disadvantage on attack rolls as if the source of fear were always in line of
+  sight.
+- Invisible's benefit applies against every creature: "a creature that can see you" (Truesight,
+  Blindsight) isn't modeled.
+- Whether an attack is within 5 feet defaults by its kind (melee: yes, ranged: no); the caller
+  sets it otherwise (a reach weapon, a ranged attack at close range).
+- Grappled's exception for the grappler needs the grappler known: an encounter effect with it as
+  the source. Otherwise the Disadvantage applies to every target.
+
 **Encounters**
 
 - Initiative ties go to the higher Initiative bonus, then the order combatants joined (the SRD
@@ -467,8 +496,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-conditions don't change rolls on their own (the caller passes Advantage or Disadvantage),
-there are no positions, reach or cover, legendary actions and monster spellcasting are text,
+there are no positions, reach or cover (so "within 5 feet" is given, not measured), legendary actions and monster spellcasting are text,
 79 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.

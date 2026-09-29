@@ -106,6 +106,8 @@ const StateAttackRequest = z.object({
   /** Riders to add on a hit: `[{ rider: "sneak-attack" }, { rider: "divine-strike", type: "radiant" }]`. */
   riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).default([]),
   ally_adjacent: z.boolean().default(false),
+  /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
+  within_5ft: z.boolean().optional(),
 });
 const StateCastRequest = z.object({
   caster: StateRequest,
@@ -442,10 +444,10 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         ];
         const attacker = combatantFromCharacter(attackerBuild, req.attacker.state, catalog);
         const target = combatantFromCharacter(targetBuild, req.target.state, catalog);
-        const { mode, two_handed, riders, ally_adjacent } = req;
+        const { mode, two_handed, riders, ally_adjacent, within_5ft } = req;
         let result: ReturnType<typeof makeAttack>;
         try {
-          const options = { rng, mode, two_handed, riders, ally_adjacent };
+          const options = { rng, mode, two_handed, riders, ally_adjacent, within_5ft };
           result = makeAttack(attacker, req.attack, target, options);
         } catch (e) {
           if (e instanceof RangeError) throw new PlayError([e.message]);

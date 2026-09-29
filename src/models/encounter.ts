@@ -176,6 +176,8 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     two_handed: z.boolean().optional(),
     riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
     ally_adjacent: z.boolean().optional(),
+    /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
+    within_5ft: z.boolean().optional(),
     reaction: z.boolean().optional(),
   }),
   /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */

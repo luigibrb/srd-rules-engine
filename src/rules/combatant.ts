@@ -1,17 +1,19 @@
 /**
  * Combatants: what combat needs to know about a creature, whatever it comes from (a character's
- * build and play state, the old `Character` snapshot, and later a monster stat block).
+ * build and play state, a monster stat block, the old `Character` snapshot).
  *
  * A combatant is a read-only view. Resolving an attack doesn't change anything: it returns the
  * rolls and the damage instances, and the caller applies them to the target's own state (for a
  * character, the play action `{ type: "damage", instances, critical }`).
  */
 
+import type { Table } from "../content/catalog";
 import type { Character } from "../models/character";
 import {
   ABILITIES,
   type Ability,
   type AdvantageTarget,
+  type ConditionDef,
   DAMAGE_TYPES,
   type MonsterDamage,
   type MonsterDef,
@@ -74,6 +76,152 @@ export interface Combatant {
   readonly condition_immunities: readonly string[];
   /** Saving throw effects it can use (a breath weapon), resolved by `useSaveAction`. */
   readonly save_actions: readonly SaveActionLine[];
+  /** How its conditions change rolls (`conditionRolls`). */
+  readonly condition_rolls: ConditionRolls;
+}
+
+/** Advantage or Disadvantage from a condition, with the condition's name for notes. */
+export interface ConditionMode {
+  readonly mode: "advantage" | "disadvantage";
+  readonly condition: string;
+  /** The condition's id (Grappled's exception: `except_against_source`). */
+  readonly id: string;
+  readonly except_against_source: boolean;
+}
+
+/** How a creature's conditions change rolls (SRD Rules Glossary, conditions). */
+export interface ConditionRolls {
+  /** On its own attack rolls. */
+  readonly attack_rolls: readonly ConditionMode[];
+  /** On attack rolls against it, from within 5 feet and from farther. */
+  readonly attacked: readonly ConditionMode[];
+  readonly attacked_beyond_5ft: readonly ConditionMode[];
+  /** Conditions that make a hit from within 5 feet a Critical Hit. */
+  readonly critical_within_5ft: readonly string[];
+  /** Ability → the condition that makes it fail that saving throw. */
+  readonly fail_saves: Readonly<Partial<Record<Ability, string>>>;
+  /** Ability → the condition that gives Disadvantage on that saving throw. */
+  readonly save_disadvantage: Readonly<Partial<Record<Ability, string>>>;
+  readonly initiative: readonly ConditionMode[];
+}
+
+export const NO_CONDITION_ROLLS: ConditionRolls = {
+  attack_rolls: [],
+  attacked: [],
+  attacked_beyond_5ft: [],
+  critical_within_5ft: [],
+  fail_saves: {},
+  save_disadvantage: {},
+  initiative: [],
+};
+
+/** Condition ids with the ones they imply (Unconscious → Incapacitated, Prone). */
+export function expandConditions(ids: readonly string[], table: Table<ConditionDef>): string[] {
+  const out: string[] = [];
+  const add = (id: string) => {
+    if (out.includes(id)) return;
+    out.push(id);
+    for (const next of (Object.hasOwn(table, id) ? table[id] : undefined)?.implies ?? []) add(next);
+  };
+  for (const id of ids) add(id);
+  return out;
+}
+
+/** What a creature's conditions (implied ones included) do to its rolls and to rolls against it. */
+export function conditionRolls(ids: readonly string[], table: Table<ConditionDef>): ConditionRolls {
+  const rolls = {
+    attack_rolls: [] as ConditionMode[],
+    attacked: [] as ConditionMode[],
+    attacked_beyond_5ft: [] as ConditionMode[],
+    critical_within_5ft: [] as string[],
+    fail_saves: {} as Partial<Record<Ability, string>>,
+    save_disadvantage: {} as Partial<Record<Ability, string>>,
+    initiative: [] as ConditionMode[],
+  };
+  for (const id of expandConditions(ids, table)) {
+    const def = Object.hasOwn(table, id) ? table[id] : undefined;
+    if (!def) continue;
+    const entry = (mode: "advantage" | "disadvantage") => ({
+      mode,
+      condition: def.name,
+      id: def.id,
+      except_against_source: def.except_against_source,
+    });
+    if (def.attack_rolls) rolls.attack_rolls.push(entry(def.attack_rolls));
+    if (def.attacked) rolls.attacked.push(entry(def.attacked));
+    if (def.attacked_beyond_5ft) rolls.attacked_beyond_5ft.push(entry(def.attacked_beyond_5ft));
+    if (def.critical_within_5ft) rolls.critical_within_5ft.push(def.name);
+    if (def.initiative) rolls.initiative.push(entry(def.initiative));
+    for (const a of def.fail_saves) rolls.fail_saves[a] ??= def.name;
+    for (const a of def.save_disadvantage) rolls.save_disadvantage[a] ??= def.name;
+  }
+  return rolls;
+}
+
+/** One reason for Advantage or Disadvantage on a roll. */
+export interface ModeReason {
+  readonly mode: "advantage" | "disadvantage";
+  readonly reason: string;
+}
+
+/**
+ * The mode of a D20 Test: Advantage if anything gives it, Disadvantage likewise, and a normal
+ * roll when both apply, however many of each (SRD "Advantage", "Disadvantage").
+ */
+export function resolveMode(
+  asked: RollMode,
+  reasons: readonly ModeReason[],
+): { mode: RollMode; reasons: string[] } {
+  const all: ModeReason[] = [...reasons];
+  if (asked !== "normal") all.unshift({ mode: asked, reason: "asked" });
+  const advantage = all.some((r) => r.mode === "advantage");
+  const disadvantage = all.some((r) => r.mode === "disadvantage");
+  const mode =
+    advantage && disadvantage
+      ? "normal"
+      : advantage
+        ? "advantage"
+        : disadvantage
+          ? "disadvantage"
+          : "normal";
+  const label = (r: ModeReason) =>
+    `${r.mode === "advantage" ? "Advantage" : "Disadvantage"}: ${r.reason}`;
+  return { mode, reasons: all.filter((r) => r.reason !== "asked").map(label) };
+}
+
+export interface AttackModeOptions {
+  /** Advantage or Disadvantage from elsewhere (the caller, a feature). */
+  mode?: RollMode;
+  /** The attacker is within 5 feet of the target (Prone, Paralyzed, Unconscious). */
+  within_5ft: boolean;
+  /** The attacker's condition ids whose source is this target (Grappled by it). */
+  against_source_of?: readonly string[];
+}
+
+/**
+ * An attack roll's mode from the attacker's and the target's conditions, and whether a hit is a
+ * Critical Hit (a Paralyzed or Unconscious target within 5 feet).
+ */
+export function attackMode(
+  attacker: Combatant,
+  target: Combatant,
+  { mode = "normal", within_5ft, against_source_of = [] }: AttackModeOptions,
+): { mode: RollMode; reasons: string[]; critical_on_hit: boolean } {
+  const reasons: ModeReason[] = [];
+  for (const c of attacker.condition_rolls.attack_rolls) {
+    if (c.except_against_source && against_source_of.includes(c.id)) continue;
+    reasons.push({ mode: c.mode, reason: `${attacker.name} is ${c.condition}` });
+  }
+  const against = within_5ft
+    ? target.condition_rolls.attacked
+    : target.condition_rolls.attacked_beyond_5ft;
+  const where = within_5ft ? "within 5 ft" : "beyond 5 ft";
+  for (const c of against) {
+    reasons.push({ mode: c.mode, reason: `${target.name} is ${c.condition} (${where})` });
+  }
+  const resolved = resolveMode(mode, reasons);
+  const critical_on_hit = within_5ft && target.condition_rolls.critical_within_5ft.length > 0;
+  return { ...resolved, critical_on_hit };
 }
 
 /** A saving throw effect with a fixed DC (a monster's breath weapon or gaze). */
@@ -128,6 +276,8 @@ export interface AttackResult {
   readonly critical_hit: boolean;
   /** A natural 1: the attack misses whatever the total. */
   readonly critical_miss: boolean;
+  /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
+  readonly reasons: readonly string[];
   /** The damage rolled on a hit. */
   readonly damage: RolledDamage | null;
   /** Names of the riders added to the damage. */
@@ -151,6 +301,10 @@ export interface AttackOptions {
   riders?: readonly { rider: string; type?: string }[];
   /** An ally is within 5 feet of the target and not Incapacitated (Sneak Attack without Advantage). */
   ally_adjacent?: boolean;
+  /** The attacker is within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
+  within_5ft?: boolean;
+  /** The attacker's condition ids whose source is the target (Grappled by it). */
+  against_source_of?: readonly string[];
 }
 
 /**
@@ -158,7 +312,8 @@ export interface AttackOptions {
  *
  * A natural 1 always misses. A roll of `critical_hit_on` or more (a natural 20, or 19 with
  * Improved Critical) is a Critical Hit, which hits regardless of the target's AC (SRD "Critical
- * Hit") and rolls the damage dice twice.
+ * Hit") and rolls the damage dice twice. Conditions add Advantage or Disadvantage (`attackMode`),
+ * and a hit on a Paralyzed or Unconscious target within 5 feet is a Critical Hit.
  */
 export function makeAttack(
   attacker: Combatant,
@@ -170,6 +325,8 @@ export function makeAttack(
     two_handed = false,
     riders = [],
     ally_adjacent = false,
+    within_5ft,
+    against_source_of = [],
   }: AttackOptions = {},
 ): AttackResult {
   const line =
@@ -178,6 +335,11 @@ export function makeAttack(
     const known = attacker.attacks.map((a) => a.name).join(", ");
     throw new RangeError(`${attacker.name} has no attack '${String(attack)}' (${known})`);
   }
+  const effective = attackMode(attacker, target, {
+    mode,
+    within_5ft: within_5ft ?? line.kind === "melee",
+    against_source_of,
+  });
   // Check the riders before rolling, so a refused request rolls nothing.
   const extra: DamagePart[] = [];
   const riderNames: string[] = [];
@@ -185,7 +347,8 @@ export function makeAttack(
     const rider = line.riders.find((r) => r.id === request.rider || r.name === request.rider);
     if (!rider) throw new RangeError(`${line.name} has no rider '${request.rider}'`);
     if (rider.requires === "advantage_or_ally") {
-      const ok = mode === "advantage" || (ally_adjacent && mode !== "disadvantage");
+      const ok =
+        effective.mode === "advantage" || (ally_adjacent && effective.mode !== "disadvantage");
       if (!ok) {
         throw new RangeError(
           `${rider.name} needs Advantage, or an ally next to the target and no Disadvantage`,
@@ -207,11 +370,12 @@ export function makeAttack(
     extra.push({ dice: rider.dice, bonus: rider.bonus, type });
     riderNames.push(rider.name);
   }
-  const roll = rollD20({ mode, rng });
+  const roll = rollD20({ mode: effective.mode, rng });
   const total = roll.d20 + line.attack_bonus;
   const critical_miss = roll.d20 === 1;
-  const critical_hit = !critical_miss && roll.d20 >= Math.min(20, attacker.critical_hit_on);
-  const hit = critical_hit || (!critical_miss && total >= target.armor_class);
+  const criticalRoll = !critical_miss && roll.d20 >= Math.min(20, attacker.critical_hit_on);
+  const hit = criticalRoll || (!critical_miss && total >= target.armor_class);
+  const critical_hit = criticalRoll || (hit && effective.critical_on_hit);
   const base = {
     attacker: attacker.name,
     target: target.name,
@@ -223,6 +387,7 @@ export function makeAttack(
     hit,
     critical_hit,
     critical_miss,
+    reasons: effective.reasons,
   };
   if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
   const parts = [
@@ -250,9 +415,17 @@ export interface SaveResult {
   readonly roll: D20Roll;
   readonly total: number;
   readonly success: boolean;
+  /** The condition that made it fail without a roll (Paralyzed: Strength and Dexterity). */
+  readonly automatic_failure: string | null;
+  /** Why the roll had Advantage or Disadvantage, if it did. */
+  readonly reasons: readonly string[];
 }
 
-/** A saving throw against a DC. Unlike attacks, a natural 20 or 1 has no special effect. */
+/**
+ * A saving throw against a DC. Unlike attacks, a natural 20 or 1 has no special effect. A
+ * condition can make it fail without a roll (Paralyzed, Stunned…: Strength and Dexterity) or give
+ * Disadvantage (Restrained: Dexterity); a feature can give Advantage (Rage: Strength).
+ */
 export function rollSavingThrow(
   combatant: Combatant,
   ability: Ability,
@@ -260,13 +433,29 @@ export function rollSavingThrow(
   { rng = mathRng, mode = "normal" }: { rng?: Rng; mode?: RollMode } = {},
 ): SaveResult {
   const bonus = combatant.saving_throws[ability];
-  // Advantage from the combatant (Rage: Strength saves) combines with the one asked for.
-  const roll = rollD20({
-    mode: combineModes(mode, combatant.advantages.includes(`save.${ability}`)),
-    rng,
-  });
+  const base = { name: combatant.name, ability, dc, bonus };
+  const failing = combatant.condition_rolls.fail_saves[ability];
+  if (failing) {
+    const roll = { rolls: [], d20: 0, mode: "normal" as const };
+    return { ...base, roll, total: 0, success: false, automatic_failure: failing, reasons: [] };
+  }
+  const reasons: ModeReason[] = [];
+  if (combatant.advantages.includes(`save.${ability}`)) {
+    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
+  }
+  const hindered = combatant.condition_rolls.save_disadvantage[ability];
+  if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
+  const resolved = resolveMode(mode, reasons);
+  const roll = rollD20({ mode: resolved.mode, rng });
   const total = roll.d20 + bonus;
-  return { name: combatant.name, ability, dc, bonus, roll, total, success: total >= dc };
+  return {
+    ...base,
+    roll,
+    total,
+    success: total >= dc,
+    automatic_failure: null,
+    reasons: resolved.reasons,
+  };
 }
 
 /** Advantage and Disadvantage cancel; several of either count once (SRD "Advantage"). */
@@ -313,6 +502,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     no_spells: false,
     condition_immunities: [],
     save_actions: [],
+    condition_rolls: NO_CONDITION_ROLLS,
   };
 }
 
@@ -325,10 +515,15 @@ export interface MonsterState {
 
 /**
  * A combatant from a monster stat block: its attacks become attack lines (for `makeAttack`), its
- * saving throw effects become `save_actions` (for `useSaveAction`); spellcasting, recharges and
- * legendary actions stay in the stat block's text.
+ * saving throw effects become `save_actions` (for `useSaveAction`); spellcasting and legendary
+ * actions stay in the stat block's text. With the catalog's `conditions`, its conditions change
+ * rolls (`condition_rolls`).
  */
-export function combatantFromMonster(monster: MonsterDef, state: MonsterState = {}): Combatant {
+export function combatantFromMonster(
+  monster: MonsterDef,
+  state: MonsterState = {},
+  { conditions: table }: { conditions?: Table<ConditionDef> } = {},
+): Combatant {
   const modifiers = Object.fromEntries(
     ABILITIES.map((a) => [a, abilityModifier(monster.abilities[a])]),
   ) as Record<Ability, number>;
@@ -398,7 +593,7 @@ export function combatantFromMonster(monster: MonsterDef, state: MonsterState = 
       vulnerabilities: monster.vulnerabilities,
       immunities: monster.immunities,
     },
-    conditions: state.conditions ?? [],
+    conditions: table ? expandConditions(state.conditions ?? [], table) : (state.conditions ?? []),
     attacks,
     critical_hit_on: 20,
     // Multiattack: that many attacks for one action.
@@ -408,5 +603,6 @@ export function combatantFromMonster(monster: MonsterDef, state: MonsterState = 
     no_spells: false,
     condition_immunities: monster.condition_immunities,
     save_actions: saveActions,
+    condition_rolls: table ? conditionRolls(state.conditions ?? [], table) : NO_CONDITION_ROLLS,
   };
 }

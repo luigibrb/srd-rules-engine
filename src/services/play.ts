@@ -21,7 +21,7 @@ import {
 } from "../models/state";
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
-import type { Combatant } from "../rules/combatant";
+import { type Combatant, conditionRolls } from "../rules/combatant";
 import { type Defenses, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
@@ -318,6 +318,7 @@ export function combatantFromCharacter(
     no_spells: sheet.toggles.some((t) => t.active && t.no_spells),
     condition_immunities: [],
     save_actions: [],
+    condition_rolls: conditionRolls(conditions, catalog.conditions),
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []

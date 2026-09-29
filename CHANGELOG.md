@@ -29,6 +29,15 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Conditions change rolls: condition fields `attack_rolls`, `attacked`, `attacked_beyond_5ft`,
+  `critical_within_5ft`, `fail_saves`, `save_disadvantage`, `initiative`,
+  `except_against_source`; `Combatant.condition_rolls`, `conditionRolls`, `attackMode`,
+  `resolveMode`. Attacks and spell attacks get Advantage or Disadvantage from both sides'
+  conditions (`within_5ft` option; `reasons` in the result), automatic Critical Hits within 5 feet
+  on Paralyzed or Unconscious targets; saves fail automatically (`automatic_failure`) or roll
+  with Disadvantage; Initiative too. `combatantFromMonster` takes the catalog's `conditions`.
+- Encounters track a condition applied with a `source` even without a duration (Grappled's
+  exception for the grappler), and drop an effect whose condition was removed.
 - `npm run content` reports the bundled SRD's size (minified, gzipped, largest tables) and
   fails when the gzipped size is over the budget (`MAX_GZIP_KB`).
 - Encounter turn rules: `attack` (Attack action with Extra Attack / Multiattack, Opportunity
