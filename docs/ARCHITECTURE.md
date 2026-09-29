@@ -393,7 +393,7 @@ Concentration, `defeated`); characters are referenced by a key into the caller's
 
 `applyEncounterAction(encounter, action, { catalog, characters, rng })` → `{ encounter, states,
 notes, result }`, or `EncounterError`. `states` holds the character states the action changed;
-`result` is the roll of an `attack`, `save_action` or `cast`. `POST /v1/encounters/apply` runs a
+`result` is the roll of an `attack`, `save_action`, `cast`, `check`, `unarmed` or `escape`. `POST /v1/encounters/apply` runs a
 list of actions.
 
 - **Setup and order:** `add_monster` (average or rolled HP), `add_character`, `remove`,
@@ -409,6 +409,22 @@ list of actions.
   throw effect; one with a Recharge is `expended` and rolled for on a d6 at the start of the
   monster's turns) and `cast` (the casting time decides the action, Bonus Action or reaction;
   the caster must have the spell).
+- **Standard actions:** `dodge` (until the start of its next turn, attack rolls against it have
+  Disadvantage and it has Advantage on Dexterity saves; not while Incapacitated or at Speed 0),
+  `disengage` (an `attack` with `opportunity: true` against it is refused this turn), `dash`;
+  each takes `bonus_action: true` for a feature that allows it (Cunning Action). `help` records
+  (`encounter.helps`) Advantage on the next attack roll by one of the helper's allies against an
+  enemy, or, with a skill the helper is proficient in, on an ally's next check with it; the next
+  such roll uses it up, and it expires at the start of the helper's next turn. `unarmed` is an
+  Unarmed Strike's Grapple or Shove, in place of one attack: the target makes a Strength or
+  Dexterity save against 8 + Strength modifier + Proficiency Bonus (no more than one size larger
+  than the attacker), or is Grappled (an effect with the grappler as source and `escape_dc`) or
+  pushed 5 feet or knocked Prone. `escape` (the action) is an Athletics or Acrobatics check
+  against the escape DC; a grapple also ends when the grappler is Incapacitated. `stand` spends
+  half the Speed to end Prone. `attack` with `light_extra` is the Light property's extra attack:
+  a Bonus Action after attacking with a Light weapon in the Attack action, with a different
+  Light weapon, using the line's `light_extra_damage_parts` (no positive ability modifier unless
+  the Two-Weapon Fighting feat).
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
@@ -516,6 +532,15 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - "Once per turn" resets on every creature's turn; Divine Strike's "once on each of your turns"
   is treated the same.
 - A monster's spell slots aren't tracked.
+- Allies are combatants on the same `side`; combatants without a side are all allies (Help needs
+  sides to tell an ally from an enemy).
+- The target of a Grapple or Shove chooses Strength or Dexterity: by default its better save
+  bonus; the escape check likewise takes the better of Athletics and Acrobatics. "A hand free"
+  and one grapple per hand aren't checked; a stat block's "Medium or Small" counts as Medium.
+- Dodge's Disadvantage applies to every attacker ("if you can see the attacker" isn't modeled),
+  and Help's attack benefit to any ally's attack roll against the enemy, wherever the helper is.
+- An Opportunity Attack (`opportunity: true`) is checked only against Disengage and for being a
+  melee attack; whether the target left the attacker's reach is the caller's to decide.
 - Legendary Resistance is spent automatically on the first failed save while uses are left
   (`auto_legendary_resistance: false` leaves it to the GM); the SRD says the monster "can choose".
 - A legendary action that makes an attack or uses another action resolves just that roll; what
@@ -538,12 +563,15 @@ Most rules are data; these are code, by name:
 
 - `rules/sheet.ts`: Martial Arts (Dex and the Martial Arts die for Unarmed Strikes and Monk
   weapons, only without armor or Shield) is triggered by the `martial_arts.die` effect; Great
-  Weapon Fighting adds a note to two-handed melee attacks.
+  Weapon Fighting adds a note to two-handed melee attacks; Two-Weapon Fighting keeps the ability
+  modifier in a Light weapon's `light_extra_damage_parts`.
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to
   all damage), `unconscious` is added at 0 HP and removed when you regain Hit Points, and
   `incapacitated` (or a condition that implies it) ends Concentration and toggles with `ends_on`.
 - `services/encounter.ts`: `incapacitated` stops actions and reactions, `petrified` gives a
-  monster Resistance to all damage, and a monster at 0 HP is defeated (SRD "Monster Death").
+  monster Resistance to all damage, a monster at 0 HP is defeated (SRD "Monster Death"),
+  `grappled` is what `unarmed` gives and `escape` ends (and ends with an Incapacitated grappler),
+  and `prone` is what a shove gives and `stand` ends.
 
 ## Runtime and packaging (TypeScript)
 

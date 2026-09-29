@@ -87,6 +87,11 @@ export interface AttackLine {
   readonly damage_parts: readonly DamagePart[];
   /** A Versatile weapon's damage when used with two hands. */
   readonly two_handed_damage_parts: readonly DamagePart[] | null;
+  /**
+   * A Light weapon's damage for the Light property's extra attack: no positive ability modifier,
+   * unless the Two-Weapon Fighting feat adds it back. `null` for other attacks.
+   */
+  readonly light_extra_damage_parts: readonly DamagePart[] | null;
   readonly mastery: string | null;
   readonly notes: readonly string[];
 }
@@ -989,6 +994,7 @@ function unarmedStrike(ctx: AttackContext): AttackLine {
     damage_type: "bludgeoning",
     damage_parts: parts,
     two_handed_damage_parts: null,
+    light_extra_damage_parts: null,
     mastery: null,
     notes,
   });
@@ -1047,6 +1053,14 @@ function attackLine(
       : { dice, bonus: abilityMod + magic.damage, type: w.damage_type };
   const parts = [part(die)];
   const twoHanded = w.versatile_damage ? [part(w.versatile_damage)] : null;
+  // The Light property's extra attack: "you don't add your ability modifier to the extra
+  // attack's damage unless that modifier is negative" (Two-Weapon Fighting: you do).
+  const keepModifier = abilityMod < 0 || ctx.featIds.has("two-weapon-fighting");
+  const lightExtra = w.properties.includes("light")
+    ? parts.map((p) =>
+        keepModifier || p.dice === null ? p : { ...p, bonus: p.bonus - abilityMod },
+      )
+    : null;
   let damage = formatDamage(parts);
   if (twoHanded) damage += ` (${formatDamage(twoHanded)} two-handed)`;
   const mastery = ctx.masteries.includes(w.id)
@@ -1064,6 +1078,7 @@ function attackLine(
     damage_type: w.damage_type,
     damage_parts: parts,
     two_handed_damage_parts: twoHanded,
+    light_extra_damage_parts: lightExtra,
     mastery,
     notes,
   };
@@ -1114,6 +1129,7 @@ function riderApplies(rider: DamageRider, line: AttackLine): boolean {
 function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackLine {
   let parts = [...line.damage_parts];
   let twoHanded = line.two_handed_damage_parts ? [...line.two_handed_damage_parts] : null;
+  let lightExtra = line.light_extra_damage_parts ? [...line.light_extra_damage_parts] : null;
   const notes = [...line.notes];
   const optional: AttackRider[] = [];
   for (const r of riders) {
@@ -1123,6 +1139,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
       const part = { dice: r.dice, bonus: r.bonus, type };
       parts = [...parts, part];
       if (twoHanded) twoHanded = [...twoHanded, part];
+      if (lightExtra) lightExtra = [...lightExtra, part];
       notes.push(`${r.def.name} ${formatDamage([part]).replace(/^(\d)/, "+$1")}`);
     } else {
       optional.push({
@@ -1143,6 +1160,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
     damage,
     damage_parts: parts,
     two_handed_damage_parts: twoHanded,
+    light_extra_damage_parts: lightExtra,
     riders: optional,
     notes,
   };

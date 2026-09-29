@@ -31,6 +31,17 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Standard combat actions in encounters: `dodge`, `disengage` (and `dash`) with `bonus_action`
+  for features that allow it; `help` (an ally's next attack roll against an enemy, or its next
+  check with a skill you're proficient in); `unarmed` (Grapple and Shove: a Strength or
+  Dexterity save against 8 + Strength modifier + Proficiency Bonus; size limit); `escape`
+  (Athletics or Acrobatics against the grapple's escape DC; `effects` takes `escape_dc`);
+  `stand` (half the Speed); `attack` with `opportunity` (refused against a Disengaged target)
+  and `light_extra` (the Light property's extra attack as a Bonus Action). Grapples end when
+  the grappler is Incapacitated. Encounter fields `dodging`, `disengaged`, `light_attacks`,
+  `helps`, effects' `escape_dc`; `AttackLine.light_extra_damage_parts` (Two-Weapon Fighting
+  keeps the modifier); `Combatant.size`; `makeAttack` options `modes` and `light_extra`;
+  `rollAbilityCheck` option `modes`.
 - Ability checks and skills: `rollAbilityCheck`, the sheet's `ability_checks`, combatants'
   `ability_checks` and `skills`, the condition field `ability_checks` (Poisoned, Frightened), the
   encounter action `check`. Encounters roll a dying character's Death Saving Throw at the start of

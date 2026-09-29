@@ -48,6 +48,7 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   condition_rolls: NO_CONDITION_ROLLS,
   legendary_actions: [],
   legendary_resistance: 0,
+  size: null,
   ...o,
 });
 const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizardLine] });

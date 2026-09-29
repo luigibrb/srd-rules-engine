@@ -60,6 +60,12 @@ export const EncounterCombatantSchema = z.object({
   /** Legendary Resistance uses spent, and whether it spends them automatically on a failed save. */
   legendary_resistance_used: z.int().min(0).default(0),
   auto_legendary_resistance: z.boolean().default(true),
+  /** Took the Dodge action: its benefits last until the start of its next turn. */
+  dodging: z.boolean().default(false),
+  /** Took the Disengage action: its movement doesn't provoke Opportunity Attacks this turn. */
+  disengaged: z.boolean().default(false),
+  /** Light weapons it attacked with in this turn's Attack action (the Light property's extra attack). */
+  light_attacks: z.array(z.string()).default([]),
 });
 export type EncounterCombatant = z.infer<typeof EncounterCombatantSchema>;
 
@@ -87,8 +93,22 @@ export const EncounterEffectSchema = z.object({
   source: z.string().nullable().default(null),
   concentration: z.boolean().default(false),
   ends: EffectEndSchema.nullable().default(null),
+  /** A grapple: the DC of the `escape` check (Athletics or Acrobatics) that ends it. */
+  escape_dc: z.int().nullable().default(null),
 });
 export type EncounterEffect = z.infer<typeof EncounterEffectSchema>;
+
+/**
+ * The Help action's benefit, until it's used or the start of the helper's next turn: Advantage on
+ * the next attack roll by one of `by`'s allies against `on` (no `skill`), or on `on`'s next check
+ * with `skill`.
+ */
+export const HelpSchema = z.object({
+  by: z.string(),
+  on: z.string(),
+  skill: z.enum(SKILLS).nullable().default(null),
+});
+export type Help = z.infer<typeof HelpSchema>;
 
 export const EncounterSchema = z.object({
   /** 0 before the fight starts. */
@@ -102,6 +122,8 @@ export const EncounterSchema = z.object({
   effects: z.array(EncounterEffectSchema).default([]),
   /** Next effect id number. */
   next_effect: z.int().min(1).default(1),
+  /** Help actions not used yet. */
+  helps: z.array(HelpSchema).default([]),
   /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
   auto_death_saves: z.boolean().default(true),
 });
@@ -156,8 +178,57 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("end") }),
   z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
   z.object({ type: z.literal("move"), id: z.string(), feet: n.min(0) }),
-  /** The Dash action: uses the action, adds the combatant's Speed to this turn's movement. */
-  z.object({ type: z.literal("dash"), id: z.string() }),
+  /**
+   * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
+   * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
+   * Action), as for `disengage` and `dodge`.
+   */
+  z.object({ type: z.literal("dash"), id: z.string(), bonus_action: z.boolean().optional() }),
+  /** The Disengage action: its movement doesn't provoke Opportunity Attacks this turn. */
+  z.object({ type: z.literal("disengage"), id: z.string(), bonus_action: z.boolean().optional() }),
+  /**
+   * The Dodge action: until the start of its next turn, attack rolls against it have
+   * Disadvantage and it makes Dexterity saves with Advantage (not while Incapacitated or at
+   * Speed 0).
+   */
+  z.object({ type: z.literal("dodge"), id: z.string(), bonus_action: z.boolean().optional() }),
+  /**
+   * The Help action: Advantage on an ally's next attack roll against `target` (an enemy), or,
+   * with `skill` (one the helper is proficient in), on `target`'s (an ally's) next check with
+   * it. Either expires at the start of the helper's next turn.
+   */
+  z.object({
+    type: z.literal("help"),
+    id: z.string(),
+    target: z.string(),
+    skill: z.enum(SKILLS).optional(),
+  }),
+  /**
+   * An Unarmed Strike to grapple or shove (in place of one attack, like `attack`): the target
+   * saves (Strength or Dexterity: default the better) against 8 + Strength modifier + Proficiency
+   * Bonus, or is Grappled (escape DC the same) or shoved (`push` 5 feet, or `prone`).
+   */
+  z.object({
+    type: z.literal("unarmed"),
+    id: z.string(),
+    target: z.string(),
+    option: z.enum(["grapple", "shove"]),
+    shove: z.enum(["push", "prone"]).optional(),
+    save: z.enum(["str", "dex"]).optional(),
+    reaction: z.boolean().optional(),
+  }),
+  /**
+   * Escape a grapple: the action, a Strength (Athletics) or Dexterity (Acrobatics) check (default
+   * the better) against its escape DC. `effect` picks the grapple when there are several.
+   */
+  z.object({
+    type: z.literal("escape"),
+    id: z.string(),
+    skill: z.enum(["athletics", "acrobatics"]).optional(),
+    effect: z.string().optional(),
+  }),
+  /** Right itself from Prone: half its Speed in movement. */
+  z.object({ type: z.literal("stand"), id: z.string() }),
   /**
    * Apply play actions to a combatant (what `makeAttack`, `castSpell` and `useSaveAction` return):
    * a character's go to its state; a monster supports damage, heal, set_temp_hp and conditions.
@@ -175,12 +246,18 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     /** The conditions end when the source's Concentration on `label` ends. */
     concentration: z.boolean().optional(),
     label: z.string().optional(),
+    /** A grapple from `source` (a stat block's "escape DC 13"): `escape` checks against it. */
+    escape_dc: n.optional(),
   }),
   z.object({ type: z.literal("end_effect"), effect: z.string() }),
   /**
    * One attack with an attack line (`makeAttack`), applied to the target. The first attack of a
-   * turn uses the action (Extra Attack allows more); `reaction: true` makes it an Opportunity
-   * Attack. Once-per-turn riders are enforced; an attack roll extends Rage.
+   * turn uses the action (Extra Attack allows more); `reaction: true` uses the reaction instead
+   * (`opportunity: true`: an Opportunity Attack, melee only, refused against a Disengaged
+   * target). `light_extra: true` is the Light property's extra attack: a Bonus Action after
+   * attacking with a Light weapon in the Attack action, with a different Light weapon, without a
+   * positive ability modifier on damage. Once-per-turn riders are enforced; an attack roll extends
+   * Rage; Help against the target is used up.
    */
   z.object({
     type: z.literal("attack"),
@@ -194,6 +271,8 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
     within_5ft: z.boolean().optional(),
     reaction: z.boolean().optional(),
+    opportunity: z.boolean().optional(),
+    light_extra: z.boolean().optional(),
   }),
   /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
   z.object({

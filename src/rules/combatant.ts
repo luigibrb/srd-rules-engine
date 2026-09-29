@@ -91,6 +91,8 @@ export interface Combatant {
    * "Legendary Resistance"), and the result says so.
    */
   readonly legendary_resistance: number;
+  /** Its size, lowercase (`medium`; the first of a stat block's "Medium or Small"), if known. */
+  readonly size: string | null;
 }
 
 /** A legendary action: an attack it makes, an action it uses, a saving throw effect, or text. */
@@ -226,6 +228,8 @@ export interface AttackModeOptions {
   within_5ft: boolean;
   /** The attacker's condition ids whose source is this target (Grappled by it). */
   against_source_of?: readonly string[];
+  /** More reasons for Advantage or Disadvantage (Help, Dodge…). */
+  modes?: readonly ModeReason[];
 }
 
 /**
@@ -235,9 +239,9 @@ export interface AttackModeOptions {
 export function attackMode(
   attacker: Combatant,
   target: Combatant,
-  { mode = "normal", within_5ft, against_source_of = [] }: AttackModeOptions,
+  { mode = "normal", within_5ft, against_source_of = [], modes = [] }: AttackModeOptions,
 ): { mode: RollMode; reasons: string[]; critical_on_hit: boolean } {
-  const reasons: ModeReason[] = [];
+  const reasons: ModeReason[] = [...modes];
   for (const c of attacker.condition_rolls.attack_rolls) {
     if (c.except_against_source && against_source_of.includes(c.id)) continue;
     reasons.push({ mode: c.mode, reason: `${attacker.name} is ${c.condition}` });
@@ -335,6 +339,13 @@ export interface AttackOptions {
   within_5ft?: boolean;
   /** The attacker's condition ids whose source is the target (Grappled by it). */
   against_source_of?: readonly string[];
+  /** More reasons for Advantage or Disadvantage (Help: `{ mode: "advantage", reason: "…" }`). */
+  modes?: readonly ModeReason[];
+  /**
+   * The Light property's extra attack: the line's `light_extra_damage_parts` (no positive ability
+   * modifier). Throws for an attack that isn't with a Light weapon.
+   */
+  light_extra?: boolean;
 }
 
 /**
@@ -357,6 +368,8 @@ export function makeAttack(
     ally_adjacent = false,
     within_5ft,
     against_source_of = [],
+    modes = [],
+    light_extra = false,
   }: AttackOptions = {},
 ): AttackResult {
   const line =
@@ -369,7 +382,11 @@ export function makeAttack(
     mode,
     within_5ft: within_5ft ?? line.kind === "melee",
     against_source_of,
+    modes,
   });
+  if (light_extra && !line.light_extra_damage_parts) {
+    throw new RangeError(`${line.name} isn't a Light weapon`);
+  }
   // Check the riders before rolling, so a refused request rolls nothing.
   const extra: DamagePart[] = [];
   const riderNames: string[] = [];
@@ -420,12 +437,13 @@ export function makeAttack(
     reasons: effective.reasons,
   };
   if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
-  const parts = [
-    ...(two_handed && line.two_handed_damage_parts
-      ? line.two_handed_damage_parts
-      : line.damage_parts),
-    ...extra,
-  ];
+  const base_parts =
+    light_extra && line.light_extra_damage_parts
+      ? line.light_extra_damage_parts
+      : two_handed && line.two_handed_damage_parts
+        ? line.two_handed_damage_parts
+        : line.damage_parts;
+  const parts = [...base_parts, ...extra];
   const damage = rollDamage(parts, { critical: critical_hit, rng });
   const instances = damage.parts.map((p) => ({ amount: p.total, type: p.type }));
   const outcome = takeDamage(
@@ -526,12 +544,16 @@ export function rollAbilityCheck(
   combatant: Combatant,
   what: { skill: Skill } | { ability: Ability },
   dc: number | null = null,
-  { rng = mathRng, mode = "normal" }: { rng?: Rng; mode?: RollMode } = {},
+  {
+    rng = mathRng,
+    mode = "normal",
+    modes = [],
+  }: { rng?: Rng; mode?: RollMode; modes?: readonly ModeReason[] } = {},
 ): CheckResult {
   const skill = "skill" in what ? what.skill : null;
   const ability = skill ? SKILL_ABILITY[skill] : (what as { ability: Ability }).ability;
   const bonus = (skill ? combatant.skills[skill] : undefined) ?? combatant.ability_checks[ability];
-  const reasons: ModeReason[] = [];
+  const reasons: ModeReason[] = [...modes];
   if (combatant.advantages.includes(`check.${ability}`)) {
     reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
   }
@@ -603,6 +625,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     condition_rolls: NO_CONDITION_ROLLS,
     legendary_actions: [],
     legendary_resistance: 0,
+    size: null,
   };
 }
 
@@ -662,6 +685,7 @@ export function combatantFromMonster(
         damage_type: damage[0]?.type ?? "",
         damage_parts: damage,
         two_handed_damage_parts: null,
+        light_extra_damage_parts: null,
         mastery: null,
         notes,
       },
@@ -731,5 +755,6 @@ export function combatantFromMonster(
     condition_rolls: table ? conditionRolls(state.conditions ?? [], table) : NO_CONDITION_ROLLS,
     legendary_actions: legendaryActions,
     legendary_resistance: resistanceLeft,
+    size: monster.size.split(" ")[0]?.toLowerCase() || null,
   };
 }
