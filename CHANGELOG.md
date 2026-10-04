@@ -6,6 +6,7 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- The builder's title shows the loaded build's level instead of always "Level 1".
 - Bardic Inspiration and Legendary Resistance are decisions: in `auto` mode (the default) the
   die is used only when it can turn a failure into a success; Uncanny Dodge is offered when an
   attack hits instead of being declared with `attack` `target_feature` (removed).

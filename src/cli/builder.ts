@@ -83,7 +83,8 @@ export class BuilderApp {
 
   async run(): Promise<CharacterBuild> {
     const con = this.con;
-    con.title("Character Builder · Level 1 · SRD 5.2.1");
+    // `levels` holds levels 2 and up: a loaded build starts at its own level.
+    con.title(`Character Builder · Level ${1 + this.build.levels.length} · SRD 5.2.1`);
     con.info("Work through the steps in order, or jump to any step by number.");
     con.info("At any prompt: 'back' returns to this menu, 'quit' exits.");
     try {

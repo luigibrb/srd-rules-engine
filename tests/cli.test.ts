@@ -27,6 +27,14 @@ async function runScript(answers: string[], build?: CharacterBuild) {
   return { build: result, output: out.join("\n"), saveDir };
 }
 
+it("the title shows the loaded build's level", async () => {
+  const fresh = await runScript(["quit", "n"]);
+  expect(fresh.output).toContain("Character Builder · Level 1 · SRD 5.2.1");
+  const third = levelUpIn(autocomplete(classBuild("bard", { name: "Lute" })), "bard", 2);
+  const loaded = await runScript(["quit", "n"], third);
+  expect(loaded.output).toContain("Character Builder · Level 3 · SRD 5.2.1");
+});
+
 it("a full session builds and saves a valid fighter", async () => {
   // biome-ignore format: one line per step
   const answers = [
