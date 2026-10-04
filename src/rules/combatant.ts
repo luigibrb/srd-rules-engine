@@ -633,6 +633,80 @@ export function combatantFromSnapshot(character: Character): Combatant {
   };
 }
 
+/** Where a monster's spell is cast from, with its limits (see `monsterSpells`). */
+export interface MonsterSpellLine {
+  /** The catalog spell id. */
+  readonly spell: string;
+  /** The action that casts it (`Spellcasting`, `Divine Aid (2/Day)`): the spellcasting source. */
+  readonly action: string;
+  readonly section: "traits" | "actions" | "bonus_actions" | "reactions" | "legendary_actions";
+  /** The level it's always cast at (`null`: the spell's level). */
+  readonly level: number | null;
+  /** Uses per day of this spell ("1/Day Each"); `null`: at will. */
+  readonly per_day: number | null;
+  /** Uses per day of the action, shared by its spells ("Divine Aid (2/Day)"). */
+  readonly action_per_day: number | null;
+  /** The action's Recharge (`5–6`), if any. */
+  readonly recharge: string | null;
+  /** A restriction from the stat block ("self only"), not enforced. */
+  readonly note: string;
+}
+
+const MONSTER_SECTIONS = [
+  "traits",
+  "actions",
+  "bonus_actions",
+  "reactions",
+  "legendary_actions",
+] as const;
+
+/** Every spell a monster can cast, by the action that casts it (SRD "Spellcasting"). */
+export function monsterSpells(monster: MonsterDef): MonsterSpellLine[] {
+  return MONSTER_SECTIONS.flatMap((section) =>
+    monster[section].flatMap((action) =>
+      (action.casts?.spells ?? []).map((s) => ({
+        spell: s.spell,
+        action: action.name,
+        section,
+        level: s.level,
+        per_day: s.per_day,
+        action_per_day: action.per_day,
+        recharge: action.recharge,
+        note: s.note,
+      })),
+    ),
+  );
+}
+
+/**
+ * One spellcasting line per action that casts spells, named after it. A stat block that gives no
+ * save DC or attack bonus gets 8 + modifier + Proficiency Bonus and the DC − 8 (the bonus a DC
+ * implies), so an attack spell listed without one can still be cast.
+ */
+function monsterSpellcasting(
+  monster: MonsterDef,
+  modifiers: Readonly<Record<Ability, number>>,
+): CombatantSpellcasting[] {
+  return MONSTER_SECTIONS.flatMap((section) =>
+    monster[section].flatMap((action) => {
+      const casts = action.casts;
+      if (!casts) return [];
+      const modifier = modifiers[casts.ability];
+      const save_dc = casts.save_dc ?? 8 + modifier + monster.proficiency_bonus;
+      return [
+        {
+          source: action.name,
+          list: null,
+          ability: casts.ability,
+          save_dc,
+          attack_bonus: casts.attack_bonus ?? save_dc - 8,
+          modifier,
+        },
+      ];
+    }),
+  );
+}
+
 /** A monster's current state in play (the stat block holds the maxima). */
 export interface MonsterState {
   readonly hp?: number;
@@ -752,7 +826,7 @@ export function combatantFromMonster(
     critical_hit_on: 20,
     // Multiattack: that many attacks for one action.
     attacks_per_action: monster.multiattack ?? 1,
-    spellcasting: [],
+    spellcasting: monsterSpellcasting(monster, modifiers),
     advantages: [],
     no_spells: false,
     condition_immunities: monster.condition_immunities,

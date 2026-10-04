@@ -120,6 +120,7 @@
         on_success: none
         conditions:
           - charmed
+      per_day: 2
   legendary_actions:
     - name: Lash
       text: The aboleth makes one Tentacle attack.
@@ -235,6 +236,31 @@
         **At Will:** _Acid Arrow_ (level 3 version), _Detect Magic_, _Fear_
 
         **1/Day Each:** _Speak with Dead_, _Vitriolic Sphere_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: 9
+        spells:
+          - spell: acid-arrow
+            level: 3
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
+          - spell: speak-with-dead
+            level: null
+            per_day: 1
+            note: ""
+          - spell: vitriolic-sphere
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Cloud of Insects
       text: _Dexterity Saving Throw:_ DC 17, one creature the dragon can see within 120 feet. _Failure:_
@@ -256,6 +282,15 @@
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
         start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: 9
+        spells:
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -363,15 +398,62 @@
         **At Will:** _Detect Magic_, _Invisibility_, _Mage Hand_, _Shatter_
 
         **1/Day Each:** _Scrying_, _Sending_
+      casts:
+        ability: cha
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: shatter
+            level: null
+            per_day: null
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
+          - spell: sending
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Cloaked Flight
       text: The dragon uses Spellcasting to cast _Invisibility_ on itself, and it can fly up to half its
         Fly Speed. The dragon can't take this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
     - name: Sonic Boom
       text: The dragon uses Spellcasting to cast _Shatter_. The dragon can't take this action again until
         the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: shatter
+            level: null
+            per_day: null
+            note: ""
     - name: Tail Swipe
       text: The dragon makes one Rend attack.
       once_per_round: false
@@ -496,10 +578,53 @@
         Temporary Hit Points required to maintain the spell), _Speak with Animals_
 
         **1/Day Each:** _Detect Thoughts_, _Control Weather_
+      casts:
+        ability: cha
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: scorching-ray
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: speak-with-animals
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: 1
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Blazing Light
       text: The dragon uses Spellcasting to cast _Scorching Ray_.
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: scorching-ray
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -638,10 +763,53 @@
         Temporary Hit Points required to maintain the spell), _Speak with Animals_, _Thaumaturgy_
 
         **1/Day Each:** _Detect Thoughts_, _Water Breathing_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: 10
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: speak-with-animals
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: 1
+            note: ""
+          - spell: water-breathing
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: 10
+        spells:
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -770,6 +938,36 @@
         Concentration or Temporary Hit Points required to maintain the spell)
 
         **1/Day Each:** _Greater Restoration_, _Major Image_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: mind-spike
+            level: 4
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: greater-restoration
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Giggling Magic
       text: _Charisma Saving Throw:_ DC 17, one creature the dragon can see within 90 feet. _Failure:_ 24
@@ -791,6 +989,15 @@
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 4 version). The dragon can't take
         this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: mind-spike
+            level: 4
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -904,6 +1111,32 @@
         Temporary Hit Points required to maintain the spell)
 
         **1/Day Each:** _Flame Strike_, _Zone of Truth_
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: 13
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: flame-strike
+            level: null
+            per_day: 1
+            note: ""
+          - spell: zone-of-truth
+            level: null
+            per_day: 1
+            note: ""
     - name: Weakening Breath
       text: _Strength Saving Throw:_ DC 21, each creature that isn't currently affected by this breath in
         a 60-foot Cone. _Failure:_ The target has Disadvantage on Strength-based D20 Tests and
@@ -931,6 +1164,15 @@
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: 13
+        spells:
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -1043,10 +1285,36 @@
         **At Will:** _Detect Magic_, _Mind Spike_ (level 3 version)
 
         **1/Day:** _Geas_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: mind-spike
+            level: 3
+            per_day: null
+            note: ""
+          - spell: geas
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Mind Invasion
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 3 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: mind-spike
+            level: 3
+            per_day: null
+            note: ""
     - name: Noxious Miasma
       text: _Constitution Saving Throw:_ DC 17, each creature in a 20-foot-radius Sphere centered on a
         point the dragon can see within 90 feet. _Failure:_ 7 (2d6) Poison damage, and the target
@@ -1170,15 +1438,54 @@
         **At Will:** _Command_ (level 2 version), _Detect Magic_, _Scorching Ray_
 
         **1/Day:** _Fireball_
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: 12
+        spells:
+          - spell: command
+            level: 2
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: scorching-ray
+            level: null
+            per_day: null
+            note: ""
+          - spell: fireball
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Commanding Presence
       text: The dragon uses Spellcasting to cast _Command_ (level 2 version). The dragon can't take this
         action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: 12
+        spells:
+          - spell: command
+            level: 2
+            per_day: null
+            note: ""
     - name: Fiery Rays
       text: The dragon uses Spellcasting to cast _Scorching Ray_. The dragon can't take this action again
         until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: 12
+        spells:
+          - spell: scorching-ray
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -1301,11 +1608,50 @@
         Hit Points required to maintain the spell)
 
         **1/Day Each:** _Ice Storm_ (level 5 version), _Zone of Truth_
+      casts:
+        ability: cha
+        save_dc: 19
+        attack_bonus: 11
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: hold-monster
+            level: null
+            per_day: null
+            note: ""
+          - spell: ice-knife
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: ice-storm
+            level: 5
+            per_day: 1
+            note: ""
+          - spell: zone-of-truth
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Chill
       text: The dragon uses Spellcasting to cast _Hold Monster_. The dragon can't take this action again
         until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 19
+        attack_bonus: 11
+        spells:
+          - spell: hold-monster
+            level: null
+            per_day: null
+            note: ""
     - name: Cold Gale
       text: _Dexterity Saving Throw:_ DC 19, each creature in a 60-foot-long, 10-foot-wide Line.
         _Failure:_ 14 (4d6) Cold damage, and the target is pushed up to 30 feet straight away from
@@ -1446,6 +1792,15 @@
         spellcasting ability (spell save DC 14). The dragon can't take this action again until the
         start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -1717,6 +2072,35 @@
         **At Will:** _Acid Arrow_ (level 4 version), _Detect Magic_, _Fear_
 
         **1/Day Each:** _Create Undead_, _Speak with Dead_, _Vitriolic Sphere_ (level 5 version)
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: 13
+        spells:
+          - spell: acid-arrow
+            level: 4
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
+          - spell: create-undead
+            level: null
+            per_day: 1
+            note: ""
+          - spell: speak-with-dead
+            level: null
+            per_day: 1
+            note: ""
+          - spell: vitriolic-sphere
+            level: 5
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Cloud of Insects
       text: _Dexterity Saving Throw:_ DC 21, one creature the dragon can see within 120 feet. _Failure:_
@@ -1738,6 +2122,15 @@
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
         start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: 13
+        spells:
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -1845,15 +2238,62 @@
         **At Will:** _Detect Magic_, _Invisibility_, _Mage Hand_, _Shatter_ (level 3 version)
 
         **1/Day Each:** _Scrying_, _Sending_
+      casts:
+        ability: cha
+        save_dc: 22
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: shatter
+            level: 3
+            per_day: null
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
+          - spell: sending
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Cloaked Flight
       text: The dragon uses Spellcasting to cast _Invisibility_ on itself, and it can fly up to half its
         Fly Speed. The dragon can't take this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 22
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
     - name: Sonic Boom
       text: The dragon uses Spellcasting to cast _Shatter_ (level 3 version). The dragon can't take this
         action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 22
+        attack_bonus: null
+        spells:
+          - spell: shatter
+            level: 3
+            per_day: null
+            note: ""
     - name: Tail Swipe
       text: The dragon makes one Rend attack.
       once_per_round: false
@@ -1979,10 +2419,53 @@
         Animals_
 
         **1/Day Each:** _Control Weather_, _Detect Thoughts_
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: scorching-ray
+            level: 3
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: speak-with-animals
+            level: null
+            per_day: null
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Blazing Light
       text: The dragon uses Spellcasting to cast _Scorching Ray_ (level 3 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: scorching-ray
+            level: 3
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -2121,10 +2604,61 @@
         Temporary Hit Points required to maintain the spell), _Speak with Animals_, _Thaumaturgy_
 
         **1/Day Each:** _Detect Thoughts_, _Control Water_, _Scrying_, _Water Breathing_
+      casts:
+        ability: cha
+        save_dc: 22
+        attack_bonus: 14
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: speak-with-animals
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: 1
+            note: ""
+          - spell: control-water
+            level: null
+            per_day: 1
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
+          - spell: water-breathing
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 22
+        attack_bonus: 14
+        spells:
+          - spell: guiding-bolt
+            level: 2
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -2255,6 +2789,40 @@
         Concentration or Temporary Hit Points required to maintain the spell)
 
         **1/Day Each:** _Greater Restoration, Major Image, Project Image_
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: mind-spike
+            level: 5
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: greater-restoration
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
+          - spell: project-image
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Giggling Magic
       text: _Charisma Saving Throw:_ DC 21, one creature the dragon can see within 120 feet. _Failure:_ 31
@@ -2276,6 +2844,15 @@
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 5 version). The dragon can't take
         this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: null
+        spells:
+          - spell: mind-spike
+            level: 5
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -2389,6 +2966,36 @@
         Temporary Hit Points required to maintain the spell)
 
         **1/Day Each:** _Flame Strike_ (level 6 version), _Word of Recall_, _Zone of Truth_
+      casts:
+        ability: cha
+        save_dc: 24
+        attack_bonus: 16
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: guiding-bolt
+            level: 4
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: flame-strike
+            level: 6
+            per_day: 1
+            note: ""
+          - spell: word-of-recall
+            level: null
+            per_day: 1
+            note: ""
+          - spell: zone-of-truth
+            level: null
+            per_day: 1
+            note: ""
     - name: Weakening Breath
       text: _Strength Saving Throw:_ DC 24, each creature that isn't currently affected by this breath in
         a 90-foot Cone. _Failure:_ The target has Disadvantage on Strength-based D20 Tests and
@@ -2416,6 +3023,15 @@
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 4 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 24
+        attack_bonus: 16
+        spells:
+          - spell: guiding-bolt
+            level: 4
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -2528,10 +3144,40 @@
         **At Will:** _Detect Magic_, _Mind Spike_ (level 5 version)
 
         **1/Day Each:** _Geas_, _Modify Memory_
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: mind-spike
+            level: 5
+            per_day: null
+            note: ""
+          - spell: geas
+            level: null
+            per_day: 1
+            note: ""
+          - spell: modify-memory
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Mind Invasion
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 5 version).
       once_per_round: false
+      casts:
+        ability: cha
+        save_dc: 21
+        attack_bonus: null
+        spells:
+          - spell: mind-spike
+            level: 5
+            per_day: null
+            note: ""
     - name: Noxious Miasma
       text: _Constitution Saving Throw:_ DC 21, each creature in a 30-foot-radius Sphere centered on a
         point the dragon can see within 90 feet. _Failure:_ 17 (5d6) Poison damage, and the target
@@ -2655,15 +3301,58 @@
         **At Will:** _Command_ (level 2 version), _Detect Magic_, _Scorching Ray_ (level 3 version)
 
         **1/Day Each:** _Fireball_ (level 6 version), _Scrying_
+      casts:
+        ability: cha
+        save_dc: 23
+        attack_bonus: 15
+        spells:
+          - spell: command
+            level: 2
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: scorching-ray
+            level: 3
+            per_day: null
+            note: ""
+          - spell: fireball
+            level: 6
+            per_day: 1
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Commanding Presence
       text: The dragon uses Spellcasting to cast _Command_ (level 2 version). The dragon can't take this
         action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 23
+        attack_bonus: 15
+        spells:
+          - spell: command
+            level: 2
+            per_day: null
+            note: ""
     - name: Fiery Rays
       text: The dragon uses Spellcasting to cast _Scorching Ray_ (level 3 version). The dragon can't take
         this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 23
+        attack_bonus: 15
+        spells:
+          - spell: scorching-ray
+            level: 3
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -2787,11 +3476,58 @@
 
         **1/Day Each:** _Control Weather_, _Ice Storm_ (level 7 version), _Teleport_, _Zone of
         Truth_
+      casts:
+        ability: cha
+        save_dc: 23
+        attack_bonus: 15
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: hold-monster
+            level: null
+            per_day: null
+            note: ""
+          - spell: ice-knife
+            level: 2
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
+          - spell: ice-storm
+            level: 7
+            per_day: 1
+            note: ""
+          - spell: teleport
+            level: null
+            per_day: 1
+            note: ""
+          - spell: zone-of-truth
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Chill
       text: The dragon uses Spellcasting to cast _Hold Monster_. The dragon can't take this action again
         until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 23
+        attack_bonus: 15
+        spells:
+          - spell: hold-monster
+            level: null
+            per_day: null
+            note: ""
     - name: Cold Gale
       text: _Dexterity Saving Throw:_ DC 23, each creature in a 60-foot-long, 10-foot-wide Line.
         _Failure:_ 14 (4d6) Cold damage, and the target is pushed up to 30 feet straight away from
@@ -2932,6 +3668,15 @@
         spellcasting ability (spell save DC 18). The dragon can't take this action again until the
         start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
       once_per_round: false
@@ -3496,13 +4241,98 @@
 
         **1/Day Each:** _Cone of Cold_ (level 9 version), _Mind Blank_ (cast before combat),
         _Scrying_, _Teleport_
+      casts:
+        ability: int
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: null
+            note: ""
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: ""
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-armor
+            level: null
+            per_day: null
+            note: included in AC
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: prestidigitation
+            level: null
+            per_day: null
+            note: ""
+          - spell: fly
+            level: null
+            per_day: 2
+            note: ""
+          - spell: lightning-bolt
+            level: 7
+            per_day: 2
+            note: ""
+          - spell: cone-of-cold
+            level: 9
+            per_day: 1
+            note: ""
+          - spell: mind-blank
+            level: null
+            per_day: 1
+            note: cast before combat
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
+          - spell: teleport
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Misty Step (3/Day)
       text: The mage casts _Misty Step_, using the same spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: int
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: misty-step
+            level: null
+            per_day: null
+            note: ""
   reactions:
     - name: Protective Magic (3/Day)
       text: The archmage casts _Counterspell_ or _Shield_ in response to the spell's trigger, using the
         same spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: int
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: counterspell
+            level: null
+            per_day: null
+            note: ""
+          - spell: shield
+            level: null
+            per_day: null
+            note: ""
 - id: assassin
   name: Assassin
   group: null
@@ -6526,6 +7356,35 @@
         **At Will:** _Detect Magic_, _Fog Cloud_, _Light_
 
         **1/Day Each:** _Control Weather_, _Gaseous Form_, _Telekinesis_
+      casts:
+        ability: cha
+        save_dc: 15
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: fog-cloud
+            level: null
+            per_day: null
+            note: ""
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
+          - spell: gaseous-form
+            level: null
+            per_day: 1
+            note: ""
+          - spell: telekinesis
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Misty Step
       text: The giant casts the _Misty Step_ spell, using the same spellcasting ability as Spellcasting.
@@ -6888,10 +7747,70 @@
         Temporary Hit Points required to maintain the spell)
 
         **1/Day Each:** _Create Food and Water_, _Dream_, _Greater Restoration_, _Scrying_, _Sleep_
+      casts:
+        ability: wis
+        save_dc: 15
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: create-food-and-water
+            level: null
+            per_day: 1
+            note: ""
+          - spell: dream
+            level: null
+            per_day: 1
+            note: ""
+          - spell: greater-restoration
+            level: null
+            per_day: 1
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
+          - spell: sleep
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Divine Aid (2/Day)
       text: The couatl casts _Bless_, _Lesser Restoration_, or _Sanctuary_, requiring no spell components
         and using the same spellcasting ability as Spellcasting.
+      per_day: 2
+      casts:
+        ability: wis
+        save_dc: 15
+        attack_bonus: null
+        spells:
+          - spell: bless
+            level: null
+            per_day: null
+            note: ""
+          - spell: lesser-restoration
+            level: null
+            per_day: null
+            note: ""
+          - spell: sanctuary
+            level: null
+            per_day: null
+            note: ""
 - id: crab
   name: Crab
   group: null
@@ -7145,10 +8064,32 @@
         **2/Day:** _Command_
 
         **1/Day:** _Hold Person_
+      casts:
+        ability: wis
+        save_dc: 12
+        attack_bonus: 4
+        spells:
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: command
+            level: null
+            per_day: 2
+            note: ""
+          - spell: hold-person
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Spiritual Weapon (2/Day)
       text: The cultist casts the _Spiritual Weapon_ spell, using the same spellcasting ability as
         Spellcasting.
+      per_day: 2
 - id: darkmantle
   name: Darkmantle
   group: null
@@ -7221,6 +8162,7 @@
       text: Magical Darkness fills a 15-foot Emanation originating from the darkmantle. This effect lasts
         while the darkmantle maintains Concentration on it, up to 10 minutes. Darkvision can't
         penetrate this area, and no light can illuminate it.
+      per_day: 1
 - id: death-dog
   name: Death Dog
   group: null
@@ -7434,10 +8376,50 @@
         required to maintain the spell)
 
         **1/Day Each:** _Commune_, _Raise Dead_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: shapechange
+            level: null
+            per_day: null
+            note: Beast or Humanoid form only, no Temporary Hit Points gained from the spell, and no
+              Concentration or Temporary Hit Points required to maintain the spell
+          - spell: commune
+            level: null
+            per_day: 1
+            note: ""
+          - spell: raise-dead
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Divine Aid (2/Day)
       text: The deva casts _Cure Wounds_, _Lesser Restoration_, or _Remove Curse_, using the same
         spellcasting ability as Spellcasting.
+      per_day: 2
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: cure-wounds
+            level: null
+            per_day: null
+            note: ""
+          - spell: lesser-restoration
+            level: null
+            per_day: null
+            note: ""
+          - spell: remove-curse
+            level: null
+            per_day: null
+            note: ""
 - id: dire-wolf
   name: Dire Wolf
   group: null
@@ -7622,6 +8604,51 @@
         Walk_
 
         **1/Day Each:** _Creation, Gaseous Form, Invisibility, Major Image, Plane Shift_
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: create-food-and-water
+            level: null
+            per_day: 2
+            note: can create wine instead of water
+          - spell: tongues
+            level: null
+            per_day: 2
+            note: ""
+          - spell: wind-walk
+            level: null
+            per_day: 2
+            note: ""
+          - spell: creation
+            level: null
+            per_day: 1
+            note: ""
+          - spell: gaseous-form
+            level: null
+            per_day: 1
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 1
+            note: ""
 - id: doppelganger
   name: Doppelganger
   group: null
@@ -7686,6 +8713,15 @@
     - name: Read Thoughts
       text: The doppelganger casts _Detect Thoughts_, requiring no spell components and using Charisma as
         the spellcasting ability (spell save DC 12).
+      casts:
+        ability: cha
+        save_dc: 12
+        attack_bonus: null
+        spells:
+          - spell: detect-thoughts
+            level: null
+            per_day: null
+            note: ""
     - name: Unsettling Visage
       text: _Wisdom Saving Throw:_ DC 12, each creature in a 15-foot Emanation originating from the
         doppelganger that can see the doppelganger. _Failure:_ The target has the Frightened
@@ -7924,6 +8960,7 @@
         on_success: none
         conditions:
           - poisoned
+      per_day: 1
 - id: drider
   name: Drider
   group: null
@@ -8010,6 +9047,23 @@
       text: The drider casts _Darkness_, _Faerie Fire_, or _Web_, requiring no Material components and
         using Wisdom as the spellcasting ability (spell save DC 14).
       recharge: 5–6
+      casts:
+        ability: wis
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: darkness
+            level: null
+            per_day: null
+            note: ""
+          - spell: faerie-fire
+            level: null
+            per_day: null
+            note: ""
+          - spell: web
+            level: null
+            per_day: null
+            note: ""
 - id: druid
   name: Druid
   group: null
@@ -8097,6 +9151,39 @@
         **2/Day Each:** _Entangle, Thunderwave_
 
         **1/Day Each:** _Animal Messenger, Long-strider, Moonbeam_
+      casts:
+        ability: wis
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: druidcraft
+            level: null
+            per_day: null
+            note: ""
+          - spell: speak-with-animals
+            level: null
+            per_day: null
+            note: ""
+          - spell: entangle
+            level: null
+            per_day: 2
+            note: ""
+          - spell: thunderwave
+            level: null
+            per_day: 2
+            note: ""
+          - spell: animal-messenger
+            level: null
+            per_day: 1
+            note: ""
+          - spell: longstrider
+            level: null
+            per_day: 1
+            note: ""
+          - spell: moonbeam
+            level: null
+            per_day: 1
+            note: ""
 - id: dryad
   name: Dryad
   group: null
@@ -8183,6 +9270,31 @@
         casts the spell again), _Druidcraft_
 
         **1/Day Each:** _Entangle, Pass without Trace_
+      casts:
+        ability: cha
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: animal-friendship
+            level: null
+            per_day: null
+            note: ""
+          - spell: charm-monster
+            level: null
+            per_day: null
+            note: lasts 24 hours; ends early if the dryad casts the spell again
+          - spell: druidcraft
+            level: null
+            per_day: null
+            note: ""
+          - spell: entangle
+            level: null
+            per_day: 1
+            note: ""
+          - spell: pass-without-trace
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Tree Stride
       text: If within 5 feet of a Large or bigger tree, the dryad teleports to an unoccupied space within
@@ -8277,6 +9389,7 @@
     - name: Sleep (1/Day)
       text: The mephit casts the _Sleep_ spell, requiring no spell components and using Charisma as the
         spellcasting ability (spell save DC 10).
+      per_day: 1
 - id: eagle
   name: Eagle
   group: null
@@ -8515,6 +9628,43 @@
 
         **1/Day Each:** _Gaseous Form, Invisibility, Major Image, Plane Shift, Tongues, Wall of
         Fire_ (level 7 version)
+      casts:
+        ability: cha
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: elementalism
+            level: null
+            per_day: null
+            note: ""
+          - spell: gaseous-form
+            level: null
+            per_day: 1
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 1
+            note: ""
+          - spell: tongues
+            level: null
+            per_day: 1
+            note: ""
+          - spell: wall-of-fire
+            level: 7
+            per_day: 1
+            note: ""
 - id: elephant
   name: Elephant
   group: null
@@ -10760,6 +11910,7 @@
     - name: Rampage (1/Day)
       text: Immediately after dealing damage to a creature that was already Bloodied, the hyena can move
         up to half its Speed, and it makes one Bite attack.
+      per_day: 1
 - id: giant-lizard
   name: Giant Lizard
   group: null
@@ -10887,6 +12038,7 @@
         that fills a 10-foot Cube centered on itself, and the octopus moves up to its Swim Speed.
         The Cube is Heavily Obscured for 1 minute or until a strong current or similar effect
         disperses the ink.
+      per_day: 1
 - id: giant-owl
   name: Giant Owl
   group: null
@@ -10957,6 +12109,23 @@
         **At Will:** _Detect Evil and Good_, _Detect Magic_
 
         **1/Day:** _Clairvoyance_
+      casts:
+        ability: wis
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: clairvoyance
+            level: null
+            per_day: 1
+            note: ""
 - id: giant-rat
   name: Giant Rat
   group: null
@@ -11874,6 +13043,35 @@
         **At Will:** _Darkness, Detect Magic, Dispel Magic_
 
         **1/Day Each:** _Confusion, Fly, Power Word Stun_
+      casts:
+        ability: int
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: darkness
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: dispel-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: confusion
+            level: null
+            per_day: 1
+            note: ""
+          - spell: fly
+            level: null
+            per_day: 1
+            note: ""
+          - spell: power-word-stun
+            level: null
+            per_day: 1
+            note: ""
 - id: gladiator
   name: Gladiator
   group: null
@@ -12022,6 +13220,7 @@
     - name: Rampage (1/Day)
       text: Immediately after dealing damage to a creature that is already Bloodied, the gnoll moves up to
         half its Speed, and it makes one Rend attack.
+      per_day: 1
 - id: goat
   name: Goat
   group: null
@@ -12715,6 +13914,31 @@
         **At Will:** _Dancing Lights_, _Disguise Self_ (24-hour duration), _Invisibility_ (self
         only, and the hag leaves no tracks while Invisible), _Minor Illusion_, _Ray of Sickness_
         (level 3 version)
+      casts:
+        ability: wis
+        save_dc: 12
+        attack_bonus: 4
+        spells:
+          - spell: dancing-lights
+            level: null
+            per_day: null
+            note: ""
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: 24-hour duration
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only, and the hag leaves no tracks while Invisible
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: ray-of-sickness
+            level: 3
+            per_day: null
+            note: ""
 - id: grick
   name: Grick
   group: null
@@ -13140,6 +14364,35 @@
 
         **1/Day Each:** _Clairvoyance_, _Cure Wounds_ (level 6 version), _Flame Strike_ (level 6
         version), _Geas_, _True Seeing_
+      casts:
+        ability: wis
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: clairvoyance
+            level: null
+            per_day: 1
+            note: ""
+          - spell: cure-wounds
+            level: 6
+            per_day: 1
+            note: ""
+          - spell: flame-strike
+            level: 6
+            per_day: 1
+            note: ""
+          - spell: geas
+            level: null
+            per_day: 1
+            note: ""
+          - spell: true-seeing
+            level: null
+            per_day: 1
+            note: ""
 - id: half-dragon
   name: Half-Dragon
   group: null
@@ -14335,6 +15588,15 @@
       text: The devil casts _Wall of Ice_ (level 8 version), requiring no spell components and using
         Intelligence as the spellcasting ability (spell save DC 17).
       recharge: "6"
+      casts:
+        ability: int
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: wall-of-ice
+            level: 8
+            per_day: null
+            note: ""
 - id: ice-mephit
   name: Ice Mephit
   group: Mephits
@@ -14420,6 +15682,16 @@
     - name: Fog Cloud (1/Day)
       text: The mephit casts _Fog Cloud_, requiring no spell components and using Charisma as the
         spellcasting ability.
+      per_day: 1
+      casts:
+        ability: cha
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: fog-cloud
+            level: null
+            per_day: null
+            note: ""
     - name: Frost Breath
       text: _Constitution Saving Throw:_ DC 10, each creature in a 15-foot Cone. _Failure:_ 7 (3d4) Cold
         damage. _Success:_ Half damage.
@@ -14507,6 +15779,15 @@
     - name: Invisibility
       text: The imp casts _Invisibility_ on itself, requiring no spell components and using Charisma as
         the spell-casting ability.
+      casts:
+        ability: cha
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
     - name: Shape-Shift
       text: The imp shape-shifts to resemble a rat (Speed 20 ft.), a raven (20 ft., Fly 60 ft.), or a
         spider (20 ft., Climb 20 ft.), or it returns to its true form. Its game statistics are the
@@ -14593,6 +15874,27 @@
         **At Will:** _Disguise Self, Etherealness_
 
         **1/Day Each:** _Dream, Hypnotic Pattern_
+      casts:
+        ability: cha
+        save_dc: 15
+        attack_bonus: null
+        spells:
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: ""
+          - spell: etherealness
+            level: null
+            per_day: null
+            note: ""
+          - spell: dream
+            level: null
+            per_day: 1
+            note: ""
+          - spell: hypnotic-pattern
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Nightmare
       text: _Wisdom Saving Throw:_ DC 15, one creature the incubus can see within 60 feet. _Failure:_ If
@@ -15303,6 +16605,31 @@
         **At Will:** _Disguise Self_ (can appear as a Large or Medium biped), _Minor Illusion_
 
         **1/Day Each:** _Geas_, _Major Image_, _Scrying_
+      casts:
+        ability: cha
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: can appear as a Large or Medium biped
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: geas
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Leap
       text: The lamia jumps up to 30 feet by spending 10 feet of movement.
@@ -15472,10 +16799,88 @@
         **2/Day Each:** _Animate Dead, Dimension Door, Plane Shift_
 
         **1/Day Each:** _Chain Lightning, Finger of Death, Power Word Kill, Scrying_
+      casts:
+        ability: int
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: null
+            note: ""
+          - spell: dispel-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: fireball
+            level: 5
+            per_day: null
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: ""
+          - spell: lightning-bolt
+            level: 5
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: prestidigitation
+            level: null
+            per_day: null
+            note: ""
+          - spell: animate-dead
+            level: null
+            per_day: 2
+            note: ""
+          - spell: dimension-door
+            level: null
+            per_day: 2
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 2
+            note: ""
+          - spell: chain-lightning
+            level: null
+            per_day: 1
+            note: ""
+          - spell: finger-of-death
+            level: null
+            per_day: 1
+            note: ""
+          - spell: power-word-kill
+            level: null
+            per_day: 1
+            note: ""
+          - spell: scrying
+            level: null
+            per_day: 1
+            note: ""
   reactions:
     - name: Protective Magic
       text: The lich casts _Counterspell_ or _Shield_ in response to the spell's trigger, using the same
         spellcasting ability as Spellcasting.
+      casts:
+        ability: int
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: counterspell
+            level: null
+            per_day: null
+            note: ""
+          - spell: shield
+            level: null
+            per_day: null
+            note: ""
   legendary_actions:
     - name: Deathly Teleport
       text: The lich teleports up to 60 feet to an unoccupied space it can see, and each creature within
@@ -15501,6 +16906,15 @@
       text: The lich casts _Fear_, using the same spellcasting ability as Spellcasting. The lich can't
         take this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: int
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: fear
+            level: null
+            per_day: null
+            note: ""
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the lich can expend a use to take one of the following actions. The lich regains all expended
     uses at the start of each of its turns."
@@ -15717,13 +17131,78 @@
         **2/Day Each:** _Fireball_ (level 4 version), _Invisibility_
 
         **1/Day Each:** _Cone of Cold_, _Fly_
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-armor
+            level: null
+            per_day: null
+            note: included in AC
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: prestidigitation
+            level: null
+            per_day: null
+            note: ""
+          - spell: fireball
+            level: 4
+            per_day: 2
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: 2
+            note: ""
+          - spell: cone-of-cold
+            level: null
+            per_day: 1
+            note: ""
+          - spell: fly
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Misty Step (3/Day)
       text: The mage casts _Misty Step_, using the same spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: misty-step
+            level: null
+            per_day: null
+            note: ""
   reactions:
     - name: Protective Magic (3/Day)
       text: The mage casts _Counterspell_ or _Shield_ in response to the spell's trigger, using the same
         spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: counterspell
+            level: null
+            per_day: null
+            note: ""
+          - spell: shield
+            level: null
+            per_day: null
+            note: ""
 - id: magma-mephit
   name: Magma Mephit
   group: Mephits
@@ -16954,6 +18433,31 @@
         **At Will:** _Dispel Magic_, _Thaumaturgy_
 
         **1/Day Each:** _Animate Dead_, _Harm_, _Insect Plague_ (level 7 version)
+      casts:
+        ability: wis
+        save_dc: 17
+        attack_bonus: 9
+        spells:
+          - spell: dispel-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: animate-dead
+            level: null
+            per_day: 1
+            note: ""
+          - spell: harm
+            level: null
+            per_day: 1
+            note: ""
+          - spell: insect-plague
+            level: 7
+            per_day: 1
+            note: ""
   reactions:
     - name: Whirlwind of Sand
       text: _Trigger:_ The mummy is hit by an attack roll. _Response:_ The mummy adds 2 to its AC against
@@ -16965,6 +18469,15 @@
       text: The mummy casts _Command_ (level 2 version), using the same spellcasting ability as
         Spellcasting. The mummy can't take this action again until the start of its next turn.
       once_per_round: true
+      casts:
+        ability: wis
+        save_dc: 17
+        attack_bonus: 9
+        spells:
+          - spell: command
+            level: 2
+            per_day: null
+            note: ""
     - name: Glare
       text: The mummy uses Dreadful Glare. The mummy can't take this action again until the start of its
         next turn.
@@ -17180,6 +18693,16 @@
         If the target takes damage from the _Dream_ spell, the target's Hit Point maximum decreases
         by an amount equal to that damage. If the spell kills the target, its soul is trapped in the
         hag's soul bag, and the target can't be raised from the dead until its soul is released.
+      per_day: 1
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: dream
+            level: null
+            per_day: null
+            note: ""
     - name: Spellcasting
       text: >-
         The hag casts one of the following spells, requiring no Material components and using
@@ -17188,6 +18711,31 @@
         **At Will:** _Detect Magic_, _Etherealness_, _Magic Missile_ (level 4 version)
 
         **2/Day Each:** _Phantasmal Killer_, _Plane Shift_ (self only)
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: etherealness
+            level: null
+            per_day: null
+            note: ""
+          - spell: magic-missile
+            level: 4
+            per_day: null
+            note: ""
+          - spell: phantasmal-killer
+            level: null
+            per_day: 2
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 2
+            note: self only
   bonus_actions:
     - name: Shape-Shift
       text: The hag shape-shifts into a Small or Medium Humanoid, or it returns to its true form. Other
@@ -17471,6 +19019,7 @@
         The octopus releases ink that fills a 5-foot Cube centered on itself, and the octopus moves
         up to its Swim Speed. The Cube is Heavily Obscured for 1 minute or until a strong current or
         similar effect disperses the ink.
+      per_day: 1
 - id: ogre
   name: Ogre
   group: null
@@ -17695,10 +19244,40 @@
         Charisma as the spellcasting ability (spell save DC 13):
 
         **1/Day Each:** _Charm Person_ (level 2 version), _Darkness_, _Gaseous Form_, _Sleep_
+      casts:
+        ability: cha
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: charm-person
+            level: 2
+            per_day: 1
+            note: ""
+          - spell: darkness
+            level: null
+            per_day: 1
+            note: ""
+          - spell: gaseous-form
+            level: null
+            per_day: 1
+            note: ""
+          - spell: sleep
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Invisibility
       text: The oni casts _Invisibility_ on itself, requiring no spell components and using the same
         spellcasting ability as Spellcasting.
+      casts:
+        ability: cha
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
 - id: otyugh
   name: Otyugh
   group: null
@@ -18547,10 +20126,57 @@
         **At Will:** _Detect Evil and Good_
 
         **1/Day Each:** _Commune_, _Control Weather_, _Dispel Evil and Good_, _Raise Dead_
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: commune
+            level: null
+            per_day: 1
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
+          - spell: dispel-evil-and-good
+            level: null
+            per_day: 1
+            note: ""
+          - spell: raise-dead
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Divine Aid (2/Day)
       text: The planetar casts _Cure Wounds_, _Invisibility_, _Lesser Restoration_, or _Remove Curse_,
         using the same spellcasting ability as Spellcasting.
+      per_day: 2
+      casts:
+        ability: cha
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: cure-wounds
+            level: null
+            per_day: null
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: ""
+          - spell: lesser-restoration
+            level: null
+            per_day: null
+            note: ""
+          - spell: remove-curse
+            level: null
+            per_day: null
+            note: ""
 - id: plesiosaurus
   name: Plesiosaurus
   group: null
@@ -18811,10 +20437,49 @@
         **At Will:** _Light, Thaumaturgy_
 
         **1/Day:** _Spirit Guardians_
+      casts:
+        ability: wis
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: spirit-guardians
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Divine Aid (3/Day)
       text: The priest casts _Bless, Dispel Magic, Healing Word,_ or _Lesser Restoration,_ using the same
         spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: wis
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: bless
+            level: null
+            per_day: null
+            note: ""
+          - spell: dispel-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: healing-word
+            level: null
+            per_day: null
+            note: ""
+          - spell: lesser-restoration
+            level: null
+            per_day: null
+            note: ""
 - id: priest-acolyte
   name: Priest Acolyte
   group: Priests
@@ -18892,10 +20557,41 @@
       text: |-
         The priest casts one of the following spells, using Wisdom as the spellcasting ability:
         **At Will:** _Light, Thaumaturgy_
+      casts:
+        ability: wis
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
   bonus_actions:
     - name: Divine Aid (1/Day)
       text: The priest casts _Bless, Healing Word,_ or _Sanctuary,_ using the same spellcasting ability as
         Spellcasting.
+      per_day: 1
+      casts:
+        ability: wis
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: bless
+            level: null
+            per_day: null
+            note: ""
+          - spell: healing-word
+            level: null
+            per_day: null
+            note: ""
+          - spell: sanctuary
+            level: null
+            per_day: null
+            note: ""
 - id: pseudodragon
   name: Pseudodragon
   group: null
@@ -19197,6 +20893,15 @@
     - name: Invisibility
       text: The quasit casts _Invisibility_ on itself, requiring no spell components and using Charisma as
         the spellcasting ability.
+      casts:
+        ability: cha
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
     - name: Scare (1/Day)
       text: _Wisdom Saving Throw:_ DC 10, one creature within 20 feet. _Failure:_ The target has the
         Frightened condition. At the end of each of its turns, the target repeats the save, ending
@@ -19208,6 +20913,7 @@
         on_success: none
         conditions:
           - frightened
+      per_day: 1
     - name: Shape-Shift
       text: The quasit shape-shifts to resemble a bat (Speed 10 ft., Fly 40 ft.), a centipede (40 ft.,
         Climb 40 ft.), or a toad (40 ft., Swim 40 ft.), or it returns to its true form. Its game
@@ -19315,6 +21021,47 @@
         **At Will:** _Detect Magic, Detect Thoughts, Disguise Self, Mage Hand, Minor Illusion_
 
         **1/Day Each:** _Fly, Invisibility, Major Image, Plane Shift_
+      casts:
+        ability: cha
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: null
+            note: ""
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: fly
+            level: null
+            per_day: 1
+            note: ""
+          - spell: invisibility
+            level: null
+            per_day: 1
+            note: ""
+          - spell: major-image
+            level: null
+            per_day: 1
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 1
+            note: ""
 - id: rat
   name: Rat
   group: null
@@ -20524,6 +22271,15 @@
     - name: Illusory Appearance
       text: The hag casts _Disguise Self_, using Constitution as the spellcasting ability (spell save DC
         13). The spell's duration is 24 hours.
+      casts:
+        ability: con
+        save_dc: 13
+        attack_bonus: null
+        spells:
+          - spell: disguise-self
+            level: null
+            per_day: null
+            note: ""
 - id: seahorse
   name: Seahorse
   group: null
@@ -21140,10 +22896,53 @@
         **At Will:** _Detect Evil and Good_
 
         **1/Day Each:** _Commune, Control Weather, Dispel Evil and Good, Resurrection_
+      casts:
+        ability: cha
+        save_dc: 25
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: commune
+            level: null
+            per_day: 1
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
+          - spell: dispel-evil-and-good
+            level: null
+            per_day: 1
+            note: ""
+          - spell: resurrection
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Divine Aid (3/Day)
       text: The solar casts _Cure Wounds_ (level 2 version), _Lesser Restoration_, or _Remove Curse_,
         using the same spellcasting ability as Spellcasting.
+      per_day: 3
+      casts:
+        ability: cha
+        save_dc: 25
+        attack_bonus: null
+        spells:
+          - spell: cure-wounds
+            level: 2
+            per_day: null
+            note: ""
+          - spell: lesser-restoration
+            level: null
+            per_day: null
+            note: ""
+          - spell: remove-curse
+            level: null
+            per_day: null
+            note: ""
   legendary_actions:
     - name: Blinding Gaze
       text: _Constitution Saving Throw:_ DC 25, one creature the solar can see within 120 feet. _Failure:_
@@ -21360,6 +23159,55 @@
 
         **1/Day Each:** _Dispel Magic_, _Legend Lore_, _Locate Object_, _Plane Shift_, _Remove
         Curse_, _Tongues_
+      casts:
+        ability: int
+        save_dc: 16
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: identify
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: prestidigitation
+            level: null
+            per_day: null
+            note: ""
+          - spell: dispel-magic
+            level: null
+            per_day: 1
+            note: ""
+          - spell: legend-lore
+            level: null
+            per_day: 1
+            note: ""
+          - spell: locate-object
+            level: null
+            per_day: 1
+            note: ""
+          - spell: plane-shift
+            level: null
+            per_day: 1
+            note: ""
+          - spell: remove-curse
+            level: null
+            per_day: 1
+            note: ""
+          - spell: tongues
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Arcane Prowl
       text: The sphinx can teleport up to 30 feet to an unoccupied space it can see, and it makes one Claw
@@ -21457,6 +23305,7 @@
     - name: Roar (3/Day)
       text: "The sphinx emits a magical roar. Whenever it roars, the roar has a different effect, as
         detailed below (the sequence resets when it takes a Long Rest):"
+      per_day: 3
     - name: First Roar
       text: _Wisdom Saving Throw:_ DC 20, each enemy in a 500-foot Emanation originating from the sphinx.
         _Failure:_ The target has the Frightened condition for 1 minute.
@@ -21503,6 +23352,39 @@
 
         **1/Day Each:** _Detect Magic_, _Dispel Magic_, _Greater Restoration_, _Heroes' Feast_,
         _Zone of Truth_
+      casts:
+        ability: wis
+        save_dc: 20
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: thaumaturgy
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-magic
+            level: null
+            per_day: 1
+            note: ""
+          - spell: dispel-magic
+            level: null
+            per_day: 1
+            note: ""
+          - spell: greater-restoration
+            level: null
+            per_day: 1
+            note: ""
+          - spell: heroes-feast
+            level: null
+            per_day: 1
+            note: ""
+          - spell: zone-of-truth
+            level: null
+            per_day: 1
+            note: ""
   legendary_actions:
     - name: Arcane Prowl
       text: The sphinx can teleport up to 30 feet to an unoccupied space it can see, and it makes one Claw
@@ -21598,6 +23480,7 @@
     - name: Burst of Ingenuity (2/Day)
       text: _Trigger:_ The sphinx or another creature within 30 feet makes an ability check or a saving
         throw. _Response:_ The sphinx adds 2 to the roll.
+      per_day: 2
 - id: spider
   name: Spider
   group: null
@@ -21755,6 +23638,43 @@
 
         **2/Day Each:** _Detect Thoughts_, _Dimension Door_, _Hold Person_ (level 3 version),
         _Lightning Bolt_ (level 4 version)
+      casts:
+        ability: int
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: mage-hand
+            level: null
+            per_day: null
+            note: ""
+          - spell: minor-illusion
+            level: null
+            per_day: null
+            note: ""
+          - spell: water-breathing
+            level: null
+            per_day: null
+            note: ""
+          - spell: detect-thoughts
+            level: null
+            per_day: 2
+            note: ""
+          - spell: dimension-door
+            level: null
+            per_day: 2
+            note: ""
+          - spell: hold-person
+            level: 3
+            per_day: 2
+            note: ""
+          - spell: lightning-bolt
+            level: 4
+            per_day: 2
+            note: ""
 - id: sprite
   name: Sprite
   group: null
@@ -21832,6 +23752,15 @@
     - name: Invisibility
       text: The sprite casts _Invisibility_ on itself, requiring no spell components and using Charisma as
         the spellcasting ability.
+      casts:
+        ability: cha
+        save_dc: null
+        attack_bonus: null
+        spells:
+          - spell: invisibility
+            level: null
+            per_day: null
+            note: self only
 - id: spy
   name: Spy
   group: null
@@ -22370,6 +24299,23 @@
         **At Will:** Detect Magic, Light
 
         **1/Day:** Control Weather
+      casts:
+        ability: wis
+        save_dc: 18
+        attack_bonus: null
+        spells:
+          - spell: detect-magic
+            level: null
+            per_day: null
+            note: ""
+          - spell: light
+            level: null
+            per_day: null
+            note: ""
+          - spell: control-weather
+            level: null
+            per_day: 1
+            note: ""
 - id: succubus
   name: Succubus
   group: null
@@ -23448,6 +25394,7 @@
         same Initiative count, and it obeys the treant. A tree remains animate for 1 day or until it
         dies, the treant dies, or it is more than 120 feet from the treant. The tree then takes root
         if possible.
+      per_day: 1
 - id: triceratops
   name: Triceratops
   group: null
@@ -23556,6 +25503,7 @@
         troll's limbs is severed, falls into the troll's space, and becomes a **Troll Limb**. The
         limb acts immediately after the troll's turn. The troll has 1 Exhaustion level for each
         missing limb, and it grows replacement limbs the next time it regains Hit Points.
+      per_day: 4
     - name: Regeneration
       text: The troll regains 15 Hit Points at the start of each of its turns. If the troll takes Acid or
         Fire damage, this trait doesn't function on the troll's next turn. The troll dies only if it
@@ -23801,10 +25749,44 @@
 
         **1/Day Each:** _Calm Emotions, Dispel Evil and Good, Entangle, Pass without Trace, Word of
         Recall_
+      casts:
+        ability: cha
+        save_dc: 14
+        attack_bonus: null
+        spells:
+          - spell: detect-evil-and-good
+            level: null
+            per_day: null
+            note: ""
+          - spell: druidcraft
+            level: null
+            per_day: null
+            note: ""
+          - spell: calm-emotions
+            level: null
+            per_day: 1
+            note: ""
+          - spell: dispel-evil-and-good
+            level: null
+            per_day: 1
+            note: ""
+          - spell: entangle
+            level: null
+            per_day: 1
+            note: ""
+          - spell: pass-without-trace
+            level: null
+            per_day: 1
+            note: ""
+          - spell: word-of-recall
+            level: null
+            per_day: 1
+            note: ""
   bonus_actions:
     - name: Unicorn's Blessing (3/Day)
       text: The unicorn touches another creature with its horn and casts _Cure Wounds_ or _Lesser
         Restoration_ on that creature, using the same spellcasting ability as Spellcasting.
+      per_day: 3
   legendary_actions:
     - name: Charging Horn
       text: The unicorn moves up to half its Speed without provoking Opportunity Attacks, and it makes one
@@ -23951,6 +25933,15 @@
         a willing recipient of the vampire's Bite, the damage of which doesn't end the spell. When
         the spell ends, the target is unaware it was Charmed by the vampire.
       recharge: 5–6
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: charm-person
+            level: null
+            per_day: null
+            note: ""
     - name: Shape-Shift
       text: >-
         If the vampire isn't in sunlight or running water, it shape-shifts into a Tiny bat (Speed 5
@@ -23970,6 +25961,15 @@
         spellcasting ability (spell save DC 17). The vampire can't take this action again until the
         start of its next turn.
       once_per_round: true
+      casts:
+        ability: cha
+        save_dc: 17
+        attack_bonus: null
+        spells:
+          - spell: command
+            level: null
+            per_day: null
+            note: ""
     - name: Deathless Strike
       text: The vampire moves up to half its Speed, and it makes one Grave Strike attack.
       once_per_round: false
@@ -24385,6 +26385,7 @@
         on_success: none
         conditions:
           - stunned
+      per_day: 1
 - id: vulture
   name: Vulture
   group: null

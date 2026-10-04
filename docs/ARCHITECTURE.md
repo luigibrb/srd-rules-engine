@@ -379,8 +379,19 @@ action it uses. A combatant's `legendary_actions` list them (their own saving th
 only there, not in `save_actions`), and `legendary_resistance` holds the uses left:
 `rollSavingThrow` turns a failed save into a success while it's above 0, automatic failures
 included, and marks the result (`legendary_resistance`). `MonsterState` gives `in_lair`, the uses
-already spent, and `auto_legendary_resistance: false` to leave the choice to the GM. Monster
-spellcasting and "X/Day" uses are text for now.
+already spent, and `auto_legendary_resistance: false` to leave the choice to the GM.
+
+**Monster spellcasting.** The importer reads every action that casts spells into `casts`
+(ability, save DC, attack bonus, and the spells as catalog ids with a fixed `level` and
+per-spell `per_day`): the Spellcasting action's lists ("At Will", "1/Day Each"), actions that
+cast one of a few spells ("Divine Aid (2/Day)", "Protective Magic"; "using the same
+spellcasting ability as Spellcasting" copies its numbers), and legendary actions that "use
+Spellcasting to cast" one. An action's "(N/Day)" becomes `per_day`. Sentences it can't read
+safely stay text and are listed by `--report` (the Pit Fiend's two Fireballs, the Unicorn's
+touch); a misspelled spell name is corrected in `SPELL_NAME_FIXES`. `monsterSpells(monster)`
+lists them with their limits, and `combatantFromMonster` gives one spellcasting line per casting
+action, named after it, so `castSpell(…, { spellcasting: "Spellcasting" })` resolves a monster's
+spell like a character's.
 
 ### Encounters
 
@@ -408,7 +419,12 @@ list of actions.
   riders are enforced, and each turn, anyone's, resets them), `save_action` (a monster's saving
   throw effect; one with a Recharge is `expended` and rolled for on a d6 at the start of the
   monster's turns) and `cast` (the casting time decides the action, Bonus Action or reaction;
-  the caster must have the spell).
+  the caster must have the spell). A monster casts through the action that lists the spell
+  (`via` when several do): the action's section decides the economy, the spell is cast at its
+  listed level only, and daily uses (`daily_used`, by action and by `<action>#<spell>`) and the
+  action's Recharge are enforced; a spell with a casting time of a minute or more is refused.
+  `legendary` casts a legendary action's spell. A monster's "(N/Day)" attacks and saving throw
+  effects count `daily_used` too.
 - **Standard actions:** `dodge` (until the start of its next turn, attack rolls against it have
   Disadvantage and it has Advantage on Dexterity saves; not while Incapacitated or at Speed 0),
   `disengage` (an `attack` with `opportunity: true` against it is refused this turn), `dash`;
@@ -519,6 +535,14 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   engulfed, stay text; so does damage that depends on something ("if the attack roll had
   Advantage").
 - Who can be targeted (size limits, range) is the caller's to decide.
+- A stat block without a save DC or attack bonus for its spells gets 8 + modifier + Proficiency
+  Bonus as the DC and the DC − 8 as the attack bonus (the Brass Dragon lists Scorching Ray with a
+  save DC only). Most stat blocks that give both follow that relation, not all (the adult Bronze
+  Dragon's +10 with DC 17).
+- A spell's restriction from the stat block (`note`: "self only", "Beast or Humanoid form only…")
+  is shown, not enforced.
+- Daily uses aren't reset by the encounter: a new day is a new encounter document.
+- A Multiattack's "replace one attack with a use of Spellcasting" stays text.
 
 **Conditions and rolls**
 
@@ -563,8 +587,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there are no positions, reach or cover (so "within 5 feet" is given, not measured), monster
-spellcasting is text,
+there are no positions, reach or cover (so "within 5 feet" is given, not measured),
 79 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.

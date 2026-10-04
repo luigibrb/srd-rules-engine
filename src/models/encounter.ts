@@ -47,6 +47,12 @@ export const EncounterCombatantSchema = z.object({
   riders_used: z.array(z.string()).default([]),
   /** Abilities with a Recharge that were used and haven't recharged (`Fire Breath`). */
   expended: z.array(z.string()).default([]),
+  /**
+   * Monsters only: daily uses spent, by action name ("Divine Aid (2/Day)") and by
+   * `<action>#<spell>` for a spell's own uses ("Spellcasting#fireball"). Not reset in the
+   * encounter (no rests).
+   */
+  daily_used: z.record(z.string(), z.int().min(0)).default({}),
   /** Monsters only: what it's concentrating on. */
   concentration: z.string().nullable().default(null),
   /** Toggles (Rage) switched on this turn, and whether one was extended this turn. */
@@ -308,13 +314,16 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
   /**
    * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
    * time says, spends the slot, applies the effects; a Concentration spell's conditions last
-   * while the caster concentrates, up to its duration.
+   * while the caster concentrates, up to its duration. A monster casts it through the action
+   * that lists it (`via` when several do): that action's section decides the economy, its level
+   * is fixed, and daily uses and Recharge are counted.
    */
   z.object({
     type: z.literal("cast"),
     id: z.string(),
     spell: z.string(),
-    targets: z.array(z.string()).default([]),
+    via: z.string().optional(),
+    targets: z.array(z.string()).optional(),
     slot_level: n.min(1).max(9).optional(),
     pact: z.boolean().optional(),
     mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),

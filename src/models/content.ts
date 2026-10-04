@@ -953,6 +953,31 @@ export const MonsterActionSchema = z.strictObject({
   attacks: z.array(z.string()).default([]),
   /** A legendary action that uses another of its actions ("uses Lightning Strike"). */
   uses: z.string().nullable().default(null),
+  /** Uses per day from its name ("Divine Aid (2/Day)"), shared by everything it does. */
+  per_day: z.int().min(1).nullable().default(null),
+  /**
+   * The spells it casts (SRD "Spellcasting"): the Spellcasting action's lists, an action that
+   * casts one of a few spells, or a legendary action that uses Spellcasting.
+   */
+  casts: z
+    .strictObject({
+      ability: z.enum(ABILITIES),
+      save_dc: z.int().nullable(),
+      attack_bonus: z.int().nullable(),
+      spells: z.array(
+        z.strictObject({
+          spell: z.string(),
+          /** "(level 3 version)": always cast at that level; `null`: the spell's level. */
+          level: z.int().min(1).max(9).nullable().default(null),
+          /** "1/Day Each": uses per day of this spell; `null`: at will (or the action's `per_day`). */
+          per_day: z.int().min(1).nullable().default(null),
+          /** A restriction from the stat block ("self only", "Beast or Humanoid form only…"). */
+          note: z.string().default(""),
+        }),
+      ),
+    })
+    .nullable()
+    .default(null),
   attack: z
     .strictObject({
       kind: z.enum(["melee", "ranged", "melee_or_ranged"]),

@@ -22,6 +22,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P10 | Ability checks and skills (`rollAbilityCheck`, the encounter `check` action); Death Saving Throws rolled at the start of a dying character's turn | Automatic death saves can be turned off per encounter |
 | P11 | Standard combat actions: Dodge, Disengage, Help, Grapple and Shove (with escaping and standing up), two-weapon fighting | Help and Dodge live in the encounter (`helps`, `dodging`), not in conditions; Help's Advantage covers weapon attacks, not spell attacks |
 | P12 | Weapon Mastery effects in encounters: Graze, Vex, Sap, Slow, Topple, Push (noted), Cleave, Nick | Applied by default (`mastery: false` skips them); Vex, Sap and Slow are encounter marks with the same turn-based ends as effects |
+| P13 | Monster spellcasting: 97 casting actions as data (spell lists, fixed levels, daily uses), monsters casting in encounters, legendary actions that cast, "X/Day" limits | One schema for every casting action (`casts`); a missing save DC or attack bonus is derived (flagged); a misspelled spell name corrected in the importer |
 
 ## Decisions
 
@@ -54,15 +55,16 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **Positions, reach and cover (L).** Distances, reach and range (normal and long range),
   Half and Three-Quarters Cover, areas of effect choosing their targets. Today the caller decides
   who is in range and in an area, and whether an attack is within 5 feet.
-- **Monster spellcasting (M).** Read the Spellcasting action's spell lists into catalog ids with
-  their DC, attack bonus and uses (at will, 1/Day), so monsters can `cast`.
-- **"X/Day" and other limited monster uses (S).**
 - **Ongoing area effects (L).** Spells and traits that deal damage when a creature enters an area
   or starts its turn there (Moonbeam, Spirit Guardians, Cloud of Daggers, a Remorhaz's swallowed
   creature): an encounter "zone" with triggers. Most of the 79 spells left as text need this.
-- **Legendary actions, what's left (M).** Legendary actions and Legendary Resistance are resolved
-  (P9); still text: legendary actions that cast spells (22, waiting for monster spellcasting) and
-  the movement, teleports or healing that come with some of them.
+- **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
+  Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
+  some of them.
+- **Monster spellcasting, what's left (S).** A Multiattack's "replace one attack with a use of
+  Spellcasting"; spells with a casting time of a minute or more (the Magic action on each turn,
+  with Concentration); the two casting actions left as text (Pit Fiend, Unicorn); restrictions
+  such as "self only".
 - **Smaller flagged items (S each).** Divine Strike only on your own turns; which attacks a
   Multiattack allows; Rage's 10-minute cap; Dash with a Fly or Swim Speed; durations written only
   in a spell's text (Color Spray's blindness "until the end of your next turn").

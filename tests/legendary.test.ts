@@ -149,9 +149,15 @@ describe("legendary actions in an encounter", () => {
     s.act([], next); // the dragon's turn: uses come back
     expect(s.get("adult-red-dragon")?.legendary_used).toBe(0);
     s.act([], next); // Brakka's turn again
-    const rays = { type: "legendary", id: "adult-red-dragon", action: "Fiery Rays" } as const;
-    s.act([], rays);
-    expect(s.notes.at(-1)).toBe("Fiery Rays: its effect is in the stat block's text.");
+    // Fiery Rays uses Spellcasting to cast Scorching Ray: three rays, 2 + 12 misses AC 17.
+    const rays: EncounterAction = {
+      type: "legendary",
+      id: "adult-red-dragon",
+      action: "Fiery Rays",
+      targets: ["brakka"],
+    };
+    s.act([2, 2, 2], rays);
+    expect(s.notes).toContain("Adult Red Dragon casts Scorching Ray.");
     expect(() => s.act([], rays)).toThrow(
       "can't take Fiery Rays again until the start of its next turn",
     );

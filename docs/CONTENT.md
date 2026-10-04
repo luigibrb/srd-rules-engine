@@ -327,7 +327,9 @@ only"), `abilities` and `saving_throws`, `skills`, damage `resistances`/`vulnera
 (how many attacks its Multiattack makes), `legendary_uses` and `legendary_resistance`
 (`{uses: 3, in_lair: 4}`). A legendary action also has `once_per_round`, `attacks` (the actions
 whose attack it makes, one of them) and `uses` (another action it uses). Each action has its
-`text`, a `recharge` (`5–6`), and, when combat can resolve it:
+`text`, a `recharge` (`5–6`), `per_day` ("(2/Day)" in its name), `casts` for an action that
+casts spells (`{ability, save_dc, attack_bonus, spells: [{spell, level, per_day, note}]}`; `level`
+is the "level N version" it's always cast at), and, when combat can resolve it:
 
 ```yaml
 attack: {kind: melee, bonus: 14, reach: 10, range: null,

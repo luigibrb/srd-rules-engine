@@ -33,6 +33,8 @@ import {
   combatantFromMonster,
   type ModeReason,
   makeAttack,
+  monsterSpells,
+  type RollMode,
   resolveMode,
   rollAbilityCheck,
   rollD20,
@@ -528,6 +530,62 @@ export function applyEncounterAction(
     }
     return r;
   };
+  /**
+   * `c` casts a spell at targets (`castSpell`) and the results are applied; a Concentration
+   * spell's conditions become effects for its duration. Economy and limits are the caller's.
+   */
+  const castBy = (
+    c: EncounterCombatant,
+    spell: SpellDef,
+    targetIds: readonly string[],
+    options: { slot_level?: number; pact?: boolean; mode?: RollMode; spellcasting?: string },
+  ): SpellCastResult => {
+    const targets = targetIds.map(find);
+    let r: SpellCastResult;
+    try {
+      r = castSpell(
+        encounterCombatant(e, c.id, ctx),
+        spell,
+        targets.map((t) => encounterCombatant(e, t.id, ctx)),
+        { ...options, rng },
+      );
+    } catch (error) {
+      if (error instanceof RangeError) fail(error.message);
+      throw error;
+    }
+    c.extended = true;
+    const level =
+      r.slot_level !== null && r.slot_level > spell.level ? ` at level ${r.slot_level}` : "";
+    notes.push(`${c.name} casts ${spell.name}${level}.`, ...r.notes);
+    applyTo(c, r.caster_actions);
+    for (const hit of r.targets) {
+      const t = targets[hit.target] as EncounterCombatant;
+      spendLegendaryResistance(t, hit.save);
+      applyTo(t, hit.actions);
+    }
+    // A Concentration spell's conditions last while the caster concentrates, up to its duration.
+    if (spell.concentration) {
+      const rounds = durationRounds(spell);
+      for (const hit of r.targets) {
+        const t = targets[hit.target] as EncounterCombatant;
+        addEffects(t, hit.conditions, {
+          source: c.id,
+          label: spell.name,
+          concentration: true,
+          ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
+        });
+      }
+    }
+    return r;
+  };
+  /** A monster action's daily uses ("(2/Day)"): refused when spent, else counted. */
+  const spendDaily = (c: EncounterCombatant, key: string, perDay: number | null, what: string) => {
+    if (perDay === null) return;
+    const used = c.daily_used[key] ?? 0;
+    if (used >= perDay)
+      fail(`${c.name} has used ${what} ${perDay} time${perDay > 1 ? "s" : ""} today`);
+    c.daily_used[key] = used + 1;
+  };
   /** After every action: Concentration effects whose source stopped concentrating end. */
   const sweep = (): void => {
     const present = (id: string) => e.combatants.some((c) => c.id === id);
@@ -1009,6 +1067,8 @@ export function applyEncounterAction(
         spendAttack(c, reaction);
         if (light && !reaction) c.light_attacks.push(action.attack);
       }
+      if (c.monster !== null)
+        spendDaily(c, action.attack, dailyUses(ctx, c, action.attack), action.attack);
       result = attackOn(c, t, action.attack, action);
       break;
     }
@@ -1021,6 +1081,8 @@ export function applyEncounterAction(
       if (c.used.action) fail(`${c.name} has already used its action this turn`);
       const user = encounterCombatant(e, c.id, ctx);
       const line = user.save_actions.find((a) => a.name === action.ability);
+      if (c.monster !== null)
+        spendDaily(c, action.ability, dailyUses(ctx, c, action.ability), action.ability);
       result = saveEffectOn(c, user, action.ability, action.targets);
       c.used.action = true;
       if (line?.recharge) c.expended.push(action.ability);
@@ -1074,6 +1136,19 @@ export function applyEncounterAction(
         result = attackOn(c, needTarget(), line.uses, action);
       } else if (line.uses && user.save_actions.some((a) => a.name === line.uses)) {
         result = saveEffectOn(c, user, line.uses, action.targets ?? []);
+      } else if (def.legendary_actions.find((a) => a.name === line.name)?.casts) {
+        // "uses Spellcasting to cast Fear": the spell, at its listed level, through this action.
+        const cast = monsterSpells(def).find(
+          (x) => x.section === "legendary_actions" && x.action === line.name,
+        ) as ReturnType<typeof monsterSpells>[number];
+        const spell =
+          lookup(ctx.catalog.spells, cast.spell) ?? fail(`Unknown spell '${cast.spell}'`);
+        const targets = action.targets ?? (action.target ? [action.target] : []);
+        result = castBy(c, spell, targets, {
+          slot_level: spell.level === 0 ? undefined : (cast.level ?? spell.level),
+          mode: action.mode,
+          spellcasting: line.name,
+        });
       } else if (line.save) {
         result = saveEffectOn(
           c,
@@ -1091,51 +1166,70 @@ export function applyEncounterAction(
       canAct(c);
       const spell =
         lookup(ctx.catalog.spells, action.spell) ?? fail(`Unknown spell '${action.spell}'`);
+      let what: "action" | "bonus_action" | "reaction" = "action";
+      let slot_level = action.slot_level;
+      let spellcasting: string | undefined;
+      let line: ReturnType<typeof monsterSpells>[number] | undefined;
       if (c.character !== null) {
         const ref = characterRef(ctx, c);
         const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
         if (!known.some((x) => x.id === spell.id)) fail(`${c.name} can't cast ${spell.name}`);
+        what = castingEconomy(spell);
+      } else {
+        // A monster casts it through an action that lists it (legendary ones: `legendary`).
+        const lines = monsterSpells(monsterDef(ctx, c)).filter(
+          (x) =>
+            x.spell === spell.id &&
+            x.section !== "legendary_actions" &&
+            (action.via === undefined || x.action === action.via),
+        );
+        if (!lines.length) {
+          fail(`${c.name} can't cast ${spell.name}${action.via ? ` with ${action.via}` : ""}`);
+        }
+        if (lines.length > 1) {
+          fail(
+            `${c.name} casts ${spell.name} with ${lines.map((x) => x.action).join(" or ")}: give \`via\``,
+          );
+        }
+        line = lines[0] as (typeof lines)[number];
+        if (!/^(Action|Bonus Action|Reaction)\b/.test(spell.casting_time)) {
+          fail(
+            `${spell.name} takes ${spell.casting_time}: a monster casts it with the Magic action on each of its turns, which isn't modeled`,
+          );
+        }
+        what =
+          line.section === "bonus_actions"
+            ? "bonus_action"
+            : line.section === "reactions"
+              ? "reaction"
+              : "action";
+        // "always cast at its lowest possible level and can't be cast at a higher level"
+        const fixed = spell.level === 0 ? undefined : (line.level ?? spell.level);
+        if (action.slot_level !== undefined && action.slot_level !== fixed) {
+          fail(`${c.name} casts ${spell.name} at level ${fixed ?? 0} only`);
+        }
+        slot_level = fixed;
+        spellcasting = line.action;
+        if (line.recharge && c.expended.includes(line.action)) {
+          fail(`${c.name}'s ${line.action} hasn't recharged`);
+        }
       }
-      const what = castingEconomy(spell);
       if (what === "reaction") {
         if (e.round === 0) fail("The fight hasn't started");
       } else onTurn(c, "cast");
       if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")}`);
-      const targets = action.targets.map(find);
-      let r: SpellCastResult;
-      try {
-        r = castSpell(
-          encounterCombatant(e, c.id, ctx),
-          spell,
-          targets.map((t) => encounterCombatant(e, t.id, ctx)),
-          { slot_level: action.slot_level, pact: action.pact, mode: action.mode, rng },
-        );
-      } catch (error) {
-        if (error instanceof RangeError) fail(error.message);
-        throw error;
-      }
-      result = r;
+      result = castBy(c, spell, action.targets ?? [], {
+        slot_level,
+        pact: action.pact,
+        mode: action.mode,
+        spellcasting,
+      });
       c.used[what] = true;
-      c.extended = true;
-      notes.push(`${c.name} casts ${spell.name}.`, ...r.notes);
-      applyTo(c, r.caster_actions);
-      for (const hit of r.targets) {
-        const t = targets[hit.target] as EncounterCombatant;
-        spendLegendaryResistance(t, hit.save);
-        applyTo(t, hit.actions);
-      }
-      // A Concentration spell's conditions last while the caster concentrates, up to its duration.
-      if (spell.concentration) {
-        const rounds = durationRounds(spell);
-        for (const hit of r.targets) {
-          const t = targets[hit.target] as EncounterCombatant;
-          addEffects(t, hit.conditions, {
-            source: c.id,
-            label: spell.name,
-            concentration: true,
-            ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
-          });
-        }
+      // A refused action throws, and the working copy of the encounter is dropped.
+      if (line) {
+        spendDaily(c, line.action, line.action_per_day, line.action);
+        spendDaily(c, `${line.action}#${line.spell}`, line.per_day, spell.name);
+        if (line.recharge) c.expended.push(line.action);
       }
       break;
     }
@@ -1390,4 +1484,11 @@ function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill: strin
   const ref = characterRef(ctx, c);
   const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
   return sheet.skills.some((line) => line.skill === skill && line.proficient_from !== null);
+}
+
+/** A monster action's uses per day ("(1/Day)" in its name), or `null`. */
+function dailyUses(ctx: EncounterContext, c: EncounterCombatant, name: string): number | null {
+  const def = monsterDef(ctx, c);
+  const all = [...def.actions, ...def.bonus_actions, ...def.reactions];
+  return all.find((a) => a.name === name)?.per_day ?? null;
 }
