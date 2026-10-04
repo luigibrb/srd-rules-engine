@@ -83,6 +83,14 @@ features:
       count: 2
       hint: Longswords and Javelins come with your starting equipment.
       rest_change: long
+    actions:
+    - id: lay-on-hands
+      name: Lay On Hands
+      economy: bonus_action
+      uses: lay-on-hands
+      pool: true
+      target: creature
+      heal: {pooled: true}
     resources:
     - id: lay-on-hands
       name: Lay On Hands (Hit Point pool)

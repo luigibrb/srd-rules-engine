@@ -1180,6 +1180,238 @@
             "additionalProperties": false
           }
         },
+        "actions": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "economy": {
+                "type": "string",
+                "enum": [
+                  "action",
+                  "bonus_action",
+                  "reaction",
+                  "free"
+                ]
+              },
+              "uses": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "cost": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "pool": {
+                "default": false,
+                "type": "boolean"
+              },
+              "target": {
+                "default": "self",
+                "type": "string",
+                "enum": [
+                  "self",
+                  "creature",
+                  "other"
+                ]
+              },
+              "heal": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "dice": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^\\d+d\\d+$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "bonus": {
+                        "default": 0,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "string",
+                            "enum": [
+                              "str",
+                              "dex",
+                              "con",
+                              "int",
+                              "wis",
+                              "cha"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "const": "class_level"
+                          }
+                        ]
+                      },
+                      "pooled": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "extra_action": {
+                "default": false,
+                "type": "boolean"
+              },
+              "also": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "dash",
+                    "disengage",
+                    "dodge"
+                  ]
+                }
+              },
+              "attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "attack": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "attack",
+                      "count"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "after_hit": {
+                "default": false,
+                "type": "boolean"
+              },
+              "once_per_turn": {
+                "default": false,
+                "type": "boolean"
+              },
+              "save": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ability": {
+                        "type": "string",
+                        "enum": [
+                          "str",
+                          "dex",
+                          "con",
+                          "int",
+                          "wis",
+                          "cha"
+                        ]
+                      },
+                      "dc_ability": {
+                        "type": "string",
+                        "enum": [
+                          "str",
+                          "dex",
+                          "con",
+                          "int",
+                          "wis",
+                          "cha"
+                        ]
+                      },
+                      "conditions": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "ability",
+                      "dc_ability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "inspiration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "progression": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "progression"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "halves_attack_damage": {
+                "default": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "economy"
+            ],
+            "additionalProperties": false
+          }
+        },
         "toggles": {
           "type": "array",
           "items": {

@@ -31,6 +31,14 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Class features used in turns: grants `actions` (`FeatureActionDef`: economy, resource,
+  healing, extra action, standard actions along, granted attacks, an after-hit save, an
+  inspiration die, a damage-halving reaction); sheet `actions` (`FeatureActionLine`); the play
+  action `use_feature`; the encounter action `feature`, `attack` `granted` and `target_feature`;
+  encounter fields `surged`, `granted_attacks`, `hits`, `features_used`, `inspiration`;
+  `Combatant.inspiration_die`, used on a failed D20 Test (`inspiration` in attack, save, check
+  and spell attack results). Content: Second Wind, Action Surge, Lay On Hands, Flurry of Blows,
+  Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration.
 - Class features that change rolls: Danger Sense, Reckless Attack (ends at the start of your
   next turn in encounters), Feral Instinct, Frenzy, Evasion (also the Assassin's), Reliable
   Talent, Primal Strike, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered

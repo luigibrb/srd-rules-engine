@@ -78,6 +78,22 @@ export const EncounterCombatantSchema = z.object({
   cleave: z.object({ attack: z.string(), target: z.string() }).nullable().default(null),
   /** Made its Cleave attack this turn. */
   cleave_used: z.boolean().default(false),
+  /** Took Action Surge this turn: its additional action can't be the Magic action. */
+  surged: z.boolean().default(false),
+  /** Attacks a feature granted this turn (Flurry of Blows), used with `attack` `granted: true`. */
+  granted_attacks: z
+    .object({ attack: z.string(), count: z.int().min(0) })
+    .nullable()
+    .default(null),
+  /** Creatures it hit this turn (Stunning Strike needs a hit). */
+  hits: z.array(z.string()).default([]),
+  /** Once-per-turn features used this turn. */
+  features_used: z.array(z.string()).default([]),
+  /** A Bardic Inspiration die it holds, and who gave it; used on its next failed D20 Test. */
+  inspiration: z
+    .object({ die: z.int().min(2), by: z.string() })
+    .nullable()
+    .default(null),
 });
 export type EncounterCombatant = z.infer<typeof EncounterCombatantSchema>;
 
@@ -303,6 +319,23 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     light_extra: z.boolean().optional(),
     cleave: z.boolean().optional(),
     mastery: z.boolean().optional(),
+    /** One of the attacks a feature granted this turn (Flurry of Blows). */
+    granted: z.boolean().optional(),
+    /** A feature the target uses as its reaction if hit (Uncanny Dodge: `rogue:uncanny-dodge`). */
+    target_feature: z.string().optional(),
+  }),
+  /**
+   * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and
+   * resource are spent, then it heals, gives an additional action (Action Surge), takes
+   * standard actions (Patient Defense), grants attacks (Flurry of Blows), forces a save after a
+   * hit (Stunning Strike), or gives a Bardic Inspiration die. `amount` for a pool (Lay on Hands).
+   */
+  z.object({
+    type: z.literal("feature"),
+    id: z.string(),
+    feature: z.string(),
+    target: z.string().optional(),
+    amount: n.min(1).optional(),
   }),
   /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
   z.object({

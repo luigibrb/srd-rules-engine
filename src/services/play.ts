@@ -22,7 +22,7 @@ import {
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
 import { type Combatant, conditionRolls } from "../rules/combatant";
-import { type Defenses, takeDamage } from "../rules/damage";
+import { type Defenses, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import {
@@ -327,6 +327,7 @@ export function combatantFromCharacter(
     rules: sheet.rules,
     proficient_skills: sheet.skills.flatMap((line) => (line.proficient_from ? [line.skill] : [])),
     spell_damage: sheet.spell_damage,
+    inspiration_die: null,
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []
@@ -789,6 +790,30 @@ export function applyAction(
       const amount = action.amount ?? 1;
       if (use.spent + amount > use.max) fail(`${use.name}: ${use.max - use.spent} left`);
       s.uses_spent[use.key] = use.spent + amount;
+      break;
+    }
+    case "use_feature": {
+      const feature =
+        sheet.actions.find((a) => a.key === action.key) ?? fail(`No feature '${action.key}'`);
+      if (feature.pool && action.amount === undefined) fail(`${feature.name}: how much? (amount)`);
+      const amount = feature.pool ? (action.amount as number) : feature.cost;
+      if (feature.uses) {
+        const use = p.uses.find((u) => u.key === feature.uses) ?? fail(`${feature.name}: no uses`);
+        if (use.spent + amount > use.max) fail(`${feature.name}: ${use.max - use.spent} left`);
+        s.uses_spent[use.key] = use.spent + amount;
+      }
+      if (feature.heal && feature.target === "self") {
+        if (s.dead) fail("The character is dead");
+        const healed = feature.heal.pooled
+          ? amount
+          : rollDamage([{ dice: feature.heal.dice, bonus: feature.heal.bonus, type: "healing" }], {
+              rng,
+            }).total;
+        s.hp.current = Math.min(p.hp.max, current + healed);
+        if (s.hp.current >= p.hp.max) s.hp.current = null;
+        if (current === 0 && healed > 0) regainConsciousness(s, notes);
+        notes.push(`${feature.name}: regains ${healed} Hit Points.`);
+      }
       break;
     }
     case "restore_use": {

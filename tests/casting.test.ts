@@ -52,6 +52,7 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   rules: [],
   proficient_skills: [],
   spell_damage: [],
+  inspiration_die: null,
   ...o,
 });
 const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizardLine] });

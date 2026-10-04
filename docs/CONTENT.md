@@ -190,6 +190,35 @@ spell_damage:
 - {name: Elemental Affinity, ability: cha, damage_type: fire, one_roll: true}
 ```
 
+A feature used in a turn is an `action` (the encounter action `feature` resolves it; the play
+action `use_feature` spends its resource and heals you, for a self-healing one):
+
+```yaml
+actions:
+- id: second-wind
+  name: Second Wind
+  economy: bonus_action        # action | bonus_action | reaction | free (no action, on your turn)
+  uses: second-wind            # the resource it spends (cost: 1 by default; pool: true → the caller's amount)
+  heal: {dice: 1d10, bonus: class_level}   # or an ability, a number, or {pooled: true}
+- id: flurry-of-blows
+  name: Flurry of Blows
+  economy: bonus_action
+  uses: focus-points
+  attacks: {attack: Unarmed Strike, count: 2}   # also: extra_action, also: [dash, disengage, dodge]
+- id: stunning-strike
+  name: Stunning Strike
+  economy: free
+  uses: focus-points
+  target: other                # self (default) | creature | other
+  after_hit: true              # needs a hit on the target this turn
+  once_per_turn: true
+  save: {ability: con, dc_ability: wis, conditions: [stunned]}   # until the start of your next turn
+```
+
+`inspiration: {progression: Bardic Die}` gives the target a die for its next failed D20 Test, and
+`halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, given as an attack's
+`target_feature`).
+
 `rules` switches on a rule written in code, from a closed list: `evasion` (Dexterity saves that
 halve damage: none on a success, half on a failure, not while Incapacitated), `reliable_talent`
 (a d20 of 9 or lower counts as 10 on checks with a proficient skill), `potent_cantrip` (a cantrip

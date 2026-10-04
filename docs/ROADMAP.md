@@ -24,6 +24,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P12 | Weapon Mastery effects in encounters: Graze, Vex, Sap, Slow, Topple, Push (noted), Cleave, Nick | Applied by default (`mastery: false` skips them); Vex, Sap and Slow are encounter marks with the same turn-based ends as effects |
 | P13 | Monster spellcasting: 97 casting actions as data (spell lists, fixed levels, daily uses), monsters casting in encounters, legendary actions that cast, "X/Day" limits | One schema for every casting action (`casts`); a missing save DC or attack bonus is derived (flagged); a misspelled spell name corrected in the importer |
 | P14 | Class features that change rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Primal Strike, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity | Data first (new Advantage targets, rider gates, `spell_damage`); three named rules in code behind a closed `rules` list |
+| P15 | Class features used in turns: Second Wind, Action Surge, Lay On Hands, Flurry of Blows, Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration | One `actions` grant for all of them; the encounter action `feature`; Bardic Inspiration used automatically on a failed D20 Test (flagged) |
 
 ## Decisions
 
@@ -81,11 +82,10 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   the next attack.
 - **Monster save effects left as text (M).** 19 effects without plain damage or conditions
   (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
-- **Class features used in turns (M).** Features you take as an action or reaction with a
-  limited use: Second Wind, Action Surge, Indomitable, Bardic Inspiration, Lay on Hands, Channel
-  Divinity options, Uncanny Dodge, Cunning Strike, Flurry of Blows and the other Focus features,
-  Stunning Strike, Relentless Rage, Brutal Strike, Innate Sorcery, Agonizing Blast (a choice of
-  cantrip).
+- **Class features used in turns, what's left (M).** Indomitable (a reroll of a failed save),
+  Channel Divinity options (Divine Spark, Turn Undead, Sacred Weapon), Cunning Strike, Relentless
+  Rage, Brutal Strike, Innate Sorcery, Deflect Attacks, Agonizing Blast (a choice of cantrip),
+  Stunning Strike's successful-save effects, Lay On Hands' cure for Poisoned.
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
 - **Starting gold and shopping (S).** Fighter option C and background option B.

@@ -249,7 +249,8 @@ once a round, movement up to your Speed (Dash doubles it), Extra Attack and Mult
 Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a grapple), the
 Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
 Slow, Topple, Push, Cleave, Nick), casting times, monsters' spells (through the action that
-lists them, with daily uses and fixed levels) (`cast`), once-per-turn riders (Sneak Attack), recharges (a
+lists them, with daily uses and fixed levels), class features used in turns (`feature`: Second Wind, Action Surge, Flurry of
+Blows, Stunning Strike, Bardic Inspiration…) (`cast`), once-per-turn riders (Sneak Attack), recharges (a
 breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10 }` or
 `{ until: { at: "end" } }`), Concentration saves when damaged, a Concentration spell's
 conditions ending with it, and Rage ending when it isn't extended.
@@ -389,7 +390,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 |---|---|
 | Character creation | Complete: all 12 SRD classes, 9 species, 4 backgrounds |
 | Levels | 1–20 with multiclassing (prerequisites, partial proficiencies, combined spell slots, Pact Magic), fixed or rolled Hit Points, Ability Score Improvements, feats with prerequisites, Epic Boons |
-| Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells. In rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Divine and Primal Strike, Sneak Attack, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity; the rest is shown as the SRD text |
+| Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells. In rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Divine and Primal Strike, Sneak Attack, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity. Used in turns: Second Wind, Action Surge, Lay On Hands, Flurry of Blows, Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration; the rest is shown as the SRD text |
 | Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions) for 53 reviewed spells; the rest are cast with their text |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
