@@ -22,8 +22,9 @@ explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← eve
 
 ## Why it's useful
 
-- **The rules are already done.** Building a 5e tool starts with the interface, not with
-  reimplementing proficiency, spell slots and saving throws.
+- **The rules run the game.** The engine embeds the SRD rules and follows the game flow with
+  them: what's legal, whose turn it is, what a roll does and what it changes. A tool built on it
+  only has to present the game.
 - **One engine for the whole game.** Character creation, play and combat share the same rules,
   so tools built on it agree with each other.
 - **Everything explains itself.** Numbers, refusals and rolls come with their reasons, ready to
