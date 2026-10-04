@@ -525,7 +525,8 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       pattern: /^\/v1\/encounters\/apply$/,
       handle: ({ body }) => {
         // One action or a list, applied in order; all or nothing. Changed character states are
-        // returned in `states`, by character key.
+        // returned in `states`, by character key. An action that stops for a decision ends the
+        // list: `pending` asks the question, `applied` counts the actions done before it.
         const req = EncounterRequest.parse(body);
         const catalog = getCatalog();
         const characters: Record<string, CharacterRef> = Object.fromEntries(
@@ -537,16 +538,23 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         let encounter = req.encounter;
         const states: Record<string, CharacterState> = {};
         const notes: string[] = [];
-        for (const action of Array.isArray(req.action) ? req.action : [req.action]) {
+        const actions = Array.isArray(req.action) ? req.action : [req.action];
+        let applied = 0;
+        for (const action of actions) {
           const result = applyEncounterAction(encounter, action, { catalog, characters, rng });
           encounter = result.encounter;
+          if (result.pending) {
+            notes.push(...result.notes);
+            return { encounter, states, notes, pending: result.pending, applied };
+          }
+          applied += 1;
           for (const [key, state] of Object.entries(result.states)) {
             states[key] = state;
             characters[key] = { build: (characters[key] as CharacterRef).build, state };
           }
           notes.push(...result.notes);
         }
-        return { encounter, states, notes };
+        return { encounter, states, notes, pending: null, applied };
       },
     },
     {

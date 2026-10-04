@@ -318,4 +318,43 @@ describe("POST /v1/encounters/apply", () => {
     expect(refused.status).toBe(400);
     expect(refused.body.detail[0]).toMatch(/It isn't Goblin Warrior's turn/);
   });
+
+  it("stops a list at a decision, then `decide` finishes the action", async () => {
+    // The dragon's Dexterity save (1), then Fireball's 9d6 after the answer.
+    const handler = createHandler({ rng: scriptedRng([1, ...Array<number>(9).fill(2)]) });
+    const post = async (body: unknown) => {
+      const res = await handler(
+        new Request("http://test/v1/encounters/apply", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      );
+      return { status: res.status, body: await res.json() };
+    };
+    const res = await post({
+      encounter: createEncounter(),
+      action: [
+        { type: "add_monster", monster: "mage" },
+        { type: "add_monster", monster: "adult-blue-dragon", decisions: "ask" },
+        { type: "set_initiative", id: "mage", value: 20 },
+        { type: "set_initiative", id: "adult-blue-dragon", value: 10 },
+        { type: "start" },
+        { type: "cast", id: "mage", spell: "fireball", targets: ["adult-blue-dragon"] },
+        { type: "next_turn" },
+      ],
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.applied).toBe(5);
+    expect(res.body.pending).toMatchObject({ combatant: "adult-blue-dragon" });
+    expect(res.body.encounter.round).toBe(1);
+    const decided = await post({
+      encounter: res.body.encounter,
+      action: [{ type: "decide", use: false }, { type: "next_turn" }],
+    });
+    expect(decided.body).toMatchObject({ applied: 2, pending: null });
+    const dragon = decided.body.encounter.combatants.find(
+      (c: { id: string }) => c.id === "adult-blue-dragon",
+    );
+    expect(dragon.hp).toBe(212 - 18);
+  });
 });

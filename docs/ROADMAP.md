@@ -25,6 +25,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P13 | Monster spellcasting: 97 casting actions as data (spell lists, fixed levels, daily uses), monsters casting in encounters, legendary actions that cast, "X/Day" limits | One schema for every casting action (`casts`); a missing save DC or attack bonus is derived (flagged); a misspelled spell name corrected in the importer |
 | P14 | Class features that change rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Primal Strike, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity | Data first (new Advantage targets, rider gates, `spell_damage`); three named rules in code behind a closed `rules` list |
 | P15 | Class features used in turns: Second Wind, Action Surge, Lay On Hands, Flurry of Blows, Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration | One `actions` grant for all of them; the encounter action `feature`; Bardic Inspiration used automatically on a failed D20 Test (flagged) |
+| P16 | Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask` stops the action with the roll shown until `decide`, `auto` uses them only when they can change the outcome; per combatant or per encounter | Resumed by replaying the action with its recorded dice, so nothing is undone; it replaces P15's automatic Bardic Inspiration and the `target_feature` option |
 
 ## Decisions
 

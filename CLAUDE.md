@@ -61,7 +61,10 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   via `applyEncounterAction` (JSON actions, `EncounterError`); character changes come back in
   `states` and go through `applyAction`. Turn hooks (`endTurn`/`startTurn` in
   `services/encounter.ts`) run timed effects, Rage's extension, recharges and once-per-turn
-  resets; `sweep()` ends Concentration effects after every action.
+  resets; `sweep()` ends Concentration effects after every action. Choices made after a roll
+  (Bardic Inspiration, Legendary Resistance, Uncanny Dodge) go through the `decide` callback
+  (`Decision`); `ask` mode stops the action (`encounter.pending`) and `decide` replays it with
+  the recorded dice, so an action must roll only through `rng`.
 - Conditions change rolls through data (`attack_rolls`, `attacked`, `fail_saves`… in
   conditions.yaml, from the CONDITIONS overlay in import-srd-items.ts) merged into
   `Combatant.condition_rolls`; `attackMode` / `resolveMode` combine them, never ad hoc checks.

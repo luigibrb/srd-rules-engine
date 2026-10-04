@@ -193,7 +193,6 @@ describe("Paladin, Monk, Rogue, Bard", () => {
       id: "goblin-warrior",
       target: "pip",
       attack: "Scimitar",
-      target_feature: "Uncanny Dodge",
     });
     const hit = s.result() as AttackResult;
     expect(hit.hit).toBe(true);
@@ -210,8 +209,8 @@ describe("Paladin, Monk, Rogue, Bard", () => {
     );
     s.act([], feature("lute", "Bardic Inspiration", { target: "brakka" }));
     expect(s.get("brakka")?.inspiration).toEqual({ die: 6, by: "lute" });
-    // A Strength check: 2 + 3 fails DC 20, so the d6 is rolled (5) and added.
-    s.act([2, 5], { type: "check", id: "brakka", ability: "str", dc: 20 });
+    // A Strength check: 2 + 3 fails DC 9 by 4, which a d6 can make up: rolled (5) and added.
+    s.act([2, 5], { type: "check", id: "brakka", ability: "str", dc: 9 });
     expect(s.notes).toContain("Brakka adds its Bardic Inspiration die: 5.");
     expect(s.get("brakka")?.inspiration).toBeNull();
   });

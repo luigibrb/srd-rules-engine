@@ -18,6 +18,7 @@ import {
   EncounterCombatantSchema,
   type EncounterEffect,
   EncounterSchema,
+  type Pending,
 } from "../models/encounter";
 import type { CharacterState, PlayAction } from "../models/state";
 import {
@@ -31,6 +32,8 @@ import {
   type CheckResult,
   type Combatant,
   combatantFromMonster,
+  type Decide,
+  type Decision,
   type ModeReason,
   makeAttack,
   monsterSpells,
@@ -81,10 +84,14 @@ export interface EncounterResult {
     | CheckResult
     | SaveResult
     | null;
+  /** The decision the action stopped for (also in `encounter.pending`), if any. */
+  readonly pending?: Pending | null;
 }
 
 /** A new encounter. `auto_death_saves: false` leaves Death Saving Throws to the players. */
-export function createEncounter(options: { auto_death_saves?: boolean } = {}): Encounter {
+export function createEncounter(
+  options: { auto_death_saves?: boolean; decisions?: "ask" | "auto" } = {},
+): Encounter {
   return EncounterSchema.parse(options);
 }
 
@@ -121,6 +128,7 @@ export function encounterCombatant(
     const ready = (name: string) => !c.expended.includes(name);
     return withDodge(ctx, encounter, c, {
       ...base,
+      id: c.id,
       name: c.name,
       inspiration_die: c.inspiration?.die ?? null,
       attacks: base.attacks.filter((a) => ready(a.name)),
@@ -130,6 +138,7 @@ export function encounterCombatant(
   const ref = characterRef(ctx, c);
   return withDodge(ctx, encounter, c, {
     ...combatantFromCharacter(ref.build, ref.state, ctx.catalog),
+    id: c.id,
     name: c.name,
     inspiration_die: c.inspiration?.die ?? null,
   });
@@ -171,6 +180,72 @@ export function applyEncounterAction(
   action: EncounterAction,
   outer: EncounterContext,
 ): EncounterResult {
+  const pending = encounter.pending;
+  if (action.type === "decide") {
+    if (!pending) fail("There's no decision to make");
+    // Replay the stopped action with the same dice and one more answer.
+    const clear = { ...encounter, pending: null };
+    return attempt(clear, pending.action, outer, pending.rolls, [...pending.answers, action.use]);
+  }
+  if (pending) fail(`Waiting for a decision: ${pending.question}`);
+  return attempt(encounter, action, outer, [], []);
+}
+
+/** Thrown when an action needs an answer it doesn't have: the action stops with nothing applied. */
+class PendingDecision {
+  constructor(
+    readonly combatant: string,
+    readonly kind: Decision["kind"],
+    readonly question: string,
+  ) {}
+}
+
+/** Run an action with recorded dice; a decision without an answer leaves it pending. */
+function attempt(
+  encounter: Encounter,
+  action: EncounterAction,
+  outer: EncounterContext,
+  rolls: readonly number[],
+  answers: readonly boolean[],
+): EncounterResult {
+  const recorded: number[] = [];
+  const base = outer.rng ?? mathRng;
+  const rng: Rng = {
+    int: (min, max) => {
+      const value =
+        recorded.length < rolls.length ? (rolls[recorded.length] as number) : base.int(min, max);
+      recorded.push(value);
+      return value;
+    },
+  };
+  try {
+    return run(encounter, action, { ...outer, rng }, answers);
+  } catch (error) {
+    if (!(error instanceof PendingDecision)) throw error;
+    const stopped = {
+      action,
+      rolls: recorded,
+      answers: [...answers],
+      combatant: error.combatant,
+      kind: error.kind,
+      question: error.question,
+    };
+    return {
+      encounter: EncounterSchema.parse({ ...encounter, pending: stopped }),
+      states: {},
+      notes: [error.question],
+      result: null,
+      pending: stopped,
+    };
+  }
+}
+
+function run(
+  encounter: Encounter,
+  action: EncounterAction,
+  outer: EncounterContext,
+  answers: readonly boolean[],
+): EncounterResult {
   const e = structuredClone(encounter) as Encounter;
   const notes: string[] = [];
   const states: Record<string, CharacterState> = {};
@@ -179,6 +254,15 @@ export function applyEncounterAction(
   const ctx: EncounterContext = { ...outer, characters: chars };
   const rng = ctx.rng ?? mathRng;
   let result: EncounterResult["result"] = null;
+  // Decisions after a roll: `auto` takes the recommendation; `ask` uses the next answer given,
+  // or stops the action for one.
+  let answered = 0;
+  const decide: Decide = (d) => {
+    const c = d.combatant.id ? e.combatants.find((x) => x.id === d.combatant.id) : undefined;
+    if (!c || (c.decisions ?? e.decisions) === "auto") return d.recommended;
+    if (answered < answers.length) return answers[answered++] as boolean;
+    throw new PendingDecision(c.id, d.kind, d.question);
+  };
   const play = (c: EncounterCombatant, a: PlayAction): void => {
     const ref = characterRef(ctx, c);
     let r: ReturnType<typeof applyAction>;
@@ -211,7 +295,7 @@ export function applyEncounterAction(
       }
       const spell = concentrationOf(c);
       if (dc !== null && spell) {
-        const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng });
+        const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng, decide });
         spendLegendaryResistance(c, save);
         const outcome = saveText(save);
         if (save.success) notes.push(`${c.name} keeps Concentration on ${spell} (${outcome}).`);
@@ -395,17 +479,13 @@ export function applyEncounterAction(
     const left = Math.max(0, max - c.legendary_resistance_used);
     notes.push(`${c.name} uses Legendary Resistance to succeed instead (${left} left today).`);
   };
-  /** The name of `t`'s feature that halves an attack's damage as its reaction, if it can use it. */
-  const defenderFeature = (t: EncounterCombatant, key: string): string => {
-    if (t.character === null) fail(`${t.name} has no class features`);
+  /** `t`'s feature that halves an attack's damage as its reaction (Uncanny Dodge), if usable. */
+  const reactionThatHalves = (t: EncounterCombatant): string | null => {
+    if (t.character === null || t.used.reaction) return null;
+    if (conditionsOf(ctx, t).has("incapacitated")) return null;
     const ref = characterRef(ctx, t);
-    const f = computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
-      (a) => (a.key === key || a.name === key) && a.halves_attack_damage,
-    );
-    if (!f) fail(`${t.name} has no feature '${key}' that halves an attack's damage`);
-    if (t.used.reaction) fail(`${t.name} has already used its reaction`);
-    if (conditionsOf(ctx, t).has("incapacitated")) fail(`${t.name} is Incapacitated`);
-    return f.name;
+    const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+    return sheet.actions.find((a) => a.halves_attack_damage)?.name ?? null;
   };
   /** One attack by `c` on `t`, applied: riders once per turn, notes, damage. */
   const attackOn = (
@@ -421,7 +501,6 @@ export function applyEncounterAction(
       light_extra?: boolean;
       cleave?: boolean;
       mastery?: boolean;
-      target_feature?: string;
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
@@ -434,8 +513,6 @@ export function applyEncounterAction(
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
     const target = encounterCombatant(e, t.id, ctx);
-    // A feature the target uses as its reaction if hit (Uncanny Dodge): checked before rolling.
-    const dodge = options.target_feature ? defenderFeature(t, options.target_feature) : null;
     // Help: Advantage on the next attack roll by one of the helper's allies against the target.
     const help = e.helps.find(
       (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
@@ -456,6 +533,7 @@ export function applyEncounterAction(
         .map((x) => x.condition);
       hit = makeAttack(attacker, attackName, target, {
         rng,
+        decide,
         mode: options.mode,
         two_handed: options.two_handed,
         riders,
@@ -484,7 +562,13 @@ export function applyEncounterAction(
       const crit = hit.critical_hit ? "Critical Hit! " : "";
       notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
       let instances = [...hit.instances];
-      if (dodge) {
+      // Uncanny Dodge: the target's reaction once it knows it's hit.
+      const dodge = reactionThatHalves(t);
+      const question = `${c.name} hits ${t.name} with ${hit.attack} (${roll}). ${t.name}: use ${dodge} to halve the damage?`;
+      if (
+        dodge &&
+        decide({ kind: "uncanny_dodge", combatant: target, question, recommended: true })
+      ) {
         t.used.reaction = true;
         instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
         notes.push(`${t.name} uses ${dodge}: the damage is halved.`);
@@ -534,7 +618,7 @@ export function applyEncounterAction(
       notes.push(`Slow: ${t.name}'s Speed is 10 feet lower until ${c.name}'s next turn.`);
     } else if (mastery === "topple") {
       const dc = 8 + modifier + attacker.proficiency_bonus;
-      const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), "con", dc, { rng });
+      const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), "con", dc, { rng, decide });
       notes.push(`Topple: ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);
       spendLegendaryResistance(t, save);
       if (!save.success) applyTo(t, [{ type: "add_condition", condition: "prone" }]);
@@ -561,7 +645,7 @@ export function applyEncounterAction(
     let r: SaveActionResult;
     try {
       const combatants = targets.map((t) => encounterCombatant(e, t.id, ctx));
-      r = useSaveAction(user, name, combatants, { rng });
+      r = useSaveAction(user, name, combatants, { rng, decide });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
       throw error;
@@ -593,7 +677,7 @@ export function applyEncounterAction(
         encounterCombatant(e, c.id, ctx),
         spell,
         targets.map((t) => encounterCombatant(e, t.id, ctx)),
-        { ...options, rng },
+        { ...options, rng, decide },
       );
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
@@ -722,6 +806,7 @@ export function applyEncounterAction(
           hp,
           in_lair: action.in_lair ?? false,
           auto_legendary_resistance: action.auto_legendary_resistance ?? true,
+          decisions: action.decisions ?? null,
         }),
       );
       notes.push(`${action.name ?? numbered} joins with ${hp} HP.`);
@@ -737,9 +822,22 @@ export function applyEncounterAction(
       }
       const name = action.name ?? (ref.build.name || action.character);
       e.combatants.push(
-        combatant({ id, name, character: action.character, side: action.side ?? "party" }),
+        combatant({
+          id,
+          name,
+          character: action.character,
+          side: action.side ?? "party",
+          decisions: action.decisions ?? null,
+        }),
       );
       notes.push(`${name} joins.`);
+      break;
+    }
+    case "decide":
+      return fail("There's no decision to make");
+    case "set_decisions": {
+      if (action.id !== undefined) find(action.id).decisions = action.mode;
+      else e.decisions = action.mode ?? fail("The encounter's mode is ask or auto");
       break;
     }
     case "remove": {
@@ -933,7 +1031,7 @@ export function applyEncounterAction(
       // The target chooses Strength or Dexterity: by default, its better bonus.
       const ability =
         action.save ?? (target.saving_throws.dex > target.saving_throws.str ? "dex" : "str");
-      const save = rollSavingThrow(target, ability, dc, { rng });
+      const save = rollSavingThrow(target, ability, dc, { rng, decide });
       result = save;
       const verb = action.option === "grapple" ? "grapple" : "shove";
       const outcome = save.success ? "succeeds on" : "fails";
@@ -980,6 +1078,7 @@ export function applyEncounterAction(
         action.skill ?? (bonus("acrobatics") > bonus("athletics") ? "acrobatics" : "athletics");
       const check = rollAbilityCheck(me, { skill }, grapple.escape_dc, {
         rng,
+        decide,
         modes: helpOnCheck(c, skill),
       });
       result = check;
@@ -1052,6 +1151,7 @@ export function applyEncounterAction(
         : { ability: action.ability ?? fail("A check needs a skill or an ability") };
       const check = rollAbilityCheck(encounterCombatant(e, c.id, ctx), what, action.dc ?? null, {
         rng,
+        decide,
         mode: action.mode,
         modes: helpOnCheck(c, action.skill ?? null),
       });
@@ -1227,7 +1327,7 @@ export function applyEncounterAction(
           (a) => a.key === action.feature || a.name === action.feature,
         ) ?? fail(`${c.name} has no feature '${action.feature}'`);
       if (f.halves_attack_damage) {
-        fail(`${f.name} is used when an attack hits: give it as the attack's \`target_feature\``);
+        fail(`${f.name} is offered when an attack hits ${c.name}`);
       }
       const t = action.target ? find(action.target) : c;
       if (f.target === "self" && t !== c) fail(`${f.name} is used on yourself`);
@@ -1273,6 +1373,7 @@ export function applyEncounterAction(
       if (f.save) {
         const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), f.save.ability, f.save.dc, {
           rng,
+          decide,
         });
         result = save;
         notes.push(`${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);

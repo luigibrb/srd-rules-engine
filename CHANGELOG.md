@@ -6,6 +6,9 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- Bardic Inspiration and Legendary Resistance are decisions: in `auto` mode (the default) the
+  die is used only when it can turn a failure into a success; Uncanny Dodge is offered when an
+  attack hits instead of being declared with `attack` `target_feature` (removed).
 - A monster's legendary saving throw effects are no longer in `save_actions`: only the
   encounter action `legendary` uses them.
 - The published `srd-5.2.1.json` is minified (about 2 MB instead of 3.8 MB).
@@ -31,6 +34,12 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Decisions after a roll: `Decision`, `Decide`, the `decide` option of `rollSavingThrow`,
+  `rollAbilityCheck`, `makeAttack`, `castSpell` and `useSaveAction`; `Combatant.id`; encounter
+  `decisions` (`ask` | `auto`, also per combatant and on `add_monster` / `add_character`),
+  `pending` (`PendingSchema`) and the actions `decide` and `set_decisions`;
+  `createEncounter({ decisions })`; `EncounterResult.pending`. `POST /v1/encounters/apply`
+  returns `pending` and `applied`.
 - Class features used in turns: grants `actions` (`FeatureActionDef`: economy, resource,
   healing, extra action, standard actions along, granted attacks, an after-hit save, an
   inspiration die, a damage-halving reaction); sheet `actions` (`FeatureActionLine`); the play

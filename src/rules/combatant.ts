@@ -11,6 +11,7 @@ import type { Table } from "../content/catalog";
 import type { Character } from "../models/character";
 import {
   ABILITIES,
+  ABILITY_NAMES,
   type Ability,
   type AdvantageTarget,
   type ConditionDef,
@@ -20,6 +21,7 @@ import {
   type MonsterDef,
   SKILL_ABILITY,
   type Skill,
+  skillName,
 } from "../models/content";
 import {
   type DamageInstance,
@@ -52,6 +54,8 @@ export interface CombatantSpellcasting {
 }
 
 export interface Combatant {
+  /** Its id in an encounter, when it comes from one (who answers its decisions). */
+  readonly id?: string;
   readonly name: string;
   /** Character level (cantrip damage grows at 5, 11 and 17). */
   readonly level: number;
@@ -116,6 +120,45 @@ export interface SpellDamageBonus {
   readonly school: string | null;
   readonly damage_type: string | null;
   readonly one_roll: boolean;
+}
+
+/**
+ * A choice made after seeing a roll and before its consequences: add a Bardic Inspiration die
+ * to a failed D20 Test, spend Legendary Resistance on a failed save, halve a hit with Uncanny
+ * Dodge. `recommended` is the automatic answer: only when it can turn the failure into a success
+ * (always, for the last two).
+ */
+export interface Decision {
+  readonly kind: "inspiration" | "legendary_resistance" | "uncanny_dodge";
+  /** Who decides. */
+  readonly combatant: Combatant;
+  /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */
+  readonly question: string;
+  readonly recommended: boolean;
+}
+/** Answers decisions; without one, the rolls follow each decision's `recommended`. */
+export type Decide = (decision: Decision) => boolean;
+const recommend: Decide = (d) => d.recommended;
+
+/** The Bardic Inspiration die added to a failed roll (`total` short of `target`), if chosen. */
+export function inspire(
+  c: Combatant,
+  total: number,
+  target: number,
+  what: string,
+  decide: Decide,
+  rng: Rng,
+): number | null {
+  const die = c.inspiration_die;
+  if (!die || total >= target) return null;
+  const question = `${c.name}: ${what} ${total} vs ${target}. Add the Bardic Inspiration die (d${die})?`;
+  const use = decide({
+    kind: "inspiration",
+    combatant: c,
+    question,
+    recommended: target - total <= die,
+  });
+  return use ? rng.int(1, die) : null;
 }
 
 /** A legendary action: an attack it makes, an action it uses, a saving throw effect, or text. */
@@ -388,6 +431,8 @@ export interface AttackOptions {
   light_extra?: boolean;
   /** The Cleave mastery's attack: the line's `cleave_damage_parts`. */
   cleave?: boolean;
+  /** Answers the attacker's decisions (Bardic Inspiration on a miss). */
+  decide?: Decide;
 }
 
 /**
@@ -413,6 +458,7 @@ export function makeAttack(
     modes = [],
     light_extra = false,
     cleave = false,
+    decide = recommend,
   }: AttackOptions = {},
 ): AttackResult {
   const line =
@@ -471,12 +517,12 @@ export function makeAttack(
   let total = roll.d20 + line.attack_bonus;
   const critical_miss = roll.d20 === 1;
   const criticalRoll = !critical_miss && roll.d20 >= Math.min(20, attacker.critical_hit_on);
-  // Bardic Inspiration on a miss a die can change.
-  let inspiration: number | null = null;
-  if (!criticalRoll && !critical_miss && total < target.armor_class && attacker.inspiration_die) {
-    inspiration = rng.int(1, attacker.inspiration_die);
-    total += inspiration;
-  }
+  // Bardic Inspiration on a miss (not a natural 1, which misses whatever the total).
+  const inspiration =
+    criticalRoll || critical_miss
+      ? null
+      : inspire(attacker, total, target.armor_class, `attack roll with ${line.name}`, decide, rng);
+  total += inspiration ?? 0;
   const hit = criticalRoll || (!critical_miss && total >= target.armor_class);
   const critical_hit = criticalRoll || (hit && effective.critical_on_hit);
   const base = {
@@ -537,14 +583,25 @@ export function rollSavingThrow(
   combatant: Combatant,
   ability: Ability,
   dc: number,
-  { rng = mathRng, mode = "normal" }: { rng?: Rng; mode?: RollMode } = {},
+  {
+    rng = mathRng,
+    mode = "normal",
+    decide = recommend,
+  }: { rng?: Rng; mode?: RollMode; decide?: Decide } = {},
 ): SaveResult {
   const bonus = combatant.saving_throws[ability];
   const base = { name: combatant.name, ability, dc, bonus };
   // Legendary Resistance: "If the monster fails a saving throw, it can choose to succeed instead."
-  const resisted = combatant.legendary_resistance > 0;
+  const resist = (total: number | null) => {
+    const left = combatant.legendary_resistance;
+    if (left <= 0) return false;
+    const roll = total === null ? "" : ` (${total} vs DC ${dc})`;
+    const question = `${combatant.name} fails a ${ABILITY_NAMES[ability]} saving throw${roll}. Use Legendary Resistance (${left} left)?`;
+    return decide({ kind: "legendary_resistance", combatant, question, recommended: true });
+  };
   const failing = combatant.condition_rolls.fail_saves[ability];
   if (failing) {
+    const resisted = resist(null);
     const roll = { rolls: [], d20: 0, mode: "normal" as const };
     return {
       ...base,
@@ -566,12 +623,10 @@ export function rollSavingThrow(
   const resolved = resolveMode(mode, reasons);
   const roll = rollD20({ mode: resolved.mode, rng });
   let total = roll.d20 + bonus;
-  let inspiration: number | null = null;
-  if (total < dc && combatant.inspiration_die) {
-    inspiration = rng.int(1, combatant.inspiration_die);
-    total += inspiration;
-  }
-  const legendary = total < dc && resisted;
+  const what = `${ABILITY_NAMES[ability]} saving throw`;
+  const inspiration = inspire(combatant, total, dc, what, decide, rng);
+  total += inspiration ?? 0;
+  const legendary = total < dc && resist(total);
   return {
     ...base,
     roll,
@@ -614,7 +669,8 @@ export function rollAbilityCheck(
     rng = mathRng,
     mode = "normal",
     modes = [],
-  }: { rng?: Rng; mode?: RollMode; modes?: readonly ModeReason[] } = {},
+    decide = recommend,
+  }: { rng?: Rng; mode?: RollMode; modes?: readonly ModeReason[]; decide?: Decide } = {},
 ): CheckResult {
   const skill = "skill" in what ? what.skill : null;
   const ability = skill ? SKILL_ABILITY[skill] : (what as { ability: Ability }).ability;
@@ -638,11 +694,10 @@ export function rollAbilityCheck(
     resolved.reasons.push("Reliable Talent: the d20 counts as 10");
   }
   let total = roll.d20 + bonus;
-  let inspiration: number | null = null;
-  if (dc !== null && total < dc && combatant.inspiration_die) {
-    inspiration = rng.int(1, combatant.inspiration_die);
-    total += inspiration;
-  }
+  const label = skill ? skillName(skill) : ABILITY_NAMES[ability];
+  const inspiration =
+    dc === null ? null : inspire(combatant, total, dc, `${label} check`, decide, rng);
+  total += inspiration ?? 0;
   return {
     name: combatant.name,
     ability,
