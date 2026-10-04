@@ -1,9 +1,10 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BuilderApp } from "../src/cli/builder";
 import { Console, scriptedInput } from "../src/cli/console";
+import { FightApp } from "../src/cli/fight";
 import { PlayApp } from "../src/cli/play";
 import {
   type CharacterBuild,
@@ -14,7 +15,7 @@ import {
   seededRng,
   srdPack,
 } from "../src/index";
-import { autocomplete, catalog, classBuild, fighterBuild } from "./helpers";
+import { autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 async function runScript(answers: string[], build?: CharacterBuild) {
   const out: string[] = [];
@@ -182,4 +183,71 @@ it("save records the content packs the build was made with", () => {
   expect(evaluate(saved, catalog).report.issues.map((i) => i.message)).toContain(
     "Needs content pack 'lantern', which isn't loaded",
   );
+});
+
+describe("fight mode", () => {
+  const lute = levelUpIn(autocomplete(classBuild("bard", { name: "Lute" })), "bard", 2);
+  async function fight(
+    answers: string[],
+    options: Partial<ConstructorParameters<typeof FightApp>[2]> = {},
+  ) {
+    const out: string[] = [];
+    const saveDir = mkdtempSync(join(tmpdir(), "fight-"));
+    const input = scriptedInput(answers, (prompt) => out.push(prompt));
+    const con = new Console({ input, output: (text) => out.push(text), color: false });
+    const app = new FightApp(con, catalog, {
+      builds: [fighterBuild(), lute],
+      monsters: ["goblin-warrior", "goblin-warrior"],
+      rng: seededRng(7),
+      saveDir,
+      ...options,
+    });
+    const result = await app.run();
+    return { output: out.join("\n"), saveDir, ...result };
+  }
+
+  it("sets up, takes turns, attacks, and saves the states and the encounter", async () => {
+    // Seed 7: the goblins (Initiative 22) act first, then Lute, then Brakka.
+    const run = await fight(["next", "next", "next", "attack 1 greatsword", "quit", "y"]);
+    expect(run.output).toContain("▶ 1. Goblin Warrior [goblin-warrior] AC 15 · HP 10/10 · Init 22");
+    expect(run.output).toContain(
+      "Brakka hits Goblin Warrior with Greatsword (19 vs AC 15): 10 slashing.",
+    );
+    expect(run.encounter.combatants.find((c) => c.id === "goblin-warrior")?.defeated).toBe(true);
+    const saved = JSON.parse(readFileSync(join(run.saveDir, "encounter.json"), "utf-8"));
+    expect(saved.round).toBe(1);
+    expect(
+      parseState(JSON.parse(readFileSync(join(run.saveDir, "brakka.state.json"), "utf-8"))),
+    ).toEqual(run.states.brakka);
+  });
+
+  it("asks decisions in ask mode, with the recommended answer as the default", async () => {
+    const run = await fight(
+      ["next", "next", "feature bardic brakka", "next", "check athletics 30", "", "quit", "n"],
+      { ask: true },
+    );
+    // 19 vs 30: a d6 can't make it up, so the default (Enter) keeps the die.
+    expect(run.output).toContain(
+      "Brakka: Athletics check 19 vs 30. Add the Bardic Inspiration die (d6)? [y/N]",
+    );
+    expect(run.output).toContain("Brakka's Athletics check: 19 vs DC 30: failure.");
+    expect(run.encounter.combatants.find((c) => c.id === "brakka")?.inspiration).not.toBeNull();
+  });
+
+  it("resumes a saved encounter, and explains what it can't do", async () => {
+    const first = await fight(["next", "quit", "y"]);
+    const run = await fight(
+      ["attack gob scimitar", "help nobody", "frobnicate", "options lute", "quit", "n"],
+      {
+        encounter: first.encounter,
+        states: first.states,
+        monsters: [],
+      },
+    );
+    expect(run.output).toContain("▶ 2. Goblin Warrior 2 [goblin-warrior-2]");
+    expect(run.output).toContain("'gob' could be goblin-warrior or goblin-warrior-2");
+    expect(run.output).toContain("No combatant 'nobody'");
+    expect(run.output).toContain("Unknown command 'frobnicate' (try 'help')");
+    expect(run.output).toContain("Bardic Inspiration (bonus action) · 2/2 left");
+  });
 });

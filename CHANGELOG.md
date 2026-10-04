@@ -34,6 +34,11 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters (turn
+  order and status, commands for every encounter action, `options`, decisions as y/n questions
+  with `--ask`, saving and resuming). `Pending.recommended`. Spell and saving throw effect notes
+  give each target's save or attack roll and what it takes; check notes name the skill or
+  ability; a refused change to a character's state names the character.
 - Decisions after a roll: `Decision`, `Decide`, the `decide` option of `rollSavingThrow`,
   `rollAbilityCheck`, `makeAttack`, `castSpell` and `useSaveAction`; `Combatant.id`; encounter
   `decisions` (`ask` | `auto`, also per combatant and on `add_monster` / `add_character`),

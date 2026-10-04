@@ -22,7 +22,7 @@ src/
                    #   encounter.ts (initiative, turns, action economy, effects on combatants),
                    #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
-  cli/             # srd-rules bin: build (interactive builder), play, serve, validate
+  cli/             # srd-rules bin: build (interactive builder), play, fight, serve, validate
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
 scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homebrew only);
@@ -118,6 +118,7 @@ npm run build            # dist/
 npm run builder          # interactive builder from source (-- --load x.json --seed N --no-color)
 npx tsx src/cli/main.ts validate examples/homebrew-pack   # validate a content pack
 npx tsx src/cli/main.ts play --load characters/x.json [--state x.state.json]   # play mode
+npx tsx src/cli/main.ts fight --load a.json --load b.json --monster goblin-warrior [--ask]  # encounter
 npm run serve            # HTTP API on localhost:8000
 npx tsx scripts/import-srd-spells.ts --report     # spell mechanics: drafts (NEW), reviewed, skips
 npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, what stayed text

@@ -187,7 +187,7 @@ describe("Help", () => {
     s.act([], { type: "help", id: goblin, target: "goblin-warrior-2", skill: "stealth" });
     s.act([4, 15], { type: "check", id: "goblin-warrior-2", skill: "stealth" });
     expect(s.notes.at(-1)).toBe(
-      "Goblin Warrior 2's stealth check: 21; Advantage: Goblin Warrior Helps.",
+      "Goblin Warrior 2's Stealth check: 21; Advantage: Goblin Warrior Helps.",
     );
     expect(s.encounter().helps).toEqual([]);
   });

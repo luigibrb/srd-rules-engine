@@ -264,6 +264,8 @@ conditions ending with it, and Rage ending when it isn't extended.
 npx srd-rules build                    # interactive level 1 character builder
 npx srd-rules build --load characters/aerin.json --seed 7
 npx srd-rules play --load characters/aerin.json   # track HP, slots, items in play
+npx srd-rules fight --load characters/aerin.json --load characters/brakka.json \
+  --monster goblin-warrior --monster goblin-warrior --ask   # run an encounter
 npx srd-rules serve --port 8000        # HTTP API
 npx srd-rules validate my-homebrew/    # check a content pack
 npx srd-rules build --content my-homebrew/   # build with homebrew layered over the SRD
@@ -298,6 +300,18 @@ reason.
 `prep 1` (today's prepared spells), `add weapon-1 base=longsword`, `equip 3`, `attune 3`,
 `money +5gp`; `help` lists them.
 `save` writes `characters/<name>.state.json`; resume it with `--state`.
+
+`fight` runs an encounter: the characters given with `--load` (each resuming its play-mode
+state file, if there is one) against the `--monster`s. Initiative is rolled, and every turn
+shows the order with HP, AC, conditions and Concentration. Whoever's turn it is acts with short
+commands (`attack goblin greatsword`, `cast fireball 2 3`, `feature second wind`, `dodge`,
+`help brakka`, `grapple 2`, `use fire breath brakka lute`); `as dragon legend pounce brakka`
+acts for someone else (legendary actions, reactions). Targets are ids, names, numbers from the
+order, or the start of a word ("dragon"). `options` lists what a combatant can do. With `--ask`,
+decisions after a roll are y/n questions that show the roll, defaulting to the engine's
+recommendation; `ask on|off` changes it mid-fight, for everyone or one combatant. `save` (or
+quitting) writes the characters' state files and `encounter.json`; resume with
+`--encounter characters/encounter.json`.
 
 ## HTTP API
 

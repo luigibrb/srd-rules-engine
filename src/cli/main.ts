@@ -3,22 +3,26 @@
  *
  *   srd-rules build     [--load file.json] [--seed N] [--no-color] [--save-dir dir] [--content dir]...
  *   srd-rules play      --load build.json [--state file.state.json] [--seed N] [--save-dir dir]
+ *   srd-rules fight     --load a.json [--load b.json]... --monster id... [--ask] [--encounter file]
  *   srd-rules serve     [--port 8000] [--host 127.0.0.1] [--cors] [--content dir]...
  *   srd-rules validate  <content dir>...
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { type Catalog, ContentError, createCatalog } from "../content/catalog";
 import { loadContentPack } from "../content/load";
 import { srdPack } from "../content/srd";
 import { createHandler } from "../http/index";
 import { serveNode } from "../http/node-server";
-import { parseBuild } from "../models/build";
+import { type CharacterBuild, parseBuild } from "../models/build";
+import { parseEncounter } from "../models/encounter";
 import { parseState } from "../models/state";
 import { mathRng, seededRng } from "../rules/rng";
 import { BuilderApp } from "./builder";
 import { Console } from "./console";
+import { FightApp, slugOf } from "./fight";
 import { PlayApp } from "./play";
 
 const USAGE = `Usage: srd-rules <command> [options]
@@ -26,12 +30,17 @@ const USAGE = `Usage: srd-rules <command> [options]
 Commands:
   build      Interactive character builder (default)
   play       Track a built character in play: HP, slots, conditions, inventory
+  fight      Run an encounter: saved characters against SRD monsters
   serve      Start the HTTP API
   validate   Check content directories (e.g. homebrew) against the schemas
 
 Options:
   --content <dir>   Layer a content directory over the SRD (repeatable)
-  --load <file>     build: resume a saved build (JSON); play: the build to play
+  --load <file>     build: resume a saved build (JSON); play: the build to play;
+                    fight: a character (repeatable; its saved state is used if there is one)
+  --monster <id>    fight: add an SRD monster (repeatable)
+  --encounter <f>   fight: resume a saved encounter
+  --ask             fight: players decide after a roll (Bardic Inspiration, Legendary Resistance)
   --state <file>    play: resume a saved state (default: a fresh one)
   --seed <n>        build/play: seed for dice rolls
   --save-dir <dir>  build/play: where to save (default: characters)
@@ -47,7 +56,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     allowPositionals: true,
     options: {
       content: { type: "string", multiple: true, default: [] },
-      load: { type: "string" },
+      load: { type: "string", multiple: true, default: [] },
+      monster: { type: "string", multiple: true, default: [] },
+      encounter: { type: "string" },
+      ask: { type: "boolean", default: false },
       seed: { type: "string" },
       state: { type: "string" },
       "save-dir": { type: "string", default: "characters" },
@@ -69,9 +81,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
 
   switch (command) {
     case "build": {
-      const build = values.load
-        ? parseBuild(JSON.parse(readFileSync(values.load, "utf-8")))
-        : undefined;
+      const first = values.load?.[0];
+      const build = first ? parseBuild(JSON.parse(readFileSync(first, "utf-8"))) : undefined;
       const con = new Console({ color: values["no-color"] ? false : undefined });
       const app = new BuilderApp(con, catalog(), {
         build,
@@ -83,11 +94,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       return 0;
     }
     case "play": {
-      if (!values.load) {
+      const first = values.load?.[0];
+      if (!first) {
         process.stderr.write("play: give the build with --load <file>\n");
         return 2;
       }
-      const build = parseBuild(JSON.parse(readFileSync(values.load, "utf-8")));
+      const build = parseBuild(JSON.parse(readFileSync(first, "utf-8")));
       const state = values.state
         ? parseState(JSON.parse(readFileSync(values.state, "utf-8")))
         : undefined;
@@ -96,6 +108,37 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         state,
         rng: values.seed !== undefined ? seededRng(Number(values.seed)) : mathRng,
         saveDir: values["save-dir"],
+      });
+      await app.run();
+      process.stdin.destroy();
+      return 0;
+    }
+    case "fight": {
+      const saveDir = values["save-dir"] ?? "characters";
+      const builds: CharacterBuild[] = (values.load ?? []).map((file) =>
+        parseBuild(JSON.parse(readFileSync(file, "utf-8"))),
+      );
+      // Each character resumes from its play-mode state file, when there is one.
+      const states = Object.fromEntries(
+        builds.flatMap((b) => {
+          const path = join(saveDir, `${slugOf(b.name)}.state.json`);
+          return existsSync(path)
+            ? [[slugOf(b.name), parseState(JSON.parse(readFileSync(path, "utf-8")))]]
+            : [];
+        }),
+      );
+      const encounter = values.encounter
+        ? parseEncounter(JSON.parse(readFileSync(values.encounter, "utf-8")))
+        : undefined;
+      const con = new Console({ color: values["no-color"] ? false : undefined });
+      const app = new FightApp(con, catalog(), {
+        builds,
+        states,
+        monsters: values.monster,
+        encounter,
+        rng: values.seed !== undefined ? seededRng(Number(values.seed)) : mathRng,
+        saveDir,
+        ask: values.ask,
       });
       await app.run();
       process.stdin.destroy();
