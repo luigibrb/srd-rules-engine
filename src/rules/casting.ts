@@ -177,19 +177,41 @@ export function castSpell(
     }
   }
 
+  // Spell damage bonuses from features (Potent Spellcasting): an ability modifier added to the
+  // first damage part, to every roll or to the first one only (`one_roll`).
+  const types = new Set(parts.map((p) => p.type));
+  const matching = caster.spell_damage.filter(
+    (d) =>
+      parts.length > 0 &&
+      (!d.cantrip || cantrip) &&
+      (d.list === null || spell.lists.includes(d.list)) &&
+      (d.school === null || spell.school.toLowerCase() === d.school) &&
+      (d.damage_type === null || types.has(d.damage_type)),
+  );
+  const extra = (first: boolean) =>
+    matching.reduce((sum, d) => sum + (!d.one_roll || first ? d.bonus : 0), 0);
+  const partsFor = (first: boolean): DamagePart[] => {
+    const add = extra(first);
+    return add && parts[0]
+      ? [{ ...parts[0], bonus: parts[0].bonus + add }, ...parts.slice(1)]
+      : parts;
+  };
+  // Potent Cantrip: a cantrip that misses or is saved against still deals half damage.
+  const potent = cantrip && caster.rules.includes("potent_cantrip");
+
   // Indices into `targets`: every beam at the one target, or one entry per target.
   const aimed =
     beams > 1 && targets.length === 1 ? Array<number>(beams).fill(0) : [...targets.keys()];
   const results: SpellTargetResult[] = [];
   let shared: RolledDamage | null = null;
   const sharedDamage = () => {
-    shared ??= parts.length && targets.length ? rollDamage(parts, { rng }) : null;
+    shared ??= parts.length && targets.length ? rollDamage(partsFor(true), { rng }) : null;
     return shared;
   };
 
   if (m.attack) {
     const bonus = line?.attack_bonus ?? 0;
-    for (const index of aimed) {
+    for (const [beam, index] of aimed.entries()) {
       const target = targets[index] as Combatant;
       // Conditions change the roll like a weapon attack's; a melee spell attack is within 5 ft.
       const effective = attackMode(caster, target, { mode, within_5ft: m.attack === "melee" });
@@ -201,8 +223,11 @@ export function castSpell(
       const reasons = effective.reasons;
       const attack = { roll, total, hit, critical_hit, critical_miss, reasons };
       const rolled =
-        hit && parts.length ? rollDamage(parts, { critical: critical_hit, rng }) : null;
-      const instances = rolled ? toInstances(rolled) : [];
+        (hit || potent) && parts.length
+          ? rollDamage(partsFor(beam === 0), { critical: critical_hit, rng })
+          : null;
+      let instances = rolled ? toInstances(rolled) : [];
+      if (!hit) instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
       const conditions = hit ? conditionsOn(m, "hit") : [];
       const r = { attack, instances, critical: critical_hit, conditions };
       results.push(targetResult(index, target, r));
@@ -213,7 +238,7 @@ export function castSpell(
       dc: line?.save_dc ?? 0,
       conditions: conditionsOn(m, "failed_save"),
     };
-    const resolved = resolveSave(effect, parts, targets, rng);
+    const resolved = resolveSave(effect, partsFor(true), targets, rng, potent);
     shared = resolved.damage;
     results.push(...resolved.targets);
   } else {
@@ -339,18 +364,22 @@ function resolveSave(
   parts: readonly DamagePart[],
   targets: readonly Combatant[],
   rng: Rng,
+  potent = false,
 ): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
   const saves = targets.map((t) => rollSavingThrow(t, effect.ability, effect.dc, { rng }));
   const damage = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
   const results = targets.map((target, i) => {
     const save = saves[i] as SaveResult;
     let instances = damage ? toInstances(damage) : [];
-    if (save.success) {
-      instances =
-        effect.on_success === "half"
-          ? instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }))
-          : [];
-    }
+    const half = () => instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
+    // Evasion: no damage on a success and half on a failure, for a Dexterity save that halves.
+    const evasion =
+      effect.ability === "dex" &&
+      effect.on_success === "half" &&
+      target.rules.includes("evasion") &&
+      !target.conditions.includes("incapacitated");
+    if (save.success) instances = effect.on_success === "half" || potent ? half() : [];
+    if (evasion) instances = save.success ? [] : half();
     const conditions = save.success ? [] : [...effect.conditions];
     return targetResult(i, target, { save, instances, conditions });
   });

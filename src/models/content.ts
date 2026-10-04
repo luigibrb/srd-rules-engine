@@ -218,9 +218,21 @@ export type DamageType = (typeof DAMAGE_TYPES)[number];
 
 const Dice = z.string().regex(/^\d+d\d+$/, "dice like 8d6");
 
-/** What a feature can give Advantage on: `save.<ability>` or `check.<ability>`. */
-export type AdvantageTarget = `save.${Ability}` | `check.${Ability}`;
+/**
+ * What a feature can give Advantage on: `save.<ability>`, `check.<ability>`, `initiative`,
+ * `attack.str` (attack rolls using Strength), or `attacked` (attack rolls against you: Reckless
+ * Attack's price).
+ */
+export type AdvantageTarget =
+  | `save.${Ability}`
+  | `check.${Ability}`
+  | "initiative"
+  | "attack.str"
+  | "attacked";
 export const ADVANTAGE_TARGETS: readonly AdvantageTarget[] = [
+  "initiative",
+  "attack.str",
+  "attacked",
   ...ABILITIES.map((a) => `save.${a}` as const),
   ...ABILITIES.map((a) => `check.${a}` as const),
 ];
@@ -235,10 +247,14 @@ export const ADVANTAGE_TARGETS: readonly AdvantageTarget[] = [
 export const DamageRiderSchema = z.strictObject({
   id: z.string(),
   name: z.string(),
+  /**
+   * `{progression, die}`: that many dice of the column's value (Frenzy: "a number of d6s equal
+   * to your Rage Damage bonus").
+   */
   damage: z.union([
     Dice,
     z.string().regex(/^[+-]\d+$/, "a flat amount like +2"),
-    z.strictObject({ progression: z.string() }),
+    z.strictObject({ progression: z.string(), die: z.int().min(2).optional() }),
   ]),
   /** The weapon's damage type, a type, or a choice of types made when it's applied. */
   type: z
@@ -255,10 +271,53 @@ export const DamageRiderSchema = z.strictObject({
     .prefault({}),
   automatic: z.boolean().default(false),
   once_per_turn: z.boolean().default(false),
-  /** Sneak Attack: Advantage on the roll, or an ally next to the target (and no Disadvantage). */
-  requires: z.enum(["advantage_or_ally"]).nullable().default(null),
+  /**
+   * Sneak Attack: Advantage on the roll, or an ally next to the target (and no Disadvantage);
+   * `target_damaged`: the target is missing any of its Hit Points (Colossus Slayer).
+   */
+  requires: z.enum(["advantage_or_ally", "target_damaged"]).nullable().default(null),
+  /** Only while all these toggles (by id) are active: Frenzy needs `rage` and `reckless-attack`. */
+  while_active: z.array(z.string()).default([]),
 });
 export type DamageRider = z.infer<typeof DamageRiderSchema>;
+
+/**
+ * Rules in code that a feature switches on (listed under "Named rules in code" in
+ * ARCHITECTURE.md): `evasion` (Dexterity saves for half damage: none on a success, half on a
+ * failure), `reliable_talent` (a d20 of 9 or lower counts as 10 on checks with a skill you're
+ * proficient in), `potent_cantrip` (a cantrip that misses, or is saved against, still deals half
+ * damage).
+ */
+export const FEATURE_RULES = ["evasion", "reliable_talent", "potent_cantrip"] as const;
+export type FeatureRule = (typeof FEATURE_RULES)[number];
+
+/**
+ * An ability modifier added to spell damage (Potent Spellcasting: Wisdom to Cleric cantrips;
+ * Empowered Evocation: Intelligence to Wizard evocation spells), to the spells matching every
+ * filter given.
+ */
+export const SpellDamageSchema = z.strictObject({
+  name: z.string(),
+  ability: z.enum(ABILITIES),
+  cantrip: z.boolean().default(false),
+  list: z.string().nullable().default(null),
+  school: z.string().nullable().default(null),
+  /** Spells dealing this damage type (Elemental Affinity). */
+  damage_type: z.enum(DAMAGE_TYPES).nullable().default(null),
+  /** To "one damage roll of that spell" (the first beam), not to each. */
+  one_roll: z.boolean().default(false),
+});
+export type SpellDamage = z.infer<typeof SpellDamageSchema>;
+
+/** An Advantage, unless the character has one of these conditions (Danger Sense: Incapacitated). */
+export const AdvantageGrantSchema = z.union([
+  z.enum(ADVANTAGE_TARGETS as [AdvantageTarget, ...AdvantageTarget[]]),
+  z.strictObject({
+    target: z.enum(ADVANTAGE_TARGETS as [AdvantageTarget, ...AdvantageTarget[]]),
+    unless: z.array(z.string()).default([]),
+  }),
+]);
+export type AdvantageGrant = AdvantageTarget | { target: AdvantageTarget; unless: string[] };
 
 export const TraitSchema = z.strictObject({ name: z.string(), text: z.string() });
 export type Trait = z.infer<typeof TraitSchema>;
@@ -430,6 +489,8 @@ export interface ToggleDef {
    * (Rage: an attack roll, forcing a save, or a Bonus Action), except the turn it started.
    */
   extends_each_turn: boolean;
+  /** In an encounter, it ends at the start of your next turn (Reckless Attack). */
+  ends_at_turn_start: boolean;
 }
 
 export interface Grants {
@@ -455,8 +516,12 @@ export interface Grants {
   effects: Effect[];
   /** Extra damage on some attacks. */
   damage_riders: DamageRider[];
-  /** Advantage on saving throws or ability checks with an ability. */
-  advantages: AdvantageTarget[];
+  /** Advantage on saving throws, ability checks, Initiative or attack rolls. */
+  advantages: AdvantageGrant[];
+  /** Rules in code it switches on (Evasion). */
+  rules: FeatureRule[];
+  /** Ability modifiers added to some spells' damage. */
+  spell_damage: SpellDamage[];
   /** Features you switch on in play (Rage); their grants apply while active. */
   toggles: ToggleDef[];
   items: ItemGrant[];
@@ -554,6 +619,7 @@ const ToggleSchema: z.ZodType<ToggleDef, unknown> = z.lazy(() =>
     ends_on: z.array(z.string()).default([]),
     no_spells: z.boolean().default(false),
     extends_each_turn: z.boolean().default(false),
+    ends_at_turn_start: z.boolean().default(false),
   }),
 );
 
@@ -578,9 +644,9 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       on_long_rest: z.array(z.enum(["heroic_inspiration"])).default([]),
       effects: z.array(EffectSchema).default([]),
       damage_riders: z.array(DamageRiderSchema).default([]),
-      advantages: z
-        .array(z.enum(ADVANTAGE_TARGETS as [AdvantageTarget, ...AdvantageTarget[]]))
-        .default([]),
+      advantages: z.array(AdvantageGrantSchema).default([]),
+      rules: z.array(z.enum(FEATURE_RULES)).default([]),
+      spell_damage: z.array(SpellDamageSchema).default([]),
       toggles: z.array(ToggleSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),

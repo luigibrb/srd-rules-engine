@@ -234,10 +234,31 @@ features:
       - id: potent-spellcasting
         name: Potent Spellcasting
         description: Add your Wisdom modifier to the damage of your Druid cantrips.
+        grants:
+          spell_damage:
+          - {name: Potent Spellcasting, ability: wis, cantrip: true, list: druid}
       - id: primal-strike
         name: Primal Strike
         description: Once per turn, a weapon or Beast-form hit deals an extra 1d8 Cold, Fire, Lightning,
           or Thunder damage.
+        grants:
+          damage_riders:
+          - id: primal-strike
+            name: Primal Strike
+            damage: 1d8
+            type: [cold, fire, lightning, thunder]
+            applies_to: {weapon: true}
+            once_per_turn: true
+          at_class_level:
+          - level: 15
+            grants:
+              damage_riders:
+              - id: primal-strike
+                name: Primal Strike
+                damage: 2d8
+                type: [cold, fire, lightning, thunder]
+                applies_to: {weapon: true}
+                once_per_turn: true
   '8':
     choices:
     - id: feat

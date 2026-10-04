@@ -555,6 +555,17 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Grappled's exception for the grappler needs the grappler known: an encounter effect with it as
   the source. Otherwise the Disadvantage applies to every target.
 
+**Class features**
+
+- Reckless Attack is switched on by the caller, who decides it's the first attack roll of the
+  turn; in an encounter it ends at the start of the barbarian's next turn.
+- Frenzy's "first target you hit on your turn" is a once-per-turn rider offered while Rage and
+  Reckless Attack are both on.
+- Primal Strike applies to weapon attacks; Beast-form attacks aren't attack lines.
+- Empowered Evocation's and Elemental Affinity's "one damage roll" is the first damage part of
+  the first roll (the first beam of a multi-beam spell); Potent Spellcasting adds to every roll.
+- Reliable Talent covers skill checks; tool proficiencies aren't checks the engine rolls.
+
 **Encounters**
 
 - Initiative ties go to the higher Initiative bonus, then the order combatants joined (the SRD
@@ -600,6 +611,10 @@ Most rules are data; these are code, by name:
   weapons, only without armor or Shield) is triggered by the `martial_arts.die` effect; Great
   Weapon Fighting adds a note to two-handed melee attacks; Two-Weapon Fighting keeps the ability
   modifier in a Light weapon's `light_extra_damage_parts`.
+- Feature `rules` (a closed list, `FEATURE_RULES`): `evasion` in `resolveSave`
+  (`rules/casting.ts`), `reliable_talent` in `rollAbilityCheck`, `potent_cantrip` in
+  `castSpell`. A monster's trait named "Evasion" (the Assassin) sets `evasion`.
+- `attackMode` reads the `attack.str` and `attacked` Advantages (Reckless Attack).
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to
   all damage), `unconscious` is added at 0 HP and removed when you regain Hit Points, and
   `incapacitated` (or a condition that implies it) ends Concentration and toggles with `ends_on`.

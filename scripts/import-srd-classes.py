@@ -248,6 +248,15 @@ def extra_attack(n):
 
 FIGHTING_STYLE_FEAT = {"id": "style", "label": "Fighting Style feat", "kind": "feat", "category": "fighting_style"}
 
+def PRIMAL_STRIKE(dice):
+    return {"id": "primal-strike", "name": "Primal Strike", "damage": dice,
+            "type": ["cold", "fire", "lightning", "thunder"], "applies_to": {"weapon": True}, "once_per_turn": True}
+
+
+def POTENT_SPELLCASTING(cls):
+    return {"spell_damage": [{"name": "Potent Spellcasting", "ability": "wis", "cantrip": True, "list": cls}]}
+
+
 def DIVINE_STRIKE(dice):
     return {"id": "divine-strike", "name": "Divine Strike", "damage": dice, "type": ["necrotic", "radiant"],
             "applies_to": {"weapon": True}, "once_per_turn": True}
@@ -255,6 +264,11 @@ def DIVINE_STRIKE(dice):
 
 OVERLAY = {
     "barbarian": {
+        2: {"advantages": [{"target": "save.dex", "unless": ["incapacitated"]}],  # Danger Sense
+            # Reckless Attack: until the start of your next turn.
+            "toggles": [{"id": "reckless-attack", "name": "Reckless Attack", "ends_at_turn_start": True,
+                         "grants": {"advantages": ["attack.str", "attacked"]}}]},
+        7: {"advantages": ["initiative"]},  # Feral Instinct
         3: {"choices": [{"id": "primal_knowledge", "label": "Primal Knowledge skill", "kind": "skill",
                          "allowed": ["animal-handling", "athletics", "intimidation", "nature", "perception", "survival"]}]},
         5: {"effects": [extra_attack(2), {"target": "speed", "value": 10, "when": "not_wearing_heavy_armor"}]},
@@ -274,14 +288,19 @@ OVERLAY = {
                         # Improved Blessed Strikes: 2d8 (same id: replaces the 1d8).
                         "at_class_level": [{"level": 14, "grants": {"damage_riders": [DIVINE_STRIKE("2d8")]}}]}},
             {"id": "potent-spellcasting", "name": "Potent Spellcasting",
-             "description": "Add your Wisdom modifier to the damage of your Cleric cantrips."}]}]},
+             "description": "Add your Wisdom modifier to the damage of your Cleric cantrips.",
+             "grants": POTENT_SPELLCASTING("cleric")}]}]},
     },
     "druid": {
         7: {"choices": [{"id": "elemental_fury", "label": "Elemental Fury", "kind": "option", "options": [
             {"id": "potent-spellcasting", "name": "Potent Spellcasting",
-             "description": "Add your Wisdom modifier to the damage of your Druid cantrips."},
+             "description": "Add your Wisdom modifier to the damage of your Druid cantrips.",
+             "grants": POTENT_SPELLCASTING("druid")},
             {"id": "primal-strike", "name": "Primal Strike",
-             "description": "Once per turn, a weapon or Beast-form hit deals an extra 1d8 Cold, Fire, Lightning, or Thunder damage."}]}]},
+             "description": "Once per turn, a weapon or Beast-form hit deals an extra 1d8 Cold, Fire, Lightning, or Thunder damage.",
+             "grants": {"damage_riders": [PRIMAL_STRIKE("1d8")],
+                        # Improved Elemental Fury: 2d8 (same id: replaces the 1d8).
+                        "at_class_level": [{"level": 15, "grants": {"damage_riders": [PRIMAL_STRIKE("2d8")]}}]}}]}]},
     },
     "fighter": {
         5: {"effects": [extra_attack(2)]},
@@ -292,6 +311,7 @@ OVERLAY = {
         2: {"effects": [{"target": "speed", "value": 10, "when": "unarmored"}]},
         5: {"effects": [extra_attack(2), {"target": "martial_arts.die", "op": "max", "value": 8}]},
         6: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},
+        7: {"rules": ["evasion"]},
         10: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},
         11: {"effects": [{"target": "martial_arts.die", "op": "max", "value": 10}]},
         14: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}],
@@ -331,6 +351,7 @@ OVERLAY = {
     },
     "rogue": {
         6: {"choices": [expertise(2, "Rogue Expertise")]},
+        7: {"rules": ["evasion", "reliable_talent"]},
         15: {"saving_throws": ["wis", "cha"]},
     },
     "sorcerer": {
@@ -399,7 +420,12 @@ EVOCATION_SAVANT = {lvl: {"choices": [{"id": "evocation_savant", "label": "Evoca
                     for lvl, sl in [(5, 3), (7, 4), (9, 5), (11, 6), (13, 7), (15, 8), (17, 9)]}
 
 SUBCLASS_OVERLAY = {
-    "path-of-the-berserker": {},
+    "path-of-the-berserker": {
+        # Frenzy: Reckless Attack while raging; "a number of d6s equal to your Rage Damage bonus".
+        3: {"damage_riders": [{"id": "frenzy", "name": "Frenzy", "damage": {"progression": "Rage Damage", "die": 6},
+                               "applies_to": {"ability": "str"}, "once_per_turn": True,
+                               "while_active": ["rage", "reckless-attack"]}]},
+    },
     "college-of-lore": {
         3: {"choices": [{"id": "bonus_proficiencies", "label": "Bonus Proficiencies (skills)", "kind": "skill", "count": 3}]},
         6: {"choices": [{"id": "magical_discoveries", "label": "Magical Discoveries", "kind": "spell", "count": 2,
@@ -420,7 +446,10 @@ SUBCLASS_OVERLAY = {
     "hunter": {
         3: {"choices": [{"id": "hunters_prey", "label": "Hunter's Prey", "kind": "option", "rest_change": "short", "options": [
             {"id": "colossus-slayer", "name": "Colossus Slayer",
-             "description": "Once per turn, +1d8 damage to a creature that's missing any of its Hit Points."},
+             "description": "Once per turn, +1d8 damage to a creature that's missing any of its Hit Points.",
+             "grants": {"damage_riders": [{"id": "colossus-slayer", "name": "Colossus Slayer", "damage": "1d8",
+                                           "applies_to": {"weapon": True}, "once_per_turn": True,
+                                           "requires": "target_damaged"}]}},
             {"id": "horde-breaker", "name": "Horde Breaker",
              "description": "Once per turn, attack another creature within 5 ft of the first target and within reach."}]}]},
         7: {"choices": [{"id": "defensive_tactics", "label": "Defensive Tactics", "kind": "option", "rest_change": "short", "options": [
@@ -436,13 +465,19 @@ SUBCLASS_OVERLAY = {
             "ac_calculations": [{"name": "Draconic Resilience", "abilities": ["dex", "cha"]}]},
         6: {"choices": [{"id": "elemental_affinity", "label": "Elemental Affinity", "kind": "option", "options": [
             {"id": t, "name": t.title(), "description": f"Resistance to {t.title()} damage; add Cha to one damage roll of spells dealing it.",
-             "grants": {"resistances": [t]}} for t in ["acid", "cold", "fire", "lightning", "poison"]]}]},
+             "grants": {"resistances": [t],
+                        "spell_damage": [{"name": "Elemental Affinity", "ability": "cha", "damage_type": t,
+                                          "one_roll": True}]}}
+            for t in ["acid", "cold", "fire", "lightning", "poison"]]}]},
     },
     "fiend-patron": {3: spell_grants(FIEND)},
     "evoker": {
         3: {"choices": [{"id": "evocation_savant", "label": "Evocation Savant (free evocation spells)", "kind": "spell",
                          "count": 2, "spell_list": "wizard", "school": "evocation", "max_spell_level": 2,
-                         "tag": "wizard-spellbook"}]},
+                         "tag": "wizard-spellbook"}],
+            "rules": ["potent_cantrip"]},
+        10: {"spell_damage": [{"name": "Empowered Evocation", "ability": "int", "list": "wizard",
+                               "school": "evocation", "one_roll": True}]},
         **EVOCATION_SAVANT,
     },
 }

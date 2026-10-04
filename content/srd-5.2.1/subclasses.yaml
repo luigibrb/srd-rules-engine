@@ -14,6 +14,13 @@
           target you hit on your turn with a Strength-based attack. To determine the extra damage, roll
           a number of d6s equal to your Rage Damage bonus, and add them together. The damage has the same
           type as the weapon or Unarmed Strike used for the attack.
+      damage_riders:
+      - id: frenzy
+        name: Frenzy
+        damage: {progression: Rage Damage, die: 6}
+        applies_to: {ability: str}
+        once_per_turn: true
+        while_active: [rage, reckless-attack]
     '6':
       traits:
       - name: Mindless Rage
@@ -632,6 +639,14 @@
         - id: colossus-slayer
           name: Colossus Slayer
           description: Once per turn, +1d8 damage to a creature that's missing any of its Hit Points.
+          grants:
+            damage_riders:
+            - id: colossus-slayer
+              name: Colossus Slayer
+              damage: 1d8
+              applies_to: {weapon: true}
+              once_per_turn: true
+              requires: target_damaged
         - id: horde-breaker
           name: Horde Breaker
           description: Once per turn, attack another creature within 5 ft of the first target and within
@@ -797,26 +812,36 @@
           description: Resistance to Acid damage; add Cha to one damage roll of spells dealing it.
           grants:
             resistances: [acid]
+            spell_damage:
+            - {name: Elemental Affinity, ability: cha, damage_type: acid, one_roll: true}
         - id: cold
           name: Cold
           description: Resistance to Cold damage; add Cha to one damage roll of spells dealing it.
           grants:
             resistances: [cold]
+            spell_damage:
+            - {name: Elemental Affinity, ability: cha, damage_type: cold, one_roll: true}
         - id: fire
           name: Fire
           description: Resistance to Fire damage; add Cha to one damage roll of spells dealing it.
           grants:
             resistances: [fire]
+            spell_damage:
+            - {name: Elemental Affinity, ability: cha, damage_type: fire, one_roll: true}
         - id: lightning
           name: Lightning
           description: Resistance to Lightning damage; add Cha to one damage roll of spells dealing it.
           grants:
             resistances: [lightning]
+            spell_damage:
+            - {name: Elemental Affinity, ability: cha, damage_type: lightning, one_roll: true}
         - id: poison
           name: Poison
           description: Resistance to Poison damage; add Cha to one damage roll of spells dealing it.
           grants:
             resistances: [poison]
+            spell_damage:
+            - {name: Elemental Affinity, ability: cha, damage_type: poison, one_roll: true}
     '14':
       traits:
       - name: Dragon Wings
@@ -951,6 +976,7 @@
         school: evocation
         max_spell_level: 2
         tag: wizard-spellbook
+      rules: [potent_cantrip]
     '5':
       choices:
       - id: evocation_savant
@@ -991,6 +1017,12 @@
       - name: Empowered Evocation
         text: Whenever you cast a Wizard spell from the Evocation school, you can add your Intelligence
           modifier to one damage roll of that spell.
+      spell_damage:
+      - name: Empowered Evocation
+        ability: int
+        list: wizard
+        school: evocation
+        one_roll: true
     '11':
       choices:
       - id: evocation_savant

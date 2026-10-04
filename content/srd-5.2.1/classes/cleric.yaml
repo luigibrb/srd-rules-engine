@@ -197,6 +197,9 @@ features:
       - id: potent-spellcasting
         name: Potent Spellcasting
         description: Add your Wisdom modifier to the damage of your Cleric cantrips.
+        grants:
+          spell_damage:
+          - {name: Potent Spellcasting, ability: wis, cantrip: true, list: cleric}
   '8':
     choices:
     - id: feat

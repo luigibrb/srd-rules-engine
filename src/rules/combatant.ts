@@ -15,6 +15,7 @@ import {
   type AdvantageTarget,
   type ConditionDef,
   DAMAGE_TYPES,
+  type FeatureRule,
   type MonsterDamage,
   type MonsterDef,
   SKILL_ABILITY,
@@ -93,6 +94,23 @@ export interface Combatant {
   readonly legendary_resistance: number;
   /** Its size, lowercase (`medium`; the first of a stat block's "Medium or Small"), if known. */
   readonly size: string | null;
+  /** Rules in code its features switch on (`evasion`, `reliable_talent`, `potent_cantrip`). */
+  readonly rules: readonly FeatureRule[];
+  /** Skills it's proficient in (Reliable Talent). */
+  readonly proficient_skills: readonly string[];
+  /** Ability modifiers its features add to some spells' damage (Potent Spellcasting). */
+  readonly spell_damage: readonly SpellDamageBonus[];
+}
+
+/** An ability modifier added to the damage of matching spells, worked out (`bonus`). */
+export interface SpellDamageBonus {
+  readonly name: string;
+  readonly bonus: number;
+  readonly cantrip: boolean;
+  readonly list: string | null;
+  readonly school: string | null;
+  readonly damage_type: string | null;
+  readonly one_roll: boolean;
 }
 
 /** A legendary action: an attack it makes, an action it uses, a saving throw effect, or text. */
@@ -230,6 +248,8 @@ export interface AttackModeOptions {
   against_source_of?: readonly string[];
   /** More reasons for Advantage or Disadvantage (Help, Dodge…). */
   modes?: readonly ModeReason[];
+  /** The attack's ability (`attack.str` Advantage: Reckless Attack); `null` for a spell. */
+  ability?: Ability | null;
 }
 
 /**
@@ -239,9 +259,22 @@ export interface AttackModeOptions {
 export function attackMode(
   attacker: Combatant,
   target: Combatant,
-  { mode = "normal", within_5ft, against_source_of = [], modes = [] }: AttackModeOptions,
+  {
+    mode = "normal",
+    within_5ft,
+    against_source_of = [],
+    modes = [],
+    ability = null,
+  }: AttackModeOptions,
 ): { mode: RollMode; reasons: string[]; critical_on_hit: boolean } {
   const reasons: ModeReason[] = [...modes];
+  // Reckless Attack: Advantage on attack rolls using Strength, and on attack rolls against you.
+  if (ability === "str" && attacker.advantages.includes("attack.str")) {
+    reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
+  }
+  if (target.advantages.includes("attacked")) {
+    reasons.push({ mode: "advantage", reason: `${target.name} attacks recklessly` });
+  }
   for (const c of attacker.condition_rolls.attack_rolls) {
     if (c.except_against_source && against_source_of.includes(c.id)) continue;
     reasons.push({ mode: c.mode, reason: `${attacker.name} is ${c.condition}` });
@@ -386,6 +419,7 @@ export function makeAttack(
     within_5ft: within_5ft ?? line.kind === "melee",
     against_source_of,
     modes,
+    ability: line.ability,
   });
   if (light_extra && !line.light_extra_damage_parts) {
     throw new RangeError(`${line.name} isn't a Light weapon`);
@@ -399,6 +433,9 @@ export function makeAttack(
   for (const request of riders) {
     const rider = line.riders.find((r) => r.id === request.rider || r.name === request.rider);
     if (!rider) throw new RangeError(`${line.name} has no rider '${request.rider}'`);
+    if (rider.requires === "target_damaged" && target.hp >= target.max_hp) {
+      throw new RangeError(`${rider.name} needs a target that's missing some of its Hit Points`);
+    }
     if (rider.requires === "advantage_or_ally") {
       const ok =
         effective.mode === "advantage" || (ally_adjacent && effective.mode !== "disadvantage");
@@ -565,7 +602,16 @@ export function rollAbilityCheck(
     reasons.push({ mode: c.mode, reason: `${combatant.name} is ${c.condition}` });
   }
   const resolved = resolveMode(mode, reasons);
-  const roll = rollD20({ mode: resolved.mode, rng });
+  let roll = rollD20({ mode: resolved.mode, rng });
+  // Reliable Talent: "treat a d20 roll of 9 or lower as a 10" with a proficient skill.
+  const reliable =
+    skill !== null &&
+    combatant.rules.includes("reliable_talent") &&
+    combatant.proficient_skills.includes(skill);
+  if (reliable && roll.d20 < 10) {
+    roll = { ...roll, d20: 10 };
+    resolved.reasons.push("Reliable Talent: the d20 counts as 10");
+  }
   const total = roll.d20 + bonus;
   return {
     name: combatant.name,
@@ -630,6 +676,9 @@ export function combatantFromSnapshot(character: Character): Combatant {
     legendary_actions: [],
     legendary_resistance: 0,
     size: null,
+    rules: [],
+    proficient_skills: [],
+    spell_damage: [],
   };
 }
 
@@ -835,5 +884,9 @@ export function combatantFromMonster(
     legendary_actions: legendaryActions,
     legendary_resistance: resistanceLeft,
     size: monster.size.split(" ")[0]?.toLowerCase() || null,
+    // The Assassin's Evasion trait works like the Rogue's feature.
+    rules: monster.traits.some((t) => t.name === "Evasion") ? ["evasion"] : [],
+    proficient_skills: Object.keys(monster.skills),
+    spell_damage: [],
   };
 }

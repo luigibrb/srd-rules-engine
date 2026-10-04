@@ -113,6 +113,15 @@ features:
         your first attack roll on your turn, you can decide to attack recklessly. Doing so gives you Advantage
         on attack rolls using Strength until the start of your next turn, but attack rolls against you
         have Advantage during that time.
+    advantages:
+    - target: save.dex
+      unless: [incapacitated]
+    toggles:
+    - id: reckless-attack
+      name: Reckless Attack
+      ends_at_turn_start: true
+      grants:
+        advantages: [attack.str, attacked]
   '3':
     traits:
     - name: Barbarian Subclass
@@ -156,6 +165,7 @@ features:
       text: Your instincts are so honed that you have Advantage on Initiative rolls.
     - name: Instinctive Pounce
       text: As part of the Bonus Action you take to enter your Rage, you can move up to half your Speed.
+    advantages: [initiative]
   '8':
     choices:
     - id: feat
