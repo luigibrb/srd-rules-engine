@@ -8,14 +8,14 @@
  *
  * Stat block fields (AC, HP, speed, abilities, saves, defenses, CR…) are parsed exactly; anything
  * unexpected throws, so no field is guessed. In actions, attack rolls and saving throw effects
- * (damage, half on a success, conditions on a failure) become `attack` and `save`; everything
- * else stays in the SRD text. Checked by tests/monsters.test.ts (invariants for every stat block,
+ * (damage, half on a success, conditions on a failure) become `attack` and `save`, actions that
+ * cast spells `casts`; everything else stays in the SRD text. Checked by tests/monsters.test.ts (invariants for every stat block,
  * and golden stat blocks compared field by field with the Markdown).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { stringify } from "yaml";
+import { parse, stringify } from "yaml";
 
 const root = join(import.meta.dirname, "..");
 const report = process.argv.includes("--report");
@@ -107,6 +107,8 @@ const FIXES: Record<
   },
 };
 const stats = {
+  castings: 0,
+  castsAsText: [] as string[],
   attacks: 0,
   attacksWithDamage: 0,
   saves: 0,
@@ -387,6 +389,7 @@ function parseBlock(name: string, group: string | null, lines: string[]): Record
     if (section === "Legendary Actions" && intro) monster.legendary_text = intro;
   }
   legendary(monster, where);
+  spellcasting(monster, where);
   return monster;
 }
 
@@ -432,6 +435,158 @@ function legendary(monster: Record<string, unknown>, where: string): void {
     const used = /\buses ([A-Z][\w' -]+?)(?: and|\.|,)/.exec(action.text);
     // "uses Spellcasting to cast Fear" stays text (monster spellcasting isn't modeled yet).
     if (used && !used[1]?.startsWith("Spellcasting")) action.uses = named(used[1] as string);
+  }
+}
+
+/** Catalog spell ids by lowercase name ("Acid Arrow" → `acid-arrow`). */
+const SPELLS = new Map(
+  (
+    parse(readFileSync(join(root, "content/srd-5.2.1/spells.yaml"), "utf-8")) as {
+      id: string;
+      name: string;
+    }[]
+  ).map((s) => [s.name.toLowerCase(), s.id]),
+);
+/** Spell names the SRD Markdown misspells in stat blocks, with the catalog name. */
+const SPELL_NAME_FIXES: Record<string, string> = {
+  "long-strider": "longstrider", // the Druid's list; the spell is "Longstrider" in "Spells"
+};
+const ABILITY_NAME = /^(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)$/;
+/**
+ * "using Charisma as the spellcasting ability (spell save DC 17, +9 to hit with spell attacks)",
+ * or "using the same spellcasting ability as Spellcasting" (`same`).
+ */
+const USING =
+  /using (?:(the same spellcasting ability as Spellcasting)|(\w+) as (?:the )?spell-?casting ability)(?: \((?:spell save DC (\d+))?(?:, )?(?:([+−-]\d+) to hit with spell attacks)?\))?/;
+
+type SpellEntry = { spell: string; level: number | null; per_day: number | null; note: string };
+type Casting = {
+  ability: string;
+  save_dc: number | null;
+  attack_bonus: number | null;
+  spells: SpellEntry[];
+};
+
+/**
+ * "_Acid Arrow_ (level 3 version), _Detect Magic_, or _Fear_" → spells, or `null` when an item
+ * isn't a plain catalog spell (then the action stays text). Commas inside parentheses (a
+ * restriction) don't split; "on itself" becomes the note "self only".
+ */
+function spellItems(list: string, per_day: number | null): SpellEntry[] | null {
+  const items: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of list.replace(/_/g, "")) {
+    if (ch === "(") depth++;
+    if (ch === ")") depth--;
+    if (ch === "," && depth === 0) {
+      items.push(current);
+      current = "";
+    } else current += ch;
+  }
+  items.push(current);
+  const out: SpellEntry[] = [];
+  // "_Bless, Healing Word,_ or _Sanctuary,_ using…": a trailing comma leaves an empty item.
+  for (const raw of items.filter((x) => x.trim())) {
+    // "_Counterspell_ or _Shield_": "or" joins two spells without a comma.
+    for (const piece of raw
+      .trim()
+      .replace(/^or /, "")
+      .split(/ or (?![^(]*\))/)) {
+      const m = /^([A-Z][\w'’ /-]*?)(?: \(([^)]*)\))?( on itself)?$/.exec(piece.trim());
+      const name = m ? (m[1] as string).toLowerCase().replace(/’/g, "'") : "";
+      const id = m && SPELLS.get(SPELL_NAME_FIXES[name] ?? name);
+      if (!m || !id) return null;
+      const level = /^level (\d) version$/.exec(m[2] ?? "");
+      const note = [level ? "" : (m[2] ?? ""), m[3] ? "self only" : ""].filter(Boolean).join("; ");
+      out.push({ spell: id, level: level ? Number(level[1]) : null, per_day, note });
+    }
+  }
+  return out;
+}
+
+/**
+ * Spells as data (SRD "Spellcasting": "a spell of level 1 or higher is always cast at its lowest
+ * possible level and can't be cast at a higher level"):
+ * - the Spellcasting action's lists ("**At Will:**", "**1/Day Each:**"), with its ability, save DC
+ *   and attack bonus;
+ * - other actions that cast spells ("The priest casts _Bless_, _Healing Word_, or _Sanctuary_,
+ *   using the same spellcasting ability as Spellcasting"), whose "(2/Day)" is `per_day`;
+ * - legendary actions that "use Spellcasting to cast _Fear_".
+ * Anything else that casts a spell (twice, or with a condition the sentence adds) stays text and
+ * is listed by `--report`. A Multiattack's "replace one attack with a use of Spellcasting" stays
+ * text too.
+ */
+function spellcasting(monster: Record<string, unknown>, where: string): void {
+  const sections = ["traits", "actions", "bonus_actions", "reactions", "legendary_actions"];
+  const all = sections.flatMap((k) => (monster[k] as Action[] | undefined) ?? []);
+  for (const action of all) {
+    const perDay = /\((\d+)\/Day(?:;[^)]*)?\)$/.exec(action.name);
+    if (perDay && !action.name.startsWith("Legendary Resistance"))
+      action.per_day = Number(perDay[1]);
+  }
+  const main = all.find((a) => a.name === "Spellcasting");
+  const using = (text: string): Omit<Casting, "spells"> | null => {
+    const u = USING.exec(text);
+    if (!u) return null;
+    if (u[1]) {
+      const from = main?.casts as Casting | undefined;
+      if (!from)
+        throw new Error(`${where}: "the same spellcasting ability as Spellcasting" without one`);
+      return { ability: from.ability, save_dc: from.save_dc, attack_bonus: from.attack_bonus };
+    }
+    if (!ABILITY_NAME.test(u[2] as string))
+      throw new Error(`${where}: spellcasting ability '${u[2]}'`);
+    return {
+      ability: ABILITY[u[2] as string] as string,
+      save_dc: u[3] ? Number(u[3]) : null,
+      attack_bonus: u[4] ? int(u[4]) : null,
+    };
+  };
+  // The Spellcasting action first: the others refer to it.
+  if (main) {
+    const [intro, ...lists] = main.text.split("\n").filter((l) => l.trim());
+    const how = using(intro ?? "");
+    if (!how || !/casts one of the following spells/.test(intro ?? "")) {
+      throw new Error(`${where}: can't read the Spellcasting action`);
+    }
+    const spells = lists.flatMap((line) => {
+      const m = /^\*\*(At Will|(\d)\/Day( Each)?):\*\* (.+)$/.exec(line.trim());
+      if (!m) throw new Error(`${where}: Spellcasting line '${line}'`);
+      const items = spellItems(m[4] as string, m[2] ? Number(m[2]) : null);
+      if (!items) throw new Error(`${where}: a Spellcasting spell isn't in the catalog: '${m[4]}'`);
+      if (m[2] && !m[3] && items.length > 1) throw new Error(`${where}: shared uses in '${line}'`);
+      return items;
+    });
+    main.casts = { ...how, spells };
+    stats.castings++;
+  }
+  for (const action of all) {
+    if (action === main || action.name === "Multiattack") continue;
+    if (!/\bcasts? _/.test(action.text)) continue;
+    const viaSpellcasting =
+      /uses Spellcasting to cast (_[^_]+_(?: \(level \d version\))?)( on itself)?/.exec(
+        action.text,
+      );
+    let casting: Casting | null = null;
+    if (viaSpellcasting && main) {
+      const spells = spellItems(`${viaSpellcasting[1]}${viaSpellcasting[2] ?? ""}`, null);
+      const from = main.casts as Casting;
+      if (spells) casting = { ...from, spells };
+    } else {
+      // "The priest casts _Bless_, … or _Sanctuary_, [requiring no … components,] using …"
+      const m =
+        /casts (.+?),?(?: in response to the spell's trigger)?,? (?:requiring no [\w ]+? components,? (?:and )?)?using /.exec(
+          action.text,
+        );
+      const how = m && using(action.text);
+      const spells = m && spellItems(m[1] as string, null);
+      if (how && spells) casting = { ...how, spells };
+    }
+    if (casting) {
+      action.casts = casting;
+      stats.castings++;
+    } else stats.castsAsText.push(`${where}: ${action.name}`);
   }
 }
 
@@ -500,6 +655,9 @@ if (report) {
   console.log(`saving throws left as text: ${stats.unparsedRolls.length}`);
   for (const line of stats.unparsedRolls) console.log(`  ${line}`);
   const noted = monsters.filter((m) => m.defenses_note);
+  console.log(`spellcasting actions as data: ${stats.castings}`);
+  console.log(`actions that cast spells left as text: ${stats.castsAsText.length}`);
+  for (const line of stats.castsAsText) console.log(`  ${line}`);
   console.log(`defenses kept as a note: ${noted.length}`);
   for (const m of noted) console.log(`  ${m.id}: ${m.defenses_note}`);
   process.exit(0);

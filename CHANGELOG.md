@@ -31,6 +31,13 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Monster spellcasting: monster action fields `casts` (the Spellcasting action's lists, other
+  actions that cast spells, legendary actions that use Spellcasting; 97 in the SRD) and `per_day`
+  ("(2/Day)"); `monsterSpells`, `MonsterSpellLine`; monster combatants get a spellcasting line
+  per casting action. The encounter action `cast` works for monsters (`via` picks the action;
+  fixed levels, daily uses, Recharge), `legendary` casts a legendary action's spell, and
+  "(N/Day)" attacks and saving throw effects are limited (`daily_used`). The encounter `cast`
+  action's `targets` is optional.
 - Weapon Mastery properties in encounters: Graze (damage on a miss), Vex, Sap and Slow (encounter
   `masteries`, ending on the attacker's turns), Topple (Constitution save or Prone), Push (noted),
   Cleave (`attack` with `cleave: true`, once per turn; `AttackLine.cleave_damage_parts`), Nick
