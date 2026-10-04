@@ -22,18 +22,15 @@ explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← eve
 
 ## Why it's useful
 
-- **Rules that run the game.** The engine embeds the SRD rules and follows the game flow with
-  them: what's legal, whose turn it is, what a roll does and what it changes. A tool built on it
-  only has to present the game.
-- **One engine for the whole game.** Character creation, play and combat share the same rules,
-  so tools built on it agree with each other.
-- **Explanations built in.** Numbers, refusals and rolls come with their reasons, ready to
-  show to players.
-- **Faithful to the SRD.** Content is reviewed against the SRD text, and every reading the
-  SRD leaves open is documented.
-- **Homebrew without forks.** Your own content is YAML layered on the SRD, validated the same way.
+- **Rules that run the game.** The engine embeds the SRD rules and follows the game flow: what's
+  legal, whose turn it is, what a roll does and what it changes.
+- **One engine for the whole game.** Character creation, play and combat share the same rules.
+- **Explanations built in.** Numbers, refusals and rolls come with their reasons.
+- **Faithful to the SRD.** Content is reviewed against the SRD text, and the readings it leaves
+  open are documented.
+- **Homebrew without forks.** Your content is YAML layered on the SRD, validated the same way.
 - **Any runtime, any language.** Browsers, Node, Deno, Bun and edge workers; other languages
-  through the HTTP API and plain JSON.
+  through the HTTP API.
 
 ## Install
 
