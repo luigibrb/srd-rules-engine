@@ -398,7 +398,15 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     type: z.literal("save_action"),
     id: z.string(),
     ability: z.string(),
-    targets: z.array(z.string()),
+    targets: z.array(z.string()).optional(),
+    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+     * Line); its targets are the positioned creatures in it. */
+    area: z
+      .object({
+        point: z.object({ x: n, y: n }).optional(),
+        toward: z.object({ x: n, y: n }).optional(),
+      })
+      .optional(),
     /** Targets' cover, by id: +2 or +5 to Dexterity saves; Total Cover can't be targeted. */
     cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
   }),
@@ -415,6 +423,14 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     spell: z.string(),
     via: z.string().optional(),
     targets: z.array(z.string()).optional(),
+    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+     * Line); its targets are the positioned creatures in it. */
+    area: z
+      .object({
+        point: z.object({ x: n, y: n }).optional(),
+        toward: z.object({ x: n, y: n }).optional(),
+      })
+      .optional(),
     /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
     cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
     slot_level: n.min(1).max(9).optional(),
@@ -443,6 +459,14 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     action: z.string(),
     target: z.string().optional(),
     targets: z.array(z.string()).optional(),
+    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+     * Line); its targets are the positioned creatures in it. */
+    area: z
+      .object({
+        point: z.object({ x: n, y: n }).optional(),
+        toward: z.object({ x: n, y: n }).optional(),
+      })
+      .optional(),
     attack: z.string().optional(),
     mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     within_5ft: z.boolean().optional(),

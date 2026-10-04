@@ -13,6 +13,7 @@ import {
   ABILITY_NAMES,
   type MonsterDef,
   type Skill,
+  type SpellArea,
   type SpellDef,
   skillName,
 } from "../models/content";
@@ -27,6 +28,13 @@ import {
   type Pending,
 } from "../models/encounter";
 import type { CharacterState, PlayAction } from "../models/state";
+import {
+  type AreaPlacement,
+  areaSquares,
+  distanceToPoint,
+  type GridPoint,
+  inArea,
+} from "../rules/areas";
 import {
   castSpell,
   type SaveActionResult,
@@ -49,6 +57,7 @@ import {
   rollAbilityCheck,
   rollD20,
   rollSavingThrow,
+  type SaveActionLine,
   type SaveResult,
 } from "../rules/combatant";
 import { rollDamage, takeDamage } from "../rules/damage";
@@ -569,6 +578,85 @@ function run(
     });
     return { modes, within_5ft, ally_adjacent };
   };
+  /**
+   * The positioned creatures in an area placed by `c` (rules/areas.ts), after checking that its
+   * point is within `range` feet; a Cube "originating from" `c` (no range) must touch its space.
+   */
+  const areaTargets = (
+    c: EncounterCombatant,
+    area: SpellArea,
+    placement: AreaPlacement,
+    range: number | null,
+    label: string,
+  ): string[] => {
+    if (!c.position) fail(`${c.name} has no position: an area needs positions`);
+    const origin = { position: c.position, size: spaceOf(ctx, c) };
+    const point = placement.point;
+    if ((area.shape === "sphere" || area.shape === "cylinder") && point && range !== null) {
+      const d = distanceToPoint(origin, point);
+      if (d > range) fail(`That point is ${d} feet away: out of ${label}'s range (${range} ft)`);
+    }
+    if (area.shape === "cube" && point) {
+      const d = gridDistance(point, area.size / 5, origin.position, origin.size);
+      if (range === null && d !== 5) fail(`${label}'s Cube must start next to ${c.name}`);
+      if (range !== null && d > range) fail(`That Cube is ${d} feet away: out of ${label}'s range`);
+    }
+    let squares: Set<string>;
+    try {
+      squares = areaSquares(area, origin, placement);
+    } catch (error) {
+      if (error instanceof RangeError) fail(`${label}: ${error.message}`);
+      throw error;
+    }
+    // A Sphere or Cylinder can include its creator; the other shapes start outside it.
+    const includesOrigin = area.shape === "sphere" || area.shape === "cylinder";
+    return e.combatants
+      .filter((x) => !outOfFight(ctx, x) && x.position && (includesOrigin || x.id !== c.id))
+      .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
+      .map((x) => x.id);
+  };
+  /** Targets of a saving throw effect: from its area, or given (checked against its range). */
+  const saveTargets = (
+    c: EncounterCombatant,
+    line: SaveActionLine,
+    placement: AreaPlacement | undefined,
+    given: readonly string[] | undefined,
+  ): string[] => {
+    if (placement) {
+      if (!line.area) fail(`${line.name} has no area: give its targets`);
+      if (given?.length) fail("Give targets or an area, not both");
+      const ids = areaTargets(c, line.area, placement, line.range ?? null, line.name);
+      notes.push(areaNote(line.name, line.area, ids));
+      return ids;
+    }
+    for (const id of given ?? []) {
+      const d = feetBetween(c, find(id));
+      if (line.range && d !== null && d > line.range) {
+        fail(`${find(id).name} is ${d} feet away: out of ${line.name}'s range (${line.range} ft)`);
+      }
+    }
+    return [...(given ?? [])];
+  };
+  /** "Fireball's Sphere covers Brakka and Lute." */
+  const areaNote = (label: string, area: SpellArea, ids: readonly string[]): string => {
+    const names = ids.map((id) => find(id).name);
+    const shape = `${area.shape[0]?.toUpperCase()}${area.shape.slice(1)}`;
+    return names.length
+      ? `${label}'s ${shape} covers ${names.join(", ")}.`
+      : `${label}'s ${shape} covers no one.`;
+  };
+  /** The creatures in a spell's area (its point within the spell's range), noted. */
+  const spellArea = (
+    c: EncounterCombatant,
+    spell: SpellDef,
+    placement: AreaPlacement,
+  ): string[] => {
+    const area = spell.mechanics?.area ?? fail(`${spell.name} has no area to place`);
+    const feet = /^(\d+) feet$/.exec(spell.range)?.[1];
+    const ids = areaTargets(c, area, placement, feet ? Number(feet) : null, spell.name);
+    notes.push(areaNote(spell.name, area, ids));
+    return ids;
+  };
   /** A target out of a positioned caster's spell range is refused ("60 feet", "Touch"). */
   const checkSpellRange = (
     c: EncounterCombatant,
@@ -794,10 +882,12 @@ function run(
       mode?: RollMode;
       spellcasting?: string;
       cover?: Readonly<Record<string, Cover>>;
+      /** The targets come from an area: its point was checked against the range instead. */
+      area?: boolean;
     },
   ): SpellCastResult => {
     const targets = targetIds.map(find);
-    checkSpellRange(c, spell, targets);
+    if (!options.area) checkSpellRange(c, spell, targets);
     // Positions: an enemy within 5 feet hinders ranged spell attacks; Prone targets within 5 ft.
     const near = enemiesNear(c)[0];
     const modes: ModeReason[] = near
@@ -807,7 +897,7 @@ function run(
       const d = feetBetween(c, t);
       return d === null ? undefined : d <= 5;
     });
-    const { cover, ...cast } = options;
+    const { cover, area: _area, ...cast } = options;
     let r: SpellCastResult;
     try {
       r = castSpell(
@@ -1412,7 +1502,10 @@ function run(
       const line = user.save_actions.find((a) => a.name === action.ability);
       if (c.monster !== null)
         spendDaily(c, action.ability, dailyUses(ctx, c, action.ability), action.ability);
-      result = saveEffectOn(c, user, action.ability, action.targets, action.cover);
+      const targets = line
+        ? saveTargets(c, line, action.area, action.targets)
+        : (action.targets ?? []);
+      result = saveEffectOn(c, user, action.ability, targets, action.cover);
       c.used.action = true;
       if (line?.recharge) c.expended.push(action.ability);
       break;
@@ -1464,7 +1557,13 @@ function run(
       } else if (line.uses && attackable(line.uses)) {
         result = attackOn(c, needTarget(), line.uses, action);
       } else if (line.uses && user.save_actions.some((a) => a.name === line.uses)) {
-        result = saveEffectOn(c, user, line.uses, action.targets ?? []);
+        const used = user.save_actions.find((a) => a.name === line.uses) as SaveActionLine;
+        result = saveEffectOn(
+          c,
+          user,
+          line.uses,
+          saveTargets(c, used, action.area, action.targets),
+        );
       } else if (def.legendary_actions.find((a) => a.name === line.name)?.casts) {
         // "uses Spellcasting to cast Fear": the spell, at its listed level, through this action.
         const cast = monsterSpells(def).find(
@@ -1472,18 +1571,20 @@ function run(
         ) as ReturnType<typeof monsterSpells>[number];
         const spell =
           lookup(ctx.catalog.spells, cast.spell) ?? fail(`Unknown spell '${cast.spell}'`);
-        const targets = action.targets ?? (action.target ? [action.target] : []);
+        const area = action.area ? spellArea(c, spell, action.area) : null;
+        const targets = area ?? action.targets ?? (action.target ? [action.target] : []);
         result = castBy(c, spell, targets, {
           slot_level: spell.level === 0 ? undefined : (cast.level ?? spell.level),
           mode: action.mode,
           spellcasting: line.name,
+          area: area !== null,
         });
       } else if (line.save) {
         result = saveEffectOn(
           c,
           { ...user, save_actions: [line.save] },
           line.name,
-          action.targets ?? [],
+          saveTargets(c, line.save, action.area, action.targets),
         );
       } else {
         notes.push(`${line.name}: its effect is in the stat block's text.`);
@@ -1629,12 +1730,15 @@ function run(
       if (what === "action" && c.surged) {
         fail("Action Surge's additional action can't be the Magic action (casting a spell)");
       }
-      result = castBy(c, spell, action.targets ?? [], {
+      if (action.area && action.targets?.length) fail("Give targets or an area, not both");
+      const area = action.area ? spellArea(c, spell, action.area) : null;
+      result = castBy(c, spell, area ?? action.targets ?? [], {
         slot_level,
         pact: action.pact,
         mode: action.mode,
         spellcasting,
         cover: action.cover,
+        area: area !== null,
       });
       c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.

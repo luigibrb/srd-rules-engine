@@ -464,6 +464,13 @@ list of actions.
   (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
   within 5 feet or in range, as before. Cover is given per attack (`cover`) or per target
   (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted.
+- **Areas of effect.** A spell's `mechanics.area` and a monster save effect's `area` (read from
+  "each creature in a 60-foot Cone") place on the grid with `area: { point }` (a Sphere,
+  Cylinder or Cube) or `area: { toward }` (a Cone or Line aimed at a square) on `cast`,
+  `save_action` or `legendary`: the targets are the creatures in it (`rules/areas.ts`), noted
+  ("Fireball's Sphere covers Brakka, Goblin Warrior."). The point must be within the spell's or
+  effect's range; a Cube "originating from" its caster must touch its space. A single-target
+  save effect's range ("one creature … within 30 feet") is checked when both have positions.
 - **Decisions after a roll.** Bardic Inspiration, Legendary Resistance and Uncanny Dodge are
   choices made after seeing the roll and before its consequences. The rules functions
   (`rollSavingThrow`, `rollAbilityCheck`, `makeAttack`, `castSpell`, `useSaveAction`) take a
@@ -622,6 +629,17 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - An Opportunity Attack (`opportunity: true`) skips the reach check: it happens just before the
   target leaves, after the target's move was recorded.
 
+**Areas of effect**
+
+- The SRD defines the shapes but not how they cover squares: a square is in an area when its
+  center is inside the shape. Spheres and Cylinders spread from a grid intersection with the
+  grid's distance rule (diagonals count as one step), so their area is square (a 20-foot radius:
+  8×8 squares); Emanations spread the same way from their origin's space. Cones and Lines start
+  at the center of their origin's space; a Cone's width equals its distance from the origin.
+- A Cylinder's height and "each enemy" (rather than each creature) aren't distinguished: the
+  caller removes a target that shouldn't be there by giving `targets` instead.
+- Creatures out of the fight (dead characters, defeated monsters) aren't in areas.
+
 **Encounters**
 
 - Initiative ties go to the higher Initiative bonus, then the order combatants joined (the SRD
@@ -655,8 +673,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-areas of effect don't choose their targets from positions yet, there's no map of walls and
-Difficult Terrain, 79 spells keep their effects in text, and shopping with starting gold isn't automated.
+there's no map of walls and Difficult Terrain, 79 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

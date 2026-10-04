@@ -44,6 +44,7 @@ Targets are ids, names or numbers from the status table.
   attack <target> [weapon] [adv|dis] [2h] [+rider] [light|cleave|granted|opp] [nomastery]
          [thrown] [half|3/4|total] (the target's cover)
   cast <spell> [targets…] [at <level>]       use <ability> [targets…]   (a monster's save effect)
+  areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
   escape · stand · move <feet> · move <x> <y> · check <skill|ability> [dc]
@@ -472,7 +473,8 @@ export class FightApp {
     );
   }
 
-  private async cast(id: string, args: string[]): Promise<void> {
+  private async cast(id: string, all: string[]): Promise<void> {
+    const { area, rest: args } = areaOf(all);
     const at = args.indexOf("at");
     const slot_level = at >= 0 ? Number(args[at + 1]) : undefined;
     const words = at >= 0 ? args.slice(0, at) : args;
@@ -486,7 +488,8 @@ export class FightApp {
         type: "cast",
         id,
         spell,
-        targets: targets.map((t) => (t as EncounterCombatant).id),
+        targets: area ? undefined : targets.map((t) => (t as EncounterCombatant).id),
+        area,
         slot_level,
       });
     }
@@ -505,29 +508,30 @@ export class FightApp {
     return spells.find((s) => s.name === name)?.id ?? null;
   }
 
-  private async saveAction(id: string, args: string[]): Promise<void> {
-    const actions = encounterCombatant(this.encounter, id, this.context()).save_actions;
-    const name = args.length
-      ? pick(
-          actions.map((a) => a.name),
-          args[0] as string,
-        )
-      : null;
-    if (!name) {
-      const known = actions.map((a) => a.name).join(", ") || "none";
-      return this.con.error(`Usage: use <ability> [targets…] (${known})`);
+  private async saveAction(id: string, all: string[]): Promise<void> {
+    const { area, rest: args } = areaOf(all);
+    const names = encounterCombatant(this.encounter, id, this.context()).save_actions.map(
+      (a) => a.name,
+    );
+    // Names of several words ("fire breath"): the longest prefix of words that names one.
+    for (let n = args.length; n >= 1; n--) {
+      const name = pick(names, args.slice(0, n).join(" "));
+      if (!name) continue;
+      const targets = args.slice(n).map((w) => this.find(w));
+      if (targets.some((t) => !t)) return;
+      return this.apply({
+        type: "save_action",
+        id,
+        ability: name,
+        targets: area ? undefined : targets.map((t) => (t as EncounterCombatant).id),
+        area,
+      });
     }
-    const targets = args.slice(1).map((w) => this.find(w));
-    if (targets.some((t) => !t)) return;
-    await this.apply({
-      type: "save_action",
-      id,
-      ability: name,
-      targets: targets.map((t) => (t as EncounterCombatant).id),
-    });
+    this.con.error(`Usage: use <ability> [targets…] (${names.join(", ") || "none"})`);
   }
 
-  private async legendary(id: string, args: string[]): Promise<void> {
+  private async legendary(id: string, all: string[]): Promise<void> {
+    const { area, rest: args } = areaOf(all);
     const lines = encounterCombatant(this.encounter, id, this.context()).legendary_actions;
     const name = args.length
       ? pick(
@@ -542,7 +546,7 @@ export class FightApp {
     const targets = args.slice(1).map((w) => this.find(w));
     if (targets.some((t) => !t)) return;
     const ids = targets.map((t) => (t as EncounterCombatant).id);
-    await this.apply({ type: "legendary", id, action: name, target: ids[0], targets: ids });
+    await this.apply({ type: "legendary", id, action: name, target: ids[0], targets: ids, area });
   }
 
   private async feature(id: string, args: string[]): Promise<void> {
@@ -702,4 +706,22 @@ function damageText(parts: readonly DamagePart[]): string {
 
 function signedBonus(n: number): string {
   return n >= 0 ? `+${n}` : `${n}`;
+}
+
+type Placement = { point?: { x: number; y: number }; toward?: { x: number; y: number } };
+
+/** `@x,y` (a point) or `>x,y` (a direction) among command words, and the words left. */
+function areaOf(words: readonly string[]): { area: Placement | undefined; rest: string[] } {
+  let area: Placement | undefined;
+  const rest: string[] = [];
+  for (const word of words) {
+    const m = /^([@>])(-?\d+),(-?\d+)$/.exec(word);
+    if (!m) {
+      rest.push(word);
+      continue;
+    }
+    const square = { x: Number(m[2]), y: Number(m[3]) };
+    area = m[1] === "@" ? { point: square } : { toward: square };
+  }
+  return { area, rest };
 }

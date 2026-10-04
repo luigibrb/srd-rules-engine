@@ -103,6 +103,8 @@
             type: psychic
         on_success: half
         conditions: []
+        area: null
+        range: 30
     - name: Dominate Mind (2/Day)
       text: >-
         _Wisdom Saving Throw:_ DC 16, one creature the aboleth can see within 30 feet. _Failure:_
@@ -120,6 +122,8 @@
         on_success: none
         conditions:
           - charmed
+        area: null
+        range: 30
       per_day: 2
   legendary_actions:
     - name: Lash
@@ -228,6 +232,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 5
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -277,6 +286,8 @@
             type: poison
         on_success: none
         conditions: []
+        area: null
+        range: 120
       once_per_round: true
     - name: Frightful Presence
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
@@ -390,6 +401,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 5
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -555,6 +571,11 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 5
+        range: null
     - name: Sleep Breath
       text: _Constitution Saving Throw:_ DC 18, each creature in a 60-foot Cone. _Failure:_ The target has
         the Incapacitated condition until the end of its next turn, at which point it repeats the
@@ -568,6 +589,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -645,6 +670,8 @@
             type: fire
         on_success: none
         conditions: []
+        area: null
+        range: 120
       once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
@@ -743,6 +770,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 5
+        range: null
     - name: Repulsion Breath
       text: _Strength Saving Throw:_ DC 19, each creature in a 30-foot Cone. _Failure:_ The target is
         pushed up to 60 feet straight away from the dragon and has the Prone condition.
@@ -753,6 +785,10 @@
         on_success: none
         conditions:
           - prone
+        area:
+          shape: cone
+          size: 30
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -828,6 +864,10 @@
         on_success: none
         conditions:
           - deafened
+        area:
+          shape: sphere
+          size: 20
+        range: 90
       once_per_round: false
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
@@ -924,6 +964,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 5
+        range: null
     - name: Slowing Breath
       text: _Constitution Saving Throw:_ DC 18, each creature in a 60-foot Cone. _Failure:_ The target
         can't take Reactions; its Speed is halved; and it can take either an action or a Bonus
@@ -984,6 +1029,8 @@
             type: psychic
         on_success: none
         conditions: []
+        area: null
+        range: 90
       once_per_round: true
     - name: Mind Jolt
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 4 version). The dragon can't take
@@ -1101,6 +1148,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -1160,6 +1211,8 @@
         on_success: none
         conditions:
           - incapacitated
+        area: null
+        range: 120
       once_per_round: true
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 2 version).
@@ -1277,6 +1330,10 @@
             type: poison
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -1330,6 +1387,10 @@
             type: poison
         on_success: none
         conditions: []
+        area:
+          shape: sphere
+          size: 20
+        range: 90
       once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
@@ -1430,6 +1491,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -1585,6 +1650,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Paralyzing Breath
       text: _Constitution Saving Throw:_ DC 20, each creature in a 60-foot Cone. _First Failure:_ The
         target has the Incapacitated condition until the end of its next turn, when it repeats the
@@ -1598,6 +1667,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -1667,6 +1740,11 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 10
+        range: null
       once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
@@ -1770,6 +1848,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
   legendary_actions:
     - name: Freezing Burst
       text: _Constitution Saving Throw:_ DC 14, each creature in a 30-foot-radius Sphere centered on a
@@ -1786,6 +1868,10 @@
             type: cold
         on_success: none
         conditions: []
+        area:
+          shape: sphere
+          size: 30
+        range: 120
       once_per_round: true
     - name: Frightful Presence
       text: The dragon casts _Fear_, requiring no Material components and using Charisma as the
@@ -1907,6 +1993,8 @@
         on_success: half
         conditions:
           - prone
+        area: null
+        range: null
 - id: allosaurus
   name: Allosaurus
   group: null
@@ -2064,6 +2152,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 10
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -2117,6 +2210,8 @@
             type: poison
         on_success: none
         conditions: []
+        area: null
+        range: 120
       once_per_round: true
     - name: Frightful Presence
       text: The dragon uses Spellcasting to cast _Fear_. The dragon can't take this action again until the
@@ -2230,6 +2325,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 120
+          width: 10
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -2395,6 +2495,11 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 5
+        range: null
     - name: Sleep Breath
       text: _Constitution Saving Throw:_ DC 21, each creature in a 90-foot Cone. _Failure:_ The target has
         the Incapacitated condition until the end of its next turn, at which point it repeats the
@@ -2408,6 +2513,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -2486,6 +2595,8 @@
             type: fire
         on_success: none
         conditions: []
+        area: null
+        range: 120
       once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
@@ -2584,6 +2695,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 120
+          width: 10
+        range: null
     - name: Repulsion Breath
       text: _Strength Saving Throw:_ DC 23, each creature in a 30-foot Cone. _Failure:_ The target is
         pushed up to 60 feet straight away from the dragon and has the Prone condition.
@@ -2594,6 +2710,10 @@
         on_success: none
         conditions:
           - prone
+        area:
+          shape: cone
+          size: 30
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -2679,6 +2799,10 @@
         on_success: none
         conditions:
           - deafened
+        area:
+          shape: sphere
+          size: 20
+        range: 120
       once_per_round: false
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the dragon can expend a use to take one of the following actions. The dragon regains all
@@ -2775,6 +2899,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 10
+        range: null
     - name: Slowing Breath
       text: _Constitution Saving Throw:_ DC 22, each creature in a 90-foot Cone. _Failure:_ The target
         can't take Reactions; its Speed is halved; and it can take either an action or a Bonus
@@ -2839,6 +2968,8 @@
             type: psychic
         on_success: none
         conditions: []
+        area: null
+        range: 120
       once_per_round: true
     - name: Mind Jolt
       text: The dragon uses Spellcasting to cast _Mind Spike_ (level 5 version). The dragon can't take
@@ -2956,6 +3087,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -3019,6 +3154,8 @@
         on_success: none
         conditions:
           - incapacitated
+        area: null
+        range: 120
       once_per_round: true
     - name: Guiding Light
       text: The dragon uses Spellcasting to cast _Guiding Bolt_ (level 4 version).
@@ -3136,6 +3273,10 @@
             type: poison
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -3193,6 +3334,10 @@
             type: poison
         on_success: none
         conditions: []
+        area:
+          shape: sphere
+          size: 30
+        range: 90
       once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
@@ -3293,6 +3438,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -3452,6 +3601,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Paralyzing Breath
       text: _Constitution Saving Throw:_ DC 24, each creature in a 90-foot Cone. _First Failure:_ The
         target has the Incapacitated condition until the end of its next turn, when it repeats the
@@ -3465,6 +3618,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 90
+        range: null
     - name: Spellcasting
       text: >-
         The dragon casts one of the following spells, requiring no Material components and using
@@ -3543,6 +3700,11 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 10
+        range: null
       once_per_round: true
     - name: Pounce
       text: The dragon moves up to half its Speed, and it makes one Rend attack.
@@ -3646,6 +3808,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 90
+        range: null
   legendary_actions:
     - name: Freezing Burst
       text: _Constitution Saving Throw:_ DC 20, each creature in a 30-foot-radius Sphere centered on a
@@ -3662,6 +3828,10 @@
             type: cold
         on_success: none
         conditions: []
+        area:
+          shape: sphere
+          size: 30
+        range: 120
       once_per_round: true
     - name: Frightful Presence
       text: The dragon casts _Fear_, requiring no Material components and using Charisma as the
@@ -3971,6 +4141,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 30
+          width: 5
+        range: null
 - id: ankylosaurus
   name: Ankylosaurus
   group: null
@@ -4849,6 +5024,10 @@
             type: force
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 30
+        range: null
     - name: Fire Aura
       text: At the end of each of the balor's turns, each creature in a 5-foot Emanation originating from
         the balor takes 13 (3d8) Fire damage.
@@ -5217,6 +5396,10 @@
         on_success: none
         conditions:
           - restrained
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: bat
   name: Bat
   group: null
@@ -5439,6 +5622,8 @@
         conditions:
           - grappled
           - restrained
+        area: null
+        range: 5
     - name: Lightning Breath
       text: _Dexterity Saving Throw:_ DC 16, each creature in a 90-foot-long, 5-foot-wide Line. _Failure:_
         66 (12d10) Lightning damage. _Success:_ Half damage.
@@ -5453,6 +5638,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 90
+          width: 5
+        range: null
   bonus_actions:
     - name: Swallow
       text: >-
@@ -5668,6 +5858,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 15
+          width: 5
+        range: null
 - id: black-pudding
   name: Black Pudding
   group: null
@@ -5964,6 +6159,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 30
+          width: 5
+        range: null
 - id: boar
   name: Boar
   group: null
@@ -6184,6 +6384,11 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 20
+          width: 5
+        range: null
     - name: Sleep Breath
       text: _Constitution Saving Throw:_ DC 11, each creature in a 15-foot Cone. _Failure:_ The target has
         the Incapacitated condition until the end of its next turn, at which point it repeats the
@@ -6197,6 +6402,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: bronze-dragon-wyrmling
   name: Bronze Dragon Wyrmling
   group: Bronze Dragons
@@ -6276,6 +6485,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 40
+          width: 5
+        range: null
     - name: Repulsion Breath
       text: _Strength Saving Throw:_ DC 12, each creature in a 30-foot Cone. _Failure:_ The target is
         pushed up to 30 feet straight away from the dragon and has the Prone condition.
@@ -6286,6 +6500,10 @@
         on_success: none
         conditions:
           - prone
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: brown-bear
   name: Brown Bear
   group: null
@@ -6445,6 +6663,8 @@
         on_success: none
         conditions:
           - grappled
+        area: null
+        range: 10
 - id: bugbear-warrior
   name: Bugbear Warrior
   group: Bugbears
@@ -6594,6 +6814,8 @@
         on_success: half
         conditions:
           - prone
+        area: null
+        range: null
   bonus_actions:
     - name: Leap
       text: The bulette jumps up to 30 feet by spending 10 feet of movement.
@@ -6800,6 +7022,8 @@
         on_success: none
         conditions:
           - prone
+        area: null
+        range: null
 - id: chain-devil
   name: Chain Devil
   group: null
@@ -6889,6 +7113,8 @@
         on_success: none
         conditions:
           - restrained
+        area: null
+        range: 60
   reactions:
     - name: Unnerving Gaze
       text: _Trigger:_ A creature the devil can see starts its turn within 30 feet of the devil and can
@@ -6995,6 +7221,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: chuul
   name: Chuul
   group: null
@@ -7077,6 +7307,8 @@
         conditions:
           - poisoned
           - paralyzed
+        area: null
+        range: null
 - id: clay-golem
   name: Clay Golem
   group: null
@@ -7265,6 +7497,10 @@
         on_success: none
         conditions:
           - frightened
+        area:
+          shape: emanation
+          size: 60
+        range: null
     - name: Phantasms (Recharge after a Short or Long Rest)
       text: The cloaker casts the _Mirror Image_ spell, requiring no spell components and using Wisdom as
         the spellcasting ability. The spell ends early if the cloaker starts or ends its turn in
@@ -7579,6 +7815,8 @@
         on_success: none
         conditions:
           - grappled
+        area: null
+        range: 5
 - id: copper-dragon-wyrmling
   name: Copper Dragon Wyrmling
   group: Copper Dragons
@@ -7652,6 +7890,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 20
+          width: 5
+        range: null
     - name: Slowing Breath
       text: _Constitution Saving Throw:_ DC 11, each creature in a 15-foot Cone. _Failure:_ The target
         can't take Reactions; its Speed is halved; and it can take either an action or a Bonus
@@ -7737,6 +7980,8 @@
         conditions:
           - grappled
           - restrained
+        area: null
+        range: 5
     - name: Spellcasting
       text: >-
         The couatl casts one of the following spells, requiring no spell components and using Wisdom
@@ -8593,6 +8838,8 @@
         on_success: none
         conditions:
           - restrained
+        area: null
+        range: null
     - name: Spellcasting
       text: >-
         The djinni casts one of the following spells, requiring no Material components and using
@@ -8735,6 +8982,10 @@
         on_success: none
         conditions:
           - frightened
+        area:
+          shape: emanation
+          size: 15
+        range: null
   bonus_actions:
     - name: Shape-Shift
       text: The doppelganger shape-shifts into a Medium or Small Humanoid, or it returns to its true form.
@@ -8889,6 +9140,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
 - id: dretch
   name: Dretch
   group: null
@@ -8960,6 +9215,10 @@
         on_success: none
         conditions:
           - poisoned
+        area:
+          shape: emanation
+          size: 10
+        range: null
       per_day: 1
 - id: drider
   name: Drider
@@ -9362,6 +9621,10 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 5
+        range: null
   actions:
     - name: Claw
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 4 (1d4 + 2) Slashing damage.
@@ -9386,6 +9649,10 @@
         on_success: none
         conditions:
           - blinded
+        area:
+          shape: cone
+          size: 15
+        range: null
     - name: Sleep (1/Day)
       text: The mephit casts the _Sleep_ spell, requiring no spell components and using Charisma as the
         spellcasting ability (spell save DC 10).
@@ -9738,6 +10005,8 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area: null
+        range: 5
 - id: elk
   name: Elk
   group: null
@@ -9892,6 +10161,8 @@
         on_success: none
         conditions:
           - restrained
+        area: null
+        range: 120
   reactions:
     - name: Parry
       text: _Trigger:_ The erinyes is hit by a melee attack roll while holding a weapon. _Response:_ The
@@ -9994,6 +10265,8 @@
         on_success: none
         conditions:
           - restrained
+        area: null
+        range: 30
   bonus_actions:
     - name: Reel
       text: The ettercap pulls one creature within 30 feet of itself that is Restrained by its Web Strand
@@ -10714,6 +10987,8 @@
             type: acid
         on_success: half
         conditions: []
+        area: null
+        range: null
 - id: ghast
   name: Ghast
   group: null
@@ -10772,6 +11047,10 @@
         on_success: none
         conditions:
           - poisoned
+        area:
+          shape: emanation
+          size: 5
+        range: null
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 7 (1d8 + 3) Piercing damage plus 9 (2d8) Necrotic
@@ -10907,6 +11186,10 @@
         on_success: none
         conditions:
           - frightened
+        area:
+          shape: cone
+          size: 60
+        range: null
     - name: Possession
       text: >-
         _Charisma Saving Throw:_ DC 13, one Humanoid the ghost can see within 5 feet. _Failure:_ The
@@ -10930,6 +11213,8 @@
         on_success: none
         conditions:
           - incapacitated
+        area: null
+        range: 5
 - id: ghoul
   name: Ghoul
   group: null
@@ -11088,6 +11373,10 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area:
+          shape: sphere
+          size: 5
+        range: null
   bonus_actions:
     - name: Leap
       text: The ape jumps up to 30 feet by spending 10 feet of movement.
@@ -11392,6 +11681,8 @@
         on_success: none
         conditions:
           - grappled
+        area: null
+        range: 10
 - id: giant-crab
   name: Giant Crab
   group: null
@@ -12470,6 +12761,8 @@
         on_success: none
         conditions:
           - restrained
+        area: null
+        range: 60
 - id: giant-toad
   name: Giant Toad
   group: null
@@ -12950,6 +13243,10 @@
         on_success: none
         conditions:
           - blinded
+        area:
+          shape: sphere
+          size: 10
+        range: 30
 - id: glabrezu
   name: Glabrezu
   group: null
@@ -13035,6 +13332,8 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area: null
+        range: null
     - name: Spellcasting
       text: >-
         The glabrezu casts one of the following spells, requiring no Material components and using
@@ -13146,6 +13445,8 @@
             type: bludgeoning
         on_success: none
         conditions: []
+        area: null
+        range: 5
   reactions:
     - name: Parry
       text: _Trigger:_ The gladiator is hit by a melee attack roll while holding a weapon. _Response:_ The
@@ -13568,6 +13869,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
     - name: Weakening Breath
       text: _Strength Saving Throw:_ DC 13, each creature that isn't currently affected by this breath in
         a 15-foot Cone. _Failure:_ The target has Disadvantage on Strength-based D20 Tests and
@@ -13645,6 +13950,10 @@
         on_success: none
         conditions:
           - restrained
+        area:
+          shape: cone
+          size: 30
+        range: null
   bonus_actions:
     - name: Trample
       text: _Dexterity Saving Throw:_ DC 16, one creature within 5 feet that has the Prone condition.
@@ -13659,6 +13968,8 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area: null
+        range: 5
 - id: gray-ooze
   name: Gray Ooze
   group: null
@@ -13827,6 +14138,10 @@
             type: poison
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: green-hag
   name: Green Hag
   group: null
@@ -14355,6 +14670,8 @@
         on_success: half
         conditions:
           - blinded
+        area: null
+        range: 60
     - name: Spellcasting
       text: >-
         The naga casts one of the following spells, requiring no Somatic or Material components and
@@ -14540,6 +14857,10 @@
         conditions:
           - charmed
           - incapacitated
+        area:
+          shape: emanation
+          size: 300
+        range: null
 - id: hawk
   name: Hawk
   group: null
@@ -14679,6 +15000,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: hezrou
   name: Hezrou
   group: null
@@ -14743,6 +15068,10 @@
         on_success: none
         conditions:
           - poisoned
+        area:
+          shape: emanation
+          size: 10
+        range: null
   actions:
     - name: Multiattack
       text: The hezrou makes three Rend attacks.
@@ -15292,6 +15621,8 @@
             type: necrotic
         on_success: none
         conditions: []
+        area: null
+        range: 10
 - id: hunter-shark
   name: Hunter Shark
   group: null
@@ -15661,6 +15992,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 5
+        range: null
   actions:
     - name: Claw
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 3 (1d4 + 1) Slashing damage plus 2 (1d4) Cold
@@ -15706,6 +16041,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: imp
   name: Imp
   group: null
@@ -15996,6 +16335,8 @@
         on_success: none
         conditions:
           - grappled
+        area: null
+        range: null
 - id: iron-golem
   name: Iron Golem
   group: null
@@ -16101,6 +16442,10 @@
             type: poison
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 60
+        range: null
 - id: jackal
   name: Jackal
   group: null
@@ -16454,6 +16799,8 @@
         on_success: half
         conditions:
           - prone
+        area: null
+        range: null
     - name: Lightning Strike
       text: _Dexterity Saving Throw:_ DC 23, one creature the kraken can see within 120 feet. _Failure:_
         33 (6d10) Lightning damage. _Success:_ Half damage.
@@ -16467,6 +16814,8 @@
             type: lightning
         on_success: half
         conditions: []
+        area: null
+        range: 120
     - name: Swallow
       text: >-
         _Dexterity Saving Throw:_ DC 25, one creature Grappled by the kraken (it can have up to four
@@ -16490,6 +16839,8 @@
             type: piercing
         on_success: none
         conditions: []
+        area: null
+        range: null
   legendary_actions:
     - name: Storm Bolt
       text: The kraken uses Lightning Strike.
@@ -16508,6 +16859,10 @@
         conditions:
           - blinded
           - poisoned
+        area:
+          shape: emanation
+          size: 15
+        range: null
       once_per_round: true
   legendary_text: "Legendary Action Uses: 3 (4 in Lair). Immediately after another creature's turn,
     the kraken can expend a use to take one of the following actions. The kraken regains all
@@ -16597,6 +16952,8 @@
             type: psychic
         on_success: none
         conditions: []
+        area: null
+        range: 5
     - name: Spellcasting
       text: >-
         The lamia casts one of the following spells, requiring no Material components and using
@@ -16901,6 +17258,10 @@
             type: necrotic
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 20
+        range: null
       once_per_round: true
     - name: Frightening Gaze
       text: The lich casts _Fear_, using the same spellcasting ability as Spellcasting. The lich can't
@@ -17000,6 +17361,8 @@
         on_success: none
         conditions:
           - frightened
+        area: null
+        range: 15
 - id: lizard
   name: Lizard
   group: null
@@ -17266,6 +17629,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 5
+        range: null
   actions:
     - name: Claw
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 3 (1d4 + 1) Slashing damage plus 3 (1d6) Fire
@@ -17298,6 +17665,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: magmin
   name: Magmin
   group: null
@@ -17355,6 +17726,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 10
+        range: null
   actions:
     - name: Touch
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 7 (2d4 + 2) Fire damage. If the target is a
@@ -17446,6 +17821,8 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area: null
+        range: 5
 - id: manticore
   name: Manticore
   group: null
@@ -17609,6 +17986,8 @@
         conditions:
           - grappled
           - restrained
+        area: null
+        range: 5
   bonus_actions:
     - name: Teleport
       text: The marilith teleports up to 120 feet to an unoccupied space it can see.
@@ -17777,6 +18156,10 @@
         on_success: none
         conditions:
           - restrained
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: merfolk-skirmisher
   name: Merfolk Skirmisher
   group: Merfolk
@@ -18312,6 +18695,8 @@
         on_success: none
         conditions:
           - frightened
+        area: null
+        range: 60
 - id: mummy-lord
   name: Mummy Lord
   group: Mummies
@@ -18425,6 +18810,8 @@
         on_success: none
         conditions:
           - paralyzed
+        area: null
+        range: 60
     - name: Spellcasting
       text: >-
         The mummy casts one of the following spells, requiring no Material components and using
@@ -18596,6 +18983,10 @@
         on_success: none
         conditions:
           - frightened
+        area:
+          shape: emanation
+          size: 15
+        range: null
   reactions:
     - name: Pursuit
       text: "Trigger: Another creature the nalfeshnee can see ends its move within 120 feet of the
@@ -19368,6 +19759,8 @@
         on_success: half
         conditions:
           - stunned
+        area: null
+        range: null
 - id: owl
   name: Owl
   group: null
@@ -19814,6 +20207,8 @@
         on_success: none
         conditions:
           - charmed
+        area: null
+        range: 30
 - id: pirate-captain
   name: Pirate Captain
   group: Pirates
@@ -19897,6 +20292,8 @@
         on_success: none
         conditions:
           - charmed
+        area: null
+        range: 30
   reactions:
     - name: Riposte
       text: _Trigger:_ The pirate is hit by a melee attack roll while holding a weapon. _Response:_ The
@@ -19967,6 +20364,8 @@
         on_success: none
         conditions:
           - frightened
+        area: null
+        range: null
     - name: Legendary Resistance (4/Day)
       text: If the pit fiend fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
@@ -20118,6 +20517,10 @@
             type: radiant
         on_success: half
         conditions: []
+        area:
+          shape: sphere
+          size: 20
+        range: 120
     - name: Spellcasting
       text: >-
         The planetar casts one of the following spells, requiring no Material components and using
@@ -20672,6 +21075,8 @@
         on_success: none
         conditions:
           - poisoned
+        area: null
+        range: 5
 - id: pteranodon
   name: Pteranodon
   group: null
@@ -20913,6 +21318,8 @@
         on_success: none
         conditions:
           - frightened
+        area: null
+        range: 20
       per_day: 1
     - name: Shape-Shift
       text: The quasit shape-shifts to resemble a bat (Speed 10 ft., Fly 40 ft.), a centipede (40 ft.,
@@ -21013,6 +21420,10 @@
         conditions:
           - frightened
           - incapacitated
+        area:
+          shape: emanation
+          size: 30
+        range: null
     - name: Spellcasting
       text: >-
         The rakshasa casts one of the following spells, requiring no Material components and using
@@ -21262,6 +21673,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: reef-shark
   name: Reef Shark
   group: null
@@ -21981,6 +22396,8 @@
         conditions:
           - grappled
           - restrained
+        area: null
+        range: 10
 - id: satyr
   name: Satyr
   group: null
@@ -22056,6 +22473,8 @@
             type: psychic
         on_success: none
         conditions: []
+        area: null
+        range: 90
 - id: scorpion
   name: Scorpion
   group: null
@@ -22250,6 +22669,8 @@
         on_success: none
         conditions:
           - frightened
+        area: null
+        range: 30
   actions:
     - name: Claw
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 10 (2d6 + 3) Slashing damage.
@@ -22503,6 +22924,8 @@
         on_success: none
         conditions:
           - grappled
+        area: null
+        range: 5
 - id: shield-guardian
   name: Shield Guardian
   group: null
@@ -22720,6 +23143,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
     - name: Paralyzing Breath
       text: _Constitution Saving Throw:_ DC 13, each creature in a 15-foot Cone. _First Failure:_ The
         target has the Incapacitated condition until the end of its next turn, when it repeats the
@@ -22733,6 +23160,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: skeleton
   name: Skeleton
   group: Skeletons
@@ -22955,6 +23386,8 @@
         on_success: none
         conditions:
           - blinded
+        area: null
+        range: 120
       once_per_round: true
     - name: Radiant Teleport
       text: The solar teleports up to 60 feet to an unoccupied space it can see. _Dexterity Saving Throw:_
@@ -22970,6 +23403,10 @@
             type: radiant
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 10
+        range: null
       once_per_round: false
   legendary_text: "Legendary Action Uses: 3. Immediately after another creature's turn, the solar can
     expend a use to take one of the following actions. The solar regains all expended uses at the
@@ -23150,6 +23587,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: emanation
+          size: 300
+        range: null
     - name: Spellcasting
       text: >-
         The sphinx casts one of the following spells, requiring no Material components and using
@@ -23316,6 +23757,10 @@
         on_success: none
         conditions:
           - frightened
+        area:
+          shape: emanation
+          size: 500
+        range: null
     - name: Second Roar
       text: _Wisdom Saving Throw:_ DC 20, each enemy in a 500-foot Emanation originating from the sphinx.
         _Failure:_ The target has the Paralyzed condition, and it repeats the save at the end of
@@ -23328,6 +23773,10 @@
         on_success: none
         conditions:
           - paralyzed
+        area:
+          shape: emanation
+          size: 500
+        range: null
     - name: Third Roar
       text: _Constitution Saving Throw:_ DC 20, each enemy in a 500-foot Emanation originating from the
         sphinx. _Failure:_ 44 (8d10) Thunder damage, and the target has the Prone condition.
@@ -23343,6 +23792,10 @@
         on_success: half
         conditions:
           - prone
+        area:
+          shape: emanation
+          size: 500
+        range: null
     - name: Spellcasting
       text: >-
         The sphinx casts one of the following spells, requiring no Material components and using
@@ -23912,6 +24365,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: emanation
+          size: 5
+        range: null
   actions:
     - name: Claw
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 2 (1d4) Slashing damage plus 2 (1d4) Fire damage.
@@ -23945,6 +24402,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: stirge
   name: Stirge
   group: null
@@ -24097,6 +24558,8 @@
             type: force
         on_success: none
         conditions: []
+        area: null
+        range: 60
 - id: stone-golem
   name: Stone Golem
   group: null
@@ -24291,6 +24754,8 @@
             type: lightning
         on_success: half
         conditions: []
+        area: null
+        range: 500
     - name: Spellcasting
       text: >-
         The giant casts one of the following spells, requiring no Material components and using
@@ -24404,6 +24869,8 @@
             type: psychic
         on_success: half
         conditions: []
+        area: null
+        range: 5
   bonus_actions:
     - name: Shape-Shift
       text: The succubus shape-shifts into a Medium or Small Humanoid, or it returns to its true form. Its
@@ -24865,6 +25332,8 @@
         on_success: none
         conditions:
           - deafened
+        area: null
+        range: null
 - id: swarm-of-venomous-snakes
   name: Swarm of Venomous Snakes
   group: null
@@ -25068,6 +25537,10 @@
         conditions:
           - deafened
           - frightened
+        area:
+          shape: cone
+          size: 150
+        range: null
   bonus_actions:
     - name: Swallow
       text: >-
@@ -25926,6 +26399,8 @@
             type: necrotic
         on_success: none
         conditions: []
+        area: null
+        range: 5
   bonus_actions:
     - name: Charm
       text: The vampire casts _Charm Person_, requiring no spell components and using Charisma as the
@@ -26158,6 +26633,8 @@
             type: necrotic
         on_success: none
         conditions: []
+        area: null
+        range: 5
   bonus_actions:
     - name: Deathless Agility
       text: The vampire takes the Dash or Disengage action.
@@ -26370,6 +26847,10 @@
         on_success: none
         conditions:
           - poisoned
+        area:
+          shape: emanation
+          size: 20
+        range: null
     - name: Stunning Screech (1/Day)
       text: _Constitution Saving Throw:_ DC 15, each creature in a 20-foot Emanation originating from the
         vrock (demons succeed automatically). _Failure:_ 10 (3d6) Thunder damage, and the target has
@@ -26385,6 +26866,10 @@
         on_success: none
         conditions:
           - stunned
+        area:
+          shape: emanation
+          size: 20
+        range: null
       per_day: 1
 - id: vulture
   name: Vulture
@@ -26795,6 +27280,8 @@
             type: bludgeoning
         on_success: half
         conditions: []
+        area: null
+        range: null
 - id: weasel
   name: Weasel
   group: null
@@ -27416,6 +27903,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: wight
   name: Wight
   group: null
@@ -27524,6 +28015,8 @@
             type: necrotic
         on_success: none
         conditions: []
+        area: null
+        range: 5
 - id: will-o-wisp
   name: Will-o'-Wisp
   group: null
@@ -27689,6 +28182,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 15
+        range: null
 - id: wolf
   name: Wolf
   group: null
@@ -28135,6 +28632,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 30
+          width: 5
+        range: null
 - id: young-blue-dragon
   name: Young Blue Dragon
   group: Blue Dragons
@@ -28216,6 +28718,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 5
+        range: null
 - id: young-brass-dragon
   name: Young Brass Dragon
   group: Brass Dragons
@@ -28293,6 +28800,11 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 40
+          width: 5
+        range: null
     - name: Sleep Breath
       text: _Constitution Saving Throw:_ DC 14, each creature in a 30-foot Cone. _Failure:_ The target has
         the Incapacitated condition until the end of its next turn, at which point it repeats the
@@ -28306,6 +28818,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: young-bronze-dragon
   name: Young Bronze Dragon
   group: Bronze Dragons
@@ -28386,6 +28902,11 @@
             type: lightning
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 60
+          width: 5
+        range: null
     - name: Repulsion Breath
       text: _Strength Saving Throw:_ DC 15, each creature in a 30-foot Cone. _Failure:_ The target is
         pushed up to 40 feet straight away from the dragon and has the Prone condition.
@@ -28396,6 +28917,10 @@
         on_success: none
         conditions:
           - prone
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: young-copper-dragon
   name: Young Copper Dragon
   group: Copper Dragons
@@ -28473,6 +28998,11 @@
             type: acid
         on_success: half
         conditions: []
+        area:
+          shape: line
+          size: 40
+          width: 5
+        range: null
     - name: Slowing Breath
       text: _Constitution Saving Throw:_ DC 14, each creature in a 30-foot Cone. _Failure:_ The target
         can't take Reactions; its Speed is halved; and it can take either an action or a Bonus
@@ -28558,6 +29088,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 30
+        range: null
     - name: Weakening Breath
       text: _Strength Saving Throw:_ DC 17, each creature that isn't currently affected by this breath in
         a 30-foot Cone. _Failure:_ The target has Disadvantage on Strength-based D20 Tests and
@@ -28649,6 +29183,10 @@
             type: poison
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: young-red-dragon
   name: Young Red Dragon
   group: Red Dragons
@@ -28730,6 +29268,10 @@
             type: fire
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: young-silver-dragon
   name: Young Silver Dragon
   group: Silver Dragons
@@ -28807,6 +29349,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 30
+        range: null
     - name: Paralyzing Breath
       text: _Constitution Saving Throw:_ DC 17, each creature in a 30-foot Cone. _First Failure:_ The
         target has the Incapacitated condition until the end of its next turn, when it repeats the
@@ -28820,6 +29366,10 @@
         on_success: none
         conditions:
           - incapacitated
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: young-white-dragon
   name: Young White Dragon
   group: White Dragons
@@ -28906,6 +29456,10 @@
             type: cold
         on_success: half
         conditions: []
+        area:
+          shape: cone
+          size: 30
+        range: null
 - id: zombie
   name: Zombie
   group: Zombies

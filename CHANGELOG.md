@@ -35,6 +35,11 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Areas of effect on the grid: `area: { point } | { toward }` on `cast`, `save_action` and
+  `legendary` chooses the targets (`rules/areas.ts`: `areaSquares`, `inArea`,
+  `distanceToPoint`); monster save effects' `area` and `range` read from their text (79 areas,
+  54 ranges), with single-target ranges checked; `SpellArea.width` (5 by default); the fight
+  CLI's `@x,y` and `>x,y`. Areas skip creatures out of the fight.
 - Positions on a 5-foot grid, optional: encounter combatant `position`, the actions `place` and
   `move` `to`, `gridDistance`; reach, normal and long range, close combat (also for spell
   attacks), thrown weapons (`attack` `thrown`), spell range and Touch, Sneak Attack's adjacent

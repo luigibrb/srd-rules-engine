@@ -249,7 +249,8 @@ once a round, movement up to your Speed (Dash doubles it), Extra Attack and Mult
 Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a grapple), the
 Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
 Slow, Topple, Push, Cleave, Nick), positions on a 5-foot grid (optional: reach, range, close
-combat, spell range, cover, Opportunity Attacks when leaving reach), casting times, monsters' spells (through the action that
+combat, spell range, cover, Opportunity Attacks when leaving reach, areas of effect choosing their
+targets), casting times, monsters' spells (through the action that
 lists them, with daily uses and fixed levels), class features used in turns (`feature`: Second Wind, Action Surge, Flurry of
 Blows, Stunning Strike, Bardic Inspiration…), and decisions after a roll (Bardic Inspiration,
 Legendary Resistance, Uncanny Dodge): with `decisions: "ask"` the action stops and shows the roll
@@ -314,6 +315,8 @@ recommendation; `ask on|off` changes it mid-fight, for everyone or one combatant
 quitting) writes the characters' state files and `encounter.json`; resume with
 `--encounter characters/encounter.json`. `place brakka 0 0` puts a combatant on a 5-foot grid,
 `move 3 2` moves to a square, `map` draws it; with positions, reach, range and cover are checked.
+Areas take a point or a direction instead of targets: `cast fireball @12,4`,
+`use fire breath >10,2`.
 
 ## HTTP API
 
@@ -417,7 +420,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), spellcasting (97 casting actions: spell lists, daily uses, fixed levels), "X/Day" limits, legendary actions and Legendary Resistance usable in combat; other traits as text |
 | Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
-| Not yet | Areas of effect choosing their targets, a map of walls and terrain, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
+| Not yet | A map of walls and terrain, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 
 What comes next is in [docs/ROADMAP.md](docs/ROADMAP.md); the design is in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

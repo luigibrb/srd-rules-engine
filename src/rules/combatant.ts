@@ -21,6 +21,7 @@ import {
   type MonsterDef,
   SKILL_ABILITY,
   type Skill,
+  type SpellArea,
   skillName,
 } from "../models/content";
 import {
@@ -352,6 +353,10 @@ export interface SaveActionLine {
   readonly conditions: readonly string[];
   /** `5–6`: recharges on those d6 rolls (tracked by the caller). */
   readonly recharge: string | null;
+  /** The area it fills (a breath weapon's Cone), or `null` for the creatures it names. */
+  readonly area?: SpellArea | null;
+  /** How far its target or its area's point can be, in feet. */
+  readonly range?: number | null;
 }
 
 export interface D20Roll {
@@ -919,6 +924,8 @@ export function combatantFromMonster(
           on_success: action.save.on_success,
           conditions: action.save.conditions,
           recharge: action.recharge,
+          area: action.save.area,
+          range: action.save.range,
         }
       : null;
   // Legendary actions' own saving throw effects are only usable as legendary actions.
