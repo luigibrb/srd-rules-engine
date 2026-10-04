@@ -26,6 +26,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P14 | Class features that change rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Primal Strike, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity | Data first (new Advantage targets, rider gates, `spell_damage`); three named rules in code behind a closed `rules` list |
 | P15 | Class features used in turns: Second Wind, Action Surge, Lay On Hands, Flurry of Blows, Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration | One `actions` grant for all of them; the encounter action `feature`; Bardic Inspiration used automatically on a failed D20 Test (flagged) |
 | P16 | Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask` stops the action with the roll shown until `decide`, `auto` uses them only when they can change the outcome; per combatant or per encounter | Resumed by replaying the action with its recorded dice, so nothing is undone; it replaces P15's automatic Bardic Inspiration and the `target_feature` option |
+| P17 | `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters, decisions as y/n questions | Playing fights by hand led to fixes in the engine's notes (each target of a spell, skill names, which character refused a change) and in the CLI's name matching |
 
 ## Decisions
 
@@ -109,8 +110,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Tools
 
-- **Encounter CLI (M).** `srd-rules fight`: an encounter in the terminal with saved characters and
-  SRD monsters.
 - **Authoring toolkit (M).** Shared helpers in `scripts/lib/` for the importers (slugs, Markdown
   sections and tables, overlay merge, YAML output) and a documented "transcribe → draft → review →
   golden test" recipe, also for private packs. Optionally port `import-srd-classes.py` to

@@ -9,7 +9,13 @@
 
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
-import { ABILITY_NAMES, type MonsterDef, type SpellDef } from "../models/content";
+import {
+  ABILITY_NAMES,
+  type MonsterDef,
+  type Skill,
+  type SpellDef,
+  skillName,
+} from "../models/content";
 import {
   type EffectEnd,
   type Encounter,
@@ -25,6 +31,7 @@ import {
   castSpell,
   type SaveActionResult,
   type SpellCastResult,
+  type SpellTargetResult,
   useSaveAction,
 } from "../rules/casting";
 import {
@@ -197,6 +204,7 @@ class PendingDecision {
     readonly combatant: string,
     readonly kind: Decision["kind"],
     readonly question: string,
+    readonly recommended: boolean,
   ) {}
 }
 
@@ -229,6 +237,7 @@ function attempt(
       combatant: error.combatant,
       kind: error.kind,
       question: error.question,
+      recommended: error.recommended,
     };
     return {
       encounter: EncounterSchema.parse({ ...encounter, pending: stopped }),
@@ -261,7 +270,7 @@ function run(
     const c = d.combatant.id ? e.combatants.find((x) => x.id === d.combatant.id) : undefined;
     if (!c || (c.decisions ?? e.decisions) === "auto") return d.recommended;
     if (answered < answers.length) return answers[answered++] as boolean;
-    throw new PendingDecision(c.id, d.kind, d.question);
+    throw new PendingDecision(c.id, d.kind, d.question, d.recommended);
   };
   const play = (c: EncounterCombatant, a: PlayAction): void => {
     const ref = characterRef(ctx, c);
@@ -269,7 +278,9 @@ function run(
     try {
       r = applyAction(ref.build, ref.state, ctx.catalog, a, { rng });
     } catch (error) {
-      if (error instanceof PlayError) throw new EncounterError(error.messages);
+      if (error instanceof PlayError) {
+        throw new EncounterError(error.messages.map((m) => `${c.name}: ${m}`));
+      }
       throw error;
     }
     chars[c.character as string] = { build: ref.build, state: r.state };
@@ -653,8 +664,7 @@ function run(
     c.extended = true; // forcing a saving throw extends Rage
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
-      const outcome = hit.save?.success ? "succeeds" : "fails";
-      notes.push(`${t.name}: ${outcome} (${hit.save ? saveText(hit.save) : ""}).`);
+      notes.push(targetNote(t.name, hit));
       spendLegendaryResistance(t, hit.save);
       applyTo(t, hit.actions);
     }
@@ -690,6 +700,7 @@ function run(
     applyTo(c, r.caster_actions);
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
+      notes.push(targetNote(t.name, hit));
       useInspiration(c, hit.attack?.inspiration);
       spendLegendaryResistance(t, hit.save);
       applyTo(t, hit.actions);
@@ -1157,7 +1168,7 @@ function run(
       });
       result = check;
       useInspiration(c, check.inspiration);
-      const label = check.skill ?? check.ability;
+      const label = check.skill ? skillName(check.skill as Skill) : ABILITY_NAMES[check.ability];
       const dc = check.dc === null ? "" : ` vs DC ${check.dc}`;
       const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
       const outcome = check.success === null ? "" : check.success ? ": success" : ": failure";
@@ -1689,6 +1700,27 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
 }
 
 /** "14 vs DC 13", or "fails automatically: Paralyzed". */
+/** One target's share of a spell or saving throw effect: "Brakka: fails (12 vs DC 14): 28 fire." */
+function targetNote(name: string, hit: SpellTargetResult): string {
+  const parts: string[] = [];
+  if (hit.save) parts.push(`${hit.save.success ? "succeeds" : "fails"} (${saveText(hit.save)})`);
+  if (hit.attack) {
+    const crit = hit.critical ? "Critical Hit, " : "";
+    const roll = `${hit.attack.total} vs AC`;
+    parts.push(hit.attack.hit ? `${crit}hit (${roll})` : `missed (${roll})`);
+  }
+  const damage = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+  const effects = [
+    damage,
+    hit.healing ? `regains ${hit.healing} HP` : "",
+    hit.conditions.length ? hit.conditions.join(", ") : "",
+  ].filter(Boolean);
+  const head = parts.length ? `${name}: ${parts.join(", ")}` : name;
+  return effects.length
+    ? `${head}: ${effects.join("; ")}.`
+    : `${head}${parts.length ? "." : ": no effect."}`;
+}
+
 function saveText(save: SaveResult): string {
   if (save.automatic_failure) return `fails automatically: ${save.automatic_failure}`;
   const mode = save.roll.mode === "normal" ? "" : `, ${save.roll.mode}`;

@@ -168,6 +168,8 @@ export const PendingSchema = z.object({
   combatant: z.string(),
   kind: z.enum(["inspiration", "legendary_resistance", "uncanny_dodge"]),
   question: z.string(),
+  /** What `auto` would answer (only when it can turn the failure into a success). */
+  recommended: z.boolean().default(true),
 });
 export type Pending = z.infer<typeof PendingSchema>;
 

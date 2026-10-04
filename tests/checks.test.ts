@@ -138,7 +138,7 @@ describe("in an encounter", () => {
       skill: "stealth",
       dc: 15,
     });
-    expect(notes.at(-1)).toBe("Goblin Warrior's stealth check: 18 vs DC 15: success.");
+    expect(notes.at(-1)).toBe("Goblin Warrior's Stealth check: 18 vs DC 15: success.");
   });
 
   it("a dying character rolls its Death Saving Throw at the start of its turn", () => {

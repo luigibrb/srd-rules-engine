@@ -1,0 +1,633 @@
+/**
+ * Fight mode: run an encounter in the terminal with saved characters and SRD monsters. Every
+ * command becomes an encounter action (`applyEncounterAction`); decisions after a roll (Bardic
+ * Inspiration, Legendary Resistance, Uncanny Dodge) are asked as yes/no questions in `ask` mode.
+ */
+
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { type Catalog, lookup } from "../content/catalog";
+import type { CharacterBuild } from "../models/build";
+import { ABILITIES, type Ability, SKILLS, type Skill } from "../models/content";
+import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
+import type { CharacterState } from "../models/state";
+import { monsterSpells } from "../rules/combatant";
+import { type DamagePart, formatDamage } from "../rules/damage";
+import { mathRng, type Rng } from "../rules/rng";
+import {
+  applyEncounterAction,
+  createEncounter,
+  currentCombatant,
+  EncounterError,
+  encounterCombatant,
+} from "../services/encounter";
+import { computePlaySheet, createState } from "../services/play";
+import { BackToMenu, type Console, QuitBuilder } from "./console";
+
+export interface FightAppOptions {
+  /** The characters, keyed by the slug of their name (their state file: `<key>.state.json`). */
+  builds: CharacterBuild[];
+  /** Saved states by key (default: a fresh state). */
+  states?: Record<string, CharacterState>;
+  /** Monster ids to add (repeat an id for several). */
+  monsters?: string[];
+  /** Resume a saved encounter instead of setting one up. */
+  encounter?: Encounter;
+  rng?: Rng;
+  saveDir?: string;
+  /** Ask the players (and the GM) to make decisions after a roll. */
+  ask?: boolean;
+}
+
+const HELP = `Commands (the combatant whose turn it is acts; "as <who> …" acts for someone else).
+Targets are ids, names or numbers from the status table.
+  attack <target> [weapon] [adv|dis] [2h] [+rider] [light|cleave|granted|opp] [nomastery]
+  cast <spell> [targets…] [at <level>]       use <ability> [targets…]   (a monster's save effect)
+  feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
+  dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
+  escape · stand · move <feet> · check <skill|ability> [dc]
+  dmg <t> <n> [type] · heal <t> <n> · cond <t> <condition> · cond <t> -<condition>
+  ask on|off [<t>]   decisions after a roll: ask, or let the engine decide (auto)
+  options [<who>]    what a combatant can do: attacks, spells, features, abilities
+  next · status · end · save · quit`;
+
+export function slugOf(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "character"
+  );
+}
+
+export class FightApp {
+  private encounter: Encounter;
+  private readonly builds: Record<string, CharacterBuild> = {};
+  private readonly states: Record<string, CharacterState> = {};
+  private readonly rng: Rng;
+  private readonly saveDir: string;
+  private readonly monsters: string[];
+  private readonly ask: boolean;
+  private dirty = false;
+
+  constructor(
+    private readonly con: Console,
+    private readonly catalog: Catalog,
+    { builds, states = {}, monsters = [], encounter, rng, saveDir, ask = false }: FightAppOptions,
+  ) {
+    for (const build of builds) {
+      let key = slugOf(build.name);
+      for (let n = 2; key in this.builds; n++) key = `${slugOf(build.name)}-${n}`;
+      this.builds[key] = build;
+      this.states[key] = states[key] ?? createState(build, catalog);
+    }
+    this.rng = rng ?? mathRng;
+    this.saveDir = saveDir ?? "characters";
+    this.monsters = monsters;
+    this.ask = ask;
+    this.encounter = encounter ?? createEncounter({ decisions: ask ? "ask" : "auto" });
+  }
+
+  get current(): { encounter: Encounter; states: Record<string, CharacterState> } {
+    return { encounter: this.encounter, states: this.states };
+  }
+
+  async run(): Promise<{ encounter: Encounter; states: Record<string, CharacterState> }> {
+    const con = this.con;
+    con.title("Fight");
+    con.info("Type 'help' for commands.");
+    try {
+      if (this.encounter.round === 0) await this.setup();
+      let shown = "";
+      for (;;) {
+        const turn = `${this.encounter.round}:${this.encounter.turn}`;
+        if (turn !== shown) {
+          this.status();
+          shown = turn;
+        }
+        const who = currentCombatant(this.encounter);
+        let line: string;
+        try {
+          line = await con.ask(`${who?.name ?? "GM"}>`);
+        } catch (error) {
+          if (error instanceof BackToMenu) continue;
+          throw error;
+        }
+        if (line) await this.command(line);
+      }
+    } catch (error) {
+      if (!(error instanceof QuitBuilder)) throw error;
+      if (this.dirty) {
+        try {
+          if (await con.confirm("Save the characters' states and the encounter?")) this.save();
+        } catch (e) {
+          if (!(e instanceof QuitBuilder || e instanceof BackToMenu)) throw e;
+        }
+      }
+    }
+    return this.current;
+  }
+
+  // --- setup and status -------------------------------------------------------------------
+
+  private async setup(): Promise<void> {
+    const actions: EncounterAction[] = [
+      ...Object.keys(this.builds).map(
+        (character) => ({ type: "add_character", character }) as const,
+      ),
+      ...this.monsters.map(
+        (monster) => ({ type: "add_monster", monster, side: "enemies" }) as const,
+      ),
+    ];
+    for (const action of actions) await this.apply(action);
+    if (!this.encounter.combatants.length) {
+      this.con.warn("Nobody to fight: give characters with --load and monsters with --monster.");
+      throw new QuitBuilder();
+    }
+    await this.apply({ type: "roll_initiative", group: true });
+    await this.apply({ type: "start" });
+  }
+
+  private status(): void {
+    const e = this.encounter;
+    this.con.title(`Round ${e.round}`);
+    e.order.forEach((id, i) => {
+      const c = e.combatants.find((x) => x.id === id) as EncounterCombatant;
+      const mark = i === e.turn ? this.con.style("▶", "bold", "green") : " ";
+      this.con.say(`${mark} ${i + 1}. ${this.line(c)}`);
+    });
+  }
+
+  private line(c: EncounterCombatant): string {
+    const view = encounterCombatant(this.encounter, c.id, this.context());
+    const hp = c.defeated ? this.con.style("defeated", "red") : `HP ${view.hp}/${view.max_hp}`;
+    const temp = view.temp_hp ? ` +${view.temp_hp} temp` : "";
+    const conditions = view.conditions.length ? ` · ${view.conditions.join(", ")}` : "";
+    const extra = [
+      c.concentration ? `concentrating on ${c.concentration}` : "",
+      c.inspiration ? `inspired (d${c.inspiration.die})` : "",
+      c.dodging ? "dodging" : "",
+    ].filter(Boolean);
+    const tail = extra.length ? ` · ${extra.join(", ")}` : "";
+    return `${c.name} [${c.id}] AC ${view.armor_class} · ${hp}${temp}${conditions}${tail} · Init ${c.initiative}`;
+  }
+
+  /** What `c` can do: attack lines, spells, features with uses left, monster abilities. */
+  private options(c: EncounterCombatant): void {
+    const view = encounterCombatant(this.encounter, c.id, this.context());
+    const con = this.con;
+    const list = (title: string, lines: string[]) => {
+      if (!lines.length) return;
+      con.say(con.style(`  ${title}`, "bold"));
+      for (const line of lines) con.say(`    ${line}`);
+    };
+    list(
+      "Attacks",
+      view.attacks.map((a) => {
+        const riders = a.riders.length ? ` · +${a.riders.map((r) => r.id).join(" +")}` : "";
+        const mastery = a.mastery ? ` · ${a.mastery}` : "";
+        return `${a.name} ${signedBonus(a.attack_bonus)} · ${damageText(a.damage_parts)}${mastery}${riders}`;
+      }),
+    );
+    if (c.character) {
+      const sheet = computePlaySheet(
+        this.builds[c.character] as CharacterBuild,
+        this.states[c.character] as CharacterState,
+        this.catalog,
+      );
+      const slots = sheet.play.spell_slots
+        .filter((x) => x.total > 0)
+        .map((x) => `level ${x.level}: ${x.total - x.spent}/${x.total}`);
+      list("Spell slots", slots.length ? [slots.join(" · ")] : []);
+      list(
+        "Spells",
+        sheet.spells.map((x) => `${x.name}${x.level ? ` (level ${x.level})` : " (cantrip)"}`),
+      );
+      list(
+        "Features",
+        sheet.actions.map((f) => {
+          const use = sheet.play.uses.find((u) => u.key === f.uses);
+          const left = use ? ` · ${use.max - use.spent}/${use.max} left` : "";
+          return `${f.name} (${f.economy.replace("_", " ")})${left}`;
+        }),
+      );
+    } else if (c.monster) {
+      const def = lookup(this.catalog.monsters, c.monster);
+      list(
+        "Spells",
+        def
+          ? monsterSpells(def)
+              .filter((x) => x.section !== "legendary_actions")
+              .map((x) => {
+                const name = lookup(this.catalog.spells, x.spell)?.name ?? x.spell;
+                const limits = [
+                  x.level ? `level ${x.level}` : "",
+                  x.per_day ? `${x.per_day}/Day` : "",
+                  x.action === "Spellcasting" ? "" : `via ${x.action}`,
+                ].filter(Boolean);
+                return limits.length ? `${name} (${limits.join(", ")})` : name;
+              })
+          : [],
+      );
+      list(
+        "Abilities (use)",
+        view.save_actions.map((a) => `${a.name}: ${a.ability.toUpperCase()} save DC ${a.dc}`),
+      );
+      list(
+        "Legendary actions (as <id> legend …)",
+        view.legendary_actions.map((a) => a.name),
+      );
+    }
+  }
+
+  // --- commands ---------------------------------------------------------------------------
+
+  private async command(line: string): Promise<void> {
+    let words = line.split(/\s+/).filter(Boolean);
+    let actor = currentCombatant(this.encounter);
+    if (words[0]?.toLowerCase() === "as") {
+      actor = this.find(words[1] ?? "");
+      if (!actor) return;
+      words = words.slice(2);
+    }
+    const [word = "", ...args] = words;
+    const cmd = word.toLowerCase();
+    const id = actor?.id ?? "";
+    switch (cmd) {
+      case "help":
+      case "?":
+        if (cmd === "help" && args.length) return this.helpAction(id, args);
+        this.con.say(HELP);
+        return;
+      case "status":
+      case "s":
+        return this.status();
+      case "options":
+      case "o": {
+        const who = args[0] ? this.find(args[0]) : actor;
+        if (who) this.options(who);
+        return;
+      }
+      case "next":
+      case "n":
+        return this.apply({ type: "next_turn" });
+      case "end":
+        return this.apply({ type: "end" });
+      case "save":
+        this.save();
+        return;
+      case "quit":
+        throw new QuitBuilder();
+      case "attack":
+      case "a":
+        return this.attack(id, args);
+      case "cast":
+      case "c":
+        return this.cast(id, args);
+      case "use":
+        return this.saveAction(id, args);
+      case "legend":
+        return this.legendary(id, args);
+      case "feature":
+      case "f":
+        return this.feature(id, args);
+      case "dash":
+      case "disengage":
+      case "dodge":
+        return this.apply({ type: cmd, id, bonus_action: args.includes("bonus") || undefined });
+      case "grapple":
+      case "shove": {
+        const t = this.find(args[0] ?? "");
+        if (!t) return;
+        const shove = args.find((a) => a === "prone" || a === "push") as
+          | "prone"
+          | "push"
+          | undefined;
+        return this.apply({ type: "unarmed", id, target: t.id, option: cmd, shove });
+      }
+      case "escape":
+        return this.apply({ type: "escape", id });
+      case "stand":
+        return this.apply({ type: "stand", id });
+      case "move":
+        return this.apply({ type: "move", id, feet: Number(args[0] ?? 0) });
+      case "check":
+        return this.check(id, args);
+      case "dmg":
+      case "heal": {
+        const t = this.find(args[0] ?? "");
+        const amount = Number(args[1]);
+        if (!t || !Number.isInteger(amount))
+          return this.con.error(`Usage: ${cmd} <target> <amount>`);
+        const effect =
+          cmd === "dmg"
+            ? ({ type: "damage", amount, damage_type: args[2] } as const)
+            : ({ type: "heal", amount } as const);
+        return this.apply({ type: "effects", id: t.id, actions: [effect] });
+      }
+      case "cond": {
+        const t = this.find(args[0] ?? "");
+        const name = args[1] ?? "";
+        if (!t || !name)
+          return this.con.error("Usage: cond <target> <condition> (or -<condition>)");
+        const remove = name.startsWith("-");
+        const condition = name.replace(/^-/, "").toLowerCase();
+        const effect = remove
+          ? ({ type: "remove_condition", condition } as const)
+          : ({ type: "add_condition", condition } as const);
+        return this.apply({ type: "effects", id: t.id, actions: [effect] });
+      }
+      case "ask": {
+        const mode = args[0] === "on" ? "ask" : args[0] === "off" ? "auto" : null;
+        if (!mode) return this.con.error("Usage: ask on|off [<target>]");
+        const t = args[1] ? this.find(args[1]) : null;
+        if (args[1] && !t) return;
+        return this.apply({ type: "set_decisions", id: t?.id, mode });
+      }
+      default:
+        this.con.error(`Unknown command '${word}' (try 'help')`);
+    }
+  }
+
+  private async attack(id: string, args: string[]): Promise<void> {
+    const t = this.find(args[0] ?? "");
+    if (!t) return;
+    const attacks = encounterCombatant(this.encounter, id, this.context()).attacks;
+    const flags = new Set(args.slice(1).map((a) => a.toLowerCase()));
+    const named = args.slice(1).filter((a) => !this.isFlag(a));
+    let attack = named.length
+      ? pick(
+          attacks.map((a) => a.name),
+          named.join(" "),
+        )
+      : null;
+    if (!attack && attacks.length === 1) attack = attacks[0]?.name ?? null;
+    if (!attack) {
+      attacks.forEach((a, i) => {
+        this.con.say(
+          `  ${i + 1}. ${a.name} ${signedBonus(a.attack_bonus)} · ${damageText(a.damage_parts)}`,
+        );
+      });
+      attack = pick(
+        attacks.map((a) => a.name),
+        await this.con.ask("Which attack?"),
+      );
+      if (!attack) return this.con.error("No such attack");
+    }
+    const riders = args.filter((a) => a.startsWith("+")).map((a) => ({ rider: a.slice(1) }));
+    await this.apply({
+      type: "attack",
+      id,
+      target: t.id,
+      attack,
+      mode: flags.has("adv") ? "advantage" : flags.has("dis") ? "disadvantage" : undefined,
+      two_handed: flags.has("2h") || undefined,
+      riders: riders.length ? riders : undefined,
+      light_extra: flags.has("light") || undefined,
+      cleave: flags.has("cleave") || undefined,
+      granted: flags.has("granted") || undefined,
+      opportunity: flags.has("opp") || undefined,
+      mastery: flags.has("nomastery") ? false : undefined,
+    });
+  }
+
+  private isFlag(word: string): boolean {
+    return (
+      word.startsWith("+") ||
+      ["adv", "dis", "2h", "light", "cleave", "granted", "opp", "nomastery"].includes(
+        word.toLowerCase(),
+      )
+    );
+  }
+
+  private async cast(id: string, args: string[]): Promise<void> {
+    const at = args.indexOf("at");
+    const slot_level = at >= 0 ? Number(args[at + 1]) : undefined;
+    const words = at >= 0 ? args.slice(0, at) : args;
+    // The spell is the longest prefix of words naming a catalog spell; the rest are targets.
+    for (let n = words.length; n >= 1; n--) {
+      const spell = this.spellId(words.slice(0, n).join(" "));
+      if (!spell) continue;
+      const targets = words.slice(n).map((w) => this.find(w));
+      if (targets.some((t) => !t)) return;
+      return this.apply({
+        type: "cast",
+        id,
+        spell,
+        targets: targets.map((t) => (t as EncounterCombatant).id),
+        slot_level,
+      });
+    }
+    this.con.error("Usage: cast <spell> [targets…] [at <level>]");
+  }
+
+  /** A catalog spell by id, name, or a prefix of its name that only one spell has. */
+  private spellId(text: string): string | null {
+    const slug = slugOf(text);
+    if (lookup(this.catalog.spells, slug)) return slug;
+    const spells = Object.values(this.catalog.spells);
+    const name = pick(
+      spells.map((s) => s.name),
+      text,
+    );
+    return spells.find((s) => s.name === name)?.id ?? null;
+  }
+
+  private async saveAction(id: string, args: string[]): Promise<void> {
+    const actions = encounterCombatant(this.encounter, id, this.context()).save_actions;
+    const name = args.length
+      ? pick(
+          actions.map((a) => a.name),
+          args[0] as string,
+        )
+      : null;
+    if (!name) {
+      const known = actions.map((a) => a.name).join(", ") || "none";
+      return this.con.error(`Usage: use <ability> [targets…] (${known})`);
+    }
+    const targets = args.slice(1).map((w) => this.find(w));
+    if (targets.some((t) => !t)) return;
+    await this.apply({
+      type: "save_action",
+      id,
+      ability: name,
+      targets: targets.map((t) => (t as EncounterCombatant).id),
+    });
+  }
+
+  private async legendary(id: string, args: string[]): Promise<void> {
+    const lines = encounterCombatant(this.encounter, id, this.context()).legendary_actions;
+    const name = args.length
+      ? pick(
+          lines.map((a) => a.name),
+          args[0] as string,
+        )
+      : null;
+    if (!name) {
+      const known = lines.map((a) => a.name).join(", ") || "none";
+      return this.con.error(`Usage: as <monster> legend <action> [targets…] (${known})`);
+    }
+    const targets = args.slice(1).map((w) => this.find(w));
+    if (targets.some((t) => !t)) return;
+    const ids = targets.map((t) => (t as EncounterCombatant).id);
+    await this.apply({ type: "legendary", id, action: name, target: ids[0], targets: ids });
+  }
+
+  private async feature(id: string, args: string[]): Promise<void> {
+    const actor = this.encounter.combatants.find((c) => c.id === id);
+    if (!actor?.character) return this.con.error("Only characters have class features");
+    const sheet = computePlaySheet(
+      this.builds[actor.character] as CharacterBuild,
+      this.states[actor.character] as CharacterState,
+      this.catalog,
+    );
+    const names = sheet.actions.map((a) => a.name);
+    const amount = args.find((a) => /^\d+$/.test(a));
+    const words = args.filter((a) => a !== amount);
+    // The feature is the longest prefix of words naming one; then an optional target.
+    for (let n = words.length; n >= 1; n--) {
+      const name = pick(names, words.slice(0, n).join(" "));
+      if (!name) continue;
+      const target = words[n] ? this.find(words[n] as string) : null;
+      if (words[n] && !target) return;
+      return this.apply({
+        type: "feature",
+        id,
+        feature: name,
+        target: target?.id,
+        amount: amount ? Number(amount) : undefined,
+      });
+    }
+    this.con.error(`Usage: feature <name> [target] [amount] (${names.join(", ") || "none"})`);
+  }
+
+  private async helpAction(id: string, args: string[]): Promise<void> {
+    const t = this.find(args[0] ?? "");
+    if (!t) return;
+    const skill = args[1] ? (slugOf(args.slice(1).join(" ")) as Skill) : undefined;
+    if (skill && !(SKILLS as readonly string[]).includes(skill)) {
+      return this.con.error(`Unknown skill '${args.slice(1).join(" ")}'`);
+    }
+    await this.apply({ type: "help", id, target: t.id, skill });
+  }
+
+  private async check(id: string, args: string[]): Promise<void> {
+    const dc = args.find((a) => /^\d+$/.test(a));
+    const what = slugOf(args.filter((a) => a !== dc).join(" "));
+    const ability = (ABILITIES as readonly string[]).includes(what.slice(0, 3))
+      ? (what.slice(0, 3) as Ability)
+      : undefined;
+    const skill = (SKILLS as readonly string[]).includes(what) ? (what as Skill) : undefined;
+    if (!skill && !ability) return this.con.error("Usage: check <skill|ability> [dc]");
+    await this.apply({
+      type: "check",
+      id,
+      skill,
+      ability: skill ? undefined : ability,
+      dc: dc ? Number(dc) : undefined,
+    });
+  }
+
+  // --- applying actions -------------------------------------------------------------------
+
+  private context() {
+    const characters = Object.fromEntries(
+      Object.entries(this.builds).map(([k, build]) => [
+        k,
+        { build, state: this.states[k] as CharacterState },
+      ]),
+    );
+    return { catalog: this.catalog, characters, rng: this.rng };
+  }
+
+  /** Apply an action, show its notes, and ask the pending decisions it stops for. */
+  private async apply(action: EncounterAction): Promise<void> {
+    let next: EncounterAction | null = action;
+    while (next) {
+      let result: ReturnType<typeof applyEncounterAction>;
+      try {
+        result = applyEncounterAction(this.encounter, next, this.context());
+      } catch (error) {
+        if (error instanceof EncounterError) {
+          for (const message of error.messages) this.con.error(message);
+          return;
+        }
+        throw error;
+      }
+      this.encounter = result.encounter;
+      Object.assign(this.states, result.states);
+      this.dirty = true;
+      next = null;
+      if (result.pending) {
+        // The default answer is the engine's recommendation.
+        const use = await this.con.confirm(result.pending.question, result.pending.recommended);
+        next = { type: "decide", use };
+      } else {
+        for (const note of result.notes) this.con.say(`  ${note}`);
+      }
+    }
+    if (this.encounter.round > 0 && this.encounter.combatants.some((c) => c.side === "enemies")) {
+      const enemies = this.encounter.combatants.filter((c) => c.side === "enemies");
+      if (enemies.every((c) => c.defeated)) {
+        this.con.say(this.con.style("  All enemies are down ('end' ends the fight).", "green"));
+      }
+    }
+  }
+
+  /** A combatant by number (status order), id, name, or the start of a word in either. */
+  private find(ref: string): EncounterCombatant | null {
+    const e = this.encounter;
+    if (/^\d+$/.test(ref)) {
+      const id = e.order[Number(ref) - 1];
+      const c = e.combatants.find((x) => x.id === id);
+      if (c) return c;
+    }
+    const lower = ref.toLowerCase();
+    const exact = e.combatants.find((c) => c.id === lower || c.name.toLowerCase() === lower);
+    if (exact) return exact;
+    // "dragon" finds "Adult Red Dragon": any word of the id or name can start the match.
+    const words = (c: EncounterCombatant) => [
+      c.id,
+      c.name.toLowerCase(),
+      ...c.id.split("-"),
+      ...c.name.toLowerCase().split(" "),
+    ];
+    const partial = e.combatants.filter((c) => words(c).some((w) => w.startsWith(lower)));
+    if (partial.length === 1) return partial[0] as EncounterCombatant;
+    this.con.error(
+      partial.length
+        ? `'${ref}' could be ${partial.map((c) => c.id).join(" or ")}`
+        : `No combatant '${ref}'`,
+    );
+    return null;
+  }
+
+  private save(): void {
+    mkdirSync(this.saveDir, { recursive: true });
+    for (const [key, state] of Object.entries(this.states)) {
+      writeFileSync(join(this.saveDir, `${key}.state.json`), `${JSON.stringify(state, null, 2)}\n`);
+    }
+    const path = join(this.saveDir, "encounter.json");
+    writeFileSync(path, `${JSON.stringify(this.encounter, null, 2)}\n`);
+    this.dirty = false;
+    this.con.say(this.con.style(`Saved the states and ${path}`, "green"));
+  }
+}
+
+/** The one name matching `text` exactly or by prefix (case-insensitive), else `null`. */
+function pick(names: readonly string[], text: string): string | null {
+  const lower = text.toLowerCase();
+  const exact = names.find((n) => n.toLowerCase() === lower);
+  if (exact) return exact;
+  const partial = names.filter((n) => n.toLowerCase().startsWith(lower));
+  return partial.length === 1 ? (partial[0] as string) : null;
+}
+
+/** `1d10+8 slashing + 2d4 fire`: each part with its own type. */
+function damageText(parts: readonly DamagePart[]): string {
+  return parts.map((p) => `${formatDamage([p])} ${p.type}`).join(" + ");
+}
+
+function signedBonus(n: number): string {
+  return n >= 0 ? `+${n}` : `${n}`;
+}

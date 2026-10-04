@@ -809,10 +809,11 @@ export function applyAction(
           : rollDamage([{ dice: feature.heal.dice, bonus: feature.heal.bonus, type: "healing" }], {
               rng,
             }).total;
-        s.hp.current = Math.min(p.hp.max, current + healed);
-        if (s.hp.current >= p.hp.max) s.hp.current = null;
+        const after = Math.min(p.hp.max, current + healed);
+        s.hp.current = after >= p.hp.max ? null : after;
         if (current === 0 && healed > 0) regainConsciousness(s, notes);
-        notes.push(`${feature.name}: regains ${healed} Hit Points.`);
+        const capped = after - current < healed ? ` (rolled ${healed})` : "";
+        notes.push(`${feature.name}: regains ${after - current} Hit Points${capped}.`);
       }
       break;
     }
