@@ -22,41 +22,16 @@ explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← eve
 
 ## Why it's useful
 
-Any tool for 5th-edition games, from a character builder to a virtual tabletop, a Discord bot or
-a campaign manager, has to implement the rules before it can do anything else: proficiency and
-multiclass spell slots, AC from armor and features, what Rage changes, how a Fireball's saving
-throw and damage work. That layer is large and easy to get subtly wrong, and every project tends
-to write its own. This engine is that layer, written once, tested, and independent of any
-interface.
-
-- **You build the interface; the engine handles the rules.** Send choices and actions as JSON
-  and get back the legal options, the computed sheet, the rolls and their consequences. It
-  renders nothing and needs no server, so it fits a web app, a bot, a mobile app or a backend
-  equally well.
-- **It covers the whole game, not one screen.** The same character goes from the builder (level
-  1 to 20, multiclassing, feats, spells) to play (HP, spell slots, rests, items, conditions) to
-  encounters against the 330 SRD monsters: Initiative and turns, the action economy, attacks,
-  spells, Concentration, conditions, legendary actions, and an optional grid for reach, range
-  and areas of effect. Tools built on it agree with each other because they share one set of
-  rules.
-- **Players and GMs can see why.** Every number carries its breakdown (`AC 17 = 16 Chain Mail
-  + 1 Defense`), every unavailable option its reason ("already proficient from Soldier"), every
-  roll the Advantage and Disadvantage behind it. Choices made after seeing a roll, such as
-  spending a Bardic Inspiration die, can be asked of the player or decided by the engine.
-- **The rules can be checked.** The content is the SRD 5.2.1, transcribed into data and
-  reviewed against the SRD text. Where the SRD leaves a question open, the reading chosen is
-  listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) instead of being buried in code. Dice
-  take a seedable random source, so any session can be replayed exactly, and the tests build
-  every class to level 20.
-- **Your table's rules fit in too.** Homebrew is a folder of YAML that adds or patches content,
-  validated like the SRD, without forking the engine; each campaign chooses which sources it
-  allows.
-- **It works from any stack.** TypeScript in browsers, Node, Deno, Bun and edge workers; other
-  languages use the HTTP API, the bundled JSON and the JSON Schemas. Builds, play states and
-  encounters are plain JSON documents you can store, send and diff.
-
-It isn't a virtual tabletop or a character sheet app: it's what one can be built on.
-[Status](#status) lists what it covers and what it doesn't yet.
+- **The rules are already done.** Building a 5e tool starts with the interface, not with
+  reimplementing proficiency, spell slots and saving throws.
+- **One engine for the whole game.** Character creation, play and combat share the same rules,
+  so tools built on it agree with each other.
+- **Everything explains itself.** Numbers, refusals and rolls come with their reasons, ready to
+  show to players.
+- **It's faithful to the SRD.** Content is reviewed against the SRD text, and every reading the
+  SRD leaves open is documented.
+- **Your rules fit in.** Homebrew is data layered on the SRD, not a fork.
+- **It runs anywhere.** Any JavaScript runtime, or any language through its HTTP API and JSON.
 
 ## Install
 
