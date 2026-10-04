@@ -31,8 +31,9 @@ explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← eve
   show to players.
 - **Faithful to the SRD.** Content is reviewed against the SRD text, and every reading the
   SRD leaves open is documented.
-- **Homebrew without forks.** Homebrew is data layered on the SRD, not a fork.
-- **Any runtime, any language.** Any JavaScript runtime, or any language through its HTTP API and JSON.
+- **Homebrew without forks.** Your own content is YAML layered on the SRD, validated the same way.
+- **Any runtime, any language.** Browsers, Node, Deno, Bun and edge workers; other languages
+  through the HTTP API and plain JSON.
 
 ## Install
 
