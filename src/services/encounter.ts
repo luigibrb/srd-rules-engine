@@ -332,6 +332,16 @@ export function applyEncounterAction(
       else if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
     }
     for (const x of e.combatants) x.riders_used = [];
+    // Toggles that last until the start of your next turn (Reckless Attack) end.
+    if (c.character !== null) {
+      const ref = characterRef(ctx, c);
+      for (const t of computePlaySheet(ref.build, ref.state, ctx.catalog).toggles) {
+        if (t.active && t.ends_at_turn_start) {
+          notes.push(`${t.name} ends: it lasts until the start of ${c.name}'s next turn.`);
+          play(c, { type: "deactivate", key: t.key });
+        }
+      }
+    }
     // Dodge lasts, and Help can be used, until the start of the creature's next turn.
     c.dodging = false;
     e.helps = e.helps.filter((h) => h.by !== c.id);
@@ -718,15 +728,15 @@ export function applyEncounterAction(
         let d20 = key !== null ? groupRolls.get(key) : undefined;
         if (d20 === undefined) {
           // Surprised: Disadvantage; conditions too (Invisible: Advantage, Incapacitated:
-          // Disadvantage).
-          const reasons: ModeReason[] = encounterCombatant(
-            e,
-            c.id,
-            ctx,
-          ).condition_rolls.initiative.map((x) => ({
+          // Disadvantage); features (Feral Instinct: Advantage).
+          const view = encounterCombatant(e, c.id, ctx);
+          const reasons: ModeReason[] = view.condition_rolls.initiative.map((x) => ({
             mode: x.mode,
             reason: `${c.name} is ${x.condition}`,
           }));
+          if (view.advantages.includes("initiative")) {
+            reasons.push({ mode: "advantage", reason: `${c.name}'s features` });
+          }
           if (surprised.has(c.id)) reasons.push({ mode: "disadvantage", reason: "surprised" });
           d20 = rollD20({ mode: resolveMode("normal", reasons).mode, rng }).d20;
           if (key !== null) groupRolls.set(key, d20);

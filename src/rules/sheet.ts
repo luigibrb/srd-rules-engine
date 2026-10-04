@@ -19,11 +19,13 @@ import {
   type EffectCondition,
   type EffectOp,
   type EffectTarget,
+  type FeatureRule,
   type MagicItemDef,
   type Size,
   SKILL_ABILITY,
   SKILLS,
   type Skill,
+  type SpellDamage,
   type WeaponDef,
 } from "../models/content";
 import { finalScores } from "./ability-scores";
@@ -66,7 +68,7 @@ export interface AttackRider {
   /** The damage type, or the types to choose from. */
   readonly type: string | readonly string[];
   readonly once_per_turn: boolean;
-  readonly requires: "advantage_or_ally" | null;
+  readonly requires: "advantage_or_ally" | "target_damaged" | null;
 }
 
 export interface AttackLine {
@@ -162,6 +164,8 @@ export interface ToggleLine {
   readonly no_spells: boolean;
   /** In an encounter: ends at the end of a turn it wasn't extended in (Rage). */
   readonly extends_each_turn: boolean;
+  /** In an encounter, it ends at the start of your next turn (Reckless Attack). */
+  readonly ends_at_turn_start: boolean;
 }
 
 export interface PlayContext {
@@ -207,6 +211,10 @@ export interface DerivedSheet {
   readonly resistances: readonly string[];
   /** Advantage on saving throws or checks (`save.str`), with where it comes from. */
   readonly advantages: readonly { readonly target: AdvantageTarget; readonly source: string }[];
+  /** Rules in code switched on by features (`evasion`, `reliable_talent`, `potent_cantrip`). */
+  readonly rules: readonly FeatureRule[];
+  /** Ability modifiers added to some spells' damage, with the modifier now (`bonus`). */
+  readonly spell_damage: readonly (SpellDamage & { readonly bonus: number })[];
   /** Features you can switch on in play. */
   readonly toggles: readonly ToggleLine[];
   /** Ids of every cantrip you know (a shortcut into `spells`). */
@@ -560,8 +568,13 @@ export function computeSheet(
   }
   // Damage riders (Rage Damage, Sneak Attack, Divine Strike): the latest of each id wins.
   const riders = new Map<string, { rider: ResolvedRider; level: number }>();
+  const activeToggles = new Set(
+    toggleDefs.filter((t) => play?.active?.has(t.key)).map((t) => t.toggle.id),
+  );
   for (const src of [...res.sources, ...itemSources]) {
     for (const def of src.grants.damage_riders) {
+      // Frenzy: only while Rage and Reckless Attack are both active.
+      if (!def.while_active.every((id) => activeToggles.has(id))) continue;
       const rider = resolveRider(def, src, catalog, classLevels);
       const previous = riders.get(def.id);
       if (rider && (!previous || src.level >= previous.level)) {
@@ -639,7 +652,16 @@ export function computeSheet(
       ]),
     ],
     advantages: [...res.sources, ...itemSources].flatMap((src) =>
-      src.grants.advantages.map((target) => ({ target, source: src.name })),
+      src.grants.advantages.flatMap((grant) => {
+        // Danger Sense: "unless you have the Incapacitated condition".
+        if (typeof grant === "string") return [{ target: grant, source: src.name }];
+        if (grant.unless.some((c) => play?.conditions.has(c))) return [];
+        return [{ target: grant.target, source: src.name }];
+      }),
+    ),
+    rules: [...new Set([...res.sources, ...itemSources].flatMap((src) => src.grants.rules))],
+    spell_damage: [...res.sources, ...itemSources].flatMap((src) =>
+      src.grants.spell_damage.map((d) => ({ ...d, bonus: mod[d.ability] })),
     ),
     toggles: toggleDefs.map(({ key, toggle, src }) => {
       const armorBlock = toggle.blocked_when.find((c) => conditions.get(c));
@@ -653,6 +675,7 @@ export function computeSheet(
         ends_on: toggle.ends_on,
         no_spells: toggle.no_spells,
         extends_each_turn: toggle.extends_each_turn,
+        ends_at_turn_start: toggle.ends_at_turn_start,
       };
     }),
     cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),
@@ -1109,6 +1132,13 @@ function resolveRider(
     const cls = lookup(catalog.classes, src.class_id);
     const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
     value = cls?.progression[def.damage.progression]?.[classLevel - 1];
+  }
+  // "{progression, die}": that many dice ("+2" Rage Damage → 2d6).
+  if (typeof def.damage !== "string" && def.damage.die && value !== undefined) {
+    const count = typeof value === "number" ? value : Number(value);
+    return count > 0
+      ? { def, source: src.name, dice: `${count}d${def.damage.die}`, bonus: 0 }
+      : null;
   }
   if (typeof value === "number") return { def, source: src.name, dice: null, bonus: value };
   if (value === undefined) return null;

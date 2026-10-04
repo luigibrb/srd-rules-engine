@@ -655,6 +655,11 @@
                     "properties": {
                       "progression": {
                         "type": "string"
+                      },
+                      "die": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 9007199254740991
                       }
                     },
                     "required": [
@@ -764,13 +769,21 @@
                   {
                     "type": "string",
                     "enum": [
-                      "advantage_or_ally"
+                      "advantage_or_ally",
+                      "target_damaged"
                     ]
                   },
                   {
                     "type": "null"
                   }
                 ]
+              },
+              "while_active": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
@@ -785,21 +798,152 @@
           "default": [],
           "type": "array",
           "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "initiative",
+                  "attack.str",
+                  "attacked",
+                  "save.str",
+                  "save.dex",
+                  "save.con",
+                  "save.int",
+                  "save.wis",
+                  "save.cha",
+                  "check.str",
+                  "check.dex",
+                  "check.con",
+                  "check.int",
+                  "check.wis",
+                  "check.cha"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "enum": [
+                      "initiative",
+                      "attack.str",
+                      "attacked",
+                      "save.str",
+                      "save.dex",
+                      "save.con",
+                      "save.int",
+                      "save.wis",
+                      "save.cha",
+                      "check.str",
+                      "check.dex",
+                      "check.con",
+                      "check.int",
+                      "check.wis",
+                      "check.cha"
+                    ]
+                  },
+                  "unless": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "rules": {
+          "default": [],
+          "type": "array",
+          "items": {
             "type": "string",
             "enum": [
-              "save.str",
-              "save.dex",
-              "save.con",
-              "save.int",
-              "save.wis",
-              "save.cha",
-              "check.str",
-              "check.dex",
-              "check.con",
-              "check.int",
-              "check.wis",
-              "check.cha"
+              "evasion",
+              "reliable_talent",
+              "potent_cantrip"
             ]
+          }
+        },
+        "spell_damage": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "ability": {
+                "type": "string",
+                "enum": [
+                  "str",
+                  "dex",
+                  "con",
+                  "int",
+                  "wis",
+                  "cha"
+                ]
+              },
+              "cantrip": {
+                "default": false,
+                "type": "boolean"
+              },
+              "list": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "school": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "damage_type": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "one_roll": {
+                "default": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "ability"
+            ],
+            "additionalProperties": false
           }
         },
         "toggles": {
@@ -849,6 +993,10 @@
                 "type": "boolean"
               },
               "extends_each_turn": {
+                "default": false,
+                "type": "boolean"
+              },
+              "ends_at_turn_start": {
                 "default": false,
                 "type": "boolean"
               }

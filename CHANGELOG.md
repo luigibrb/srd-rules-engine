@@ -31,6 +31,14 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Class features that change rolls: Danger Sense, Reckless Attack (ends at the start of your
+  next turn in encounters), Feral Instinct, Frenzy, Evasion (also the Assassin's), Reliable
+  Talent, Primal Strike, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered
+  Evocation, Elemental Affinity. Content: Advantage targets `initiative`, `attack.str`,
+  `attacked` and the `{target, unless}` form; toggle `ends_at_turn_start`; rider `while_active`,
+  `requires: target_damaged` and `{progression, die}` damage; grants `rules` (`FEATURE_RULES`)
+  and `spell_damage`. Sheet `rules` and `spell_damage`; combatant `rules`,
+  `proficient_skills`, `spell_damage`.
 - Monster spellcasting: monster action fields `casts` (the Spellcasting action's lists, other
   actions that cast spells, legendary actions that use Spellcasting; 97 in the SRD) and `per_day`
   ("(2/Day)"); `monsterSpells`, `MonsterSpellLine`; monster combatants get a spellcasting line

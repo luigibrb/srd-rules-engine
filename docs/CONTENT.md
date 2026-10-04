@@ -145,8 +145,10 @@ loads ("unknown effect target 'speeed'"), and the JSON Schemas offer them for au
 ### Damage riders, Advantage and toggles
 
 Extra damage on some attacks goes in `damage_riders`; `advantages` gives Advantage on saves or
-checks (`save.str`, `check.dex`); a feature you switch on in play is a `toggle`, whose grants apply
-while it's active:
+checks (`save.str`, `check.dex`), Initiative (`initiative`), attack rolls using Strength
+(`attack.str`) or attack rolls against you (`attacked`), optionally `unless` you have a condition
+(`{target: save.dex, unless: [incapacitated]}`: Danger Sense); a feature you switch on in play is a
+`toggle`, whose grants apply while it's active:
 
 ```yaml
 toggles:
@@ -157,6 +159,7 @@ toggles:
   ends_on: [incapacitated]      # conditions (implied ones count) that end it
   no_spells: true               # no Concentration or spellcasting while active
   extends_each_turn: true       # in an encounter: ends at the end of a turn it wasn't extended in
+                                # (ends_at_turn_start: true ends it at your next turn: Reckless Attack)
   grants:
     resistances: [bludgeoning, piercing, slashing]
     advantages: [check.str, save.str]
@@ -170,9 +173,27 @@ toggles:
 
 A rider that isn't `automatic` (Sneak Attack, Divine Strike) is listed on matching attack lines
 and added when `makeAttack` is asked to; `type` is `weapon` (the default), a damage type, or a
-list to choose from. `requires: advantage_or_ally` is checked by `makeAttack`; `once_per_turn`
-is enforced in encounters (outside one, the caller tracks it). A later rider with the same `id`
-replaces an earlier one (Divine Strike at Cleric 14: `at_class_level` gives the 2d8 version).
+list to choose from. `requires` (`advantage_or_ally`: Sneak Attack; `target_damaged`: Colossus
+Slayer) is checked by `makeAttack`; `once_per_turn` is enforced in encounters (outside one, the
+caller tracks it). `while_active: [rage, reckless-attack]` offers it only while those toggles are
+on (Frenzy), and `damage: {progression: Rage Damage, die: 6}` rolls that many dice. A later rider
+with the same `id` replaces an earlier one (Divine Strike at Cleric 14: `at_class_level` gives the
+2d8 version).
+
+`spell_damage` adds an ability modifier to the damage of matching spells (every filter given must
+match), to each damage roll or, with `one_roll`, to the first:
+
+```yaml
+spell_damage:
+- {name: Potent Spellcasting, ability: wis, cantrip: true, list: cleric}
+- {name: Empowered Evocation, ability: int, list: wizard, school: evocation, one_roll: true}
+- {name: Elemental Affinity, ability: cha, damage_type: fire, one_roll: true}
+```
+
+`rules` switches on a rule written in code, from a closed list: `evasion` (Dexterity saves that
+halve damage: none on a success, half on a failure, not while Incapacitated), `reliable_talent`
+(a d20 of 9 or lower counts as 10 on checks with a proficient skill), `potent_cantrip` (a cantrip
+that misses or is saved against deals half damage).
 
 Anything effects, riders, Advantage and toggles can't express goes in a trait's text, or in a
 feat's `unsupported` note, which the builder shows to the player.

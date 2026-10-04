@@ -324,6 +324,9 @@ export function combatantFromCharacter(
     legendary_actions: [],
     legendary_resistance: 0,
     size: sheet.size,
+    rules: sheet.rules,
+    proficient_skills: sheet.skills.flatMap((line) => (line.proficient_from ? [line.skill] : [])),
+    spell_damage: sheet.spell_damage,
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []
