@@ -22,17 +22,17 @@ explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← eve
 
 ## Why it's useful
 
-- **The rules run the game.** The engine embeds the SRD rules and follows the game flow with
+- **Rules that run the game.** The engine embeds the SRD rules and follows the game flow with
   them: what's legal, whose turn it is, what a roll does and what it changes. A tool built on it
   only has to present the game.
 - **One engine for the whole game.** Character creation, play and combat share the same rules,
   so tools built on it agree with each other.
-- **Everything explains itself.** Numbers, refusals and rolls come with their reasons, ready to
+- **Explanations built in.** Numbers, refusals and rolls come with their reasons, ready to
   show to players.
-- **It's faithful to the SRD.** Content is reviewed against the SRD text, and every reading the
+- **Faithful to the SRD.** Content is reviewed against the SRD text, and every reading the
   SRD leaves open is documented.
-- **Your rules fit in.** Homebrew is data layered on the SRD, not a fork.
-- **It runs anywhere.** Any JavaScript runtime, or any language through its HTTP API and JSON.
+- **Homebrew without forks.** Homebrew is data layered on the SRD, not a fork.
+- **Any runtime, any language.** Any JavaScript runtime, or any language through its HTTP API and JSON.
 
 ## Install
 
