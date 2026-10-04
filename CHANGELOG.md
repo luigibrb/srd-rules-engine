@@ -35,6 +35,12 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Positions on a 5-foot grid, optional: encounter combatant `position`, the actions `place` and
+  `move` `to`, `gridDistance`; reach, normal and long range, close combat (also for spell
+  attacks), thrown weapons (`attack` `thrown`), spell range and Touch, Sneak Attack's adjacent
+  ally and "within 5 feet" measured; Opportunity Attacks noted when leaving reach; `cover` on
+  `attack`, `cast` and `save_action`. `AttackLine.reach` and `range`; `castSpell` options
+  `modes` and `within_5ft`. The fight CLI's `place`, `move <x> <y>` and `map`.
 - `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters (turn
   order and status, commands for every encounter action, `options`, decisions as y/n questions
   with `--ask`, saving and resuming). `Pending.recommended`. Spell and saving throw effect notes

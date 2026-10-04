@@ -490,6 +490,101 @@ function run(
     const left = Math.max(0, max - c.legendary_resistance_used);
     notes.push(`${c.name} uses Legendary Resistance to succeed instead (${left} left today).`);
   };
+  /** Put `c` on a square; another creature's space can't be the end of a move. */
+  const occupy = (c: EncounterCombatant, to: { x: number; y: number }): void => {
+    const size = spaceOf(ctx, c);
+    for (const x of e.combatants) {
+      if (x.id === c.id || x.defeated || !x.position) continue;
+      if (gridDistance(to, size, x.position, spaceOf(ctx, x)) === 0) {
+        fail(`${x.name} is in that space`);
+      }
+    }
+    c.position = { ...to };
+  };
+  /** Feet between two positioned combatants (nearest squares of their spaces), else `null`. */
+  const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null => {
+    if (!a.position || !b.position) return null;
+    return gridDistance(a.position, spaceOf(ctx, a), b.position, spaceOf(ctx, b));
+  };
+  /** Positioned enemies of `c` within 5 feet that aren't Incapacitated (close combat). */
+  const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] =>
+    e.combatants.filter((x) => {
+      if (x.id === c.id || x.defeated || alliesOf(e, x.id, c)) return false;
+      const d = feetBetween(c, x);
+      return d !== null && d <= 5 && !conditionsOf(ctx, x).has("incapacitated");
+    });
+  /**
+   * What positions say about an attack: a melee attack within reach, a ranged one within long
+   * range (Disadvantage beyond normal range, and with an enemy within 5 feet), whether it's
+   * within 5 feet, and whether an ally of the attacker is next to the target (Sneak Attack).
+   */
+  const attackGeometry = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    line: AttackLine,
+    options: {
+      thrown?: boolean;
+      within_5ft?: boolean;
+      ally_adjacent?: boolean;
+      opportunity?: boolean;
+    },
+  ) => {
+    const modes: ModeReason[] = [];
+    if (options.thrown && !line.properties.includes("thrown")) {
+      fail(`${line.name} can't be thrown`);
+    }
+    const ranged = line.kind === "ranged" || Boolean(options.thrown);
+    const distance = feetBetween(c, t);
+    let within_5ft = options.within_5ft;
+    let ally_adjacent = options.ally_adjacent;
+    if (distance === null) {
+      if (options.thrown) within_5ft ??= false;
+      return { modes, within_5ft, ally_adjacent };
+    }
+    within_5ft ??= distance <= 5;
+    if (!ranged) {
+      // An Opportunity Attack happens just before the target leaves the reach.
+      const reach = line.reach ?? 5;
+      if (!options.opportunity && distance > reach) {
+        fail(`${t.name} is ${distance} feet away: out of ${line.name}'s reach (${reach} ft)`);
+      }
+    } else {
+      const range = line.range;
+      if (range && distance > range.long) {
+        fail(`${t.name} is ${distance} feet away: beyond ${line.name}'s range (${range.long} ft)`);
+      }
+      if (range && distance > range.normal) {
+        modes.push({
+          mode: "disadvantage",
+          reason: `${t.name} is beyond normal range (${range.normal} ft)`,
+        });
+      }
+      const near = enemiesNear(c)[0];
+      if (near) modes.push({ mode: "disadvantage", reason: `${near.name} is within 5 ft` });
+    }
+    ally_adjacent ??= e.combatants.some((x) => {
+      if (x.id === c.id || x.id === t.id || x.defeated || !alliesOf(e, x.id, c)) return false;
+      const d = feetBetween(x, t);
+      return d !== null && d <= 5 && !conditionsOf(ctx, x).has("incapacitated");
+    });
+    return { modes, within_5ft, ally_adjacent };
+  };
+  /** A target out of a positioned caster's spell range is refused ("60 feet", "Touch"). */
+  const checkSpellRange = (
+    c: EncounterCombatant,
+    spell: SpellDef,
+    targets: EncounterCombatant[],
+  ) => {
+    const reach = /^(\d+) feet$/.exec(spell.range)?.[1];
+    const limit = spell.range === "Touch" ? 5 : reach ? Number(reach) : null;
+    if (limit === null) return;
+    for (const t of targets) {
+      const d = t === c ? 0 : feetBetween(c, t);
+      if (d !== null && d > limit) {
+        fail(`${t.name} is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
+      }
+    }
+  };
   /** `t`'s feature that halves an attack's damage as its reaction (Uncanny Dodge), if usable. */
   const reactionThatHalves = (t: EncounterCombatant): string | null => {
     if (t.character === null || t.used.reaction) return null;
@@ -512,10 +607,21 @@ function run(
       light_extra?: boolean;
       cleave?: boolean;
       mastery?: boolean;
+      thrown?: boolean;
+      cover?: Cover;
+      opportunity?: boolean;
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
     const line = attacker.attacks.find((a) => a.name === attackName);
+    // Positions: reach, range, close combat, within 5 feet and an ally next to the target.
+    const spatial = line
+      ? attackGeometry(c, t, line, options)
+      : {
+          modes: [] as ModeReason[],
+          within_5ft: options.within_5ft,
+          ally_adjacent: options.ally_adjacent,
+        };
     const riders = options.riders ?? [];
     const onceIds = riders.flatMap((r) => {
       const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
@@ -523,7 +629,7 @@ function run(
     });
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
-    const target = encounterCombatant(e, t.id, ctx);
+    const target = withCover(encounterCombatant(e, t.id, ctx), options.cover);
     // Help: Advantage on the next attack roll by one of the helper's allies against the target.
     const help = e.helps.find(
       (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
@@ -531,6 +637,7 @@ function run(
     const modes: ModeReason[] = help
       ? [{ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` }]
       : [];
+    modes.push(...spatial.modes);
     // Vex: Advantage on c's next attack roll against t; Sap: Disadvantage on c's next attack roll.
     const vex = e.masteries.find((m) => m.mastery === "vex" && m.by === c.id && m.on === t.id);
     const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id);
@@ -548,8 +655,8 @@ function run(
         mode: options.mode,
         two_handed: options.two_handed,
         riders,
-        ally_adjacent: options.ally_adjacent,
-        within_5ft: options.within_5ft,
+        ally_adjacent: spatial.ally_adjacent,
+        within_5ft: spatial.within_5ft,
         against_source_of,
         modes,
         light_extra: options.light_extra,
@@ -651,11 +758,14 @@ function run(
     user: Combatant,
     name: string,
     targetIds: readonly string[],
+    cover?: Readonly<Record<string, Cover>>,
   ): SaveActionResult => {
     const targets = targetIds.map(find);
     let r: SaveActionResult;
     try {
-      const combatants = targets.map((t) => encounterCombatant(e, t.id, ctx));
+      const combatants = targets.map((t) =>
+        withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]),
+      );
       r = useSaveAction(user, name, combatants, { rng, decide });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
@@ -678,16 +788,33 @@ function run(
     c: EncounterCombatant,
     spell: SpellDef,
     targetIds: readonly string[],
-    options: { slot_level?: number; pact?: boolean; mode?: RollMode; spellcasting?: string },
+    options: {
+      slot_level?: number;
+      pact?: boolean;
+      mode?: RollMode;
+      spellcasting?: string;
+      cover?: Readonly<Record<string, Cover>>;
+    },
   ): SpellCastResult => {
     const targets = targetIds.map(find);
+    checkSpellRange(c, spell, targets);
+    // Positions: an enemy within 5 feet hinders ranged spell attacks; Prone targets within 5 ft.
+    const near = enemiesNear(c)[0];
+    const modes: ModeReason[] = near
+      ? [{ mode: "disadvantage", reason: `${near.name} is within 5 ft` }]
+      : [];
+    const within_5ft = targets.map((t) => {
+      const d = feetBetween(c, t);
+      return d === null ? undefined : d <= 5;
+    });
+    const { cover, ...cast } = options;
     let r: SpellCastResult;
     try {
       r = castSpell(
         encounterCombatant(e, c.id, ctx),
         spell,
-        targets.map((t) => encounterCombatant(e, t.id, ctx)),
-        { ...options, rng, decide },
+        targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id])),
+        { ...cast, rng, decide, modes, within_5ft },
       );
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
@@ -971,11 +1098,37 @@ function run(
       const c = find(action.id);
       onTurn(c, "move");
       if (c.defeated) fail(`${c.name} is defeated`);
+      const from = c.position;
+      if (action.to && !from) fail(`${c.name} has no position: place it first`);
+      const feet =
+        action.feet ??
+        (action.to && from
+          ? Math.max(Math.abs(action.to.x - from.x), Math.abs(action.to.y - from.y)) * 5
+          : fail("Give the feet moved or a square to move to"));
       const budget = speedOf(ctx, c, e) + c.extra_movement;
-      if (c.moved + action.feet > budget) {
+      if (c.moved + feet > budget) {
         fail(`${c.name} can move ${Math.max(0, budget - c.moved)} more feet this turn`);
       }
-      c.moved += action.feet;
+      c.moved += feet;
+      if (action.to) {
+        // Enemies whose reach it leaves can make an Opportunity Attack (not after Disengage).
+        const before = e.combatants.map((x) => [x, feetBetween(c, x)] as const);
+        occupy(c, action.to);
+        for (const [x, was] of before) {
+          if (x.id === c.id || x.defeated || alliesOf(e, x.id, c) || was === null) continue;
+          const reach = meleeReach(ctx, e, x);
+          const now = feetBetween(c, x) as number;
+          if (reach !== null && was <= reach && now > reach && !c.disengaged && !x.used.reaction) {
+            notes.push(
+              `${c.name} leaves ${x.name}'s reach: ${x.name} can make an Opportunity Attack.`,
+            );
+          }
+        }
+      }
+      break;
+    }
+    case "place": {
+      occupy(find(action.id), { x: action.x, y: action.y });
       break;
     }
     case "dash": {
@@ -1012,7 +1165,13 @@ function run(
         if (!proficientIn(ctx, c, action.skill)) {
           fail(`${c.name} isn't proficient in ${action.skill}: Help assists with a proficiency`);
         }
-      } else if (c.side && c.side === t.side) fail(`${t.name} is on ${c.name}'s side`);
+      } else {
+        if (c.side && c.side === t.side) fail(`${t.name} is on ${c.name}'s side`);
+        // "You momentarily distract an enemy within 5 feet of you."
+        const d = feetBetween(c, t);
+        if (d !== null && d > 5)
+          fail(`${t.name} is ${d} feet away: Help distracts an enemy within 5 ft`);
+      }
       takeAction(c, "Help");
       e.helps.push({ by: c.id, on: t.id, skill: action.skill ?? null });
       notes.push(
@@ -1036,6 +1195,8 @@ function run(
       if (mine >= 0 && theirs > mine + 1) {
         fail(`${t.name} is too large for ${c.name} to ${action.option}`);
       }
+      const d = feetBetween(c, t);
+      if (d !== null && d > 5) fail(`${t.name} is ${d} feet away: an Unarmed Strike reaches 5 ft`);
       spendAttack(c, action.reaction);
       c.extended = true; // forcing a saving throw extends Rage
       const dc = 8 + user.modifiers.str + user.proficiency_bonus;
@@ -1251,7 +1412,7 @@ function run(
       const line = user.save_actions.find((a) => a.name === action.ability);
       if (c.monster !== null)
         spendDaily(c, action.ability, dailyUses(ctx, c, action.ability), action.ability);
-      result = saveEffectOn(c, user, action.ability, action.targets);
+      result = saveEffectOn(c, user, action.ability, action.targets, action.cover);
       c.used.action = true;
       if (line?.recharge) c.expended.push(action.ability);
       break;
@@ -1473,6 +1634,7 @@ function run(
         pact: action.pact,
         mode: action.mode,
         spellcasting,
+        cover: action.cover,
       });
       c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.
@@ -1762,4 +1924,52 @@ function dailyUses(ctx: EncounterContext, c: EncounterCombatant, name: string): 
   const def = monsterDef(ctx, c);
   const all = [...def.actions, ...def.bonus_actions, ...def.reactions];
   return all.find((a) => a.name === name)?.per_day ?? null;
+}
+
+export type Cover = "half" | "three_quarters" | "total";
+
+/** A target behind cover: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
+function withCover(view: Combatant, cover: Cover | undefined): Combatant {
+  if (!cover) return view;
+  if (cover === "total") fail(`${view.name} has Total Cover: it can't be targeted`);
+  const bonus = cover === "half" ? 2 : 5;
+  return {
+    ...view,
+    armor_class: view.armor_class + bonus,
+    saving_throws: { ...view.saving_throws, dex: view.saving_throws.dex + bonus },
+  };
+}
+
+/** Squares on a side of a creature's space (SRD "Creature Size and Space"); Tiny counts as one. */
+const SPACE: Readonly<Record<string, number>> = { large: 2, huge: 3, gargantuan: 4 };
+function spaceOf(ctx: EncounterContext, c: EncounterCombatant): number {
+  const size =
+    c.monster !== null
+      ? monsterDef(ctx, c).size.split(" ")[0]?.toLowerCase()
+      : computePlaySheet(characterRef(ctx, c).build, characterRef(ctx, c).state, ctx.catalog).size;
+  return SPACE[size ?? ""] ?? 1;
+}
+
+/**
+ * Feet between two spaces on the grid: count squares from one space to the nearest square of
+ * the other, diagonals like any other step (SRD "Playing on a Grid"); 5 feet when adjacent, 0
+ * when they overlap.
+ */
+export function gridDistance(
+  a: { x: number; y: number },
+  sizeA: number,
+  b: { x: number; y: number },
+  sizeB: number,
+): number {
+  const gap = (from: number, sa: number, to: number, sb: number) =>
+    Math.max(0, to - (from + sa - 1), from - (to + sb - 1));
+  return Math.max(gap(a.x, sizeA, b.x, sizeB), gap(a.y, sizeA, b.y, sizeB)) * 5;
+}
+
+/** The longest reach of a combatant's melee attacks, or `null` without one. */
+function meleeReach(ctx: EncounterContext, e: Encounter, c: EncounterCombatant): number | null {
+  const reaches = encounterCombatant(e, c.id, ctx)
+    .attacks.filter((a) => a.kind === "melee")
+    .map((a) => a.reach ?? 5);
+  return reaches.length ? Math.max(...reaches) : null;
 }

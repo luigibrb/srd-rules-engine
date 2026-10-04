@@ -450,6 +450,20 @@ list of actions.
   (Stunning Strike: Stunned until the start of the monk's next turn), or gives a Bardic
   Inspiration die (`inspiration`), which its holder can add to a failed attack roll, saving throw
   or check (a decision, below). A target with Uncanny Dodge is offered it when an attack hits it.
+- **Positions (optional).** A combatant's `position` is its square on a 5-foot grid (`place`,
+  or `move` with `to`), top-left for a creature larger than Medium (Large 2×2, Huge 3×3,
+  Gargantuan 4×4). `gridDistance` counts squares to the nearest square of the other space,
+  diagonals like any other step (SRD "Playing on a Grid"). When attacker and target both have
+  positions, the encounter measures: a melee attack needs the target within its line's `reach`
+  (5 ft, 10 with Reach, a monster's listed reach); a ranged or thrown (`thrown: true`) attack
+  has Disadvantage beyond normal range, can't go past long range, and has Disadvantage with an
+  enemy within 5 ft that isn't Incapacitated (spell attacks too); "within 5 feet" (Prone,
+  Paralyzed) and Sneak Attack's ally next to the target are measured; a spell's range ("60
+  feet", Touch) is checked; Unarmed Strike and Help need 5 ft. Moving to a square costs its
+  distance, can't end in another creature's space, and notes the enemies whose reach it leaves
+  (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
+  within 5 feet or in range, as before. Cover is given per attack (`cover`) or per target
+  (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted.
 - **Decisions after a roll.** Bardic Inspiration, Legendary Resistance and Uncanny Dodge are
   choices made after seeing the roll and before its consequences. The rules functions
   (`rollSavingThrow`, `rollAbilityCheck`, `makeAttack`, `castSpell`, `useSaveAction`) take a
@@ -557,7 +571,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Conditions a stat block gives only to targets of some size or HP, or after being swallowed or
   engulfed, stay text; so does damage that depends on something ("if the attack roll had
   Advantage").
-- Who can be targeted (size limits, range) is the caller's to decide.
+- Who can be targeted (size limits) is the caller's to decide; range is measured when combatants have positions.
 - A stat block without a save DC or attack bonus for its spells gets 8 + modifier + Proficiency
   Bonus as the DC and the DC − 8 as the attack bonus (the Brass Dragon lists Scorching Ray with a
   save DC only). Most stat blocks that give both follow that relation, not all (the adult Bronze
@@ -573,8 +587,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   sight.
 - Invisible's benefit applies against every creature: "a creature that can see you" (Truesight,
   Blindsight) isn't modeled.
-- Whether an attack is within 5 feet defaults by its kind (melee: yes, ranged: no); the caller
-  sets it otherwise (a reach weapon, a ranged attack at close range).
+- Without positions, whether an attack is within 5 feet defaults by its kind (melee: yes,
+  ranged: no); the caller sets it otherwise (a reach weapon, a ranged attack at close range).
 - Grappled's exception for the grappler needs the grappler known: an encounter effect with it as
   the source. Otherwise the Disadvantage applies to every target.
 
@@ -597,6 +611,16 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Uncanny Dodge is decided once the hit is known, with the damage already rolled (the question
   doesn't show it); it doesn't check that the rogue can see the attacker; Lay On Hands' option to cure
   Poisoned stays text.
+
+**Positions**
+
+- Moving to a square costs the straight count of squares; Difficult Terrain, walls and the path
+  taken aren't on the map (give `feet` instead for a longer route). Leaving an enemy's reach is
+  judged from where the move starts and ends.
+- A Tiny creature takes one square; several Tiny creatures can't share it.
+- Close combat's "an enemy who can see you", and cover itself, are the caller's to judge.
+- An Opportunity Attack (`opportunity: true`) skips the reach check: it happens just before the
+  target leaves, after the target's move was recorded.
 
 **Encounters**
 
@@ -631,8 +655,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there are no positions, reach or cover (so "within 5 feet" is given, not measured),
-79 spells keep their effects in text, and shopping with starting gold isn't automated.
+areas of effect don't choose their targets from positions yet, there's no map of walls and
+Difficult Terrain, 79 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

@@ -95,6 +95,11 @@ export const EncounterCombatantSchema = z.object({
    * encounter's `decisions`.
    */
   decisions: z.enum(["ask", "auto"]).nullable().default(null),
+  /**
+   * Its square on a 5-foot grid (the top-left one, for a creature larger than Medium), or `null`
+   * when positions aren't used: then the caller says what's within 5 feet or in range.
+   */
+  position: z.object({ x: z.int(), y: z.int() }).nullable().default(null),
   /** A Bardic Inspiration die it holds, and who gave it; used on its next failed D20 Test. */
   inspiration: z
     .object({ die: z.int().min(2), by: z.string() })
@@ -256,7 +261,19 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("next_turn") }),
   z.object({ type: z.literal("end") }),
   z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
-  z.object({ type: z.literal("move"), id: z.string(), feet: n.min(0) }),
+  /**
+   * Move `feet`, or to the square `to` (its position: a straight count of squares, diagonals
+   * included, 5 feet each). Leaving an enemy's reach is noted: it can make an Opportunity
+   * Attack (unless the mover Disengaged).
+   */
+  z.object({
+    type: z.literal("move"),
+    id: z.string(),
+    feet: n.min(0).optional(),
+    to: z.object({ x: n, y: n }).optional(),
+  }),
+  /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
+  z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
   /**
    * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
    * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
@@ -358,6 +375,10 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     mastery: z.boolean().optional(),
     /** One of the attacks a feature granted this turn (Flurry of Blows). */
     granted: z.boolean().optional(),
+    /** Throw a melee weapon with the Thrown property: a ranged attack at its range. */
+    thrown: z.boolean().optional(),
+    /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
+    cover: z.enum(["half", "three_quarters", "total"]).optional(),
   }),
   /**
    * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and
@@ -378,6 +399,8 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     id: z.string(),
     ability: z.string(),
     targets: z.array(z.string()),
+    /** Targets' cover, by id: +2 or +5 to Dexterity saves; Total Cover can't be targeted. */
+    cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
   }),
   /**
    * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
@@ -392,6 +415,8 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     spell: z.string(),
     via: z.string().optional(),
     targets: z.array(z.string()).optional(),
+    /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
+    cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
     slot_level: n.min(1).max(9).optional(),
     pact: z.boolean().optional(),
     mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),

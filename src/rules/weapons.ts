@@ -21,3 +21,10 @@ export function isMonkWeapon(weapon: WeaponDef): boolean {
     weapon.kind === "melee" && (weapon.category === "simple" || weapon.properties.includes("light"))
   );
 }
+
+/** "80/320" (feet) → `{ normal: 80, long: 320 }`; a single number is both. */
+export function parseRange(text: string | null): { normal: number; long: number } | null {
+  const m = text ? /^(\d+)(?:\/(\d+))?/.exec(text) : null;
+  if (!m) return null;
+  return { normal: Number(m[1]), long: Number(m[2] ?? m[1]) };
+}
