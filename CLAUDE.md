@@ -31,7 +31,8 @@ scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homeb
                    #   import-srd-monsters.ts (→ monsters.yaml; FIXES for garbled values);
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
-examples/          # homebrew-pack (tested in tests/content.test.ts)
+examples/          # homebrew-pack (tested in tests/content.test.ts); battle-demo.ts (`npm run demo`,
+                   #   a seeded battle; tests/demo.test.ts snapshots its story)
 docs/              # ARCHITECTURE.md (design, flagged interpretations), CONTENT.md (authoring
                    #   guide), ROADMAP.md (done, decisions, next steps)
   srd-5.2.1/       # SRD 5.2.1 Markdown: authoritative rules reference (git-ignored)

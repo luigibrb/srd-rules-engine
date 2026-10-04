@@ -862,8 +862,8 @@ function run(
     c.extended = true; // forcing a saving throw extends Rage
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
+      spendLegendaryResistance(t, hit.save); // notes Bardic Inspiration first: it changed the roll
       notes.push(targetNote(t.name, hit));
-      spendLegendaryResistance(t, hit.save);
       applyTo(t, hit.actions);
     }
     return r;
@@ -898,14 +898,16 @@ function run(
       return d === null ? undefined : d <= 5;
     });
     const { cover, area: _area, ...cast } = options;
+    const views = targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]));
     let r: SpellCastResult;
     try {
-      r = castSpell(
-        encounterCombatant(e, c.id, ctx),
-        spell,
-        targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id])),
-        { ...cast, rng, decide, modes, within_5ft },
-      );
+      r = castSpell(encounterCombatant(e, c.id, ctx), spell, views, {
+        ...cast,
+        rng,
+        decide,
+        modes,
+        within_5ft,
+      });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
       throw error;
@@ -917,9 +919,9 @@ function run(
     applyTo(c, r.caster_actions);
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
-      notes.push(targetNote(t.name, hit));
       useInspiration(c, hit.attack?.inspiration);
       spendLegendaryResistance(t, hit.save);
+      notes.push(targetNote(t.name, hit, views[hit.target]?.armor_class));
       applyTo(t, hit.actions);
     }
     // A Concentration spell's conditions last while the caster concentrates, up to its duration.
@@ -1921,7 +1923,8 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       );
       c.hp = result.hp;
       c.temp_hp = result.temp;
-      const notes = [...result.notes];
+      // Massive Damage and Death Saving Throws are for characters: a monster just dies at 0 HP.
+      const notes = result.notes.filter((n) => !/^(Massive damage|Damage at 0 HP)/.test(n));
       // SRD "Monster Death": a monster dies the instant it drops to 0 Hit Points.
       if (result.hp === 0) {
         c.defeated = true;
@@ -1967,12 +1970,12 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
 
 /** "14 vs DC 13", or "fails automatically: Paralyzed". */
 /** One target's share of a spell or saving throw effect: "Brakka: fails (12 vs DC 14): 28 fire." */
-function targetNote(name: string, hit: SpellTargetResult): string {
+function targetNote(name: string, hit: SpellTargetResult, ac?: number): string {
   const parts: string[] = [];
   if (hit.save) parts.push(`${hit.save.success ? "succeeds" : "fails"} (${saveText(hit.save)})`);
   if (hit.attack) {
     const crit = hit.critical ? "Critical Hit, " : "";
-    const roll = `${hit.attack.total} vs AC`;
+    const roll = `${hit.attack.total} vs AC${ac === undefined ? "" : ` ${ac}`}`;
     parts.push(hit.attack.hit ? `${crit}hit (${roll})` : `missed (${roll})`);
   }
   const damage = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");

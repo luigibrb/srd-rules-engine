@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the demo battle shows the engine's main features, the same way on every run 1`] = `
+"
+== 1. Building a character ==
+Fighter skill "Athletics": already proficient from Soldier
+Picking it anyway is refused: Athletics: already proficient from Soldier
+Brakka, level 1: AC 17 = 16 Chain Mail + 1 Defense
+HP 11 = 10 Fighter d10 + 1 Con
+
+== 2. Levelling up the party to 5 ==
+Brakka: Fighter 5, HP 39, AC 17, 2 attacks per action
+Ilse: Wizard 5, HP 32, AC 11, slots 4×L1 3×L2 2×L3, with Ray of Frost, Shield, Magic Missile, Fireball
+Lute: Bard 5, HP 33, AC 14, slots 4×L1 3×L2 2×L3, with Vicious Mockery, Healing Word
+
+== 3. The battle ==
+  Brakka joins.
+  Ilse joins.
+  Lute joins.
+  Red Dragon Wyrmling joins with 75 HP.
+  Goblin Warrior joins with 10 HP.
+  Goblin Warrior 2 joins with 10 HP.
+  Goblin Warrior 3 joins with 10 HP.
+  Brakka: Initiative 6 (1 + 5).
+  Ilse: Initiative 6 (2 + 4).
+  Lute: Initiative 26 (20 + 6).
+  Red Dragon Wyrmling: Initiative 16 (14 + 2).
+  Goblin Warrior: Initiative 13 (11 + 2).
+  Goblin Warrior 2: Initiative 13 (11 + 2).
+  Goblin Warrior 3: Initiative 13 (11 + 2).
+
+  Round 1: Lute's turn.
+  Lute uses Bardic Inspiration on Brakka.
+  Brakka has a Bardic Inspiration die (d8).
+  Lute casts Vicious Mockery.
+  Red Dragon Wyrmling: fails (11 vs DC 13): 5 psychic.
+
+  Round 1: Red Dragon Wyrmling's turn.
+  Red Dragon Wyrmling moves to 6,2.
+
+  Round 1: Goblin Warrior's turn.
+  Goblin Warrior moves to 3,1.
+  Goblin Warrior misses Brakka with Scimitar (16 vs AC 17).
+
+  Round 1: Goblin Warrior 2's turn.
+  Goblin Warrior 2 moves to 3,2.
+  Goblin Warrior 2 hits Brakka with Scimitar (19 vs AC 17): 4 slashing.
+
+  Round 1: Goblin Warrior 3's turn.
+  Goblin Warrior 3 moves to 3,3.
+  Goblin Warrior 3 misses Brakka with Scimitar (8 vs AC 17).
+
+  Round 1: Brakka's turn.
+  ✘ Refused: Red Dragon Wyrmling is 20 feet away: out of Greatsword's reach (5 ft)
+  Brakka moves to 5,1.
+  Brakka leaves Goblin Warrior's reach: Goblin Warrior can make an Opportunity Attack.
+  Brakka leaves Goblin Warrior 2's reach: Goblin Warrior 2 can make an Opportunity Attack.
+  Brakka leaves Goblin Warrior 3's reach: Goblin Warrior 3 can make an Opportunity Attack.
+  Goblin Warrior hits Brakka with Scimitar (20 vs AC 17): 6 slashing.
+  Goblin Warrior 2 misses Brakka with Scimitar (8 vs AC 17).
+  Goblin Warrior 3 misses Brakka with Scimitar (12 vs AC 17).
+  ? Brakka: attack roll with Greatsword 12 vs 17. Add the Bardic Inspiration die (d8)? → yes
+  Brakka adds its Bardic Inspiration die: 5.
+  Brakka hits Red Dragon Wyrmling with Greatsword (17 vs AC 17): 11 slashing.
+  Brakka misses Red Dragon Wyrmling with Greatsword (11 vs AC 17).
+  Graze: Red Dragon Wyrmling takes 3 slashing damage.
+  Brakka uses Action Surge.
+  Brakka hits Red Dragon Wyrmling with Greatsword (24 vs AC 17): 6 slashing.
+  Brakka misses Red Dragon Wyrmling with Greatsword (10 vs AC 17).
+  Graze: Red Dragon Wyrmling takes 3 slashing damage.
+
+  Round 1: Ilse's turn.
+  Fireball's Sphere covers Red Dragon Wyrmling, Goblin Warrior 2, Goblin Warrior 3.
+  Ilse casts Fireball.
+  Red Dragon Wyrmling: fails (8 vs DC 14): 36 fire.
+  Immunity to fire: 36 damage ignored.
+  Goblin Warrior 2: fails (13 vs DC 14): 36 fire.
+  Goblin Warrior 2 drops to 0 Hit Points and dies.
+  Goblin Warrior 3: succeeds (18 vs DC 14): 18 fire.
+  Goblin Warrior 3 drops to 0 Hit Points and dies.
+
+  Round 2: Lute's turn.
+  Lute uses Bardic Inspiration on Brakka.
+  Brakka has a Bardic Inspiration die (d8).
+  Lute casts Vicious Mockery.
+  Red Dragon Wyrmling: succeeds (19 vs DC 13).
+
+  Round 2: Red Dragon Wyrmling's turn.
+  ? Brakka: Dexterity saving throw 10 vs 13. Add the Bardic Inspiration die (d8)? → yes
+  Fire Breath's Cone covers Brakka, Goblin Warrior.
+  Brakka adds its Bardic Inspiration die: 4.
+  Brakka: succeeds (14 vs DC 13): 13 fire.
+  Goblin Warrior: fails (3 vs DC 13): 26 fire.
+  Goblin Warrior drops to 0 Hit Points and dies.
+  Goblin Warrior is out of the fight: turn skipped.
+  Goblin Warrior 2 is out of the fight: turn skipped.
+  Goblin Warrior 3 is out of the fight: turn skipped.
+
+  Round 2: Brakka's turn.
+  Brakka hits Red Dragon Wyrmling with Greatsword (20 vs AC 17): 8 slashing.
+  Brakka misses Red Dragon Wyrmling with Greatsword (9 vs AC 17).
+  Graze: Red Dragon Wyrmling takes 3 slashing damage.
+
+  Round 2: Ilse's turn.
+  Ilse casts Ray of Frost.
+  Red Dragon Wyrmling: missed (9 vs AC 17): 5 cold.
+
+  Round 3: Lute's turn.
+  Lute casts Healing Word.
+  Brakka: regains 6 HP.
+  Lute casts Vicious Mockery.
+  Red Dragon Wyrmling: fails (9 vs DC 13): 6 psychic.
+
+  Round 3: Red Dragon Wyrmling's turn.
+  Red Dragon Wyrmling's Fire Breath recharges (6).
+  Fire Breath's Cone covers Brakka.
+  Brakka: succeeds (13 vs DC 13): 15 fire.
+  Goblin Warrior is out of the fight: turn skipped.
+  Goblin Warrior 2 is out of the fight: turn skipped.
+  Goblin Warrior 3 is out of the fight: turn skipped.
+
+  Round 3: Brakka's turn.
+  Critical Hit! Brakka hits Red Dragon Wyrmling with Greatsword (26 vs AC 17): 25 slashing.
+  Red Dragon Wyrmling drops to 0 Hit Points and dies.
+
+  Round 3: Ilse's turn.
+The wyrmling falls. The party wins.
+
+== 4. After the battle ==
+Brakka: HP 7/39; spent Action Surge 1/1
+Ilse: HP 32/32; spent L3 1/2
+Lute: HP 33/33; spent Bardic Inspiration 2/2, L1 1/4"
+`;

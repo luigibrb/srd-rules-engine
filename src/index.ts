@@ -19,6 +19,7 @@ export * from "./models/spell";
 export * from "./models/state";
 // Rules
 export * from "./rules/ability-scores";
+export * from "./rules/areas";
 export * from "./rules/build-resolution";
 export * from "./rules/build-validation";
 export * from "./rules/casting";

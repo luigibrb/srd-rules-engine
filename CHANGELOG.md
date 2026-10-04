@@ -6,6 +6,9 @@ All notable changes are documented here. This project follows
 ## [Unreleased]
 
 ### Changed
+- Encounter notes: a monster's damage no longer notes Massive Damage or Death Saving Throw
+  failures (it dies at 0 HP); a Bardic Inspiration die is noted before the result it changed;
+  spell attack notes give the target's AC.
 - The builder's title shows the loaded build's level instead of always "Level 1".
 - Bardic Inspiration and Legendary Resistance are decisions: in `auto` mode (the default) the
   die is used only when it can turn a failure into a success; Uncanny Dodge is offered when an
@@ -35,6 +38,9 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- `npm run demo` (`examples/battle-demo.ts`): a seeded battle that shows the main features, its
+  story snapshotted in `tests/demo.test.ts`. `rules/areas.ts` (`areaSquares`, `inArea`,
+  `distanceToPoint`) is exported from the package.
 - Areas of effect on the grid: `area: { point } | { toward }` on `cast`, `save_action` and
   `legendary` chooses the targets (`rules/areas.ts`: `areaSquares`, `inArea`,
   `distanceToPoint`); monster save effects' `area` and `range` read from their text (79 areas,

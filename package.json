@@ -68,6 +68,7 @@
   "scripts": {
     "build": "npm run content && tsdown",
     "content": "tsx scripts/compile-content.ts",
+    "demo": "tsx examples/battle-demo.ts",
     "builder": "tsx src/cli/main.ts build",
     "serve": "tsx src/cli/main.ts serve",
     "test": "vitest run",
