@@ -242,6 +242,29 @@ describe("fight mode", () => {
     expect(run.encounter.combatants.find((c) => c.id === "brakka")?.inspiration).not.toBeNull();
   });
 
+  it("places combatants on a grid, shows it, and measures reach", async () => {
+    const run = await fight([
+      "place brakka 0 0",
+      "place lute 0 1",
+      "place goblin-warrior 3 0",
+      "place goblin-warrior-2 4 4",
+      "map",
+      "next",
+      "next",
+      "next",
+      "attack 1 greatsword",
+      "move 2 0",
+      "attack 1 greatsword",
+      "quit",
+      "n",
+    ]);
+    expect(run.output).toContain("  · 4 · · 1 · ");
+    expect(run.output).toContain(
+      "Goblin Warrior is 15 feet away: out of Greatsword's reach (5 ft)",
+    );
+    expect(run.output).toContain("Brakka hits Goblin Warrior with Greatsword");
+  });
+
   it("resumes a saved encounter, and explains what it can't do", async () => {
     const first = await fight(["next", "quit", "y"]);
     const run = await fight(

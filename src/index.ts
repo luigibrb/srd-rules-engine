@@ -42,12 +42,14 @@ export * from "./services/combat";
 export {
   applyEncounterAction,
   type CharacterRef,
+  type Cover,
   createEncounter,
   currentCombatant,
   type EncounterContext,
   EncounterError,
   type EncounterResult,
   encounterCombatant,
+  gridDistance,
 } from "./services/encounter";
 export {
   applyAction,

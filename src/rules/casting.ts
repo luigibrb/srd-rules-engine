@@ -15,6 +15,7 @@ import {
   type D20Roll,
   type Decide,
   inspire,
+  type ModeReason,
   type RollMode,
   rollD20,
   rollSavingThrow,
@@ -43,6 +44,10 @@ export interface CastOptions {
   rng?: Rng;
   /** Answers decisions (Bardic Inspiration, Legendary Resistance); default: `recommended`. */
   decide?: Decide;
+  /** More reasons for Advantage or Disadvantage on ranged spell attacks (an enemy within 5 ft). */
+  modes?: readonly ModeReason[];
+  /** Whether the caster is within 5 feet of each target (default: a melee spell attack is). */
+  within_5ft?: readonly (boolean | undefined)[];
 }
 
 export interface SpellAttackRoll {
@@ -119,6 +124,8 @@ export function castSpell(
     mode = "normal",
     rng = mathRng,
     decide = (d) => d.recommended,
+    modes = [],
+    within_5ft,
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
@@ -227,7 +234,11 @@ export function castSpell(
     for (const [beam, index] of aimed.entries()) {
       const target = targets[index] as Combatant;
       // Conditions change the roll like a weapon attack's; a melee spell attack is within 5 ft.
-      const effective = attackMode(caster, target, { mode, within_5ft: m.attack === "melee" });
+      const effective = attackMode(caster, target, {
+        mode,
+        within_5ft: within_5ft?.[index] ?? m.attack === "melee",
+        modes: m.attack === "ranged" ? modes : [],
+      });
       const roll = rollD20({ mode: effective.mode, rng });
       const critical_miss = roll.d20 === 1;
       let total = roll.d20 + bonus;

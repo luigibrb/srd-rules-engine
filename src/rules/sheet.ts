@@ -32,7 +32,7 @@ import { finalScores } from "./ability-scores";
 import { type ActiveSource, mergeGrants, type Resolution, resolve } from "./build-resolution";
 import { type DamagePart, formatDamage } from "./damage";
 import { abilityModifier, proficiencyBonus } from "./dice";
-import { isMonkWeapon, isWeaponProficient } from "./weapons";
+import { isMonkWeapon, isWeaponProficient, parseRange } from "./weapons";
 
 export interface Contribution {
   readonly source: string;
@@ -98,6 +98,10 @@ export interface AttackLine {
   readonly cleave_damage_parts: readonly DamagePart[] | null;
   readonly mastery: string | null;
   readonly notes: readonly string[];
+  /** A melee attack's reach in feet (5; 10 with the Reach property); `null` for a ranged one. */
+  readonly reach: number | null;
+  /** Normal and long range in feet: a ranged or thrown weapon, a monster's ranged attack. */
+  readonly range: { readonly normal: number; readonly long: number } | null;
 }
 
 /** A feature used in a turn, with its numbers worked out for the character. */
@@ -1098,6 +1102,8 @@ function unarmedStrike(ctx: AttackContext): AttackLine {
     cleave_damage_parts: null,
     mastery: null,
     notes,
+    reach: 5,
+    range: null,
   });
   if (!ctx.martialArtsDie) {
     // 1 + Strength modifier, never below 0.
@@ -1184,6 +1190,9 @@ function attackLine(
     cleave_damage_parts: cleave,
     mastery,
     notes,
+    // Reach adds 5 feet; a thrown or ranged weapon has a range ("20/60").
+    reach: w.kind === "melee" ? (w.properties.includes("reach") ? 10 : 5) : null,
+    range: parseRange(w.range),
   };
 }
 

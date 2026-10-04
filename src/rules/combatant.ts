@@ -36,6 +36,7 @@ import {
 import { abilityModifier } from "./dice";
 import { mathRng, type Rng } from "./rng";
 import type { AttackLine } from "./sheet";
+import { parseRange } from "./weapons";
 
 export const ROLL_MODES = ["normal", "advantage", "disadvantage"] as const;
 export type RollMode = (typeof ROLL_MODES)[number];
@@ -903,6 +904,8 @@ export function combatantFromMonster(
         cleave_damage_parts: null,
         mastery: null,
         notes,
+        reach: a.kind === "ranged" ? null : (a.reach ?? 5),
+        range: parseRange(a.range),
       },
     ];
   });

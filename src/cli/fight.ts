@@ -42,10 +42,12 @@ export interface FightAppOptions {
 const HELP = `Commands (the combatant whose turn it is acts; "as <who> …" acts for someone else).
 Targets are ids, names or numbers from the status table.
   attack <target> [weapon] [adv|dis] [2h] [+rider] [light|cleave|granted|opp] [nomastery]
+         [thrown] [half|3/4|total] (the target's cover)
   cast <spell> [targets…] [at <level>]       use <ability> [targets…]   (a monster's save effect)
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
-  escape · stand · move <feet> · check <skill|ability> [dc]
+  escape · stand · move <feet> · move <x> <y> · check <skill|ability> [dc]
+  place <who> <x> <y>   put a combatant on the grid (5-foot squares)    map   show the grid
   dmg <t> <n> [type] · heal <t> <n> · cond <t> <condition> · cond <t> -<condition>
   ask on|off [<t>]   decisions after a roll: ask, or let the engine decide (auto)
   options [<who>]    what a combatant can do: attacks, spells, features, abilities
@@ -169,7 +171,45 @@ export class FightApp {
       c.dodging ? "dodging" : "",
     ].filter(Boolean);
     const tail = extra.length ? ` · ${extra.join(", ")}` : "";
-    return `${c.name} [${c.id}] AC ${view.armor_class} · ${hp}${temp}${conditions}${tail} · Init ${c.initiative}`;
+    const at = c.position ? ` · at ${c.position.x},${c.position.y}` : "";
+    return `${c.name} [${c.id}] AC ${view.armor_class} · ${hp}${temp}${conditions}${tail} · Init ${c.initiative}${at}`;
+  }
+
+  /** The grid around the positioned combatants: each shown by its number in the order. */
+  private map(): void {
+    const e = this.encounter;
+    const placed = e.order
+      .map((id, i) => [e.combatants.find((c) => c.id === id) as EncounterCombatant, i + 1] as const)
+      .filter(([c]) => c.position && !c.defeated);
+    if (!placed.length) {
+      this.con.info("Nobody is on the grid: 'place <who> <x> <y>'.");
+      return;
+    }
+    const cells = new Map<string, string>();
+    for (const [c, n] of placed) {
+      const pos = c.position as { x: number; y: number };
+      const size =
+        { large: 2, huge: 3, gargantuan: 4 }[
+          (encounterCombatant(e, c.id, this.context()).size ?? "") as "large"
+        ] ?? 1;
+      const mark = n < 10 ? String(n) : String.fromCharCode(87 + n); // 10 → a
+      for (let dx = 0; dx < size; dx++)
+        for (let dy = 0; dy < size; dy++) cells.set(`${pos.x + dx},${pos.y + dy}`, mark);
+    }
+    const xs = [...cells.keys()].map((k) => Number(k.split(",")[0]));
+    const ys = [...cells.keys()].map((k) => Number(k.split(",")[1]));
+    const [x0, x1, y0, y1] = [
+      Math.min(...xs) - 1,
+      Math.max(...xs) + 1,
+      Math.min(...ys) - 1,
+      Math.max(...ys) + 1,
+    ];
+    this.con.info(`x ${x0}…${x1}, y ${y0}…${y1}; each square is 5 feet`);
+    for (let y = y0; y <= y1; y++) {
+      let row = "  ";
+      for (let x = x0; x <= x1; x++) row += `${cells.get(`${x},${y}`) ?? "·"} `;
+      this.con.say(row);
+    }
   }
 
   /** What `c` can do: attack lines, spells, features with uses left, monster abilities. */
@@ -309,8 +349,21 @@ export class FightApp {
         return this.apply({ type: "escape", id });
       case "stand":
         return this.apply({ type: "stand", id });
-      case "move":
-        return this.apply({ type: "move", id, feet: Number(args[0] ?? 0) });
+      case "move": {
+        const [a, b] = args.map(Number);
+        if (args.length >= 2) return this.apply({ type: "move", id, to: { x: a ?? 0, y: b ?? 0 } });
+        return this.apply({ type: "move", id, feet: a ?? 0 });
+      }
+      case "place": {
+        const t = this.find(args[0] ?? "");
+        const [x, y] = args.slice(1).map(Number);
+        if (!t || !Number.isInteger(x) || !Number.isInteger(y)) {
+          return this.con.error("Usage: place <who> <x> <y>");
+        }
+        return this.apply({ type: "place", id: t.id, x: x as number, y: y as number });
+      }
+      case "map":
+        return this.map();
       case "check":
         return this.check(id, args);
       case "dmg":
@@ -388,15 +441,34 @@ export class FightApp {
       granted: flags.has("granted") || undefined,
       opportunity: flags.has("opp") || undefined,
       mastery: flags.has("nomastery") ? false : undefined,
+      thrown: flags.has("thrown") || undefined,
+      cover: flags.has("half")
+        ? "half"
+        : flags.has("3/4")
+          ? "three_quarters"
+          : flags.has("total")
+            ? "total"
+            : undefined,
     });
   }
 
   private isFlag(word: string): boolean {
     return (
       word.startsWith("+") ||
-      ["adv", "dis", "2h", "light", "cleave", "granted", "opp", "nomastery"].includes(
-        word.toLowerCase(),
-      )
+      [
+        "adv",
+        "dis",
+        "2h",
+        "light",
+        "cleave",
+        "granted",
+        "opp",
+        "nomastery",
+        "thrown",
+        "half",
+        "3/4",
+        "total",
+      ].includes(word.toLowerCase())
     );
   }
 
