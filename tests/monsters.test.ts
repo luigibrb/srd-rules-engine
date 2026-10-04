@@ -323,6 +323,8 @@ describe("golden stat blocks", () => {
       damage: [],
       on_success: "none",
       conditions: ["incapacitated"], // the first failure; Paralyzed on a second one stays text
+      area: { shape: "cone", size: 15, width: 5 }, // "each creature in a 15-foot Cone"
+      range: null,
     });
   });
 

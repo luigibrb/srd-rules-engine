@@ -24529,7 +24529,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 5
+                    "size": 5,
+                    "width": 5
                 }
             }
         },
@@ -25335,7 +25336,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "cone",
-                    "size": 15
+                    "size": 15,
+                    "width": 5
                 }
             }
         },
@@ -25439,7 +25441,8 @@
                 ],
                 "area": {
                     "shape": "cone",
-                    "size": 15
+                    "size": 15,
+                    "width": 5
                 }
             }
         },
@@ -26571,7 +26574,8 @@
                 ],
                 "area": {
                     "shape": "sphere",
-                    "size": 5
+                    "size": 5,
+                    "width": 5
                 }
             }
         },
@@ -26644,7 +26648,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "cube",
-                    "size": 15
+                    "size": 15,
+                    "width": 5
                 }
             }
         },
@@ -27700,7 +27705,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 10
+                    "size": 10,
+                    "width": 5
                 }
             }
         },
@@ -28211,7 +28217,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 20
+                    "size": 20,
+                    "width": 5
                 }
             }
         },
@@ -28336,7 +28343,8 @@
                 ],
                 "area": {
                     "shape": "cube",
-                    "size": 30
+                    "size": 30,
+                    "width": 5
                 }
             }
         },
@@ -28386,7 +28394,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "line",
-                    "size": 100
+                    "size": 100,
+                    "width": 5
                 }
             }
         },
@@ -29460,7 +29469,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "cylinder",
-                    "size": 20
+                    "size": 20,
+                    "width": 5
                 }
             }
         },
@@ -29868,7 +29878,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "cone",
-                    "size": 60
+                    "size": 60,
+                    "width": 5
                 }
             }
         },
@@ -30206,7 +30217,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 30
+                    "size": 30,
+                    "width": 5
                 }
             }
         },
@@ -30587,7 +30599,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 60
+                    "size": 60,
+                    "width": 5
                 }
             }
         },
@@ -30809,7 +30822,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 60
+                    "size": 60,
+                    "width": 5
                 }
             }
         },
@@ -31103,7 +31117,8 @@
                 ],
                 "area": {
                     "shape": "line",
-                    "size": 60
+                    "size": 60,
+                    "width": 5
                 }
             }
         },
@@ -31985,7 +32000,8 @@
                 ],
                 "area": {
                     "shape": "sphere",
-                    "size": 60
+                    "size": 60,
+                    "width": 5
                 }
             }
         },
@@ -32148,7 +32164,8 @@
                 "conditions": [],
                 "area": {
                     "shape": "sphere",
-                    "size": 40
+                    "size": 40,
+                    "width": 5
                 }
             }
         },
@@ -32348,7 +32365,8 @@
                 ],
                 "area": {
                     "shape": "sphere",
-                    "size": 30
+                    "size": 30,
+                    "width": 5
                 }
             }
         },
@@ -56448,7 +56466,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 30
                     }
                 },
                 {
@@ -56468,7 +56488,9 @@
                         "on_success": "none",
                         "conditions": [
                             "charmed"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 30
                     }
                 }
             ],
@@ -56659,7 +56681,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -56745,7 +56773,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -56923,7 +56953,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57194,7 +57230,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57214,7 +57256,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57350,7 +57398,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 }
             ]
@@ -57503,7 +57553,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57523,7 +57579,13 @@
                         "on_success": "none",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57654,7 +57716,13 @@
                         "on_success": "none",
                         "conditions": [
                             "deafened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": 90
                     }
                 }
             ]
@@ -57795,7 +57863,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -57899,7 +57973,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 90
                     }
                 },
                 {
@@ -58091,7 +58167,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -58191,7 +58273,9 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -58385,7 +58469,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -58483,7 +58573,13 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": 90
                     }
                 },
                 {
@@ -58637,7 +58733,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -58894,7 +58996,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -58914,7 +59022,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -59030,7 +59144,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -59197,7 +59317,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -59235,7 +59361,13 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": 120
                     }
                 },
                 {
@@ -59420,7 +59552,9 @@
                         "on_success": "half",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -59688,7 +59822,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -59780,7 +59920,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -59958,7 +60100,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 120,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60229,7 +60377,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60249,7 +60403,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60385,7 +60545,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 }
             ]
@@ -60538,7 +60700,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 120,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60558,7 +60726,13 @@
                         "on_success": "none",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60708,7 +60882,13 @@
                         "on_success": "none",
                         "conditions": [
                             "deafened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": 120
                     }
                 }
             ]
@@ -60849,7 +61029,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -60959,7 +61145,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -61151,7 +61339,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -61257,7 +61451,9 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -61451,7 +61647,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -61555,7 +61757,13 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": 90
                     }
                 },
                 {
@@ -61709,7 +61917,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -61972,7 +62186,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -61992,7 +62212,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -62120,7 +62346,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 10
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -62287,7 +62519,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -62325,7 +62563,13 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": 120
                     }
                 },
                 {
@@ -62780,7 +63024,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -64209,7 +64459,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -64886,7 +65142,13 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -65245,7 +65507,9 @@
                         "conditions": [
                             "grappled",
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 },
                 {
@@ -65270,7 +65534,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 90,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -65624,7 +65894,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -66102,7 +66378,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -66475,7 +66757,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -66495,7 +66783,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -66635,7 +66929,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 40,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -66655,7 +66955,13 @@
                         "on_success": "none",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -66936,7 +67242,9 @@
                         "on_success": "none",
                         "conditions": [
                             "grappled"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 10
                     }
                 }
             ],
@@ -67184,7 +67492,9 @@
                         "on_success": "half",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -67532,7 +67842,9 @@
                         "on_success": "none",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -67688,7 +68000,9 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 60
                     }
                 }
             ],
@@ -67874,7 +68188,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -68022,7 +68342,9 @@
                         "conditions": [
                             "poisoned",
                             "paralyzed"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -68360,7 +68682,13 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -68864,7 +69192,9 @@
                         "on_success": "none",
                         "conditions": [
                             "grappled"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -68979,7 +69309,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -69123,7 +69459,9 @@
                         "conditions": [
                             "grappled",
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 },
                 {
@@ -70472,7 +70810,9 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 },
                 {
@@ -70694,7 +71034,13 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -70957,7 +71303,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -71068,7 +71420,13 @@
                         "on_success": "none",
                         "conditions": [
                             "poisoned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 10,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -71758,7 +72116,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -71805,7 +72169,13 @@
                         "on_success": "none",
                         "conditions": [
                             "blinded"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -72413,7 +72783,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -72673,7 +73045,9 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 120
                     }
                 }
             ],
@@ -72862,7 +73236,9 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 30
                     }
                 }
             ],
@@ -74098,7 +74474,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -74183,7 +74561,13 @@
                         "on_success": "none",
                         "conditions": [
                             "poisoned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -74423,7 +74807,13 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -74443,7 +74833,9 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -74700,7 +75092,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -75190,7 +75588,9 @@
                         "on_success": "none",
                         "conditions": [
                             "grappled"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 10
                     }
                 }
             ],
@@ -76966,7 +77366,9 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 60
                     }
                 }
             ],
@@ -77721,7 +78123,13 @@
                         "on_success": "none",
                         "conditions": [
                             "blinded"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 10,
+                            "width": 5
+                        },
+                        "range": 30
                     }
                 }
             ],
@@ -77877,7 +78285,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": null
                     }
                 },
                 {
@@ -78054,7 +78464,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -78783,7 +79195,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -78903,7 +79321,13 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -78930,7 +79354,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -79201,7 +79627,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -80070,7 +80502,9 @@
                         "on_success": "half",
                         "conditions": [
                             "blinded"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 60
                     }
                 },
                 {
@@ -80366,7 +80800,13 @@
                         "conditions": [
                             "charmed",
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 300,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -80595,7 +81035,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -80704,7 +81150,13 @@
                         "on_success": "none",
                         "conditions": [
                             "poisoned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 10,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -81664,7 +82116,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 10
                     }
                 }
             ],
@@ -82288,7 +82742,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -82370,7 +82830,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -82861,7 +83327,9 @@
                         "on_success": "none",
                         "conditions": [
                             "grappled"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -83060,7 +83528,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -83672,7 +84146,9 @@
                         "on_success": "half",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 },
                 {
@@ -83697,7 +84173,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -83722,7 +84200,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -83768,7 +84248,13 @@
                         "conditions": [
                             "blinded",
                             "poisoned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ]
@@ -83892,7 +84378,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 },
                 {
@@ -84409,7 +84897,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -84570,7 +85064,9 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 15
                     }
                 }
             ],
@@ -84987,7 +85483,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -85045,7 +85547,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -85129,7 +85637,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 10,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -85291,7 +85805,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -85588,7 +86104,9 @@
                         "conditions": [
                             "grappled",
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -85874,7 +86392,13 @@
                         "on_success": "none",
                         "conditions": [
                             "restrained"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -86748,7 +87272,9 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 60
                     }
                 }
             ],
@@ -86953,7 +87479,9 @@
                         "on_success": "none",
                         "conditions": [
                             "paralyzed"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 60
                     }
                 },
                 {
@@ -87249,7 +87777,13 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -88558,7 +89092,9 @@
                         "on_success": "half",
                         "conditions": [
                             "stunned"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -89314,7 +89850,9 @@
                         "on_success": "none",
                         "conditions": [
                             "charmed"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 30
                     }
                 }
             ],
@@ -89459,7 +89997,9 @@
                         "on_success": "none",
                         "conditions": [
                             "charmed"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 30
                     }
                 }
             ],
@@ -89571,7 +90111,9 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 },
                 {
@@ -89877,7 +90419,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "sphere",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": 120
                     }
                 },
                 {
@@ -90784,7 +91332,9 @@
                         "on_success": "none",
                         "conditions": [
                             "poisoned"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -91186,7 +91736,9 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 20
                     }
                 },
                 {
@@ -91359,7 +91911,13 @@
                         "conditions": [
                             "frightened",
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -91762,7 +92320,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -93009,7 +93573,9 @@
                         "conditions": [
                             "grappled",
                             "restrained"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 10
                     }
                 }
             ],
@@ -93134,7 +93700,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 90
                     }
                 }
             ],
@@ -93450,7 +94018,9 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 30
                     }
                 }
             ],
@@ -93889,7 +94459,9 @@
                         "on_success": "none",
                         "conditions": [
                             "grappled"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -94250,7 +94822,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -94270,7 +94848,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -94676,7 +95260,9 @@
                         "on_success": "none",
                         "conditions": [
                             "blinded"
-                        ]
+                        ],
+                        "area": null,
+                        "range": 120
                     }
                 },
                 {
@@ -94701,7 +95287,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 10,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ]
@@ -94987,7 +95579,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 300,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -95269,7 +95867,13 @@
                         "on_success": "none",
                         "conditions": [
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 500,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -95289,7 +95893,13 @@
                         "on_success": "none",
                         "conditions": [
                             "paralyzed"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 500,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -95316,7 +95926,13 @@
                         "on_success": "half",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 500,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -96252,7 +96868,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 5,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -96310,7 +96932,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -96546,7 +97174,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 60
                     }
                 }
             ],
@@ -96894,7 +97524,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 500
                     }
                 },
                 {
@@ -97087,7 +97719,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -97811,7 +98445,9 @@
                         "on_success": "none",
                         "conditions": [
                             "deafened"
-                        ]
+                        ],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -98166,7 +98802,13 @@
                         "conditions": [
                             "deafened",
                             "frightened"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 150,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -99668,7 +100310,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -100088,7 +100732,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -100446,7 +101092,13 @@
                         "on_success": "none",
                         "conditions": [
                             "poisoned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -100473,7 +101125,13 @@
                         "on_success": "none",
                         "conditions": [
                             "stunned"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "emanation",
+                            "size": 20,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -101137,7 +101795,9 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": null
                     }
                 }
             ],
@@ -102201,7 +102861,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -102381,7 +103047,9 @@
                             }
                         ],
                         "on_success": "none",
-                        "conditions": []
+                        "conditions": [],
+                        "area": null,
+                        "range": 5
                     }
                 }
             ],
@@ -102673,7 +103341,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 15,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -103441,7 +104115,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -103574,7 +104254,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -103702,7 +104388,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 40,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -103722,7 +104414,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -103863,7 +104561,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 60,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -103883,7 +104587,13 @@
                         "on_success": "none",
                         "conditions": [
                             "prone"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -104011,7 +104721,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "line",
+                            "size": 40,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -104165,7 +104881,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -104326,7 +105048,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -104459,7 +105187,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -104586,7 +105320,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 },
                 {
@@ -104606,7 +105346,13 @@
                         "on_success": "none",
                         "conditions": [
                             "incapacitated"
-                        ]
+                        ],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],
@@ -104753,7 +105499,13 @@
                             }
                         ],
                         "on_success": "half",
-                        "conditions": []
+                        "conditions": [],
+                        "area": {
+                            "shape": "cone",
+                            "size": 30,
+                            "width": 5
+                        },
+                        "range": null
                     }
                 }
             ],

@@ -875,6 +875,17 @@ export type MasteryDef = z.infer<typeof MasterySchema>;
 export const SPELL_AREAS = ["cone", "cube", "cylinder", "emanation", "line", "sphere"] as const;
 
 /**
+ * An area of effect (SRD "Area of Effect"): `size` is a Sphere's, Cylinder's or Emanation's
+ * radius, a Cone's or Line's length, or a Cube's side, in feet; a Line's `width` (5 by default).
+ */
+export const SpellAreaSchema = z.strictObject({
+  shape: z.enum(SPELL_AREAS),
+  size: z.int().min(1),
+  width: z.int().min(1).default(5),
+});
+export type SpellArea = z.infer<typeof SpellAreaSchema>;
+
+/**
  * What a spell does, as data (`castSpell` uses it). Anything not listed here stays in the
  * spell's text: durations, movement, repeated saves, choices made while casting.
  */
@@ -928,10 +939,7 @@ export const SpellMechanicsSchema = z
     conditions: z
       .array(z.strictObject({ condition: z.string(), on: z.enum(["failed_save", "hit"]) }))
       .default([]),
-    area: z
-      .strictObject({ shape: z.enum(SPELL_AREAS), size: z.int().min(1) })
-      .nullable()
-      .default(null),
+    area: SpellAreaSchema.nullable().default(null),
   })
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
   .meta({ id: "SpellMechanics" });
@@ -1125,6 +1133,10 @@ export const MonsterActionSchema = z.strictObject({
       on_success: z.enum(["half", "none"]).default("none"),
       /** Conditions on a failed save. */
       conditions: z.array(z.string()).default([]),
+      /** The area it fills ("60-foot Cone"); `null`: the creatures it names. */
+      area: SpellAreaSchema.nullable().default(null),
+      /** "within 90 feet": how far its target, or its area's point, can be. */
+      range: z.int().nullable().default(null),
     })
     .nullable()
     .default(null),

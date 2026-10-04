@@ -8,9 +8,10 @@
  *
  * Stat block fields (AC, HP, speed, abilities, saves, defenses, CR…) are parsed exactly; anything
  * unexpected throws, so no field is guessed. In actions, attack rolls and saving throw effects
- * (damage, half on a success, conditions on a failure) become `attack` and `save`, actions that
- * cast spells `casts`; everything else stays in the SRD text. Checked by tests/monsters.test.ts (invariants for every stat block,
- * and golden stat blocks compared field by field with the Markdown).
+ * (damage, half on a success, conditions on a failure, the area or range) become `attack` and
+ * `save`, actions that cast spells `casts`; everything else stays in the SRD text. Checked by
+ * tests/monsters.test.ts (invariants for every stat block, and golden stat blocks compared field
+ * by field with the Markdown).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -193,12 +194,29 @@ function parseAction(name: string, text: string, where: string): Action {
     const damage = damageParts(failure);
     if (damage.length || conditions.length) {
       stats.saves++;
+      // Who it affects: "each creature in a 60-foot Cone", "…in a 30-foot-long, 5-foot-wide
+      // Line", "…in a 20-foot-radius Sphere centered on a point … within 90 feet", "…in a
+      // 10-foot Emanation originating from…"; "one creature … within 30 feet" gives a range.
+      const head = text.slice(save.index, text.indexOf("_Failure", save.index) >>> 0);
+      const shape =
+        /in an? (\d+)-foot(?:-long, (\d+)-foot-wide|-radius)? (Cone|Line|Sphere|Emanation|Cube)\b/.exec(
+          head,
+        );
+      const within = /within (\d+) feet/.exec(head);
       action.save = {
         ability: ABILITY[save[1] as string],
         dc: Number(save[2]),
         damage,
         on_success: success && damage.length ? "half" : "none",
         conditions,
+        area: shape
+          ? {
+              shape: (shape[3] as string).toLowerCase(),
+              size: Number(shape[1]),
+              ...(shape[2] ? { width: Number(shape[2]) } : {}),
+            }
+          : null,
+        range: within ? Number(within[1]) : null,
       };
     } else stats.unparsedRolls.push(`${where}: ${name} (saving throw with no damage or condition)`);
   }

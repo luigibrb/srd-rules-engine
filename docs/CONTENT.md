@@ -358,7 +358,7 @@ mechanics:
   save: {ability: dex, on_success: half}     # or none; `attack: ranged | melee` instead
   damage: [{dice: 8d6, type: fire}]          # add_modifier: true adds the spellcasting modifier
   upcast: {damage: [{dice: 1d6, type: fire}]}   # per slot level above; also heal, targets
-  area: {shape: sphere, size: 20}
+  area: {shape: sphere, size: 20}          # radius, length or side in feet; a line's width: 5
 # Others: heal: {dice: 2d8, add_modifier: true}; targets: 1; cantrip_scaling: dice | beams;
 #         conditions: [{condition: paralyzed, on: failed_save}]   # or on: hit
 ```
@@ -385,7 +385,9 @@ is the "level N version" it's always cast at), and, when combat can resolve it:
 attack: {kind: melee, bonus: 14, reach: 10, range: null,
          damage: [{average: 13, dice: 1d10, bonus: 8, type: slashing}, {average: 5, dice: 2d4, bonus: 0, type: fire}]}
 save: {ability: dex, dc: 21, damage: [{average: 59, dice: 17d6, bonus: 0, type: fire}],
-       on_success: half, conditions: []}   # conditions on a failed save
+       on_success: half, conditions: [],   # conditions on a failed save
+       area: {shape: cone, size: 60, width: 5},   # "each creature in a 60-foot Cone"
+       range: null}                        # "within 90 feet": its target's or point's range
 ```
 
 Damage that depends on something ("plus 2 (1d4) if the attack roll had Advantage"), later

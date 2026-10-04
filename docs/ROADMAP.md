@@ -28,6 +28,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P16 | Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask` stops the action with the roll shown until `decide`, `auto` uses them only when they can change the outcome; per combatant or per encounter | Resumed by replaying the action with its recorded dice, so nothing is undone; it replaces P15's automatic Bardic Inspiration and the `target_feature` option |
 | P17 | `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters, decisions as y/n questions | Playing fights by hand led to fixes in the engine's notes (each target of a spell, skill names, which character refused a change) and in the CLI's name matching |
 | P18a | Positions on a 5-foot grid (optional): distances, reach, normal and long range, close combat, thrown weapons, spell range, movement to a square with Opportunity Attacks noted, cover given per attack or target | Positions are optional: without them the caller still says what's within 5 feet or in range. Areas of effect are P18b |
+| P18b | Areas of effect on the grid: spells' and monster effects' Spheres, Cylinders, Cubes, Cones, Lines and Emanations choose their targets from a point or a direction; monster save effects' areas and ranges read from their text | How shapes cover squares is an engine reading (flagged): a square is in when its center is inside |
 
 ## Decisions
 
@@ -57,8 +58,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
   Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM; Help's
   Advantage and Sap's Disadvantage don't reach spell attack rolls yet.
-- **Areas of effect on the grid (M, P18b).** Spheres, cubes, cones, lines and emanations choosing
-  their targets from positions (a point, a direction), so `cast` needs no target list.
 - **A map (L).** Walls, Difficult Terrain and obstacles on the grid: paths and their cost, line
   of sight, cover worked out instead of given.
 - **Ongoing area effects (L).** Spells and traits that deal damage when a creature enters an area
