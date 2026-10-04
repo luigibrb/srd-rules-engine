@@ -20,28 +20,43 @@ sheet.max_hp?.total;              // 12
 explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← every number explains itself
 ```
 
-## Why use it
+## Why it's useful
 
-- **Every number explains itself.** AC, HP, initiative and speed come with their
-  contributions (`AC 17 = 16 Chain Mail + 1 Defense`), ready to show in a tooltip.
-- **Tells you why a choice is illegal.** Every option comes with the reason it can't be
-  picked ("already proficient from Soldier"). If an earlier change invalidates a later
-  choice, the engine repairs the build and tells you what it removed.
-- **Rules content is data.** Species, classes, backgrounds, feats and equipment are YAML,
-  validated against schemas at load time. Every entity records where it came from
-  (`source: srd-5.2.1`).
-- **Homebrew is a first-class citizen.** Add a folder of YAML on top of the SRD. It can add
-  new content, override SRD entities by id or patch them in place, and it is validated the same
-  way. Each campaign can pick which sources it allows.
-- **From the builder to the table.** The same character goes from its build to a play state
-  (HP, slots, items, conditions) to an encounter with SRD monsters: Initiative, turns, attacks,
-  spells, Concentration, all checked against the rules.
-- **Deterministic dice.** Every roll takes an optional `Rng`; `seededRng(42)` makes sessions
-  replayable and tests exact.
-- **Plain data in, plain data out.** Builds and sheets are JSON-serializable, so you can
-  store them anywhere, send them over the wire and diff them.
-- **Runs anywhere.** Browsers and workers can use the core, since the SRD is bundled as
-  JSON. Filesystem loading and the Node server are in a separate entry point.
+Any tool for 5th-edition games, from a character builder to a virtual tabletop, a Discord bot or
+a campaign manager, has to implement the rules before it can do anything else: proficiency and
+multiclass spell slots, AC from armor and features, what Rage changes, how a Fireball's saving
+throw and damage work. That layer is large and easy to get subtly wrong, and every project tends
+to write its own. This engine is that layer, written once, tested, and independent of any
+interface.
+
+- **You build the interface; the engine handles the rules.** Send choices and actions as JSON
+  and get back the legal options, the computed sheet, the rolls and their consequences. It
+  renders nothing and needs no server, so it fits a web app, a bot, a mobile app or a backend
+  equally well.
+- **It covers the whole game, not one screen.** The same character goes from the builder (level
+  1 to 20, multiclassing, feats, spells) to play (HP, spell slots, rests, items, conditions) to
+  encounters against the 330 SRD monsters: Initiative and turns, the action economy, attacks,
+  spells, Concentration, conditions, legendary actions, and an optional grid for reach, range
+  and areas of effect. Tools built on it agree with each other because they share one set of
+  rules.
+- **Players and GMs can see why.** Every number carries its breakdown (`AC 17 = 16 Chain Mail
+  + 1 Defense`), every unavailable option its reason ("already proficient from Soldier"), every
+  roll the Advantage and Disadvantage behind it. Choices made after seeing a roll, such as
+  spending a Bardic Inspiration die, can be asked of the player or decided by the engine.
+- **The rules can be checked.** The content is the SRD 5.2.1, transcribed into data and
+  reviewed against the SRD text. Where the SRD leaves a question open, the reading chosen is
+  listed in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) instead of being buried in code. Dice
+  take a seedable random source, so any session can be replayed exactly, and the tests build
+  every class to level 20.
+- **Your table's rules fit in too.** Homebrew is a folder of YAML that adds or patches content,
+  validated like the SRD, without forking the engine; each campaign chooses which sources it
+  allows.
+- **It works from any stack.** TypeScript in browsers, Node, Deno, Bun and edge workers; other
+  languages use the HTTP API, the bundled JSON and the JSON Schemas. Builds, play states and
+  encounters are plain JSON documents you can store, send and diff.
+
+It isn't a virtual tabletop or a character sheet app: it's what one can be built on.
+[Status](#status) lists what it covers and what it doesn't yet.
 
 ## Install
 
