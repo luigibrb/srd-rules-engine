@@ -20,7 +20,7 @@ sheet.max_hp?.total;              // 12
 explainStat(sheet.max_hp!);       // "10 Fighter d10 + 1 Con + 1 Dwarf"  ← every number explains itself
 ```
 
-## Why it's useful
+## Highlights
 
 - **Rules that run the game.** The engine embeds the SRD rules and follows the game flow: what's
   legal, whose turn it is, what a roll does and what it changes.
