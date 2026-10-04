@@ -303,13 +303,27 @@ OVERLAY = {
                         "at_class_level": [{"level": 15, "grants": {"damage_riders": [PRIMAL_STRIKE("2d8")]}}]}}]}]},
     },
     "fighter": {
+        2: {"actions": [{"id": "action-surge", "name": "Action Surge", "economy": "free", "uses": "action-surge",
+                         "extra_action": True}]},
         5: {"effects": [extra_attack(2)]},
         11: {"effects": [extra_attack(3)]},
         20: {"effects": [extra_attack(4)]},
     },
     "monk": {
-        2: {"effects": [{"target": "speed", "value": 10, "when": "unarmored"}]},
-        5: {"effects": [extra_attack(2), {"target": "martial_arts.die", "op": "max", "value": 8}]},
+        2: {"effects": [{"target": "speed", "value": 10, "when": "unarmored"}],
+            # Monk's Focus: the Focus Point versions (the free ones are a Bonus Action Unarmed
+            # Strike, `disengage` and `dash` with `bonus_action`).
+            "actions": [
+                {"id": "flurry-of-blows", "name": "Flurry of Blows", "economy": "bonus_action", "uses": "focus-points",
+                 "attacks": {"attack": "Unarmed Strike", "count": 2}},
+                {"id": "patient-defense", "name": "Patient Defense", "economy": "bonus_action", "uses": "focus-points",
+                 "also": ["disengage", "dodge"]},
+                {"id": "step-of-the-wind", "name": "Step of the Wind", "economy": "bonus_action",
+                 "uses": "focus-points", "also": ["disengage", "dash"]}]},
+        5: {"effects": [extra_attack(2), {"target": "martial_arts.die", "op": "max", "value": 8}],
+            "actions": [{"id": "stunning-strike", "name": "Stunning Strike", "economy": "free", "uses": "focus-points",
+                         "target": "other", "after_hit": True, "once_per_turn": True,
+                         "save": {"ability": "con", "dc_ability": "wis", "conditions": ["stunned"]}}]},
         6: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},
         7: {"rules": ["evasion"]},
         10: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},
@@ -350,6 +364,8 @@ OVERLAY = {
         9: {"choices": [expertise(2, "Ranger Expertise")]},
     },
     "rogue": {
+        5: {"actions": [{"id": "uncanny-dodge", "name": "Uncanny Dodge", "economy": "reaction",
+                         "halves_attack_damage": True}]},
         6: {"choices": [expertise(2, "Rogue Expertise")]},
         7: {"rules": ["evasion", "reliable_talent"]},
         15: {"saving_throws": ["wis", "cha"]},

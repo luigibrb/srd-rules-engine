@@ -319,6 +319,63 @@ export const AdvantageGrantSchema = z.union([
 ]);
 export type AdvantageGrant = AdvantageTarget | { target: AdvantageTarget; unless: string[] };
 
+/**
+ * A feature you use in a turn (Second Wind, Action Surge, Flurry of Blows): its economy, the
+ * resource it spends, and what it does. The encounter action `feature` resolves it; the play
+ * action `use_feature` spends it (and heals you, for a self-healing feature).
+ */
+export const FeatureActionSchema = z.strictObject({
+  id: z.string(),
+  name: z.string(),
+  /** `free`: no action, on your turn (Action Surge, Stunning Strike). */
+  economy: z.enum(["action", "bonus_action", "reaction", "free"]),
+  /** The resource (of the same source) it spends. */
+  uses: z.string().nullable().default(null),
+  cost: z.int().min(1).default(1),
+  /** The caller says how much of the resource to spend (Lay on Hands' pool). */
+  pool: z.boolean().default(false),
+  /** Who it's used on: yourself, any creature (you included), or another creature. */
+  target: z.enum(["self", "creature", "other"]).default("self"),
+  /** Healing: dice + bonus (a number, an ability modifier, or `class_level`), or the pool spent. */
+  heal: z
+    .strictObject({
+      dice: Dice.nullable().default(null),
+      bonus: z.union([z.int(), z.enum(ABILITIES), z.literal("class_level")]).default(0),
+      pooled: z.boolean().default(false),
+    })
+    .nullable()
+    .default(null),
+  /** One additional action this turn (Action Surge), not the Magic action. */
+  extra_action: z.boolean().default(false),
+  /** Standard actions it takes along (Patient Defense: Disengage and Dodge). */
+  also: z.array(z.enum(["dash", "disengage", "dodge"])).default([]),
+  /** Attacks it grants this turn (Flurry of Blows: two Unarmed Strikes). */
+  attacks: z
+    .strictObject({ attack: z.string(), count: z.int().min(1) })
+    .nullable()
+    .default(null),
+  /** Used after hitting the target this turn (Stunning Strike). */
+  after_hit: z.boolean().default(false),
+  once_per_turn: z.boolean().default(false),
+  /**
+   * The target's saving throw, DC 8 + `dc_ability` modifier + Proficiency Bonus: on a failure,
+   * the conditions until the start of your next turn.
+   */
+  save: z
+    .strictObject({
+      ability: z.enum(ABILITIES),
+      dc_ability: z.enum(ABILITIES),
+      conditions: z.array(z.string()).default([]),
+    })
+    .nullable()
+    .default(null),
+  /** Gives the target a die (a class table column: "Bardic Die") to add to a failed D20 Test. */
+  inspiration: z.strictObject({ progression: z.string() }).nullable().default(null),
+  /** Your reaction when an attack hits you: halve its damage (Uncanny Dodge). */
+  halves_attack_damage: z.boolean().default(false),
+});
+export type FeatureActionDef = z.infer<typeof FeatureActionSchema>;
+
 export const TraitSchema = z.strictObject({ name: z.string(), text: z.string() });
 export type Trait = z.infer<typeof TraitSchema>;
 
@@ -522,6 +579,8 @@ export interface Grants {
   rules: FeatureRule[];
   /** Ability modifiers added to some spells' damage. */
   spell_damage: SpellDamage[];
+  /** Features you use in a turn (Second Wind, Action Surge). */
+  actions: FeatureActionDef[];
   /** Features you switch on in play (Rage); their grants apply while active. */
   toggles: ToggleDef[];
   items: ItemGrant[];
@@ -647,6 +706,7 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       advantages: z.array(AdvantageGrantSchema).default([]),
       rules: z.array(z.enum(FEATURE_RULES)).default([]),
       spell_damage: z.array(SpellDamageSchema).default([]),
+      actions: z.array(FeatureActionSchema).default([]),
       toggles: z.array(ToggleSchema).default([]),
       items: z.array(ItemGrantSchema).default([]),
       gp: z.int().default(0),

@@ -95,6 +95,12 @@ features:
         count: [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6]
         max_spell_level: null
       rest_change: long
+    actions:
+    - id: second-wind
+      name: Second Wind
+      economy: bonus_action
+      uses: second-wind
+      heal: {dice: 1d10, bonus: class_level}
     resources:
     - id: second-wind
       name: Second Wind
@@ -113,6 +119,12 @@ features:
         can expend a use of your Second Wind to push yourself toward success. Rather than regaining Hit
         Points, you roll 1d10 and add the number rolled to the ability check, potentially turning it into
         a success. If the check still fails, this use of Second Wind isn't expended.
+    actions:
+    - id: action-surge
+      name: Action Surge
+      economy: free
+      uses: action-surge
+      extra_action: true
     resources:
     - id: action-surge
       name: Action Surge

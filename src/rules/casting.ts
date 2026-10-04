@@ -49,6 +49,8 @@ export interface SpellAttackRoll {
   readonly critical_miss: boolean;
   /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
   readonly reasons: readonly string[];
+  /** The Bardic Inspiration die rolled and added to a miss, if any. */
+  readonly inspiration: number | null;
 }
 
 export interface SpellTargetResult {
@@ -217,11 +219,22 @@ export function castSpell(
       const effective = attackMode(caster, target, { mode, within_5ft: m.attack === "melee" });
       const roll = rollD20({ mode: effective.mode, rng });
       const critical_miss = roll.d20 === 1;
-      const hit = roll.d20 === 20 || (!critical_miss && roll.d20 + bonus >= target.armor_class);
+      let total = roll.d20 + bonus;
+      // Bardic Inspiration on a miss a die can change.
+      let inspiration: number | null = null;
+      if (
+        roll.d20 !== 20 &&
+        !critical_miss &&
+        total < target.armor_class &&
+        caster.inspiration_die
+      ) {
+        inspiration = rng.int(1, caster.inspiration_die);
+        total += inspiration;
+      }
+      const hit = roll.d20 === 20 || (!critical_miss && total >= target.armor_class);
       const critical_hit = roll.d20 === 20 || (hit && effective.critical_on_hit);
-      const total = roll.d20 + bonus;
       const reasons = effective.reasons;
-      const attack = { roll, total, hit, critical_hit, critical_miss, reasons };
+      const attack = { roll, total, hit, critical_hit, critical_miss, reasons, inspiration };
       const rolled =
         (hit || potent) && parts.length
           ? rollDamage(partsFor(beam === 0), { critical: critical_hit, rng })

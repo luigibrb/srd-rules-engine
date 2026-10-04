@@ -100,6 +100,22 @@ features:
         Once you use this feature, you can't use it again until you finish a Long Rest.
     effects:
     - {target: speed, value: 10, when: unarmored}
+    actions:
+    - id: flurry-of-blows
+      name: Flurry of Blows
+      economy: bonus_action
+      uses: focus-points
+      attacks: {attack: Unarmed Strike, count: 2}
+    - id: patient-defense
+      name: Patient Defense
+      economy: bonus_action
+      uses: focus-points
+      also: [disengage, dodge]
+    - id: step-of-the-wind
+      name: Step of the Wind
+      economy: bonus_action
+      uses: focus-points
+      also: [disengage, dash]
     resources:
     - id: focus-points
       name: Focus Points
@@ -149,6 +165,18 @@ features:
     effects:
     - {target: attacks, op: max, value: 2}
     - {target: martial_arts.die, op: max, value: 8}
+    actions:
+    - id: stunning-strike
+      name: Stunning Strike
+      economy: free
+      uses: focus-points
+      target: other
+      after_hit: true
+      once_per_turn: true
+      save:
+        ability: con
+        dc_ability: wis
+        conditions: [stunned]
   '6':
     traits:
     - name: Empowered Strikes

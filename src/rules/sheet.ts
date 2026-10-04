@@ -100,6 +100,36 @@ export interface AttackLine {
   readonly notes: readonly string[];
 }
 
+/** A feature used in a turn, with its numbers worked out for the character. */
+export interface FeatureActionLine {
+  readonly key: string;
+  readonly name: string;
+  readonly economy: "action" | "bonus_action" | "reaction" | "free";
+  /** The limited use it spends (`fighter:second-wind`), if any. */
+  readonly uses: string | null;
+  readonly cost: number;
+  readonly pool: boolean;
+  readonly target: "self" | "creature" | "other";
+  readonly heal: {
+    readonly dice: string | null;
+    readonly bonus: number;
+    readonly pooled: boolean;
+  } | null;
+  readonly extra_action: boolean;
+  readonly also: readonly ("dash" | "disengage" | "dodge")[];
+  readonly attacks: { readonly attack: string; readonly count: number } | null;
+  readonly after_hit: boolean;
+  readonly once_per_turn: boolean;
+  readonly save: {
+    readonly ability: Ability;
+    readonly dc: number;
+    readonly conditions: readonly string[];
+  } | null;
+  /** The die it gives (8 for a d8). */
+  readonly inspiration_die: number | null;
+  readonly halves_attack_damage: boolean;
+}
+
 export interface ClassLine {
   readonly class_id: string;
   readonly name: string;
@@ -211,6 +241,8 @@ export interface DerivedSheet {
   readonly resistances: readonly string[];
   /** Advantage on saving throws or checks (`save.str`), with where it comes from. */
   readonly advantages: readonly { readonly target: AdvantageTarget; readonly source: string }[];
+  /** Features used in turns (Second Wind, Action Surge), keyed like toggles (`fighter:second-wind`). */
+  readonly actions: readonly FeatureActionLine[];
   /** Rules in code switched on by features (`evasion`, `reliable_talent`, `potent_cantrip`). */
   readonly rules: readonly FeatureRule[];
   /** Ability modifiers added to some spells' damage, with the modifier now (`bonus`). */
@@ -660,6 +692,49 @@ export function computeSheet(
       }),
     ),
     rules: [...new Set([...res.sources, ...itemSources].flatMap((src) => src.grants.rules))],
+    actions: res.sources.flatMap((src) =>
+      src.grants.actions.map((a): FeatureActionLine => {
+        const scope = usesScope(src);
+        const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : level;
+        const column = (name: string) =>
+          lookup(catalog.classes, src.class_id ?? "")?.progression[name]?.[classLevel - 1];
+        const heal = a.heal && {
+          dice: a.heal.dice,
+          bonus:
+            a.heal.bonus === "class_level"
+              ? classLevel
+              : typeof a.heal.bonus === "number"
+                ? a.heal.bonus
+                : mod[a.heal.bonus],
+          pooled: a.heal.pooled,
+        };
+        const die = a.inspiration
+          ? /(\d+)$/.exec(String(column(a.inspiration.progression)))?.[1]
+          : null;
+        return {
+          key: `${scope}:${a.id}`,
+          name: a.name,
+          economy: a.economy,
+          uses: a.uses === null ? null : `${scope}:${a.uses}`,
+          cost: a.cost,
+          pool: a.pool,
+          target: a.target,
+          heal,
+          extra_action: a.extra_action,
+          also: a.also,
+          attacks: a.attacks,
+          after_hit: a.after_hit,
+          once_per_turn: a.once_per_turn,
+          save: a.save && {
+            ability: a.save.ability,
+            dc: 8 + mod[a.save.dc_ability] + pb,
+            conditions: a.save.conditions,
+          },
+          inspiration_die: die ? Number(die) : null,
+          halves_attack_damage: a.halves_attack_damage,
+        };
+      }),
+    ),
     spell_damage: [...res.sources, ...itemSources].flatMap((src) =>
       src.grants.spell_damage.map((d) => ({ ...d, bonus: mod[d.ability] })),
     ),

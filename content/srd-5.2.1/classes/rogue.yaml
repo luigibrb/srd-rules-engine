@@ -146,6 +146,8 @@ features:
     - name: Uncanny Dodge
       text: When an attacker that you can see hits you with an attack roll, you can take a Reaction to
         halve the attack's damage against you (round down).
+    actions:
+    - {id: uncanny-dodge, name: Uncanny Dodge, economy: reaction, halves_attack_damage: true}
   '6':
     choices:
     - {id: expertise, label: Rogue Expertise, kind: expertise, count: 2}

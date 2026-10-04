@@ -100,6 +100,11 @@ export interface Combatant {
   readonly proficient_skills: readonly string[];
   /** Ability modifiers its features add to some spells' damage (Potent Spellcasting). */
   readonly spell_damage: readonly SpellDamageBonus[];
+  /**
+   * A Bardic Inspiration die it holds (8 for a d8): rolled and added to its next failed D20 Test
+   * that a die can change (not a natural 1 attack roll, not an automatic failure).
+   */
+  readonly inspiration_die: number | null;
 }
 
 /** An ability modifier added to the damage of matching spells, worked out (`bonus`). */
@@ -345,6 +350,8 @@ export interface AttackResult {
   readonly critical_miss: boolean;
   /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
   readonly reasons: readonly string[];
+  /** The Bardic Inspiration die rolled and added to a miss, if any. */
+  readonly inspiration: number | null;
   /** The damage rolled on a hit. */
   readonly damage: RolledDamage | null;
   /** Names of the riders added to the damage. */
@@ -461,9 +468,15 @@ export function makeAttack(
     riderNames.push(rider.name);
   }
   const roll = rollD20({ mode: effective.mode, rng });
-  const total = roll.d20 + line.attack_bonus;
+  let total = roll.d20 + line.attack_bonus;
   const critical_miss = roll.d20 === 1;
   const criticalRoll = !critical_miss && roll.d20 >= Math.min(20, attacker.critical_hit_on);
+  // Bardic Inspiration on a miss a die can change.
+  let inspiration: number | null = null;
+  if (!criticalRoll && !critical_miss && total < target.armor_class && attacker.inspiration_die) {
+    inspiration = rng.int(1, attacker.inspiration_die);
+    total += inspiration;
+  }
   const hit = criticalRoll || (!critical_miss && total >= target.armor_class);
   const critical_hit = criticalRoll || (hit && effective.critical_on_hit);
   const base = {
@@ -478,6 +491,7 @@ export function makeAttack(
     critical_hit,
     critical_miss,
     reasons: effective.reasons,
+    inspiration,
   };
   if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
   let base_parts = line.damage_parts;
@@ -510,6 +524,8 @@ export interface SaveResult {
   readonly legendary_resistance: boolean;
   /** Why the roll had Advantage or Disadvantage, if it did. */
   readonly reasons: readonly string[];
+  /** The Bardic Inspiration die rolled and added (it failed without it), if any. */
+  readonly inspiration: number | null;
 }
 
 /**
@@ -538,6 +554,7 @@ export function rollSavingThrow(
       automatic_failure: failing,
       legendary_resistance: resisted,
       reasons: [],
+      inspiration: null,
     };
   }
   const reasons: ModeReason[] = [];
@@ -548,7 +565,12 @@ export function rollSavingThrow(
   if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
   const resolved = resolveMode(mode, reasons);
   const roll = rollD20({ mode: resolved.mode, rng });
-  const total = roll.d20 + bonus;
+  let total = roll.d20 + bonus;
+  let inspiration: number | null = null;
+  if (total < dc && combatant.inspiration_die) {
+    inspiration = rng.int(1, combatant.inspiration_die);
+    total += inspiration;
+  }
   const legendary = total < dc && resisted;
   return {
     ...base,
@@ -558,6 +580,7 @@ export function rollSavingThrow(
     automatic_failure: null,
     legendary_resistance: legendary,
     reasons: resolved.reasons,
+    inspiration,
   };
 }
 
@@ -573,6 +596,8 @@ export interface CheckResult {
   /** Against a DC; `null` when none was given (a contest, or the GM decides). */
   readonly success: boolean | null;
   readonly reasons: readonly string[];
+  /** The Bardic Inspiration die rolled and added, if any. */
+  readonly inspiration: number | null;
 }
 
 /**
@@ -612,7 +637,12 @@ export function rollAbilityCheck(
     roll = { ...roll, d20: 10 };
     resolved.reasons.push("Reliable Talent: the d20 counts as 10");
   }
-  const total = roll.d20 + bonus;
+  let total = roll.d20 + bonus;
+  let inspiration: number | null = null;
+  if (dc !== null && total < dc && combatant.inspiration_die) {
+    inspiration = rng.int(1, combatant.inspiration_die);
+    total += inspiration;
+  }
   return {
     name: combatant.name,
     ability,
@@ -623,6 +653,7 @@ export function rollAbilityCheck(
     total,
     success: dc === null ? null : total >= dc,
     reasons: resolved.reasons,
+    inspiration,
   };
 }
 
@@ -679,6 +710,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     rules: [],
     proficient_skills: [],
     spell_damage: [],
+    inspiration_die: null,
   };
 }
 
@@ -888,5 +920,6 @@ export function combatantFromMonster(
     rules: monster.traits.some((t) => t.name === "Evasion") ? ["evasion"] : [],
     proficient_skills: Object.keys(monster.skills),
     spell_damage: [],
+    inspiration_die: null,
   };
 }

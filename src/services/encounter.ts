@@ -41,7 +41,7 @@ import {
   rollSavingThrow,
   type SaveResult,
 } from "../rules/combatant";
-import { takeDamage } from "../rules/damage";
+import { rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
@@ -122,6 +122,7 @@ export function encounterCombatant(
     return withDodge(ctx, encounter, c, {
       ...base,
       name: c.name,
+      inspiration_die: c.inspiration?.die ?? null,
       attacks: base.attacks.filter((a) => ready(a.name)),
       save_actions: base.save_actions.filter((a) => ready(a.name)),
     });
@@ -130,6 +131,7 @@ export function encounterCombatant(
   return withDodge(ctx, encounter, c, {
     ...combatantFromCharacter(ref.build, ref.state, ctx.catalog),
     name: c.name,
+    inspiration_die: c.inspiration?.die ?? null,
   });
 }
 
@@ -321,6 +323,10 @@ export function applyEncounterAction(
     c.nick_used = false;
     c.cleave = null;
     c.cleave_used = false;
+    c.surged = false;
+    c.granted_attacks = null;
+    c.hits = [];
+    c.features_used = [];
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
@@ -370,7 +376,14 @@ export function applyEncounterAction(
     }
   };
   /** A monster's save turned into a success by Legendary Resistance: one use spent. */
+  /** A Bardic Inspiration die added to a roll is gone. */
+  const useInspiration = (c: EncounterCombatant, rolled: number | null | undefined): void => {
+    if (rolled === null || rolled === undefined || !c.inspiration) return;
+    notes.push(`${c.name} adds its Bardic Inspiration die: ${rolled}.`);
+    c.inspiration = null;
+  };
   const spendLegendaryResistance = (c: EncounterCombatant, save: SaveResult | null): void => {
+    useInspiration(c, save?.inspiration);
     if (!save?.legendary_resistance || c.monster === null) return;
     c.legendary_resistance_used += 1;
     const def = monsterDef(ctx, c);
@@ -381,6 +394,18 @@ export function applyEncounterAction(
       : 0;
     const left = Math.max(0, max - c.legendary_resistance_used);
     notes.push(`${c.name} uses Legendary Resistance to succeed instead (${left} left today).`);
+  };
+  /** The name of `t`'s feature that halves an attack's damage as its reaction, if it can use it. */
+  const defenderFeature = (t: EncounterCombatant, key: string): string => {
+    if (t.character === null) fail(`${t.name} has no class features`);
+    const ref = characterRef(ctx, t);
+    const f = computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
+      (a) => (a.key === key || a.name === key) && a.halves_attack_damage,
+    );
+    if (!f) fail(`${t.name} has no feature '${key}' that halves an attack's damage`);
+    if (t.used.reaction) fail(`${t.name} has already used its reaction`);
+    if (conditionsOf(ctx, t).has("incapacitated")) fail(`${t.name} is Incapacitated`);
+    return f.name;
   };
   /** One attack by `c` on `t`, applied: riders once per turn, notes, damage. */
   const attackOn = (
@@ -396,6 +421,7 @@ export function applyEncounterAction(
       light_extra?: boolean;
       cleave?: boolean;
       mastery?: boolean;
+      target_feature?: string;
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
@@ -408,6 +434,8 @@ export function applyEncounterAction(
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
     const target = encounterCombatant(e, t.id, ctx);
+    // A feature the target uses as its reaction if hit (Uncanny Dodge): checked before rolling.
+    const dodge = options.target_feature ? defenderFeature(t, options.target_feature) : null;
     // Help: Advantage on the next attack roll by one of the helper's allies against the target.
     const help = e.helps.find(
       (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
@@ -443,6 +471,7 @@ export function applyEncounterAction(
       throw error;
     }
     c.extended = true; // an attack roll extends Rage
+    useInspiration(c, hit.inspiration);
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
@@ -450,10 +479,17 @@ export function applyEncounterAction(
     if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
     else {
       c.riders_used.push(...onceIds);
+      c.hits.push(t.id);
       const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
       const crit = hit.critical_hit ? "Critical Hit! " : "";
       notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
-      applyTo(t, [{ type: "damage", instances: [...hit.instances], critical: hit.critical_hit }]);
+      let instances = [...hit.instances];
+      if (dodge) {
+        t.used.reaction = true;
+        instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
+        notes.push(`${t.name} uses ${dodge}: the damage is halved.`);
+      }
+      applyTo(t, [{ type: "damage", instances, critical: hit.critical_hit }]);
     }
     if (line?.mastery && options.mastery !== false) {
       applyMastery(c, t, attacker, line, hit, options.cleave ?? false);
@@ -570,6 +606,7 @@ export function applyEncounterAction(
     applyTo(c, r.caster_actions);
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
+      useInspiration(c, hit.attack?.inspiration);
       spendLegendaryResistance(t, hit.save);
       applyTo(t, hit.actions);
     }
@@ -946,6 +983,7 @@ export function applyEncounterAction(
         modes: helpOnCheck(c, skill),
       });
       result = check;
+      useInspiration(c, check.inspiration);
       const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
       const outcome = check.success ? "escapes" : "stays Grappled";
       notes.push(
@@ -1018,6 +1056,7 @@ export function applyEncounterAction(
         modes: helpOnCheck(c, action.skill ?? null),
       });
       result = check;
+      useInspiration(c, check.inspiration);
       const label = check.skill ?? check.ability;
       const dc = check.dc === null ? "" : ` vs DC ${check.dc}`;
       const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
@@ -1036,7 +1075,15 @@ export function applyEncounterAction(
       const attacker = encounterCombatant(e, c.id, ctx);
       const line = attacker.attacks.find((a) => a.name === action.attack);
       const light = line?.properties.includes("light") ?? false;
-      if (action.cleave) {
+      if (action.granted) {
+        // An attack a feature granted this turn (Flurry of Blows), without spending an action.
+        onTurn(c, "attack");
+        const granted = c.granted_attacks;
+        if (!granted || granted.count === 0)
+          fail(`${c.name} has no granted attacks left this turn`);
+        if (granted.attack !== action.attack) fail(`The granted attacks are ${granted.attack}s`);
+        granted.count -= 1;
+      } else if (action.cleave) {
         // SRD "Cleave": after a melee hit with this weapon, an attack against a second creature
         // within 5 feet of the first, once per turn; it isn't one of the Attack action's attacks.
         onTurn(c, "attack");
@@ -1171,6 +1218,84 @@ export function applyEncounterAction(
       }
       break;
     }
+    case "feature": {
+      const c = find(action.id);
+      if (c.character === null) fail(`${c.name} has no class features`);
+      const ref = characterRef(ctx, c);
+      const f =
+        computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
+          (a) => a.key === action.feature || a.name === action.feature,
+        ) ?? fail(`${c.name} has no feature '${action.feature}'`);
+      if (f.halves_attack_damage) {
+        fail(`${f.name} is used when an attack hits: give it as the attack's \`target_feature\``);
+      }
+      const t = action.target ? find(action.target) : c;
+      if (f.target === "self" && t !== c) fail(`${f.name} is used on yourself`);
+      if (f.target === "other" && t === c) fail(`${f.name} is used on another creature`);
+      if (f.economy === "reaction") {
+        if (e.round === 0) fail("The fight hasn't started");
+        canAct(c);
+        if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+        c.used.reaction = true;
+      } else if (f.economy === "free") {
+        onTurn(c, `use ${f.name}`);
+        canAct(c);
+      } else takeAction(c, f.name, f.economy === "bonus_action");
+      if (f.once_per_turn && c.features_used.includes(f.key)) {
+        fail(`${c.name} has already used ${f.name} this turn`);
+      }
+      if (f.after_hit && !c.hits.includes(t.id)) fail(`${c.name} hasn't hit ${t.name} this turn`);
+      if (f.extra_action && !c.used.action) {
+        fail(`Take your action first: ${f.name} gives one additional action`);
+      }
+      notes.push(`${c.name} uses ${f.name}${t === c ? "" : ` on ${t.name}`}.`);
+      play(c, { type: "use_feature", key: f.key, amount: action.amount });
+      if (f.once_per_turn) c.features_used.push(f.key);
+      if (f.heal && f.target !== "self") {
+        const amount = f.heal.pooled
+          ? (action.amount as number)
+          : rollDamage([{ dice: f.heal.dice, bonus: f.heal.bonus, type: "healing" }], { rng })
+              .total;
+        applyTo(t, [{ type: "heal", amount }]);
+        notes.push(`${t.name} regains ${amount} Hit Points.`);
+      }
+      if (f.extra_action) {
+        c.used.action = false;
+        c.attacks_left = 0;
+        c.surged = true;
+      }
+      for (const also of f.also) {
+        if (also === "dash") c.extra_movement += speedOf(ctx, c, e);
+        if (also === "disengage") c.disengaged = true;
+        if (also === "dodge") c.dodging = true;
+      }
+      if (f.attacks) c.granted_attacks = { ...f.attacks };
+      if (f.save) {
+        const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), f.save.ability, f.save.dc, {
+          rng,
+        });
+        result = save;
+        notes.push(`${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);
+        spendLegendaryResistance(t, save);
+        if (!save.success && f.save.conditions.length) {
+          applyTo(
+            t,
+            f.save.conditions.map((condition) => ({ type: "add_condition", condition }) as const),
+          );
+          addEffects(t, f.save.conditions, {
+            source: c.id,
+            label: f.name,
+            concentration: false,
+            ends: { at: "start", of: c.id, count: 1, skip_current: false },
+          });
+        }
+      }
+      if (f.inspiration_die) {
+        t.inspiration = { die: f.inspiration_die, by: c.id };
+        notes.push(`${t.name} has a Bardic Inspiration die (d${f.inspiration_die}).`);
+      }
+      break;
+    }
     case "cast": {
       const c = find(action.id);
       canAct(c);
@@ -1228,6 +1353,9 @@ export function applyEncounterAction(
         if (e.round === 0) fail("The fight hasn't started");
       } else onTurn(c, "cast");
       if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")}`);
+      if (what === "action" && c.surged) {
+        fail("Action Surge's additional action can't be the Magic action (casting a spell)");
+      }
       result = castBy(c, spell, action.targets ?? [], {
         slot_level,
         pact: action.pact,

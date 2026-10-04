@@ -83,6 +83,13 @@ features:
       hint: Charm Person, Color Spray, Dissonant Whispers, and Healing Word are recommended.
       tag: bard-prepared
       swap: class_level
+    actions:
+    - id: bardic-inspiration
+      name: Bardic Inspiration
+      economy: bonus_action
+      uses: bardic-inspiration
+      target: other
+      inspiration: {progression: Bardic Die}
     resources:
     - id: bardic-inspiration
       name: Bardic Inspiration

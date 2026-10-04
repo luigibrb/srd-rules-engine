@@ -441,6 +441,17 @@ list of actions.
   a Bonus Action after attacking with a Light weapon in the Attack action, with a different
   Light weapon, using the line's `light_extra_damage_parts` (no positive ability modifier unless
   the Two-Weapon Fighting feat).
+- **Features used in turns:** `feature` uses a character's `sheet.actions` entry: its economy
+  (action, Bonus Action, reaction, or free on your turn) and resource are spent (through the play
+  action `use_feature`), then it heals (Second Wind; Lay On Hands from its pool, on any creature),
+  gives one additional action after the first (Action Surge; `surged`: that action can't cast a
+  spell), takes standard actions along (Patient Defense: Disengage and Dodge), grants attacks
+  used with `attack` `granted: true` (Flurry of Blows), forces a save after a hit this turn
+  (Stunning Strike: Stunned until the start of the monk's next turn), or gives a Bardic
+  Inspiration die (`inspiration`). An `attack` with `target_feature` lets the target halve a
+  hit's damage with its reaction (Uncanny Dodge). A combatant's `inspiration_die` is rolled and
+  added to its next failed attack roll, saving throw or check a die can change, and the encounter
+  removes it.
 - **Weapon Mastery:** an `attack` with a line that has a mastery applies it unless
   `mastery: false`: Graze deals the ability modifier on a miss; Vex (Advantage on the attacker's
   next attack roll against the target, until the end of its next turn), Sap (Disadvantage on the
@@ -565,6 +576,14 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Empowered Evocation's and Elemental Affinity's "one damage roll" is the first damage part of
   the first roll (the first beam of a multi-beam spell); Potent Spellcasting adds to every roll.
 - Reliable Talent covers skill checks; tool proficiencies aren't checks the engine rolls.
+- Action Surge can be used once the turn's action is spent (the additional action replaces it).
+- A Bardic Inspiration die is used automatically on the holder's first failed D20 Test it could
+  change (the SRD says "can"), and lasts until used in the encounter ("within the next hour"
+  isn't tracked); a death save doesn't use it.
+- Stunning Strike accepts any hit this turn ("with a Monk weapon or an Unarmed Strike" isn't
+  checked); its successful-save effects (half Speed, Advantage on the next attack) stay text.
+- Uncanny Dodge doesn't check that the rogue can see the attacker; Lay On Hands' option to cure
+  Poisoned stays text.
 
 **Encounters**
 

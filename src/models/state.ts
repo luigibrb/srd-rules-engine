@@ -125,6 +125,12 @@ export const PlayActionSchema = z.discriminatedUnion("type", [
   /** A limited-use feature by its key (see the play sheet's `uses`). */
   z.object({ type: z.literal("use"), key: z.string(), amount: n.min(1).optional() }),
   z.object({ type: z.literal("restore_use"), key: z.string(), amount: n.min(1).optional() }),
+  /**
+   * Use a feature (`sheet.actions`: `fighter:second-wind`): spends its resource (`amount` for a
+   * pool like Lay on Hands) and, for one that heals you (Second Wind), rolls and heals. Its other
+   * effects need an encounter (`feature`).
+   */
+  z.object({ type: z.literal("use_feature"), key: z.string(), amount: n.min(1).optional() }),
   z.object({ type: z.literal("add_condition"), condition: id }),
   z.object({ type: z.literal("remove_condition"), condition: id }),
   z.object({ type: z.literal("set_exhaustion"), level: n.min(0).max(6) }),
