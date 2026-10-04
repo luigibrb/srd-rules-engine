@@ -13,6 +13,8 @@ import {
   type Combatant,
   type CombatantSpellcasting,
   type D20Roll,
+  type Decide,
+  inspire,
   type RollMode,
   rollD20,
   rollSavingThrow,
@@ -39,6 +41,8 @@ export interface CastOptions {
   /** Advantage or Disadvantage on spell attack rolls. */
   mode?: RollMode;
   rng?: Rng;
+  /** Answers decisions (Bardic Inspiration, Legendary Resistance); default: `recommended`. */
+  decide?: Decide;
 }
 
 export interface SpellAttackRoll {
@@ -108,7 +112,14 @@ export function castSpell(
   caster: Combatant,
   spell: SpellDef,
   targets: readonly Combatant[],
-  { slot_level, pact = false, spellcasting, mode = "normal", rng = mathRng }: CastOptions = {},
+  {
+    slot_level,
+    pact = false,
+    spellcasting,
+    mode = "normal",
+    rng = mathRng,
+    decide = (d) => d.recommended,
+  }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
   const m = spell.mechanics;
@@ -220,17 +231,13 @@ export function castSpell(
       const roll = rollD20({ mode: effective.mode, rng });
       const critical_miss = roll.d20 === 1;
       let total = roll.d20 + bonus;
-      // Bardic Inspiration on a miss a die can change.
-      let inspiration: number | null = null;
-      if (
-        roll.d20 !== 20 &&
-        !critical_miss &&
-        total < target.armor_class &&
-        caster.inspiration_die
-      ) {
-        inspiration = rng.int(1, caster.inspiration_die);
-        total += inspiration;
-      }
+      // Bardic Inspiration on a miss (not a natural 1 or 20).
+      const what = `spell attack roll with ${spell.name}`;
+      const inspiration =
+        roll.d20 === 20 || critical_miss
+          ? null
+          : inspire(caster, total, target.armor_class, what, decide, rng);
+      total += inspiration ?? 0;
       const hit = roll.d20 === 20 || (!critical_miss && total >= target.armor_class);
       const critical_hit = roll.d20 === 20 || (hit && effective.critical_on_hit);
       const reasons = effective.reasons;
@@ -251,7 +258,7 @@ export function castSpell(
       dc: line?.save_dc ?? 0,
       conditions: conditionsOn(m, "failed_save"),
     };
-    const resolved = resolveSave(effect, partsFor(true), targets, rng, potent);
+    const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent);
     shared = resolved.damage;
     results.push(...resolved.targets);
   } else {
@@ -377,9 +384,10 @@ function resolveSave(
   parts: readonly DamagePart[],
   targets: readonly Combatant[],
   rng: Rng,
+  decide: Decide,
   potent = false,
 ): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
-  const saves = targets.map((t) => rollSavingThrow(t, effect.ability, effect.dc, { rng }));
+  const saves = targets.map((t) => rollSavingThrow(t, effect.ability, effect.dc, { rng, decide }));
   const damage = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
   const results = targets.map((target, i) => {
     const save = saves[i] as SaveResult;
@@ -417,14 +425,14 @@ export function useSaveAction(
   user: Combatant,
   name: string,
   targets: readonly Combatant[],
-  { rng = mathRng }: { rng?: Rng } = {},
+  { rng = mathRng, decide = (d) => d.recommended }: { rng?: Rng; decide?: Decide } = {},
 ): SaveActionResult {
   const action = user.save_actions.find((a) => a.name === name);
   if (!action) {
     const known = user.save_actions.map((a) => a.name).join(", ");
     throw new RangeError(`${user.name} has no saving throw action '${name}' (${known})`);
   }
-  const resolved = resolveSave(action, action.damage_parts, targets, rng);
+  const resolved = resolveSave(action, action.damage_parts, targets, rng, decide);
   return {
     action: action.name,
     ability: action.ability,

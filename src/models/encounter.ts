@@ -89,6 +89,12 @@ export const EncounterCombatantSchema = z.object({
   hits: z.array(z.string()).default([]),
   /** Once-per-turn features used this turn. */
   features_used: z.array(z.string()).default([]),
+  /**
+   * Who makes its decisions (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask`
+   * stops for an answer after the roll, `auto` takes the recommended choice; `null`: the
+   * encounter's `decisions`.
+   */
+  decisions: z.enum(["ask", "auto"]).nullable().default(null),
   /** A Bardic Inspiration die it holds, and who gave it; used on its next failed D20 Test. */
   inspiration: z
     .object({ die: z.int().min(2), by: z.string() })
@@ -150,6 +156,21 @@ export const MasteryMarkSchema = z.object({
 });
 export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
 
+/**
+ * An action stopped for a decision: the action, the dice it rolled so far and the answers given;
+ * `decide` replays it with the same dice and one more answer.
+ */
+export const PendingSchema = z.object({
+  action: z.lazy(() => EncounterActionSchema),
+  rolls: z.array(z.int()),
+  answers: z.array(z.boolean()),
+  /** Who decides, and what. */
+  combatant: z.string(),
+  kind: z.enum(["inspiration", "legendary_resistance", "uncanny_dodge"]),
+  question: z.string(),
+});
+export type Pending = z.infer<typeof PendingSchema>;
+
 export const EncounterSchema = z.object({
   /** 0 before the fight starts. */
   round: z.int().min(0).default(0),
@@ -166,6 +187,10 @@ export const EncounterSchema = z.object({
   helps: z.array(HelpSchema).default([]),
   /** Weapon Mastery effects in play (Vex, Sap, Slow). */
   masteries: z.array(MasteryMarkSchema).default([]),
+  /** Decisions after a roll: `ask` the combatant (or its player), or `auto` (the recommendation). */
+  decisions: z.enum(["ask", "auto"]).default("auto"),
+  /** An action waiting for a decision (`decide`); nothing else can happen until it's answered. */
+  pending: PendingSchema.nullable().default(null),
   /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
   auto_death_saves: z.boolean().default(true),
 });
@@ -194,6 +219,7 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     in_lair: z.boolean().optional(),
     /** `false`: don't spend Legendary Resistance automatically on a failed save. */
     auto_legendary_resistance: z.boolean().optional(),
+    decisions: z.enum(["ask", "auto"]).optional(),
   }),
   z.object({
     type: z.literal("add_character"),
@@ -201,6 +227,15 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     id: id.optional(),
     name: z.string().optional(),
     side: z.string().optional(),
+    decisions: z.enum(["ask", "auto"]).optional(),
+  }),
+  /** Answer the pending decision. */
+  z.object({ type: z.literal("decide"), use: z.boolean() }),
+  /** Change who decides: one combatant's mode (`null`: the encounter's), or the encounter's. */
+  z.object({
+    type: z.literal("set_decisions"),
+    id: z.string().optional(),
+    mode: z.enum(["ask", "auto"]).nullable(),
   }),
   z.object({ type: z.literal("remove"), id: z.string() }),
   z.object({
@@ -321,8 +356,6 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     mastery: z.boolean().optional(),
     /** One of the attacks a feature granted this turn (Flurry of Blows). */
     granted: z.boolean().optional(),
-    /** A feature the target uses as its reaction if hit (Uncanny Dodge: `rogue:uncanny-dodge`). */
-    target_feature: z.string().optional(),
   }),
   /**
    * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and

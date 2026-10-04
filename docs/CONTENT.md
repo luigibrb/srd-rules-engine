@@ -216,8 +216,8 @@ actions:
 ```
 
 `inspiration: {progression: Bardic Die}` gives the target a die for its next failed D20 Test, and
-`halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, given as an attack's
-`target_feature`).
+`halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, offered when an attack
+hits). Both are decisions the encounter asks for or takes automatically (`decisions`).
 
 `rules` switches on a rule written in code, from a closed list: `evasion` (Dexterity saves that
 halve damage: none on a success, half on a failure, not while Incapacitated), `reliable_talent`

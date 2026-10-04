@@ -448,10 +448,22 @@ list of actions.
   spell), takes standard actions along (Patient Defense: Disengage and Dodge), grants attacks
   used with `attack` `granted: true` (Flurry of Blows), forces a save after a hit this turn
   (Stunning Strike: Stunned until the start of the monk's next turn), or gives a Bardic
-  Inspiration die (`inspiration`). An `attack` with `target_feature` lets the target halve a
-  hit's damage with its reaction (Uncanny Dodge). A combatant's `inspiration_die` is rolled and
-  added to its next failed attack roll, saving throw or check a die can change, and the encounter
-  removes it.
+  Inspiration die (`inspiration`), which its holder can add to a failed attack roll, saving throw
+  or check (a decision, below). A target with Uncanny Dodge is offered it when an attack hits it.
+- **Decisions after a roll.** Bardic Inspiration, Legendary Resistance and Uncanny Dodge are
+  choices made after seeing the roll and before its consequences. The rules functions
+  (`rollSavingThrow`, `rollAbilityCheck`, `makeAttack`, `castSpell`, `useSaveAction`) take a
+  `decide` callback that receives a `Decision` (who, what, the question with the roll, and a
+  `recommended` answer: only when it can turn the failure into a success; always for Legendary
+  Resistance and Uncanny Dodge); without one they follow the recommendation. In an encounter,
+  each combatant's `decisions` (or the encounter's, default `auto`) says who answers: `auto`
+  takes the recommendation; `ask` stops the action before anything is applied, with the question
+  in `encounter.pending` and nothing else allowed until `decide` answers it. `applyEncounterAction`
+  records the dice an action rolls, so `decide` replays the stopped action with the same dice
+  and the answers given so far: an action with several decisions (a Fireball on two dragons)
+  asks them one at a time, and the engine never undoes anything. `set_decisions` changes the
+  mode mid-fight; `POST /v1/encounters/apply` stops a list of actions at the first decision
+  (`pending`, `applied`).
 - **Weapon Mastery:** an `attack` with a line that has a mastery applies it unless
   `mastery: false`: Graze deals the ability modifier on a miss; Vex (Advantage on the attacker's
   next attack roll against the target, until the end of its next turn), Sap (Disadvantage on the
@@ -577,12 +589,13 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   the first roll (the first beam of a multi-beam spell); Potent Spellcasting adds to every roll.
 - Reliable Talent covers skill checks; tool proficiencies aren't checks the engine rolls.
 - Action Surge can be used once the turn's action is spent (the additional action replaces it).
-- A Bardic Inspiration die is used automatically on the holder's first failed D20 Test it could
-  change (the SRD says "can"), and lasts until used in the encounter ("within the next hour"
-  isn't tracked); a death save doesn't use it.
+- In `auto` mode, a Bardic Inspiration die is used on a failed D20 Test only when its highest
+  roll could turn the failure into a success; in `ask` mode its holder decides. It lasts until
+  used in the encounter ("within the next hour" isn't tracked); a death save doesn't use it.
 - Stunning Strike accepts any hit this turn ("with a Monk weapon or an Unarmed Strike" isn't
   checked); its successful-save effects (half Speed, Advantage on the next attack) stay text.
-- Uncanny Dodge doesn't check that the rogue can see the attacker; Lay On Hands' option to cure
+- Uncanny Dodge is decided once the hit is known, with the damage already rolled (the question
+  doesn't show it); it doesn't check that the rogue can see the attacker; Lay On Hands' option to cure
   Poisoned stays text.
 
 **Encounters**
@@ -607,8 +620,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   feet of the first" are the caller's to handle (no positions).
 - An Opportunity Attack (`opportunity: true`) is checked only against Disengage and for being a
   melee attack; whether the target left the attacker's reach is the caller's to decide.
-- Legendary Resistance is spent automatically on the first failed save while uses are left
-  (`auto_legendary_resistance: false` leaves it to the GM); the SRD says the monster "can choose".
+- In `auto` mode, Legendary Resistance is spent on the first failed save while uses are left; the
+  SRD says the monster "can choose", which `decisions: ask` gives the GM.
+  `auto_legendary_resistance: false` keeps its older meaning: the monster never uses it.
 - A legendary action that makes an attack or uses another action resolves just that roll; what
   else it does (moving, teleporting, regaining Hit Points) is in its text.
 - Ending the fight keeps active effects; they stop counting down.

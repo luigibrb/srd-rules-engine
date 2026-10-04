@@ -250,7 +250,10 @@ Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a g
 Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
 Slow, Topple, Push, Cleave, Nick), casting times, monsters' spells (through the action that
 lists them, with daily uses and fixed levels), class features used in turns (`feature`: Second Wind, Action Surge, Flurry of
-Blows, Stunning Strike, Bardic Inspiration…) (`cast`), once-per-turn riders (Sneak Attack), recharges (a
+Blows, Stunning Strike, Bardic Inspiration…), and decisions after a roll (Bardic Inspiration,
+Legendary Resistance, Uncanny Dodge): with `decisions: "ask"` the action stops and shows the roll
+so the player or GM can choose (`decide`), with `"auto"` the engine uses them only when they can
+change the outcome (`cast`), once-per-turn riders (Sneak Attack), recharges (a
 breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10 }` or
 `{ until: { at: "end" } }`), Concentration saves when damaged, a Concentration spell's
 conditions ending with it, and Rage ending when it isn't extended.
@@ -324,7 +327,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
-| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes }`: Initiative, turns, attacks, spells, effects on monsters and characters |
+| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, pending, applied }`: Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
 | `POST /v1/combat/roll` | Roll a dice expression (`{"expression": "2d6+3"}`) |
 
 Routes that take a hand-filled `Character` snapshot (from the earlier Python version):
