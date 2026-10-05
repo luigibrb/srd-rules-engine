@@ -358,10 +358,10 @@ The spellcasting feature used is the one asked for, else the one with the best s
 spell list has the spell, else the best overall (a species' fixed spells). A spell without
 `mechanics` is still cast (slot, Concentration) with a note that its effects are in the text.
 
-66 SRD spells have mechanics: 22 hand-written golden spells with worked tests, 40 drafts from
+72 SRD spells have mechanics: 28 hand-written golden spells with worked tests, 40 drafts from
 the importer's parser reviewed against their text, and 4 corrected by hand (`tests/casting.test.ts`
-snapshots them all). The other 273 are cast with their text: 204 have nothing to model (utility
-spells), and 69 have effects the parser deliberately doesn't guess (damage after casting, several
+snapshots them all). The other 267 are cast with their text: 204 have nothing to model (utility
+spells), and 63 have effects the parser deliberately doesn't guess (damage after casting, several
 saves, tables…).
 
 ### Monsters
@@ -511,13 +511,21 @@ list of actions.
   check ends (Black Tentacles, Web) gets an escape DC, and `escape` uses it with the skill the
   spell names.
 - **Zones:** a spell with `mechanics.zone` (Moonbeam, Spirit Guardians, Cloudkill, Insect
-  Plague, Incendiary Cloud, Black Tentacles, Web, Grease) leaves an `encounter.zones` entry: its
-  area (at a point, or around its caster for an Emanation), save, damage at the cast level and
-  conditions. With positions, a creature saves when a move puts it in the zone (or moves the
-  zone onto it: `move_zone`, or an Emanation's caster moving), and at the start or end of its
-  turn there; without positions, `zone_save` names who saves. "Only once per turn" is tracked
-  per zone (`saved`, reset at every turn's start). A zone ends with its caster's Concentration,
-  after its duration, or with `end_zone`; the creatures its caster designates are spared.
+  Plague, Incendiary Cloud, Black Tentacles, Web, Grease, Spike Growth, Stinking Cloud, Sleet
+  Storm, Flaming Sphere, Conjure Animals, Conjure Woodland Beings) leaves an `encounter.zones`
+  entry: its area (at a point; an Emanation around its caster, or around a space at a point:
+  Conjure Animals' Large pack), save, damage at the cast level and conditions. With positions, a
+  move goes square by square (`to`, straight, or a given `path`): a creature saves when it gets
+  into a zone on the way (or the zone moves onto it: `move_zone`, or an Emanation's caster
+  moving), at the start or end of its turn there, and takes `move` zones' damage for every 5
+  feet in them (Spike Growth); a creature held on the way (Web) stops there. Without positions,
+  `zone_save` names who saves. "Only once per turn" is tracked per zone (`saved`, reset at every
+  turn's start). A failed save can also take the turn's action and Bonus Action (Stinking Cloud)
+  or end Concentration (Sleet Storm). Saves the caster may force (Conjure Animals) are a
+  `zone_force` decision, by default for enemies only; a ramming zone (Flaming Sphere) makes the
+  creature it's moved onto save (`move_zone` `onto`). A zone ends with its caster's
+  Concentration, after its duration, or with `end_zone`; the creatures its caster designates
+  are spared.
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
@@ -611,6 +619,15 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Moonbeam's effect on shape-shifters stay text.
 - Web's Restrained lasts until the creature escapes or the caster's Concentration ends ("while
   in the webs" isn't checked).
+- A move to a square goes straight, diagonals first; a `path` gives another way. Entering a zone
+  on the way counts, but an Opportunity Attack is still judged by where the move starts and
+  ends.
+- A save the caster may force (Conjure Animals, Conjure Woodland Beings) is forced on enemies in
+  `auto` mode, never on the caster itself; "a creature you can see" isn't checked.
+- Flaming Sphere's "within 5 feet of the sphere" is a 5-foot Emanation from its square; it rams
+  a creature only through `move_zone` with `onto`. Conjure Animals' pack is a 10-foot Emanation
+  from a Large space; its Advantage on Strength saves and Conjure Woodland Beings' Disengage
+  stay text, as do Spike Growth's camouflage and Sleet Storm's doused flames.
 
 **Monsters**
 
@@ -714,7 +731,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there's no map of walls and Difficult Terrain, 69 spells keep their effects in text, and shopping with starting gold isn't automated.
+there's no map of walls and Difficult Terrain, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

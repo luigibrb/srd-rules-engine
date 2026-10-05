@@ -131,7 +131,7 @@ export interface SpellDamageBonus {
  * (always, for the last two).
  */
 export interface Decision {
-  readonly kind: "inspiration" | "legendary_resistance" | "uncanny_dodge";
+  readonly kind: "inspiration" | "legendary_resistance" | "uncanny_dodge" | "zone_force";
   /** Who decides. */
   readonly combatant: Combatant;
   /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */

@@ -726,36 +726,43 @@
             ]
           },
           "save": {
-            "type": "object",
-            "properties": {
-              "ability": {
-                "type": "string",
-                "enum": [
-                  "str",
-                  "dex",
-                  "con",
-                  "int",
-                  "wis",
-                  "cha"
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "ability": {
+                    "type": "string",
+                    "enum": [
+                      "str",
+                      "dex",
+                      "con",
+                      "int",
+                      "wis",
+                      "cha"
+                    ]
+                  },
+                  "on_success": {
+                    "type": "string",
+                    "enum": [
+                      "half",
+                      "none"
+                    ]
+                  },
+                  "dc": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "ability",
+                  "on_success",
+                  "dc"
                 ]
               },
-              "on_success": {
-                "type": "string",
-                "enum": [
-                  "half",
-                  "none"
-                ]
-              },
-              "dc": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "ability",
-              "on_success",
-              "dc"
             ]
           },
           "damage": {
@@ -821,6 +828,20 @@
               }
             ]
           },
+          "until": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "end_of_its_turn"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "triggers": {
             "type": "array",
             "items": {
@@ -828,13 +849,39 @@
               "enum": [
                 "enter",
                 "start_turn",
-                "end_turn"
+                "end_turn",
+                "move"
               ]
             }
           },
           "once_per_turn": {
             "default": true,
             "type": "boolean"
+          },
+          "optional": {
+            "default": false,
+            "type": "boolean"
+          },
+          "space": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "ram": {
+            "default": false,
+            "type": "boolean"
+          },
+          "on_fail": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "no_actions",
+                "lose_concentration"
+              ]
+            }
           },
           "unaffected": {
             "default": [],
@@ -942,7 +989,8 @@
               "enum": [
                 "inspiration",
                 "legendary_resistance",
-                "uncanny_dodge"
+                "uncanny_dodge",
+                "zone_force"
               ]
             },
             "question": {
@@ -1279,6 +1327,29 @@
                 "x",
                 "y"
               ]
+            },
+            "path": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              }
             }
           },
           "required": [
@@ -1958,6 +2029,9 @@
                 "x",
                 "y"
               ]
+            },
+            "onto": {
+              "type": "string"
             }
           },
           "required": [

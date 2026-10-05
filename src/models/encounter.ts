@@ -192,11 +192,13 @@ export const ZoneSchema = z.object({
   by: z.string(),
   area: SpellAreaSchema,
   point: z.object({ x: z.int(), y: z.int() }).nullable().default(null),
-  save: z.object({
-    ability: z.enum(ABILITIES),
-    on_success: z.enum(["half", "none"]),
-    dc: z.int(),
-  }),
+  save: z
+    .object({
+      ability: z.enum(ABILITIES),
+      on_success: z.enum(["half", "none"]),
+      dc: z.int(),
+    })
+    .nullable(),
   damage: z
     .array(z.object({ dice: z.string().nullable(), bonus: z.int(), type: z.string() }))
     .default([]),
@@ -204,8 +206,17 @@ export const ZoneSchema = z.object({
   conditions: z.array(z.string()).default([]),
   escape_dc: z.int().nullable().default(null),
   escape_skill: z.enum(["athletics", "acrobatics"]).nullable().default(null),
-  triggers: z.array(z.enum(["enter", "start_turn", "end_turn"])),
+  /** Conditions that end at the end of the creature's turn (Stinking Cloud's Poisoned). */
+  until: z.enum(["end_of_its_turn"]).nullable().default(null),
+  triggers: z.array(z.enum(["enter", "start_turn", "end_turn", "move"])),
   once_per_turn: z.boolean().default(true),
+  /** The caster decides each time whether to force the save. */
+  optional: z.boolean().default(false),
+  /** An Emanation from `point` (not its caster): its space, in squares. */
+  space: z.int().min(1).default(1),
+  /** `move_zone` onto a creature makes it save. */
+  ram: z.boolean().default(false),
+  on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
   /** Creatures the caster designated: the zone doesn't affect them. */
   unaffected: z.array(z.string()).default([]),
   /** It ends when its caster stops concentrating on `label`. */
@@ -226,7 +237,7 @@ export const PendingSchema = z.object({
   answers: z.array(z.boolean()),
   /** Who decides, and what. */
   combatant: z.string(),
-  kind: z.enum(["inspiration", "legendary_resistance", "uncanny_dodge"]),
+  kind: z.enum(["inspiration", "legendary_resistance", "uncanny_dodge", "zone_force"]),
   question: z.string(),
   /** What `auto` would answer (only when it can turn the failure into a success). */
   recommended: z.boolean().default(true),
@@ -325,14 +336,19 @@ export const EncounterActionSchema = z
     z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
     /**
      * Move `feet`, or to the square `to` (its position: a straight count of squares, diagonals
-     * included, 5 feet each). Leaving an enemy's reach is noted: it can make an Opportunity
-     * Attack (unless the mover Disengaged).
+     * included, 5 feet each), or along `path` (each square next to the one before, ending at the
+     * destination). Zones on the way count: entering one, and damage for moving in it. Leaving
+     * an enemy's reach is noted: it can make an Opportunity Attack (unless the mover Disengaged).
      */
     z.object({
       type: z.literal("move"),
       id: z.string(),
       feet: n.min(0).optional(),
       to: z.object({ x: n, y: n }).optional(),
+      path: z
+        .array(z.object({ x: n, y: n }))
+        .min(1)
+        .optional(),
     }),
     /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
     z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
@@ -526,7 +542,13 @@ export const EncounterActionSchema = z
      * Move a zone's point (Moonbeam's Magic action, Cloudkill drifting): the creatures it moves
      * onto save. The action it takes is the caller's.
      */
-    z.object({ type: z.literal("move_zone"), zone: z.string(), point: z.object({ x: n, y: n }) }),
+    z.object({
+      type: z.literal("move_zone"),
+      zone: z.string(),
+      point: z.object({ x: n, y: n }),
+      /** The creature whose space it's moved into, for a zone that rams (Flaming Sphere). */
+      onto: z.string().optional(),
+    }),
     z.object({ type: z.literal("end_zone"), zone: z.string() }),
     /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
     z.object({

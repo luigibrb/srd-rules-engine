@@ -26078,7 +26078,12 @@
                     ],
                     "once_per_turn": false,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -27386,7 +27391,57 @@
             "components": "V, S, M (a ball of wax)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d6",
+                        "type": "fire",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "emanation",
+                    "size": 5,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "end_turn"
+                    ],
+                    "once_per_turn": false,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "point",
+                    "space": 1,
+                    "ram": true,
+                    "on_fail": []
+                }
+            }
         },
         {
             "id": "gentle-repose",
@@ -27820,7 +27875,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -28137,7 +28197,45 @@
             "components": "V, S, M (seven thorns)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "2d4",
+                        "type": "piercing",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "move"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
+                }
+            }
         },
         {
             "id": "spiritual-weapon",
@@ -28274,7 +28372,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": false,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -28464,7 +28567,58 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [
+                    {
+                        "dice": "3d10",
+                        "type": "slashing",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "slashing"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "emanation",
+                    "size": 10,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": true,
+                    "anchor": "point",
+                    "space": 2,
+                    "ram": false,
+                    "on_fail": []
+                }
+            }
         },
         {
             "id": "counterspell",
@@ -29085,7 +29239,51 @@
             "components": "V, S, M (a miniature umbrella)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "prone",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null
+                    }
+                ],
+                "area": {
+                    "shape": "cylinder",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "start_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": [
+                        "lose_concentration"
+                    ]
+                }
+            }
         },
         {
             "id": "slow",
@@ -29210,7 +29408,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": false,
-                    "designate": true
+                    "designate": true,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -29232,7 +29435,50 @@
             "components": "V, S, M (a rotten egg)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "poisoned",
+                        "on": "failed_save",
+                        "until": "end_of_its_turn",
+                        "escape": null
+                    }
+                ],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "start_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": [
+                        "no_actions"
+                    ]
+                }
+            }
         },
         {
             "id": "tiny-hut",
@@ -29498,7 +29744,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -29708,7 +29959,58 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "5d8",
+                        "type": "force",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "force"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "emanation",
+                    "size": 10,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false,
+                    "optional": true,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
+                }
+            }
         },
         {
             "id": "control-water",
@@ -30396,7 +30698,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -30822,7 +31129,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },
@@ -32705,7 +33017,12 @@
                     ],
                     "once_per_turn": true,
                     "on_cast": true,
-                    "designate": false
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": []
                 }
             }
         },

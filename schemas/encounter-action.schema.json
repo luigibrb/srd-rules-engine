@@ -318,6 +318,29 @@
                 "x",
                 "y"
               ]
+            },
+            "path": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              }
             }
           },
           "required": [
@@ -997,6 +1020,9 @@
                 "x",
                 "y"
               ]
+            },
+            "onto": {
+              "type": "string"
             }
           },
           "required": [

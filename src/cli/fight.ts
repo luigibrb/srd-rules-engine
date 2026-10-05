@@ -45,7 +45,7 @@ Targets are ids, names or numbers from the status table.
          [thrown] [half|3/4|total] (the target's cover)
   cast <spell> [targets…] [near …] [at <level>] [type <damage>] [spare <who…>]
   use <ability> [targets…]   (a monster's save effect)
-  zone <id> save <who…> · zone <id> move <x> <y> · zone <id> end   (a spell's lasting area)
+  zone <id> save <who…> · zone <id> move <x> <y> [onto <who>] · zone <id> end   (lasting areas)
   areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
@@ -367,7 +367,14 @@ export class FightApp {
           if (!Number.isInteger(x) || !Number.isInteger(y)) {
             return this.con.error("Usage: zone <id> move <x> <y>");
           }
-          return this.apply({ type: "move_zone", zone, point: { x: x as number, y: y as number } });
+          const onto = rest[2] === "onto" ? this.find(rest[3] ?? "") : undefined;
+          if (rest[2] === "onto" && !onto) return;
+          return this.apply({
+            type: "move_zone",
+            zone,
+            point: { x: x as number, y: y as number },
+            onto: onto?.id,
+          });
         }
         if (verb === "save") {
           const targets = rest.map((w) => this.find(w));

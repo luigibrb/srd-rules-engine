@@ -28,6 +28,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P16 | Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask` stops the action with the roll shown until `decide`, `auto` uses them only when they can change the outcome; per combatant or per encounter | Resumed by replaying the action with its recorded dice, so nothing is undone; it replaces P15's automatic Bardic Inspiration and the `target_feature` option |
 | P17 | `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters, decisions as y/n questions | Playing fights by hand led to fixes in the engine's notes (each target of a spell, skill names, which character refused a change) and in the CLI's name matching |
 | P18a | Positions on a 5-foot grid (optional): distances, reach, normal and long range, close combat, thrown weapons, spell range, movement to a square with Opportunity Attacks noted, cover given per attack or target | Positions are optional: without them the caller still says what's within 5 feet or in range. Areas of effect are P18b |
+| P21 | More zones: moves followed square by square (zones entered on the way, a creature held stops), damage per 5 feet moved (Spike Growth), saves the caster may force (Conjure Animals, Conjure Woodland Beings) as a decision, Stinking Cloud, Sleet Storm, Flaming Sphere | A move to a square goes straight, diagonals first, unless a `path` is given; forced saves default to enemies only (flagged) |
 | P20 | Spell areas that last (zones): Moonbeam, Spirit Guardians, Cloudkill, Insect Plague, Incendiary Cloud, Black Tentacles, Web, Grease; saves on entering, at the start or end of a turn, when the zone moves; `zone_save`, `move_zone`, `end_zone`; escaping a spell's hold | Entering is judged by where a move ends (flagged); a zone's later rolls get no feature bonuses. Walls, Spike Growth, the Conjure spells and Stinking Cloud stay text |
 | P19 | Spell mechanics the schema couldn't express: flat damage bonuses, darts and rays (Magic Missile, Scorching Ray), a save after an attack (Ice Knife), hit riders (Guiding Bolt), conditions until the caster's next turn; Help, Vex and Sap on spell attack rolls | Guiding Bolt's Advantage is an encounter mark like Vex's, usable by anyone. Darts share one damage roll (flagged). Five spells gained mechanics: Magic Missile, Scorching Ray, Ice Knife, Disintegrate, Finger of Death |
 | P18b | Areas of effect on the grid: spells' and monster effects' Spheres, Cylinders, Cubes, Cones, Lines and Emanations choose their targets from a point or a direction; monster save effects' areas and ranges read from their text | How shapes cover squares is an engine reading (flagged): a square is in when its center is inside |
@@ -65,11 +66,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM.
 - **A map (L).** Walls, Difficult Terrain and obstacles on the grid: paths and their cost, line
   of sight, cover worked out instead of given.
-- **Zones, what's left (M).** Walls (Blade Barrier, Wall of Fire: a wall's shape and side),
-  damage per 5 feet moved (Spike Growth), optional saves the caster forces (Conjure Animals,
-  Conjure Woodland Beings), Stinking Cloud's lost action, Sleet Storm's lost Concentration,
-  Flaming Sphere; the path of a move (entering a zone on the way); monster traits that work like
-  zones.
+- **Walls (M).** Blade Barrier, Wall of Fire, Wall of Ice, Wall of Thorns: a wall placed from
+  point to point or as a ring, its damaging side, cover and blocked paths.
+- **Monster traits that work like zones (M).** Auras and areas in stat blocks.
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
   some of them.
@@ -82,7 +81,7 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Content coverage
 
-- **Spells left as text (L, ongoing).** 69 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 63 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
   first.

@@ -68,7 +68,7 @@ import {
   type SaveResult,
 } from "../rules/combatant";
 import { rollDamage, takeDamage } from "../rules/damage";
-import { roll } from "../rules/dice";
+import { parseDiceExpression, roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
@@ -428,58 +428,109 @@ function run(
       else if (--ends.count <= 0) endZone(zone, "its duration is over");
     }
   };
-  /** The squares' origin of a zone: its point, or its caster's space for an Emanation. */
+  /**
+   * The squares' origin of a zone: its point, or for an Emanation its caster's space, or the
+   * space at its point (`space` squares wide).
+   */
   const zoneOrigin = (z: Zone): GridSpace | null => {
-    if (z.area.shape !== "emanation") return z.point ? { position: z.point, size: 1 } : null;
-    const by = e.combatants.find((x) => x.id === z.by);
-    return by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
+    if (z.area.shape === "emanation" && !z.point) {
+      const by = e.combatants.find((x) => x.id === z.by);
+      return by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
+    }
+    return z.point ? { position: z.point, size: z.space } : null;
   };
-  /** The positioned creatures in a zone (an Emanation doesn't include its caster). */
-  const inZone = (z: Zone): string[] => {
+  /** The zone's squares, or `null` when positions don't place it. */
+  const zoneSquares = (z: Zone): Set<string> | null => {
     const origin = zoneOrigin(z);
-    if (!origin) return [];
-    const squares = areaSquares(z.area, origin, { point: z.point ?? undefined });
-    return e.combatants
-      .filter((x) => !outOfFight(ctx, x) && x.position)
-      .filter((x) => !(z.area.shape === "emanation" && x.id === z.by))
-      .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
-      .map((x) => x.id);
+    return origin ? areaSquares(z.area, origin, { point: z.point ?? undefined }) : null;
+  };
+  /** Whether `x`, at its position now, is in the zone (an Emanation doesn't include its caster). */
+  const inZoneNow = (z: Zone, squares: ReadonlySet<string> | null, x: EncounterCombatant) =>
+    !!squares &&
+    !!x.position &&
+    !outOfFight(ctx, x) &&
+    !(z.area.shape === "emanation" && !z.point && x.id === z.by) &&
+    inArea(squares, { position: x.position, size: spaceOf(ctx, x) });
+  /** The positioned creatures in a zone. */
+  const inZone = (z: Zone): string[] => {
+    const squares = zoneSquares(z);
+    return e.combatants.filter((x) => inZoneNow(z, squares, x)).map((x) => x.id);
   };
   /**
    * Creatures save against a zone (`why`: "ends its turn in it"), each once per turn when the
-   * spell says so; the damage is rolled once for all of them.
+   * spell says so; the damage is rolled once for all of them. When the save is the caster's to
+   * force (Conjure Animals), the caster decides for each creature.
    */
   const zoneSave = (z: Zone, ids: readonly string[], why: string): void => {
-    const who = ids
-      .map(find)
-      .filter(
-        (t) =>
-          !z.unaffected.includes(t.id) &&
-          !outOfFight(ctx, t) &&
-          !(z.once_per_turn && z.saved.includes(t.id)),
-      );
+    const save = z.save;
+    if (!save) return;
+    const caster = e.combatants.find((x) => x.id === z.by);
+    const who = ids.map(find).filter((t) => {
+      if (z.unaffected.includes(t.id) || outOfFight(ctx, t)) return false;
+      if (z.once_per_turn && z.saved.includes(t.id)) return false;
+      if (!z.optional || !caster) return true;
+      if (t.id === caster.id) return false; // the caster doesn't force itself
+      const ability = ABILITY_NAMES[save.ability];
+      const question = `${caster.name}: force ${t.name} (${why}) to make a ${ability} saving throw against ${z.label}?`;
+      const view = encounterCombatant(e, caster.id, ctx);
+      return decide({
+        kind: "zone_force",
+        combatant: view,
+        question,
+        recommended: !alliesOf(e, t.id, caster),
+      });
+    });
     if (!who.length) return;
     const views = who.map((t) => encounterCombatant(e, t.id, ctx));
-    const effect = { ...z.save, conditions: z.conditions };
-    const r = saveAgainst(effect, z.damage, views, { rng, decide });
+    const r = saveAgainst({ ...save, conditions: z.conditions }, z.damage, views, { rng, decide });
     const names = who.map((t) => t.name).join(", ");
-    notes.push(`${z.label}: ${names} ${why} (${ABILITY_NAMES[z.save.ability]} DC ${z.save.dc}).`);
+    notes.push(`${z.label}: ${names} ${why} (${ABILITY_NAMES[save.ability]} DC ${save.dc}).`);
     for (const hit of r.targets) {
       const t = who[hit.target] as EncounterCombatant;
       z.saved.push(t.id);
       spendLegendaryResistance(t, hit.save);
       notes.push(targetNote(t.name, hit));
       applyTo(t, hit.actions);
-      if (z.concentration && hit.conditions.length) {
+      if (hit.save?.success) continue;
+      if (hit.conditions.length && (z.concentration || z.until)) {
         addEffects(t, hit.conditions, {
           source: z.by,
           label: z.label,
-          concentration: true,
-          ends: null,
+          // "until the end of the current turn" (Stinking Cloud), else while the spell lasts.
+          concentration: z.until ? false : z.concentration,
+          ends: z.until ? { at: "end", of: t.id, count: 1, skip_current: false } : null,
           escape_dc: z.escape_dc,
           escape_skill: z.escape_skill,
         });
       }
+      if (z.on_fail.includes("no_actions") && current()?.id === t.id) {
+        t.used.action = true;
+        t.used.bonus_action = true;
+        notes.push(`${t.name} can't take an action or a Bonus Action this turn.`);
+      }
+      const spell = z.on_fail.includes("lose_concentration") ? concentrationOf(t) : null;
+      if (spell) {
+        notes.push(`${t.name} loses Concentration on ${spell} (${z.label}).`);
+        if (t.monster !== null) t.concentration = null;
+        else play(t, { type: "set_concentration", spell: null });
+      }
+    }
+  };
+  /** Damage for every 5 feet moved into or within zones that deal it (Spike Growth). */
+  const zoneMoveDamage = (c: EncounterCombatant, steps: Map<string, number>): void => {
+    for (const z of [...e.zones]) {
+      const n = steps.get(z.id) ?? 0;
+      if (!n || z.unaffected.includes(c.id) || outOfFight(ctx, c)) continue;
+      const parts = z.damage.map((d) => {
+        if (!d.dice) return { ...d, bonus: d.bonus * n };
+        const { count, sides } = parseDiceExpression(d.dice);
+        return { ...d, dice: `${count * n}d${sides}`, bonus: d.bonus * n };
+      });
+      const rolled = rollDamage(parts, { rng });
+      const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
+      const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+      notes.push(`${z.label}: ${c.name} moves ${n * 5} feet in it: ${dealt}.`);
+      applyTo(c, [{ type: "damage", instances }]);
     }
   };
   /** Who is in each zone now, to find who enters one after a move. */
@@ -758,6 +809,14 @@ function run(
     const ids = areaTargets(c, area, placement, feet ? Number(feet) : null, spell.name);
     notes.push(areaNote(spell.name, area, ids));
     return ids;
+  };
+  /** A zone's point out of a positioned caster's spell range is refused. */
+  const checkZonePoint = (c: EncounterCombatant, spell: SpellDef, point?: GridPoint) => {
+    const reach = /^(\d+) feet$/.exec(spell.range)?.[1];
+    if (!point || !c.position || !reach) return;
+    const d = gridDistance(point, 1, c.position, spaceOf(ctx, c));
+    if (d > Number(reach))
+      fail(`That point is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
   };
   /** A target out of a positioned caster's spell range is refused ("60 feet", "Touch"). */
   const checkSpellRange = (
@@ -1154,39 +1213,49 @@ function run(
         });
       }
     }
-    if (zone && spell.mechanics?.save && spell.mechanics.area) {
+    if (zone && spell.mechanics?.area) {
       const m = spell.mechanics;
       const id = `zone-${e.next_effect++}`;
+      const followsCaster = m.area?.shape === "emanation" && zone.anchor === "caster";
+      const until = m.conditions.find((x) => x.until === "end_of_its_turn")
+        ? "end_of_its_turn"
+        : null;
       e.zones.push({
         id,
         spell: spell.id,
         label: spell.name,
         by: c.id,
         area: m.area as SpellArea,
-        point: m.area?.shape === "emanation" ? null : (options.point ?? null),
-        save: { ...(m.save as NonNullable<typeof m.save>), dc: r.save_dc ?? 0 },
+        point: followsCaster ? null : (options.point ?? null),
+        save: m.save ? { ...m.save, dc: r.save_dc ?? 0 } : null,
         damage: [...r.damage_parts],
         conditions: m.conditions.filter((x) => x.on === "failed_save").map((x) => x.condition),
         escape_dc: escapeDc,
         escape_skill: hold,
+        until,
         triggers: [...zone.triggers],
         once_per_turn: zone.once_per_turn,
+        optional: zone.optional,
+        space: zone.space,
+        ram: zone.ram,
+        on_fail: [...zone.on_fail],
         unaffected: [...(options.unaffected ?? [])].map((x) => find(x).id),
         concentration: spell.concentration,
         ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
         // The save on casting counts as this turn's.
         saved: r.targets.map((x) => (targets[x.target] as EncounterCombatant).id),
       });
-      const when = zone.triggers
-        .map((t) =>
-          t === "enter"
-            ? "enter it"
-            : t === "start_turn"
-              ? "start their turn there"
-              : "end their turn there",
-        )
-        .join(" or ");
-      notes.push(`${spell.name} lasts (${id}): creatures save when they ${when}.`);
+      const WHEN = {
+        enter: "enter it",
+        start_turn: "start their turn there",
+        end_turn: "end their turn there",
+      } as const;
+      const when = zone.triggers.flatMap((t) => (t === "move" ? [] : [WHEN[t]])).join(" or ");
+      const lasts = `${spell.name} lasts (${id})`;
+      if (when) notes.push(`${lasts}: creatures save when they ${when}.`);
+      if (zone.triggers.includes("move")) {
+        notes.push(`${lasts}: creatures take its damage for every 5 feet they move in it.`);
+      }
     }
     return r;
 
@@ -1484,32 +1553,59 @@ function run(
       onTurn(c, "move");
       if (c.defeated) fail(`${c.name} is defeated`);
       const from = c.position;
-      if (action.to && !from) fail(`${c.name} has no position: place it first`);
+      if ((action.to || action.path) && !from) fail(`${c.name} has no position: place it first`);
+      if (action.to && action.path) fail("Give a square to move to or a path, not both");
+      const path = !from
+        ? null
+        : action.path
+          ? checkedPath(from, action.path)
+          : action.to
+            ? straightPath(from, action.to)
+            : null;
       const feet =
         action.feet ??
-        (action.to && from
-          ? Math.max(Math.abs(action.to.x - from.x), Math.abs(action.to.y - from.y)) * 5
-          : fail("Give the feet moved or a square to move to"));
+        (path ? path.length * 5 : fail("Give the feet moved or a square to move to"));
       const budget = speedOf(ctx, c, e) + c.extra_movement;
       if (c.moved + feet > budget) {
         fail(`${c.name} can move ${Math.max(0, budget - c.moved)} more feet this turn`);
       }
-      c.moved += feet;
-      if (action.to) {
-        // Enemies whose reach it leaves can make an Opportunity Attack (not after Disengage).
-        const before = e.combatants.map((x) => [x, feetBetween(c, x)] as const);
-        const zonesBefore = zoneOccupants();
-        occupy(c, action.to);
-        zoneEntries(zonesBefore);
-        for (const [x, was] of before) {
-          if (x.id === c.id || x.defeated || alliesOf(e, x.id, c) || was === null) continue;
-          const reach = meleeReach(ctx, e, x);
-          const now = feetBetween(c, x) as number;
-          if (reach !== null && was <= reach && now > reach && !c.disengaged && !x.used.reaction) {
-            notes.push(
-              `${c.name} leaves ${x.name}'s reach: ${x.name} can make an Opportunity Attack.`,
-            );
+      if (!path) {
+        c.moved += feet;
+        break;
+      }
+      // Square by square: zones entered on the way, and damage for moving in some (Spike Growth).
+      const before = e.combatants.map((x) => [x, feetBetween(c, x)] as const);
+      let zonesBefore = zoneOccupants();
+      const steps = new Map<string, number>();
+      let walked = 0;
+      for (const [i, square] of path.entries()) {
+        if (i === path.length - 1) occupy(c, square);
+        else c.position = { ...square };
+        walked += 5;
+        for (const z of e.zones) {
+          if (z.triggers.includes("move") && inZoneNow(z, zoneSquares(z), c)) {
+            steps.set(z.id, (steps.get(z.id) ?? 0) + 1);
           }
+        }
+        zoneEntries(zonesBefore);
+        zonesBefore = zoneOccupants();
+        // Held on the way (Web) or out of the fight: it stops there.
+        if (i < path.length - 1 && (outOfFight(ctx, c) || speedOf(ctx, c, e) === 0)) {
+          notes.push(`${c.name} stops at ${square.x},${square.y}.`);
+          break;
+        }
+      }
+      c.moved += walked;
+      zoneMoveDamage(c, steps);
+      // Enemies whose reach it left can make an Opportunity Attack (not after Disengage).
+      for (const [x, was] of before) {
+        if (x.id === c.id || x.defeated || alliesOf(e, x.id, c) || was === null) continue;
+        const reach = meleeReach(ctx, e, x);
+        const now = feetBetween(c, x) as number;
+        if (reach !== null && was <= reach && now > reach && !c.disengaged && !x.used.reaction) {
+          notes.push(
+            `${c.name} leaves ${x.name}'s reach: ${x.name} can make an Opportunity Attack.`,
+          );
         }
       }
       break;
@@ -1714,10 +1810,12 @@ function run(
     case "move_zone": {
       const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
       if (!z.point) fail(`${z.label} moves with its caster`);
+      if (action.onto && !z.ram) fail(`${z.label} doesn't make a creature save by moving into it`);
       const before = zoneOccupants();
       z.point = { ...action.point };
       notes.push(`${z.label} moves to ${action.point.x},${action.point.y}.`);
       zoneEntries(before);
+      if (action.onto) zoneSave(z, [action.onto], "is in its way");
       break;
     }
     case "end_zone": {
@@ -2057,9 +2155,10 @@ function run(
         fail("Action Surge's additional action can't be the Magic action (casting a spell)");
       }
       if (action.area && action.targets?.length) fail("Give targets or an area, not both");
-      let area = action.area ? spellArea(c, spell, action.area) : null;
       // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
-      if (area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast) area = [];
+      const placeOnly = action.area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast;
+      if (placeOnly) checkZonePoint(c, spell, action.area?.point);
+      const area = placeOnly ? [] : action.area ? spellArea(c, spell, action.area) : null;
       result = castBy(c, spell, area ?? action.targets ?? [], {
         slot_level,
         pact: action.pact,
@@ -2324,6 +2423,30 @@ function saveText(save: SaveResult): string {
   if (save.automatic_failure) return `fails automatically: ${save.automatic_failure}`;
   const mode = save.roll.mode === "normal" ? "" : `, ${save.roll.mode}`;
   return `${save.total} vs DC ${save.dc}${mode}`;
+}
+
+/** The squares of a straight move, one step (diagonal first) at a time, `to` included. */
+function straightPath(from: GridPoint, to: GridPoint): GridPoint[] {
+  const path: GridPoint[] = [];
+  let { x, y } = from;
+  while (x !== to.x || y !== to.y) {
+    x += Math.sign(to.x - x);
+    y += Math.sign(to.y - y);
+    path.push({ x, y });
+  }
+  return path;
+}
+
+/** A given path: each square next to the one before it (diagonals included). */
+function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPoint[] {
+  let at = from;
+  for (const square of path) {
+    if (Math.max(Math.abs(square.x - at.x), Math.abs(square.y - at.y)) !== 1) {
+      fail(`The path jumps from ${at.x},${at.y} to ${square.x},${square.y}: give every square`);
+    }
+    at = square;
+  }
+  return path.map((p) => ({ ...p }));
 }
 
 /** The action economy a spell's casting time uses. */
