@@ -670,43 +670,8 @@ function run(
     c.position = { ...to };
   };
   /** Another creature whose space overlaps `c`'s at `to`. */
-  const spaceTaken = (c: EncounterCombatant, to: GridPoint): EncounterCombatant | undefined => {
-    const size = spaceOf(ctx, c);
-    return e.combatants.find(
-      (x) =>
-        x.id !== c.id &&
-        !x.defeated &&
-        x.position &&
-        gridDistance(to, size, x.position, spaceOf(ctx, x)) === 0,
-    );
-  };
-  /** The grid as `c` moves on it: walls, blocked and difficult squares, other creatures. */
-  const terrainFor = (c: EncounterCombatant): Terrain => {
-    const difficult = new Set(e.map.difficult.map(squareKey));
-    for (const z of e.zones) {
-      if (z.difficult) for (const sq of zoneSquares(z) ?? []) difficult.add(sq);
-    }
-    const creatures = new Map<string, Occupant>();
-    for (const x of e.combatants) {
-      if (x.id === c.id || !x.position || x.defeated || outOfFight(ctx, x)) continue;
-      const what = occupantFor(ctx, e, c, x);
-      const size = spaceOf(ctx, x);
-      for (let dx = 0; dx < size; dx++) {
-        for (let dy = 0; dy < size; dy++) {
-          const k = `${x.position.x + dx},${x.position.y + dy}`;
-          // Overlapping creatures: the strictest says.
-          if (creatures.get(k) !== "block")
-            creatures.set(k, what === "pass" ? (creatures.get(k) ?? what) : what);
-        }
-      }
-    }
-    return {
-      walls: e.map.walls,
-      blocked: new Set(e.map.blocked.map(squareKey)),
-      difficult,
-      creatures,
-    };
-  };
+  const spaceTaken = (c: EncounterCombatant, to: GridPoint): EncounterCombatant | undefined =>
+    spaceTakenBy(e, ctx, c, to);
   const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null =>
     feetApart(ctx, a, b);
   const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] => enemiesWithin5(e, ctx, c);
@@ -777,46 +742,13 @@ function run(
     range: number | null,
     label: string,
   ): string[] => {
-    if (!c.position) fail(`${c.name} has no position: an area needs positions`);
-    const origin = { position: c.position, size: spaceOf(ctx, c) };
-    const point = placement.point;
-    if ((area.shape === "sphere" || area.shape === "cylinder") && point && range !== null) {
-      const d = distanceToPoint(origin, point);
-      if (d > range) fail(`That point is ${d} feet away: out of ${label}'s range (${range} ft)`);
-    }
-    if (area.shape === "cube" && point) {
-      const d = gridDistance(point, area.size / 5, origin.position, origin.size);
-      if (range === null && d !== 5) fail(`${label}'s Cube must start next to ${c.name}`);
-      if (range !== null && d > range) fail(`That Cube is ${d} feet away: out of ${label}'s range`);
-    }
-    let squares: Set<string>;
-    try {
-      squares = areaSquares(area, origin, placement);
-    } catch (error) {
-      if (error instanceof RangeError) fail(`${label}: ${error.message}`);
-      throw error;
-    }
-    // Squares with no clear line from the point of origin aren't in it (SRD "Area of Effect").
-    const from = areaOriginPoint(area, origin, placement);
-    squares = inLineOfEffect(e, squares, from);
-    // A Sphere or Cylinder can include its creator; the other shapes start outside it.
-    const includesOrigin = area.shape === "sphere" || area.shape === "cylinder";
-    const ids = e.combatants
-      .filter((x) => !outOfFight(ctx, x) && x.position && (includesOrigin || x.id !== c.id))
-      .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
-      .map((x) => x.id);
-    // Cover from the point of origin: Dexterity saves; Total Cover keeps a creature out.
+    const placed = placeArea(e, ctx, c, area, placement, range, label);
     areaCover.clear();
-    return ids.filter((id) => {
-      const x = find(id);
-      const cover = mapCover(e, ctx, [from], x, [c.id]);
-      if (cover.degree === "total") {
-        notes.push(`${x.name} has Total Cover from ${label}'s point of origin.`);
-        return false;
-      }
-      areaCover.set(id, cover);
-      return true;
-    });
+    for (const id of placed.total) {
+      notes.push(`${find(id).name} has Total Cover from ${label}'s point of origin.`);
+    }
+    for (const [id, cover] of placed.cover) areaCover.set(id, cover);
+    return placed.ids;
   };
   /** Cover worked out for the creatures of the last area placed, by id. */
   const areaCover = new Map<string, MapCover>();
@@ -1645,51 +1577,9 @@ function run(
       if (action.to && action.path) fail("Give a square to move to or a path, not both");
       const budget = speedOf(ctx, c, e) + c.extra_movement;
       const left = Math.max(0, budget - c.moved);
-      const size = spaceOf(ctx, c);
-      const terrain = from && (action.to || action.path) ? terrainFor(c) : null;
-      /** Each step's cost, or why it can't be taken. */
-      const costs = (start: GridPoint, squares: readonly GridPoint[]): number[] => {
-        const t = terrain as Terrain;
-        let at = start;
-        return squares.map((square) => {
-          const why = stepBlocked(t, at, square, size);
-          if (why) fail(`${c.name} can't move to ${square.x},${square.y}: ${why}`);
-          const cost = stepCost(t, at, square, size);
-          at = square;
-          return cost;
-        });
-      };
-      let path: GridPoint[] | null = null;
-      let steps: number[] = [];
-      if (from && action.path) {
-        path = checkedPath(from, action.path);
-        steps = costs(from, path);
-      } else if (from && action.to) {
-        const to = action.to;
-        const taken = spaceTaken(c, to);
-        if (taken) fail(`${taken.name} is in that space`);
-        const straight = straightPath(from, to);
-        let at = from;
-        const clear = straight.every((square) => {
-          const ok = !stepBlocked(terrain as Terrain, at, square, size);
-          at = square;
-          return ok;
-        });
-        if (clear) {
-          path = straight;
-          steps = costs(from, path);
-        } else {
-          // Around the obstacle: the cheapest path (looking a little past the movement left, to
-          // say how far it is).
-          const found = findPath(terrain as Terrain, from, to, { size, maxCost: left + 300 });
-          if (!found) fail(`${c.name} can't reach ${to.x},${to.y}: something blocks every path`);
-          if (found.cost > left) {
-            fail(`${c.name} can't reach ${to.x},${to.y} (needs ${found.cost} ft, ${left} left)`);
-          }
-          path = found.path;
-          steps = costs(from, path);
-        }
-      }
+      const planned = from && (action.to || action.path) ? planMove(e, ctx, c, action) : null;
+      const path = planned?.path ?? null;
+      const steps = planned?.steps ?? [];
       const feet =
         action.feet ??
         (path
@@ -2742,6 +2632,164 @@ function occupantFor(
 }
 
 export { gridDistance };
+
+/** Another creature whose space overlaps `c`'s if it stood at `to`. */
+export function spaceTakenBy(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  to: GridPoint,
+): EncounterCombatant | undefined {
+  const size = spaceOf(ctx, c);
+  return e.combatants.find(
+    (x) =>
+      x.id !== c.id &&
+      !x.defeated &&
+      x.position &&
+      gridDistance(to, size, x.position, spaceOf(ctx, x)) === 0,
+  );
+}
+
+/** The grid as `c` moves on it: walls, blocked and difficult squares, other creatures. */
+export function terrainOf(e: Encounter, ctx: EncounterContext, c: EncounterCombatant): Terrain {
+  const difficult = new Set(e.map.difficult.map(squareKey));
+  for (const z of e.zones) {
+    if (z.difficult) for (const sq of zoneArea(e, ctx, z) ?? []) difficult.add(sq);
+  }
+  const creatures = new Map<string, Occupant>();
+  for (const x of e.combatants) {
+    if (x.id === c.id || !x.position || x.defeated || outOfFight(ctx, x)) continue;
+    const what = occupantFor(ctx, e, c, x);
+    const size = spaceOf(ctx, x);
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        const k = `${x.position.x + dx},${x.position.y + dy}`;
+        // Overlapping creatures: the strictest says.
+        if (creatures.get(k) !== "block")
+          creatures.set(k, what === "pass" ? (creatures.get(k) ?? what) : what);
+      }
+    }
+  }
+  return {
+    walls: e.map.walls,
+    blocked: new Set(e.map.blocked.map(squareKey)),
+    difficult,
+    creatures,
+  };
+}
+
+/**
+ * The squares a positioned `c` moves through for a `move` with `to` or `path`, and each step's
+ * cost; `EncounterError` when a step can't be taken or `to` can't be reached with the movement
+ * left. `to` goes straight when nothing blocks it, else along the cheapest path.
+ */
+export function planMove(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  move: { to?: GridPoint; path?: readonly GridPoint[] },
+): { path: GridPoint[]; steps: number[] } {
+  const from = c.position ?? fail(`${c.name} has no position: place it first`);
+  if (move.to && move.path) fail("Give a square to move to or a path, not both");
+  const left = Math.max(0, speedOf(ctx, c, e) + c.extra_movement - c.moved);
+  const size = spaceOf(ctx, c);
+  const terrain = terrainOf(e, ctx, c);
+  const costs = (squares: readonly GridPoint[]): number[] => {
+    let at = from;
+    return squares.map((square) => {
+      const why = stepBlocked(terrain, at, square, size);
+      if (why) fail(`${c.name} can't move to ${square.x},${square.y}: ${why}`);
+      const cost = stepCost(terrain, at, square, size);
+      at = square;
+      return cost;
+    });
+  };
+  if (move.path) {
+    const path = checkedPath(from, move.path);
+    return { path, steps: costs(path) };
+  }
+  const to = move.to ?? fail("Give a square to move to or a path");
+  const taken = spaceTakenBy(e, ctx, c, to);
+  if (taken) fail(`${taken.name} is in that space`);
+  const straight = straightPath(from, to);
+  let at = from;
+  const clear = straight.every((square) => {
+    const ok = !stepBlocked(terrain, at, square, size);
+    at = square;
+    return ok;
+  });
+  if (clear) return { path: straight, steps: costs(straight) };
+  // Around the obstacle: the cheapest path (looking a little past the movement left, to say how
+  // far it is).
+  const found = findPath(terrain, from, to, { size, maxCost: left + 300 });
+  if (!found) fail(`${c.name} can't reach ${to.x},${to.y}: something blocks every path`);
+  if (found.cost > left) {
+    fail(`${c.name} can't reach ${to.x},${to.y} (needs ${found.cost} ft, ${left} left)`);
+  }
+  return { path: found.path, steps: costs(found.path) };
+}
+
+/**
+ * An area placed by `c` (rules/areas.ts), after checking that its point is within `range` feet
+ * (a Cube "originating from" `c`, with no range, must touch its space): its squares (with a clear
+ * line from its point of origin), the positioned creatures in it with their cover from that
+ * point, and those it misses for Total Cover.
+ */
+export function placeArea(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  area: SpellArea,
+  placement: AreaPlacement,
+  range: number | null,
+  label: string,
+): {
+  squares: Set<string>;
+  ids: string[];
+  cover: Map<string, MapCover>;
+  total: string[];
+} {
+  if (!c.position) fail(`${c.name} has no position: an area needs positions`);
+  const origin = { position: c.position, size: spaceOf(ctx, c) };
+  const point = placement.point;
+  if ((area.shape === "sphere" || area.shape === "cylinder") && point && range !== null) {
+    const d = distanceToPoint(origin, point);
+    if (d > range) fail(`That point is ${d} feet away: out of ${label}'s range (${range} ft)`);
+  }
+  if (area.shape === "cube" && point) {
+    const d = gridDistance(point, area.size / 5, origin.position, origin.size);
+    if (range === null && d !== 5) fail(`${label}'s Cube must start next to ${c.name}`);
+    if (range !== null && d > range) fail(`That Cube is ${d} feet away: out of ${label}'s range`);
+  }
+  let squares: Set<string>;
+  try {
+    squares = areaSquares(area, origin, placement);
+  } catch (error) {
+    if (error instanceof RangeError) fail(`${label}: ${error.message}`);
+    throw error;
+  }
+  // Squares with no clear line from the point of origin aren't in it (SRD "Area of Effect").
+  const from = areaOriginPoint(area, origin, placement);
+  squares = inLineOfEffect(e, squares, from);
+  // A Sphere or Cylinder can include its creator; the other shapes start outside it.
+  const includesOrigin = area.shape === "sphere" || area.shape === "cylinder";
+  const inside = e.combatants
+    .filter((x) => !outOfFight(ctx, x) && x.position && (includesOrigin || x.id !== c.id))
+    .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }));
+  // Cover from the point of origin: Dexterity saves; Total Cover keeps a creature out.
+  const cover = new Map<string, MapCover>();
+  const ids: string[] = [];
+  const total: string[] = [];
+  for (const x of inside) {
+    const found = mapCover(e, ctx, [from], x, [c.id]);
+    if (found.degree === "total") total.push(x.id);
+    else {
+      ids.push(x.id);
+      cover.set(x.id, found);
+    }
+  }
+  return { squares, ids, cover, total };
+}
 
 /**
  * A zone's squares (`"x,y"`), or `null` when positions don't place it. Its origin is its point,

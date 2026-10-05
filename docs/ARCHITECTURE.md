@@ -620,6 +620,21 @@ engine's "out of reach"), or "No creature within N ft". The result has a Zod sch
 (`CombatantOptionsSchema`, `schemas/options.schema.json`); `POST /v1/encounters/options` and
 `/v1/encounters/check` serve both functions.
 
+### Previews
+
+`src/services/previews.ts` answers a map UI's questions without applying anything, with the
+encounter's own planning so the answers match what happens: `reachableSquares` floods the grid
+from the combatant's space as `move` sees it (`rules/grid.ts` `reachable`: walls, blocked and
+Difficult squares, creatures it can pass through but not end in) up to its movement left;
+`previewMove` plans the move like `move` does (`planMove`), judges it with `checkAction`, and
+walks the path to list the zones each creature would get into (an Emanation moving with its
+caster included), the feet moved in zones that deal damage for moving, and the enemies whose
+reach it would leave; `previewArea` places a spell's, a save effect's or a legendary action's
+area like `cast` does (`placeArea`): its squares with a clear line from the point of origin, the
+creatures in it with their cover, and those Total Cover keeps out. Saves aren't rolled, so a
+preview can't say whether a zone would stop a creature on the way. The results have Zod schemas
+(`schemas/reachable.schema.json`, `move-preview.schema.json`, `area-preview.schema.json`).
+
 ## Interpretations (flagged, not invented)
 
 Where the SRD is silent or ambiguous, the engine picks a reading and lists it here.

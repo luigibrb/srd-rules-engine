@@ -304,6 +304,12 @@ checkAction(encounter, { type: "dodge", id: "goblin-warrior" }, ctx);
 // { ok: false, reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"] }
 ```
 
+Previews for a map, before anything is sent: `reachableSquares(encounter, id, ctx)` (every
+square a combatant can end a move on, with its cost), `previewMove(encounter, { id, to }, ctx)`
+(the path, its cost, the zones on the way and the Opportunity Attacks it would provoke) and
+`previewArea(encounter, { id, spell, area: { point } }, ctx)` (the squares an area would cover
+and the creatures in it, with their cover).
+
 ## Command line
 
 ```bash
@@ -393,6 +399,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
 | `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, pending, applied }`: Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
 | `POST /v1/encounters/options` | `{ encounter, characters, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
+| `POST /v1/encounters/reachable` · `/preview-move` · `/preview-area` | `{ encounter, characters, id }` (+ `to` or `path`; + `area` and `spell`, `ability` or `legendary`) → where it can move, what a move or an area would do (schemas in `schemas/`) |
 | `POST /v1/encounters/check` | `{ encounter, characters, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |
 | `POST /v1/combat/roll` | Roll a dice expression (`{"expression": "2d6+3"}`) |
 

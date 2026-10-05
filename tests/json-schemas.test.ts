@@ -11,6 +11,9 @@ import {
   createState,
   type Encounter,
   type EncounterAction,
+  previewArea,
+  previewMove,
+  reachableSquares,
   scriptedRng,
   TABLE_NAMES,
 } from "../src/index";
@@ -144,5 +147,28 @@ describe("options.schema.json", () => {
       expect(errors("options.schema.json", options)).toEqual([]);
     }
     expect(errors("options.schema.json", { id: "x" }).length).toBeGreaterThan(0);
+    encounter = applyEncounterAction(
+      encounter,
+      { type: "place", id: "brakka", x: 0, y: 0 },
+      { catalog, characters },
+    ).encounter;
+    const ctx = { catalog, characters };
+    expect(errors("reachable.schema.json", reachableSquares(encounter, "brakka", ctx))).toEqual([]);
+    expect(
+      errors(
+        "move-preview.schema.json",
+        previewMove(encounter, { id: "brakka", to: { x: 2, y: 1 } }, ctx),
+      ),
+    ).toEqual([]);
+    expect(
+      errors(
+        "area-preview.schema.json",
+        previewArea(
+          encounter,
+          { id: "brakka", spell: "fireball", area: { point: { x: 3, y: 3 } } },
+          ctx,
+        ),
+      ),
+    ).toEqual([]);
   });
 });
