@@ -16,8 +16,9 @@ import type {
   TargetSpec,
 } from "../models/options";
 import { monsterSpells } from "../rules/combatant";
-import { formatDamage } from "../rules/damage";
+import { type DamagePart, formatDamage } from "../rules/damage";
 import { spaceCorners } from "../rules/grid";
+import { attackOdds, averageDamage, failOdds } from "../rules/odds";
 import type { Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import {
@@ -29,6 +30,7 @@ import {
   currentCombatant,
   type EncounterContext,
   EncounterError,
+  type EncounterResult,
   encounterCombatant,
   feetApart,
   mapCover,
@@ -55,12 +57,24 @@ export function checkAction(
   action: EncounterAction,
   ctx: EncounterContext,
 ): ActionCheck {
+  return dryRun(encounter, action, ctx).check;
+}
+
+/** `checkAction`, and the result the dry run got (for the odds). */
+function dryRun(
+  encounter: Encounter,
+  action: EncounterAction,
+  ctx: EncounterContext,
+): { check: ActionCheck; result: EncounterResult["result"] } {
   try {
-    applyEncounterAction(encounter, action, { ...ctx, rng: middle }, { events: false });
-    return { ok: true, reasons: [], codes: [] };
+    const r = applyEncounterAction(encounter, action, { ...ctx, rng: middle }, { events: false });
+    return { check: { ok: true, reasons: [], codes: [] }, result: r.result };
   } catch (error) {
     if (error instanceof EncounterError) {
-      return { ok: false, reasons: [...error.messages], codes: [...error.codes] };
+      return {
+        check: { ok: false, reasons: [...error.messages], codes: [...error.codes] },
+        result: null,
+      };
     }
     throw error;
   }
@@ -99,6 +113,7 @@ export function combatantOptions(
     why: string | null = null,
   ): OptionEntry => {
     let reason = why;
+    let odds: OptionEntry["odds"] = null;
     if (reason === null && check) {
       // No candidate: judge it against the nearest creature (or one behind Total Cover), for the
       // engine's reason ("out of reach", "has Total Cover").
@@ -111,8 +126,9 @@ export function combatantOptions(
           : action;
       if ("target" in probe && probe.target === "") reason = "No creature to target";
       else {
-        const result = checkAction(e, probe, ctx);
-        reason = result.ok ? null : result.reasons.join("; ");
+        const run = dryRun(e, probe, ctx);
+        reason = run.check.ok ? null : run.check.reasons.join("; ");
+        if (run.check.ok && probe === action) odds = oddsOf(e, ctx, c, action, run.result);
       }
     }
     // Allowed, but there's no one in range to aim it at.
@@ -131,6 +147,7 @@ export function combatantOptions(
       slot_levels: [],
       pact_slot: null,
       uses: null,
+      odds: reason === null ? odds : null,
       note: null,
       ...extra,
     };
@@ -614,3 +631,137 @@ function attackLabel(line: AttackLine): string {
 function spellLabel(spell: SpellDef, level: number | null = spell.level): string {
   return `${spell.name} (${spell.level === 0 ? "cantrip" : `level ${level ?? spell.level}`})`;
 }
+
+/** The odds of an allowed option against its target, from what its dry run computed. */
+function oddsOf(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  action: EncounterAction,
+  result: EncounterResult["result"],
+): OptionEntry["odds"] {
+  if (!result) return null;
+  const target =
+    "target" in action && action.target
+      ? action.target
+      : "targets" in action && action.targets?.[0]
+        ? action.targets[0]
+        : null;
+  if (!target || !e.combatants.some((x) => x.id === target)) return null;
+  const me = encounterCombatant(e, c.id, ctx);
+  const them = encounterCombatant(e, target, ctx);
+  const odds = { target, hit: null, critical: null, fail_save: null, average_damage: null };
+  /** Expected damage of an attack roll with these parts. */
+  const onHit = (
+    parts: readonly DamagePart[],
+    chances: { hit: number; critical: number },
+  ): number =>
+    (chances.hit - chances.critical) * averageDamage(parts, { defenses: them.defenses }) +
+    chances.critical * averageDamage(parts, { critical: true, defenses: them.defenses });
+  const onSave = (parts: readonly DamagePart[], fail: number, half: boolean): number => {
+    const full = averageDamage(parts, { defenses: them.defenses });
+    return fail * full + (half ? (1 - fail) * (full / 2) : 0);
+  };
+  if ("target_ac" in result) {
+    // A weapon or monster attack: its total was d20 (10, the dry run's) + bonus.
+    const bonus = result.total - result.roll.d20 - (result.inspiration ?? 0);
+    const line = me.attacks.find((a) => a.name === result.attack);
+    const chances = attackOdds({
+      bonus,
+      ac: result.target_ac,
+      mode: result.roll.mode,
+      critical_on: me.critical_hit_on,
+      auto_critical: result.critical_hit && result.roll.d20 < me.critical_hit_on,
+    });
+    const a = action.type === "attack" ? action : null;
+    const parts = !line
+      ? []
+      : a?.light_extra
+        ? (line.light_extra_damage_parts ?? line.damage_parts)
+        : a?.cleave
+          ? (line.cleave_damage_parts ?? line.damage_parts)
+          : a?.two_handed
+            ? (line.two_handed_damage_parts ?? line.damage_parts)
+            : line.damage_parts;
+    return { ...odds, ...chances, average_damage: round(onHit(parts, chances)) };
+  }
+  if ("automatic_failure" in result) {
+    // A save forced by itself (grapple, shove): no damage.
+    return { ...odds, fail_save: round(saveFail(result)) };
+  }
+  const hit = "targets" in result ? result.targets.find((t) => t.target === 0) : undefined;
+  if (!hit) return null;
+  if ("spell" in result) {
+    const spell = ctx.catalog.spells[result.spell];
+    if (hit.attack && result.attack_bonus !== null) {
+      const ac = them.armor_class + coverBonus(e, ctx, c, target, action);
+      const chances = attackOdds({
+        bonus: result.attack_bonus,
+        ac,
+        mode: hit.attack.roll.mode,
+        critical_on: 20,
+        auto_critical: hit.attack.critical_hit && hit.attack.roll.d20 < 20,
+      });
+      return { ...odds, ...chances, average_damage: round(onHit(result.damage_parts, chances)) };
+    }
+    if (hit.save) {
+      const fail = saveFail(hit.save);
+      const half = spell?.mechanics?.save?.on_success === "half";
+      return {
+        ...odds,
+        fail_save: round(fail),
+        average_damage: round(onSave(result.damage_parts, fail, half)),
+      };
+    }
+    return null;
+  }
+  if (hit.save && "action" in result) {
+    const fail = saveFail(hit.save);
+    const name = result.action;
+    // A legendary action's own save effect isn't in `save_actions`.
+    const line =
+      me.save_actions.find((a) => a.name === name) ??
+      me.legendary_actions.find((a) => a.name === name)?.save;
+    return {
+      ...odds,
+      fail_save: round(fail),
+      average_damage: round(onSave(line?.damage_parts ?? [], fail, line?.on_success === "half")),
+    };
+  }
+  return null;
+}
+
+/** The chance a save like this one fails (its bonus and mode, its automatic failure). */
+function saveFail(save: {
+  bonus: number;
+  dc: number;
+  roll: { mode: "normal" | "advantage" | "disadvantage" };
+  automatic_failure: string | null;
+}): number {
+  return failOdds({
+    bonus: save.bonus,
+    dc: save.dc,
+    mode: save.roll.mode,
+    automatic_failure: save.automatic_failure !== null,
+  });
+}
+
+/** The AC bonus of `target`'s cover against `c`'s spell: given, or worked out from the map. */
+function coverBonus(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  target: string,
+  action: EncounterAction,
+): number {
+  const given = action.type === "cast" ? action.cover?.[target] : undefined;
+  const t = e.combatants.find((x) => x.id === target);
+  let degree: string | undefined = given;
+  if (!degree && c.position && t?.position) {
+    const corners = spaceCorners({ position: c.position, size: spaceOf(ctx, c) });
+    degree = mapCover(e, ctx, corners, t, [c.id]).degree;
+  }
+  return degree === "half" ? 2 : degree === "three_quarters" ? 5 : 0;
+}
+
+const round = (n: number) => Math.round(n * 1000) / 1000;

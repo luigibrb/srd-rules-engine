@@ -612,7 +612,12 @@ within reach or range when positioned), and `available`/`reason`.
 
 Legality isn't re-derived: `checkAction(encounter, action, ctx)` dry-runs
 `applyEncounterAction` with dice fixed in the middle of their range and returns the
-`EncounterError` messages, and `combatantOptions` judges every option that way (`{ check: false
+`EncounterError` messages, and `combatantOptions` judges every option that way; the same dry
+run's result gives an allowed option's `odds` against its first target (`rules/odds.ts`): its
+d20 was 10, so the result's total says the bonus, and its roll says the mode the engine chose
+(Advantage, cover, conditions all included). Average damage uses the attack line's or spell's
+damage parts (features' bonus dice left out), Critical Hits, a save's half damage and the target's
+Resistance, Immunity and Vulnerability (without rounding down) (`{ check: false
 }` skips it). An action that stops for a decision counts as allowed. The dry run says whether an
 action is allowed, not how its dice would land. An option aimed at a creature is judged against
 its first candidate; with none in range, against the nearest creature (so the reason is the

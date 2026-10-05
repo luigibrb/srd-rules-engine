@@ -291,7 +291,9 @@ What a combatant can do now, for a UI's buttons: `combatantOptions(encounter, id
 every attack, spell, feature, monster ability, legendary action and standard action as an
 encounter action ready to send, with its cost, candidate targets (in reach or range when
 positioned), slot levels and uses left, and whether the engine would take it now or why not.
-`checkAction(encounter, action, ctx)` answers the same for one action by a dry run of
+Allowed options against a creature carry `odds`: the chance to hit and to score a Critical Hit, or
+that the target fails its save, and the average damage, from the same modifiers the engine would
+use (`attackOdds`, `failOdds`, `averageDamage` for your own). `checkAction(encounter, action, ctx)` answers the same for one action by a dry run of
 `applyEncounterAction`, so the options never disagree with the engine.
 
 ```ts
