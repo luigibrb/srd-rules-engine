@@ -25,7 +25,10 @@ import {
   EncounterCombatantSchema,
   type EncounterEffect,
   EncounterSchema,
+  type Help,
+  type MasteryMark,
   type Pending,
+  type SpellMark,
 } from "../models/encounter";
 import type { CharacterState, PlayAction } from "../models/state";
 import {
@@ -406,6 +409,12 @@ function run(
       if (ends.skip_current) ends.skip_current = false;
       else if (--ends.count <= 0) e.masteries = e.masteries.filter((m) => m !== mark);
     }
+    for (const mark of [...e.marks]) {
+      const ends = mark.ends;
+      if (ends.at !== at || ends.of !== c.id) continue;
+      if (ends.skip_current) ends.skip_current = false;
+      else if (--ends.count <= 0) e.marks = e.marks.filter((m) => m !== mark);
+    }
   };
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
@@ -731,6 +740,9 @@ function run(
     const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id);
     if (vex) modes.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
     if (sap) modes.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
+    // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
+    const mark = e.marks.find((m) => m.on === t.id);
+    if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
     let hit: AttackResult;
     try {
       // The attacker's conditions caused by this target (Grappled by it), from the effects.
@@ -758,6 +770,7 @@ function run(
     useInspiration(c, hit.inspiration);
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
+    e.marks = e.marks.filter((m) => m !== mark);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
     const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
     if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
@@ -884,6 +897,8 @@ function run(
       cover?: Readonly<Record<string, Cover>>;
       /** The targets come from an area: its point was checked against the range instead. */
       area?: boolean;
+      /** A follow-up saving throw's other creatures (Ice Knife), when positions aren't used. */
+      nearby?: readonly string[];
     },
   ): SpellCastResult => {
     const targets = targetIds.map(find);
@@ -897,8 +912,49 @@ function run(
       const d = feetBetween(c, t);
       return d === null ? undefined : d <= 5;
     });
-    const { cover, area: _area, ...cast } = options;
+    const nearby = followUpNearby(spell, targets, options.nearby);
+    const { cover, area: _area, nearby: _nearby, ...cast } = options;
     const views = targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]));
+    const nearbyViews = nearby.map((t) =>
+      withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]),
+    );
+    // Help, Vex, Sap and Guiding Bolt reach spell attack rolls too, each used by one roll.
+    const used = { helps: [] as Help[], masteries: [] as MasteryMark[], marks: [] as SpellMark[] };
+    const modesFor = (index: number): ModeReason[] => {
+      const t = targets[index] as EncounterCombatant;
+      const out: ModeReason[] = [];
+      const help = e.helps.find(
+        (h) =>
+          h.on === t.id &&
+          h.skill === null &&
+          h.by !== c.id &&
+          alliesOf(e, h.by, c) &&
+          !used.helps.includes(h),
+      );
+      if (help) {
+        used.helps.push(help);
+        out.push({ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` });
+      }
+      const fresh = (m: MasteryMark) => !used.masteries.includes(m);
+      const vex = e.masteries.find(
+        (m) => m.mastery === "vex" && m.by === c.id && m.on === t.id && fresh(m),
+      );
+      if (vex) {
+        used.masteries.push(vex);
+        out.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
+      }
+      const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id && fresh(m));
+      if (sap) {
+        used.masteries.push(sap);
+        out.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
+      }
+      const mark = e.marks.find((m) => m.on === t.id && !used.marks.includes(m));
+      if (mark) {
+        used.marks.push(mark);
+        out.push({ mode: "advantage", reason: markReason(mark) });
+      }
+      return out;
+    };
     let r: SpellCastResult;
     try {
       r = castSpell(encounterCombatant(e, c.id, ctx), spell, views, {
@@ -906,12 +962,17 @@ function run(
         rng,
         decide,
         modes,
+        modesFor,
         within_5ft,
+        nearby: nearbyViews,
       });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
       throw error;
     }
+    e.helps = e.helps.filter((h) => !used.helps.includes(h));
+    e.masteries = e.masteries.filter((m) => !used.masteries.includes(m));
+    e.marks = e.marks.filter((m) => !used.marks.includes(m));
     c.extended = true;
     const level =
       r.slot_level !== null && r.slot_level > spell.level ? ` at level ${r.slot_level}` : "";
@@ -923,13 +984,53 @@ function run(
       spendLegendaryResistance(t, hit.save);
       notes.push(targetNote(t.name, hit, views[hit.target]?.armor_class));
       applyTo(t, hit.actions);
+      if (hit.on_hit.includes("advantage_against") && !outOfFight(ctx, t)) {
+        e.marks = e.marks.filter((m) => !(m.on === t.id && m.label === spell.name));
+        e.marks.push({
+          kind: "advantage_against",
+          label: spell.name,
+          by: c.id,
+          on: t.id,
+          ends: until("end"),
+        });
+        notes.push(`${spell.name}: the next attack roll against ${t.name} has Advantage.`);
+      }
     }
-    // A Concentration spell's conditions last while the caster concentrates, up to its duration.
-    if (spell.concentration) {
-      const rounds = durationRounds(spell);
-      for (const hit of r.targets) {
-        const t = targets[hit.target] as EncounterCombatant;
-        addEffects(t, hit.conditions, {
+    if (r.follow_up) {
+      const all = [...targets, ...nearby];
+      const what = r.follow_up.targets.length ? "" : ": no creature is in it";
+      notes.push(
+        `${spell.name}'s saving throw (${ABILITY_NAMES[r.follow_up.ability]} DC ${r.follow_up.dc})${what}.`,
+      );
+      for (const hit of r.follow_up.targets) {
+        const t = all[hit.target] as EncounterCombatant;
+        spendLegendaryResistance(t, hit.save);
+        notes.push(targetNote(t.name, hit));
+        applyTo(t, hit.actions);
+      }
+    }
+    // Conditions with a duration in the spell's text end at the start or end of the caster's
+    // next turn; a Concentration spell's others last while it concentrates, up to its duration.
+    const timed = new Map(
+      (spell.mechanics?.conditions ?? []).flatMap((x) => (x.until ? [[x.condition, x.until]] : [])),
+    );
+    const rounds = durationRounds(spell);
+    for (const hit of r.targets) {
+      const t = targets[hit.target] as EncounterCombatant;
+      for (const at of ["start", "end"] as const) {
+        const conditions = hit.conditions.filter((x) => timed.get(x) === `${at}_of_your_next_turn`);
+        if (conditions.length) {
+          addEffects(t, conditions, {
+            source: c.id,
+            label: spell.name,
+            concentration: false,
+            ends: until(at),
+          });
+        }
+      }
+      const lasting = hit.conditions.filter((x) => !timed.has(x));
+      if (spell.concentration && lasting.length) {
+        addEffects(t, lasting, {
           source: c.id,
           label: spell.name,
           concentration: true,
@@ -938,6 +1039,34 @@ function run(
       }
     }
     return r;
+
+    /** Until the start or end of `c`'s next turn. */
+    function until(at: "start" | "end"): EffectEnd {
+      return { at, of: c.id, count: 1, skip_current: at === "end" && current()?.id === c.id };
+    }
+  };
+  /**
+   * A follow-up saving throw's other creatures (Ice Knife): those given, else the positioned
+   * creatures within its radius of the target.
+   */
+  const followUpNearby = (
+    spell: SpellDef,
+    targets: readonly EncounterCombatant[],
+    ids: readonly string[] | undefined,
+  ): EncounterCombatant[] => {
+    const f = spell.mechanics?.follow_up;
+    if (!f) {
+      if (ids?.length) fail(`${spell.name} has no saving throw for creatures near its target`);
+      return [];
+    }
+    if (ids) return ids.map(find);
+    const target = targets[0];
+    if (!target?.position) return [];
+    return e.combatants.filter((x) => {
+      if (targets.includes(x) || outOfFight(ctx, x) || !x.position) return false;
+      const d = feetBetween(target, x);
+      return d !== null && d <= f.radius;
+    });
   };
   /** A monster action's daily uses ("(2/Day)"): refused when spent, else counted. */
   const spendDaily = (c: EncounterCombatant, key: string, perDay: number | null, what: string) => {
@@ -951,6 +1080,8 @@ function run(
   const sweep = (): void => {
     const present = (id: string) => e.combatants.some((c) => c.id === id);
     e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
+    // A spell's mark stays when its caster leaves: the light is on the target.
+    e.marks = e.marks.filter((m) => present(m.on));
     for (const effect of [...e.effects]) {
       const target = e.combatants.find((c) => c.id === effect.target);
       const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
@@ -970,6 +1101,11 @@ function run(
         endEffect(effect, "Concentration ended");
       }
     }
+  };
+  /** Why an attack roll has Advantage from a spell's mark: `Guiding Bolt (Ilse's hit on Goblin)`. */
+  const markReason = (mark: SpellMark): string => {
+    const by = e.combatants.find((x) => x.id === mark.by)?.name ?? mark.by;
+    return `${mark.label} (${by}'s hit on ${find(mark.on).name})`;
   };
   const find = (id: string) =>
     e.combatants.find((c) => c.id === id) ?? fail(`No combatant '${id}' in the encounter`);
@@ -1741,6 +1877,7 @@ function run(
         spellcasting,
         cover: action.cover,
         area: area !== null,
+        nearby: action.nearby,
       });
       c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.

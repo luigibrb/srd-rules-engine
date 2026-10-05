@@ -38,6 +38,19 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Spell mechanics: a flat damage `bonus` (Magic Missile's 1d4 + 1, Disintegrate, Finger of
+  Death); `projectiles` (darts that hit automatically, or rays with an attack each; one target
+  or one `targets` entry per projectile); `follow_up`, a saving throw after the attack for the
+  target and the creatures within its radius (Ice Knife); `on_hit: [advantage_against]`
+  (Guiding Bolt); `until` on conditions (Ray of Sickness, Color Spray, Sunbeam). Five more SRD
+  spells have mechanics: Magic Missile, Scorching Ray, Ice Knife, Disintegrate, Finger of Death.
+- `castSpell` options `modesFor` (Advantage or Disadvantage for one spell attack roll, melee or
+  ranged) and `nearby`; results `follow_up` and `targets[i].on_hit`.
+- Encounters: `marks` (`SpellMarkSchema`) for Guiding Bolt's Advantage, used by the next attack
+  roll against the target, whoever makes it; Help, Vex and Sap now reach spell attack rolls;
+  `cast` takes `nearby` for a follow-up save without positions (`near …` in `srd-rules fight`);
+  conditions with a duration in the spell's text end at the start or end of the caster's next
+  turn.
 - `npm run demo` (`examples/battle-demo.ts`): a seeded battle that shows the main features, its
   story snapshotted in `tests/demo.test.ts`. `rules/areas.ts` (`areaSquares`, `inArea`,
   `distanceToPoint`) is exported from the package.
@@ -239,6 +252,8 @@ All notable changes are documented here. This project follows
   `POST /v1/combat/attack` too: use `POST /v1/state/attack`. Kept until 1.0.
 
 ### Fixed
+- Ray of Sickness's Poisoned and Color Spray's Blinded lasted until removed; they end at the end
+  of the caster's next turn. Guiding Bolt's Advantage on the next attack was dropped.
 - `GET /v1/content/magic_items` (and `magic-items`) returned 404: table names with `_` didn't match.
 - The Blowgun's fixed damage no longer adds the ability modifier (SRD "Damage Rolls").
 - While Petrified, untyped damage is halved too (Resistance to all damage).

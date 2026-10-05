@@ -14,11 +14,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d6",
         "type": "acid",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "none",
@@ -34,10 +38,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -57,11 +65,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "10d12",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "int",
       "on_success": "half",
@@ -77,11 +89,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "8d8",
         "type": "necrotic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -110,11 +126,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "3d6",
         "type": "fire",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -139,11 +159,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "3d10",
         "type": "lightning",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -168,10 +192,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -191,10 +219,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -214,11 +246,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d10",
         "type": "necrotic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -235,11 +271,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "8d8",
         "type": "necrotic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -268,10 +308,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "blinded",
         "on": "failed_save",
+        "until": "end_of_your_next_turn",
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "none",
@@ -287,10 +331,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -310,11 +358,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "8d8",
         "type": "cold",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -337,15 +389,51 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "follow_up": null,
     "heal": {
       "add_modifier": true,
       "dice": "2d8",
     },
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": {
       "damage": [],
       "heal": "2d8",
+      "targets": 0,
+    },
+  },
+  "disintegrate": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 40,
+        "dice": "10d6",
+        "type": "force",
+      },
+    ],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "none",
+    },
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "3d6",
+          "type": "force",
+        },
+      ],
+      "heal": null,
       "targets": 0,
     },
   },
@@ -357,11 +445,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "3d6",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "half",
@@ -386,11 +478,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d10",
         "type": "force",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -403,15 +499,43 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "restrained",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "str",
       "on_success": "none",
     },
     "targets": null,
+    "upcast": null,
+  },
+  "finger-of-death": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 30,
+        "dice": "7d8",
+        "type": "necrotic",
+      },
+    ],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": 1,
     "upcast": null,
   },
   "fire-bolt": {
@@ -422,11 +546,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d10",
         "type": "fire",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -439,11 +567,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "7d10",
         "type": "fire",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -463,11 +595,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "8d6",
         "type": "fire",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -492,10 +628,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "restrained",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "none",
@@ -515,11 +655,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "10d6",
         "type": "cold",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -544,11 +688,17 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "4d6",
         "type": "radiant",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [
+      "advantage_against",
+    ],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": {
@@ -570,11 +720,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "14d6",
         "type": "necrotic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -588,10 +742,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "follow_up": null,
     "heal": {
       "add_modifier": true,
       "dice": "2d4",
     },
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": {
@@ -608,11 +765,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "2d10",
         "type": "fire",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -637,14 +798,19 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "prone",
         "on": "failed_save",
+        "until": null,
       },
       {
         "condition": "incapacitated",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -664,10 +830,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "paralyzed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -687,10 +857,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "paralyzed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -714,19 +888,63 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
       {
         "condition": "incapacitated",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
     },
     "targets": null,
+    "upcast": null,
+  },
+  "ice-knife": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "1d10",
+        "type": "piercing",
+      },
+    ],
+    "follow_up": {
+      "damage": [
+        {
+          "dice": "2d6",
+          "type": "cold",
+        },
+      ],
+      "radius": 5,
+      "save": {
+        "ability": "dex",
+        "on_success": "none",
+      },
+      "upcast": [
+        {
+          "dice": "1d6",
+          "type": "cold",
+        },
+      ],
+    },
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": 1,
     "upcast": null,
   },
   "ice-storm": {
@@ -741,16 +959,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "2d10",
         "type": "bludgeoning",
       },
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "4d6",
         "type": "cold",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -775,11 +998,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "2d10",
         "type": "necrotic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -808,11 +1035,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "8d6",
         "type": "lightning",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -829,6 +1060,30 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "targets": 0,
     },
   },
+  "magic-missile": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 1,
+        "dice": "1d4",
+        "type": "force",
+      },
+    ],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": {
+      "count": 3,
+      "upcast": 1,
+    },
+    "save": null,
+    "targets": null,
+    "upcast": null,
+  },
   "mass-cure-wounds": {
     "area": {
       "shape": "sphere",
@@ -839,10 +1094,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "follow_up": null,
     "heal": {
       "add_modifier": true,
       "dice": "5d8",
     },
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 6,
     "upcast": {
@@ -857,10 +1115,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "follow_up": null,
     "heal": {
       "add_modifier": true,
       "dice": "2d4",
     },
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 6,
     "upcast": {
@@ -881,16 +1142,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "20d6",
         "type": "fire",
       },
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "20d6",
         "type": "bludgeoning",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "half",
@@ -906,11 +1172,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "3d8",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "half",
@@ -935,11 +1205,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "4d10",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "half",
@@ -964,11 +1238,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d12",
         "type": "poison",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -981,11 +1259,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d8",
         "type": "cold",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -998,16 +1280,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "poisoned",
         "on": "hit",
+        "until": "end_of_your_next_turn",
       },
     ],
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "2d8",
         "type": "poison",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": {
@@ -1029,16 +1316,44 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d8",
         "type": "radiant",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "dex",
       "on_success": "none",
     },
     "targets": 1,
+    "upcast": null,
+  },
+  "scorching-ray": {
+    "area": null,
+    "attack": "ranged",
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "2d6",
+        "type": "fire",
+      },
+    ],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": {
+      "count": 3,
+      "upcast": 1,
+    },
+    "save": null,
+    "targets": null,
     "upcast": null,
   },
   "shatter": {
@@ -1053,11 +1368,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "3d8",
         "type": "thunder",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -1082,11 +1401,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d8",
         "type": "lightning",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -1103,10 +1426,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "incapacitated",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -1122,11 +1449,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d8",
         "type": "radiant",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": null,
     "targets": 1,
     "upcast": null,
@@ -1139,10 +1470,14 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "charmed",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -1162,16 +1497,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "blinded",
         "on": "failed_save",
+        "until": "start_of_your_next_turn",
       },
     ],
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "6d8",
         "type": "radiant",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -1191,16 +1531,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "blinded",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "12d6",
         "type": "radiant",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -1220,11 +1565,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "2d8",
         "type": "thunder",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "con",
       "on_success": "half",
@@ -1249,11 +1598,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "1d6",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "none",
@@ -1273,16 +1626,21 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       {
         "condition": "frightened",
         "on": "failed_save",
+        "until": null,
       },
     ],
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "10d10",
         "type": "psychic",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "wis",
       "on_success": "half",
@@ -1298,11 +1656,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "damage": [
       {
         "add_modifier": false,
+        "bonus": 0,
         "dice": "4d8",
         "type": "bludgeoning",
       },
     ],
+    "follow_up": null,
     "heal": null,
+    "on_hit": [],
+    "projectiles": null,
     "save": {
       "ability": "str",
       "on_success": "half",

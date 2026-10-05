@@ -43,7 +43,7 @@ const HELP = `Commands (the combatant whose turn it is acts; "as <who> …" acts
 Targets are ids, names or numbers from the status table.
   attack <target> [weapon] [adv|dis] [2h] [+rider] [light|cleave|granted|opp] [nomastery]
          [thrown] [half|3/4|total] (the target's cover)
-  cast <spell> [targets…] [at <level>]       use <ability> [targets…]   (a monster's save effect)
+  cast <spell> [targets…] [near …] [at <level>]   use <ability> [targets…]   (a monster's save effect)
   areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
@@ -477,7 +477,12 @@ export class FightApp {
     const { area, rest: args } = areaOf(all);
     const at = args.indexOf("at");
     const slot_level = at >= 0 ? Number(args[at + 1]) : undefined;
-    const words = at >= 0 ? args.slice(0, at) : args;
+    const before = at >= 0 ? args.slice(0, at) : args;
+    // `near …`: the creatures next to the target of a follow-up save (Ice Knife) without positions.
+    const near = before.indexOf("near");
+    const words = near >= 0 ? before.slice(0, near) : before;
+    const nearby = near >= 0 ? before.slice(near + 1).map((w) => this.find(w)) : undefined;
+    if (nearby?.some((t) => !t)) return;
     // The spell is the longest prefix of words naming a catalog spell; the rest are targets.
     for (let n = words.length; n >= 1; n--) {
       const spell = this.spellId(words.slice(0, n).join(" "));
@@ -491,9 +496,10 @@ export class FightApp {
         targets: area ? undefined : targets.map((t) => (t as EncounterCombatant).id),
         area,
         slot_level,
+        nearby: nearby?.map((t) => (t as EncounterCombatant).id),
       });
     }
-    this.con.error("Usage: cast <spell> [targets…] [at <level>]");
+    this.con.error("Usage: cast <spell> [targets…] [near <creatures…>] [at <level>]");
   }
 
   /** A catalog spell by id, name, or a prefix of its name that only one spell has. */

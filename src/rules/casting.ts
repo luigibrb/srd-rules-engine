@@ -46,6 +46,13 @@ export interface CastOptions {
   decide?: Decide;
   /** More reasons for Advantage or Disadvantage on ranged spell attacks (an enemy within 5 ft). */
   modes?: readonly ModeReason[];
+  /**
+   * Reasons for Advantage or Disadvantage on one spell attack roll, melee or ranged: the
+   * `shot`-th roll (0, 1…) against `targets[target]`. Called once per roll, in order.
+   */
+  modesFor?: (target: number, shot: number) => readonly ModeReason[];
+  /** Creatures within the follow-up's radius of the target, besides it (Ice Knife). */
+  nearby?: readonly Combatant[];
   /** Whether the caster is within 5 feet of each target (default: a melee spell attack is). */
   within_5ft?: readonly (boolean | undefined)[];
 }
@@ -75,6 +82,8 @@ export interface SpellTargetResult {
   readonly outcome: DamageResult | null;
   readonly healing: number;
   readonly conditions: readonly string[];
+  /** What the hit does besides damage and conditions (`advantage_against`: Guiding Bolt). */
+  readonly on_hit: readonly "advantage_against"[];
   /** Play actions that apply all this to a character target's state. */
   readonly actions: readonly PlayAction[];
 }
@@ -89,9 +98,22 @@ export interface SpellCastResult {
   /** Damage rolled once for every target (a save or an automatic hit). */
   readonly damage: RolledDamage | null;
   readonly targets: readonly SpellTargetResult[];
+  /**
+   * The saving throw after the spell attack (Ice Knife); each result's `target` is an index into
+   * the `targets` given to `castSpell` followed by `nearby`.
+   */
+  readonly follow_up: SpellFollowUpResult | null;
   /** Play actions for the caster: spend the slot, start Concentration. */
   readonly caster_actions: readonly PlayAction[];
   readonly notes: readonly string[];
+}
+
+export interface SpellFollowUpResult {
+  readonly ability: Ability;
+  readonly dc: number;
+  /** Damage rolled once for every creature. */
+  readonly damage: RolledDamage | null;
+  readonly targets: readonly SpellTargetResult[];
 }
 
 /** Cantrip Upgrade tier: 1, then 2 at level 5, 3 at 11, 4 at 17. */
@@ -103,8 +125,13 @@ export function cantripTier(level: number): number {
  * Cast `spell` at `targets` (combatants, or none for a spell without targets). Each result's
  * `target` is an index into `targets`; each damage preview is against the target as it is now.
  *
- * - A spell attack is rolled per target (per beam for Eldritch Blast), with its own damage roll
- *   and Critical Hit; a natural 1 misses and a natural 20 hits.
+ * - A spell attack is rolled per target (per beam or ray: Eldritch Blast, Scorching Ray), with
+ *   its own damage roll and Critical Hit; a natural 1 misses and a natural 20 hits.
+ * - Beams, rays and darts go at one target, or one entry of `targets` per projectile (repeat a
+ *   target to aim several at it). Darts that hit automatically (Magic Missile) share one damage
+ *   roll; each dart is its own damage.
+ * - A follow-up saving throw (Ice Knife) comes after the attack, hit or miss, for the target and
+ *   `nearby`.
  * - Damage from a save (or an automatic hit) is rolled once for all targets (SRD "Damage against
  *   Multiple Targets"); on a successful save, each damage type is halved (rounded down) or
  *   ignored, per `save.on_success`.
@@ -125,7 +152,9 @@ export function castSpell(
     rng = mathRng,
     decide = (d) => d.recommended,
     modes = [],
+    modesFor,
     within_5ft,
+    nearby = [],
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
@@ -140,11 +169,18 @@ export function castSpell(
   }
   const above = slot === null ? 0 : slot - spell.level;
   const tier = cantripTier(caster.level);
-  const beams = cantrip && m?.cantrip_scaling === "beams" ? tier : 1;
+  // Beams (Eldritch Blast), rays or darts: how many, each with its own attack or hit.
+  const projectiles = m?.projectiles;
+  const beams = projectiles
+    ? projectiles.count + projectiles.upcast * above
+    : cantrip && m?.cantrip_scaling === "beams"
+      ? tier
+      : 1;
   const maxTargets = m?.targets == null ? null : m.targets + (m.upcast?.targets ?? 0) * above;
   if (beams > 1) {
+    const what = projectiles ? (m?.attack ? "rays" : "darts") : "beams";
     if (targets.length !== 1 && targets.length !== beams) {
-      throw new RangeError(`${spell.name} has ${beams} beams: give 1 target or ${beams}`);
+      throw new RangeError(`${spell.name} has ${beams} ${what}: give 1 target or ${beams}`);
     }
   } else if (maxTargets !== null && targets.length > maxTargets) {
     throw new RangeError(`${spell.name} can target at most ${maxTargets} at this level`);
@@ -164,12 +200,13 @@ export function castSpell(
       attack_bonus: null,
       damage: null,
       targets: [],
+      follow_up: null,
       notes: [`${spell.name}: its effects aren't automated; see the spell's text.`],
     };
   }
 
   const line = pickSpellcasting(caster, spell, spellcasting);
-  const needsLine = m.attack !== null || m.save !== null;
+  const needsLine = m.attack !== null || m.save !== null || m.follow_up !== null;
   const modifierUsed = m.damage.some((d) => d.add_modifier) || m.heal?.add_modifier === true;
   if (!line && (needsLine || modifierUsed)) {
     throw new RangeError(`${caster.name} has no spellcasting feature to cast ${spell.name}`);
@@ -180,7 +217,11 @@ export function castSpell(
   const parts: DamagePart[] = m.damage.map((d) => {
     const { count, sides } = parseDiceExpression(d.dice);
     const scaled = cantrip && m.cantrip_scaling === "dice" ? count * tier : count;
-    return { dice: `${scaled}d${sides}`, bonus: d.add_modifier ? modifier : 0, type: d.type };
+    return {
+      dice: `${scaled}d${sides}`,
+      bonus: (d.add_modifier ? modifier : 0) + d.bonus,
+      type: d.type,
+    };
   });
   for (const extra of m.upcast?.damage ?? []) {
     if (!above) break;
@@ -231,13 +272,16 @@ export function castSpell(
 
   if (m.attack) {
     const bonus = line?.attack_bonus ?? 0;
+    const shots = new Map<number, number>();
     for (const [beam, index] of aimed.entries()) {
       const target = targets[index] as Combatant;
+      const shot = shots.get(index) ?? 0;
+      shots.set(index, shot + 1);
       // Conditions change the roll like a weapon attack's; a melee spell attack is within 5 ft.
       const effective = attackMode(caster, target, {
         mode,
         within_5ft: within_5ft?.[index] ?? m.attack === "melee",
-        modes: m.attack === "ranged" ? modes : [],
+        modes: [...(m.attack === "ranged" ? modes : []), ...(modesFor?.(index, shot) ?? [])],
       });
       const roll = rollD20({ mode: effective.mode, rng });
       const critical_miss = roll.d20 === 1;
@@ -260,7 +304,8 @@ export function castSpell(
       let instances = rolled ? toInstances(rolled) : [];
       if (!hit) instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
       const conditions = hit ? conditionsOn(m, "hit") : [];
-      const r = { attack, instances, critical: critical_hit, conditions };
+      const on_hit = hit ? m.on_hit : [];
+      const r = { attack, instances, critical: critical_hit, conditions, on_hit };
       results.push(targetResult(index, target, r));
     }
   } else if (m.save) {
@@ -272,11 +317,51 @@ export function castSpell(
     const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent);
     shared = resolved.damage;
     results.push(...resolved.targets);
+  } else if (projectiles) {
+    // Darts that hit automatically: one roll for all of them, a feature's `one_roll` bonus on
+    // the first dart only.
+    shared = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
+    for (const [dart, index] of aimed.entries()) {
+      const add = extra(dart === 0);
+      const instances = shared
+        ? toInstances(shared).map((d, i) => (i === 0 ? { ...d, amount: d.amount + add } : d))
+        : [];
+      results.push(targetResult(index, targets[index] as Combatant, { instances }));
+    }
   } else {
     const rolled = sharedDamage();
     for (const [i, target] of targets.entries()) {
       results.push(targetResult(i, target, { instances: rolled ? toInstances(rolled) : [] }));
     }
+  }
+
+  // A saving throw after the attack, hit or miss: the target and the creatures near it.
+  let follow_up: SpellFollowUpResult | null = null;
+  if (m.follow_up) {
+    const f = m.follow_up;
+    const followParts: DamagePart[] = f.damage.map((d) => ({
+      dice: d.dice,
+      bonus: 0,
+      type: d.type,
+    }));
+    for (const more of f.upcast) {
+      if (!above) break;
+      const { count, sides } = parseDiceExpression(more.dice);
+      const i = followParts.findIndex(
+        (p) => p.type === more.type && parseDiceExpression(p.dice ?? "").sides === sides,
+      );
+      const part = followParts[i];
+      if (part?.dice) {
+        followParts[i] = {
+          ...part,
+          dice: `${parseDiceExpression(part.dice).count + count * above}d${sides}`,
+        };
+      } else followParts.push({ dice: `${count * above}d${sides}`, bonus: 0, type: more.type });
+    }
+    const dc = line?.save_dc ?? 0;
+    const effect = { ...f.save, dc, conditions: [] };
+    const resolved = resolveSave(effect, followParts, [...targets, ...nearby], rng, decide);
+    follow_up = { ability: f.save.ability, dc, damage: resolved.damage, targets: resolved.targets };
   }
 
   if (m.heal) {
@@ -298,10 +383,11 @@ export function castSpell(
   return {
     ...base,
     spellcasting: line?.source ?? null,
-    save_dc: m.save ? (line?.save_dc ?? null) : null,
+    save_dc: m.save || m.follow_up ? (line?.save_dc ?? null) : null,
     attack_bonus: m.attack ? (line?.attack_bonus ?? null) : null,
     damage: shared,
     targets: results,
+    follow_up,
     notes: [],
   };
 }
@@ -347,6 +433,7 @@ function targetResult(
     instances?: DamageInstance[];
     critical?: boolean;
     conditions?: string[];
+    on_hit?: readonly "advantage_against"[];
   },
 ): SpellTargetResult {
   const instances = r.instances ?? [];
@@ -374,6 +461,7 @@ function targetResult(
     outcome,
     healing: 0,
     conditions,
+    on_hit: r.on_hit ?? [],
     actions,
   };
 }

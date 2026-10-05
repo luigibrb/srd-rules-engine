@@ -909,6 +909,8 @@ export const SpellMechanicsSchema = z
           type: z.enum(DAMAGE_TYPES),
           /** Add the spellcasting ability modifier. */
           add_modifier: z.boolean().default(false),
+          /** A flat bonus: Magic Missile's `1d4 + 1`. */
+          bonus: z.int().min(0).default(0),
         }),
       )
       .default([]),
@@ -935,13 +937,58 @@ export const SpellMechanicsSchema = z
      * the dice), or more attacks (`beams`: Eldritch Blast).
      */
     cantrip_scaling: z.enum(["dice", "beams"]).nullable().default(null),
-    /** Conditions a target gets on a failed save or when hit. */
+    /**
+     * Conditions a target gets on a failed save or when hit; `until`: they end at the start or end
+     * of the caster's next turn (otherwise a Concentration spell's last while it does).
+     */
     conditions: z
-      .array(z.strictObject({ condition: z.string(), on: z.enum(["failed_save", "hit"]) }))
+      .array(
+        z.strictObject({
+          condition: z.string(),
+          on: z.enum(["failed_save", "hit"]),
+          until: z
+            .enum(["start_of_your_next_turn", "end_of_your_next_turn"])
+            .nullable()
+            .default(null),
+        }),
+      )
       .default([]),
     area: SpellAreaSchema.nullable().default(null),
+    /**
+     * Darts or rays (Magic Missile, Scorching Ray): `count`, plus `upcast` per slot level above
+     * the spell's. Each is a spell attack with `attack`, else it hits automatically; aimed at one
+     * target or split among several.
+     */
+    projectiles: z
+      .strictObject({ count: z.int().min(2), upcast: z.int().min(0).default(0) })
+      .nullable()
+      .default(null),
+    /**
+     * A saving throw after the spell attack, hit or miss, by the target and each creature within
+     * `radius` feet of it (Ice Knife); its damage is rolled once for all of them.
+     */
+    follow_up: z
+      .strictObject({
+        save: z.strictObject({
+          ability: z.enum(ABILITIES),
+          on_success: z.enum(["half", "none"]).default("none"),
+        }),
+        damage: z.array(z.strictObject({ dice: Dice, type: z.enum(DAMAGE_TYPES) })).min(1),
+        /** Dice added per spell slot level above the spell's level. */
+        upcast: z.array(z.strictObject({ dice: Dice, type: z.enum(DAMAGE_TYPES) })).default([]),
+        radius: z.int().min(0).default(0),
+      })
+      .nullable()
+      .default(null),
+    /**
+     * What a hit does besides damage and conditions: `advantage_against` gives the next attack
+     * roll against the target Advantage, until the end of the caster's next turn (Guiding Bolt).
+     */
+    on_hit: z.array(z.enum(["advantage_against"])).default([]),
   })
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
+  .refine((m) => !m.follow_up || m.attack, "a follow-up saving throw comes after a spell attack")
+  .refine((m) => !m.projectiles || !m.save, "projectiles are spell attacks or automatic hits")
   .meta({ id: "SpellMechanics" });
 export type SpellMechanics = z.infer<typeof SpellMechanicsSchema>;
 

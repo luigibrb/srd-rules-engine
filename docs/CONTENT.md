@@ -361,9 +361,15 @@ mechanics:
   area: {shape: sphere, size: 20}          # radius, length or side in feet; a line's width: 5
 # Others: heal: {dice: 2d8, add_modifier: true}; targets: 1; cantrip_scaling: dice | beams;
 #         conditions: [{condition: paralyzed, on: failed_save}]   # or on: hit
+#         conditions: [{condition: poisoned, on: hit, until: end_of_your_next_turn}]  # or start_…
+#         damage: [{dice: 1d4, type: force, bonus: 1}]          # Magic Missile's 1d4 + 1
+#         projectiles: {count: 3, upcast: 1}    # darts (no attack) or rays (attack), +1 per slot
+#         follow_up: {save: {ability: dex}, damage: [{dice: 2d6, type: cold}],
+#                     upcast: [{dice: 1d6, type: cold}], radius: 5}   # after the attack (Ice Knife)
+#         on_hit: [advantage_against]           # Guiding Bolt
 ```
 
-A spell has an attack roll or a save, not both. Damage from a save is rolled once for every
+A spell has an attack roll or a save, not both; a `follow_up` save comes after an attack. Damage from a save is rolled once for every
 target; each damage type is halved separately on a successful save (`on_success: half`).
 
 ### Monsters

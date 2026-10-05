@@ -162,6 +162,20 @@ export const MasteryMarkSchema = z.object({
 export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
 
 /**
+ * A spell's lasting effect on `on`, until used or `ends`: `advantage_against` gives the next
+ * attack roll against it Advantage, whoever makes it (Guiding Bolt).
+ */
+export const SpellMarkSchema = z.object({
+  kind: z.enum(["advantage_against"]),
+  /** The spell's name: `Guiding Bolt`. */
+  label: z.string(),
+  by: z.string(),
+  on: z.string(),
+  ends: EffectEndSchema,
+});
+export type SpellMark = z.infer<typeof SpellMarkSchema>;
+
+/**
  * An action stopped for a decision: the action, the dice it rolled so far and the answers given;
  * `decide` replays it with the same dice and one more answer.
  */
@@ -194,6 +208,8 @@ export const EncounterSchema = z.object({
   helps: z.array(HelpSchema).default([]),
   /** Weapon Mastery effects in play (Vex, Sap, Slow). */
   masteries: z.array(MasteryMarkSchema).default([]),
+  /** Spell effects on the next attack roll against a creature (Guiding Bolt). */
+  marks: z.array(SpellMarkSchema).default([]),
   /** Decisions after a roll: `ask` the combatant (or its player), or `auto` (the recommendation). */
   decisions: z.enum(["ask", "auto"]).default("auto"),
   /** An action waiting for a decision (`decide`); nothing else can happen until it's answered. */
@@ -436,6 +452,11 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     slot_level: n.min(1).max(9).optional(),
     pact: z.boolean().optional(),
     mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+    /**
+     * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),
+     * when positions aren't used; with positions they're found on the grid.
+     */
+    nearby: z.array(z.string()).optional(),
   }),
   /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
   z.object({
