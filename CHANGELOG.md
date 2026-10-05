@@ -43,6 +43,13 @@ migrated when it's loaded.
 - `srd-rules fight`: `terrain difficult|blocked|clear x y [x2 y2]`, `wall [remove] x1 y1 x2 y2`;
   `map` draws walls, blocked squares, Difficult Terrain and zones.
 
+- Cover worked out from the map when positions are used and the caller gives none: walls,
+  blocked squares and creatures in between give Half, Three-Quarters or Total Cover (noted);
+  Total Cover can't be targeted. Areas and zones leave out squares with no clear line from their
+  point of origin, and Dexterity saves against an area get cover from it. `combatantOptions`
+  leaves targets behind Total Cover out. `mapCover`; `rules/grid.ts`: `lineClear`, `coverDegree`,
+  `obstacles`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to

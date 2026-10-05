@@ -342,9 +342,13 @@ export {
   roll,
 } from "./rules/dice";
 export {
+  type CoverDegree,
+  coverDegree,
   findPath,
   gridDistance,
+  lineClear,
   type Occupant,
+  obstacles,
   stepBlocked,
   stepCost,
   straightPath,
@@ -405,6 +409,8 @@ export {
   EncounterError,
   type EncounterResult,
   encounterCombatant,
+  type MapCover,
+  mapCover,
 } from "./services/encounter";
 export {
   checkAction,

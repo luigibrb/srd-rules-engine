@@ -70,9 +70,14 @@ import {
 import { rollDamage, takeDamage } from "../rules/damage";
 import { parseDiceExpression, roll } from "../rules/dice";
 import {
+  type CoverDegree,
+  coverDegree,
   findPath,
   gridDistance,
+  lineClear,
   type Occupant,
+  obstacles,
+  spaceCorners,
   key as squareKey,
   stepBlocked,
   stepCost,
@@ -791,12 +796,54 @@ function run(
       if (error instanceof RangeError) fail(`${label}: ${error.message}`);
       throw error;
     }
+    // Squares with no clear line from the point of origin aren't in it (SRD "Area of Effect").
+    const from = areaOriginPoint(area, origin, placement);
+    squares = inLineOfEffect(e, squares, from);
     // A Sphere or Cylinder can include its creator; the other shapes start outside it.
     const includesOrigin = area.shape === "sphere" || area.shape === "cylinder";
-    return e.combatants
+    const ids = e.combatants
       .filter((x) => !outOfFight(ctx, x) && x.position && (includesOrigin || x.id !== c.id))
       .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
       .map((x) => x.id);
+    // Cover from the point of origin: Dexterity saves; Total Cover keeps a creature out.
+    areaCover.clear();
+    return ids.filter((id) => {
+      const x = find(id);
+      const cover = mapCover(e, ctx, [from], x, [c.id]);
+      if (cover.degree === "total") {
+        notes.push(`${x.name} has Total Cover from ${label}'s point of origin.`);
+        return false;
+      }
+      areaCover.set(id, cover);
+      return true;
+    });
+  };
+  /** Cover worked out for the creatures of the last area placed, by id. */
+  const areaCover = new Map<string, MapCover>();
+  /**
+   * `t`'s cover against `c`: the cover given, else (both positioned) worked out from the map,
+   * from `c`'s space or from the last area's point of origin; noted when it changes the roll.
+   */
+  const coverFor = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    given: Cover | undefined,
+    { area = false, relevant = true }: { area?: boolean; relevant?: boolean } = {},
+  ): Cover | undefined => {
+    if (given) return given;
+    let found: MapCover | undefined;
+    if (area) found = areaCover.get(t.id);
+    else if (c.position && t.position && c.id !== t.id) {
+      const corners = spaceCorners({ position: c.position, size: spaceOf(ctx, c) });
+      found = mapCover(e, ctx, corners, t, [c.id]);
+    }
+    if (!found || found.degree === "none") return undefined;
+    const cover = found.degree;
+    if (relevant && cover !== "total") {
+      const what = cover === "half" ? "Half Cover" : "Three-Quarters Cover";
+      notes.push(`${t.name} has ${what} (behind ${found.by ?? "an obstacle"}).`);
+    }
+    return cover;
   };
   /** Targets of a saving throw effect: from its area, or given (checked against its range). */
   const saveTargets = (
@@ -906,7 +953,7 @@ function run(
     });
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
-    const target = withCover(encounterCombatant(e, t.id, ctx), options.cover);
+    const target = withCover(encounterCombatant(e, t.id, ctx), coverFor(c, t, options.cover));
     // Help: Advantage on the next attack roll by one of the helper's allies against the target.
     const help = e.helps.find(
       (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
@@ -1040,12 +1087,18 @@ function run(
     name: string,
     targetIds: readonly string[],
     cover?: Readonly<Record<string, Cover>>,
+    area = false,
   ): SaveActionResult => {
     const targets = targetIds.map(find);
+    const line = user.save_actions.find((a) => a.name === name);
+    const relevant = line?.ability === "dex";
     let r: SaveActionResult;
     try {
       const combatants = targets.map((t) =>
-        withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]),
+        withCover(
+          encounterCombatant(e, t.id, ctx),
+          coverFor(c, t, cover?.[t.id], { area, relevant }),
+        ),
       );
       r = useSaveAction(user, name, combatants, { rng, decide });
     } catch (error) {
@@ -1112,7 +1165,13 @@ function run(
       unaffected: _unaffected,
       ...cast
     } = options;
-    const views = targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]));
+    const relevant = !!spell.mechanics?.attack || spell.mechanics?.save?.ability === "dex";
+    const views = targets.map((t) =>
+      withCover(
+        encounterCombatant(e, t.id, ctx),
+        coverFor(c, t, cover?.[t.id], { area: options.area, relevant }),
+      ),
+    );
     const nearbyViews = nearby.map((t) =>
       withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]),
     );
@@ -2046,7 +2105,7 @@ function run(
       const targets = line
         ? saveTargets(c, line, action.area, action.targets)
         : (action.targets ?? []);
-      result = saveEffectOn(c, user, action.ability, targets, action.cover);
+      result = saveEffectOn(c, user, action.ability, targets, action.cover, !!action.area);
       c.used.action = true;
       if (line?.recharge) c.expended.push(action.ability);
       break;
@@ -2104,6 +2163,8 @@ function run(
           user,
           line.uses,
           saveTargets(c, used, action.area, action.targets),
+          undefined,
+          !!action.area,
         );
       } else if (def.legendary_actions.find((a) => a.name === line.name)?.casts) {
         // "uses Spellcasting to cast Fear": the spell, at its listed level, through this action.
@@ -2126,6 +2187,8 @@ function run(
           { ...user, save_actions: [line.save] },
           line.name,
           saveTargets(c, line.save, action.area, action.targets),
+          undefined,
+          !!action.area,
         );
       } else {
         notes.push(`${line.name}: its effect is in the stat block's text.`);
@@ -2683,6 +2746,7 @@ export { gridDistance };
 /**
  * A zone's squares (`"x,y"`), or `null` when positions don't place it. Its origin is its point,
  * or for an Emanation its caster's space, or the space at its point (`space` squares wide).
+ * Squares the point of origin has no clear line to aren't in it.
  */
 export function zoneArea(e: Encounter, ctx: EncounterContext, z: Zone): Set<string> | null {
   let origin: GridSpace | null;
@@ -2690,7 +2754,80 @@ export function zoneArea(e: Encounter, ctx: EncounterContext, z: Zone): Set<stri
     const by = e.combatants.find((x) => x.id === z.by);
     origin = by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
   } else origin = z.point ? { position: z.point, size: z.space } : null;
-  return origin ? areaSquares(z.area, origin, { point: z.point ?? undefined }) : null;
+  if (!origin) return null;
+  const placement = { point: z.point ?? undefined };
+  const squares = areaSquares(z.area, origin, placement);
+  return inLineOfEffect(e, squares, areaOriginPoint(z.area, origin, placement));
+}
+
+/**
+ * An area's point of origin, for lines of effect and cover (flagged): a Sphere's or Cylinder's
+ * grid intersection, the center of a Cube, or the center of the space an Emanation, Cone or Line
+ * comes from.
+ */
+export function areaOriginPoint(
+  area: SpellArea,
+  origin: GridSpace,
+  placement: AreaPlacement,
+): GridPoint {
+  const center = (p: GridPoint, size: number) => ({ x: p.x + size / 2, y: p.y + size / 2 });
+  if ((area.shape === "sphere" || area.shape === "cylinder") && placement.point) {
+    return placement.point;
+  }
+  if (area.shape === "cube" && placement.point) return center(placement.point, area.size / 5);
+  return center(origin.position, origin.size);
+}
+
+/** The squares of an area the point `from` has a clear line to (blocked squares left out). */
+export function inLineOfEffect(
+  e: Encounter,
+  squares: ReadonlySet<string>,
+  from: GridPoint,
+): Set<string> {
+  const { walls, blocked } = e.map;
+  if (!walls.length && !blocked.length) return new Set(squares);
+  const solid = new Set(blocked.map(squareKey));
+  const lines = obstacles(walls, solid);
+  return new Set(
+    [...squares].filter((k) => {
+      if (solid.has(k)) return false;
+      const [x, y] = k.split(",").map(Number) as [number, number];
+      return lineClear(from, { x: x + 0.5, y: y + 0.5 }, lines);
+    }),
+  );
+}
+
+export interface MapCover {
+  readonly degree: CoverDegree;
+  /** The creature giving Half Cover, when that's what decided it. */
+  readonly by: string | null;
+}
+
+/**
+ * `t`'s cover from `origins` (an attacker's corners, an area's point of origin), worked out
+ * from the map's walls and blocked squares and the creatures in between (not `t`, nor those in
+ * `exclude`).
+ */
+export function mapCover(
+  e: Encounter,
+  ctx: EncounterContext,
+  origins: readonly GridPoint[],
+  t: EncounterCombatant,
+  exclude: readonly string[] = [],
+): MapCover {
+  if (!t.position) return { degree: "none", by: null };
+  const others = e.combatants.filter(
+    (x) =>
+      x.id !== t.id && !exclude.includes(x.id) && x.position && !x.defeated && !outOfFight(ctx, x),
+  );
+  const lines = obstacles(e.map.walls, e.map.blocked.map(squareKey));
+  const r = coverDegree(
+    origins,
+    { position: t.position, size: spaceOf(ctx, t) },
+    lines,
+    others.map((x) => ({ position: x.position as GridPoint, size: spaceOf(ctx, x) })),
+  );
+  return { degree: r.degree, by: r.by === null ? null : (others[r.by]?.name ?? null) };
 }
 
 /** The longest reach of a combatant's melee attacks, or `null` without one. */

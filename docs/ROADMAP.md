@@ -35,6 +35,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P22 | What a combatant can do now: `combatantOptions` (attacks, spells, features, monster abilities, legendary and standard actions, zones, each with cost, targets and the reason it's refused) and `checkAction` (a dry run); `POST /v1/encounters/options` and `/check`; the fight CLI's `options` built on them | Legality comes from a dry run of `applyEncounterAction` with fixed dice, never re-derived; pure helpers moved out of the encounter's `run` first |
 | P23 | The bundled SRD out of the main entry: `srd-rules-engine/srd`; the SRD published split by table with `splitPack`/`loadPack`; catalogs with only some tables (`tables`, `CORE_TABLES`); a gzip budget for the core tables | Reading a table that wasn't loaded throws instead of returning nothing. Validating the full SRD at startup took about 70 ms in Node, so precompiled content is still parsed |
 | P24a | A map for encounters: walls between squares, Difficult Terrain and blocked squares (`set_terrain`, `add_wall`, `remove_wall`), step costs, creatures' spaces passed through or not, the cheapest path around obstacles, zones that are Difficult Terrain, Opportunity Attacks judged at the step that leaves reach; the fight CLI draws them | Walls are segments between grid corners, so a diagonal can't cut a corner (flagged); a move goes straight when it can, else by the cheapest path; Spirit Guardians' halved Speed is left for later |
+| P24b | Cover and line of effect from the map: cover worked out for attacks, spells and save effects (walls, blocked squares, creatures in between), Total Cover can't be targeted, areas and zones stop at walls, Dexterity saves get cover from an area's point of origin; options leave out targets behind Total Cover | The DMG's corner-lines method (flagged); creatures give Half Cover against areas too; cover given by the caller still wins |
 
 ## Decisions
 
@@ -67,10 +68,11 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 - **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
   Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM.
-- **Cover and line of sight from the map (M).** Cover worked out from walls, blocked squares
-  and creatures in between; areas and targets that need a clear line.
 - **Walls (M).** Blade Barrier, Wall of Fire, Wall of Ice, Wall of Thorns: a wall placed from
-  point to point or as a ring, its damaging side, cover and blocked paths.
+  point to point or as a ring, its damaging side; on the map, wall segments or blocked squares
+  plus a zone along them.
+- **Spirit Guardians' halved Speed (S).** "Any other creature's Speed is halved in the
+  Emanation": a budget that changes along a move.
 - **Monster traits that work like zones (M).** Auras and areas in stat blocks.
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with

@@ -17,6 +17,7 @@ import type {
 } from "../models/options";
 import { monsterSpells } from "../rules/combatant";
 import { formatDamage } from "../rules/damage";
+import { spaceCorners } from "../rules/grid";
 import type { Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import {
@@ -30,8 +31,10 @@ import {
   EncounterError,
   encounterCombatant,
   feetApart,
+  mapCover,
   monsterDef,
   outOfFight,
+  spaceOf,
   speedOf,
   spellRangeFeet,
   spellTargetRange,
@@ -94,8 +97,11 @@ export function combatantOptions(
   ): OptionEntry => {
     let reason = why;
     if (reason === null && check) {
-      // No candidate: judge it against the nearest creature, for the engine's reason (out of reach).
-      const fallback = candidates(null)[0];
+      // No candidate: judge it against the nearest creature (or one behind Total Cover), for the
+      // engine's reason ("out of reach", "has Total Cover").
+      const fallback =
+        candidates(null)[0] ??
+        e.combatants.find((x) => x.id !== c.id && !x.defeated && !outOfFight(ctx, x))?.id;
       const probe =
         "target" in action && action.target === "" && fallback
           ? ({ ...action, target: fallback } as EncounterAction)
@@ -126,7 +132,22 @@ export function combatantOptions(
     };
   };
 
-  /** Creatures it could aim at: enemies first, then nearest first; within `range` with positions. */
+  /** Total Cover from `c` (worked out from the map): it can't be targeted. */
+  const totalCover = new Map<string, boolean>();
+  const behindTotalCover = (x: EncounterCombatant): boolean => {
+    if (!c.position || !x.position) return false;
+    let found = totalCover.get(x.id);
+    if (found === undefined) {
+      const corners = spaceCorners({ position: c.position, size: spaceOf(ctx, c) });
+      found = mapCover(e, ctx, corners, x, [c.id]).degree === "total";
+      totalCover.set(x.id, found);
+    }
+    return found;
+  };
+  /**
+   * Creatures it could aim at: enemies first, then nearest first; with positions, within `range`
+   * and not behind Total Cover.
+   */
   const candidates = (
     range: number | null,
     { self = false, near }: { self?: boolean; near?: EncounterCombatant } = {},
@@ -134,6 +155,7 @@ export function combatantOptions(
     const from = near ?? c;
     const rows = e.combatants
       .filter((x) => (self || x.id !== c.id) && !x.defeated && !outOfFight(ctx, x))
+      .filter((x) => x.id === c.id || !behindTotalCover(x))
       .map((x, i) => ({ x, i, d: x.id === c.id ? 0 : feetApart(ctx, from, x) }))
       .filter(({ d }) => range === null || d === null || d <= range);
     const rank = (x: EncounterCombatant) => (x.id === c.id ? 2 : alliesOf(e, x.id, c) ? 1 : 0);
