@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { SpellAreaSchema } from "./content";
 import { EncounterActionSchema } from "./encounter";
+import { REFUSAL_CODES } from "./events";
 
 /**
  * What an option spends: an action, a Bonus Action or a reaction; `attack`, one of the Attack
@@ -55,6 +56,8 @@ export const OptionEntrySchema = z.object({
   available: z.boolean(),
   /** Why not, in the engine's words; `null` when available. */
   reason: z.string().nullable(),
+  /** Why not, as a code (`REFUSAL_CODES`); `null` when available. */
+  code: z.enum(REFUSAL_CODES).nullable().default(null),
   targets: TargetSpecSchema.nullable(),
   /** A spell: the slot levels it can be cast with now (empty for a cantrip). */
   slot_levels: z.array(z.int()).default([]),
@@ -111,5 +114,7 @@ export type CombatantOptions = z.infer<typeof CombatantOptionsSchema>;
 export const ActionCheckSchema = z.object({
   ok: z.boolean(),
   reasons: z.array(z.string()),
+  /** A code per reason (`REFUSAL_CODES`). */
+  codes: z.array(z.enum(REFUSAL_CODES)),
 });
 export type ActionCheck = z.infer<typeof ActionCheckSchema>;

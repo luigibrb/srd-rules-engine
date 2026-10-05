@@ -31,6 +31,7 @@ import {
   zoneArea,
 } from "./encounter";
 import { checkAction } from "./options";
+import { refusalCode } from "./refusals";
 
 function combatantIn(e: Encounter, id: string): EncounterCombatant {
   return (
@@ -220,6 +221,7 @@ export function previewArea(
   const fail = (reasons: readonly string[]): AreaPreview => ({
     ok: false,
     reasons: [...reasons],
+    codes: reasons.map(refusalCode),
     squares: [],
     targets: [],
     total_cover: [],
@@ -236,6 +238,7 @@ export function previewArea(
     return {
       ok: true,
       reasons: [],
+      codes: [],
       squares,
       targets: placed.ids.map((id) => {
         const cover = placed.cover.get(id);

@@ -304,6 +304,13 @@ checkAction(encounter, { type: "dodge", id: "goblin-warrior" }, ctx);
 // { ok: false, reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"] }
 ```
 
+Each result also has `events`: what the action changed, as data (a turn, a move with its path,
+HP before and after, conditions, Concentration, the economy and resources spent, effects,
+zones), for animations and a combat log. A refusal's `EncounterError` has a `codes` entry per
+message (`not_your_turn`, `out_of_range`, `total_cover`, `no_resources`…). Undo: an action's
+result lists the dice it drew (`rolls`), so a history (`createHistory`, `recordAction`)
+replays to the same state, and `undoAction` replays all but the last action.
+
 Previews for a map, before anything is sent: `reachableSquares(encounter, id, ctx)` (every
 square a combatant can end a move on, with its cost), `previewMove(encounter, { id, to }, ctx)`
 (the path, its cost, the zones on the way and the Opportunity Attacks it would provoke) and
@@ -397,7 +404,7 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
-| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, pending, applied }`: Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
+| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, events, log, pending, applied }` (`log`: each action with the dice it drew): Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
 | `POST /v1/encounters/options` | `{ encounter, characters, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
 | `POST /v1/encounters/reachable` · `/preview-move` · `/preview-area` | `{ encounter, characters, id }` (+ `to` or `path`; + `area` and `spell`, `ability` or `legendary`) → where it can move, what a move or an area would do (schemas in `schemas/`) |
 | `POST /v1/encounters/check` | `{ encounter, characters, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |
@@ -410,7 +417,8 @@ Attacks and spells use builds and states (`/v1/state/attack`, `/v1/state/cast`) 
 encounter.
 
 Invalid bodies return `422` with a readable message; bad JSON, bad dice expressions and refused
-setters or actions return `400` with the reasons in `detail`; unknown routes and entities `404`.
+setters or actions return `400` with the reasons in `detail` (and an encounter's refusal codes in
+`codes`); unknown routes and entities `404`.
 
 ## Homebrew and custom content
 

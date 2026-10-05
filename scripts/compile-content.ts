@@ -25,6 +25,8 @@ import { splitPack } from "../src/content/split";
 import { CharacterBuildSchema } from "../src/models/build";
 import { CreationSchema } from "../src/models/content";
 import { EncounterActionSchema, EncounterSchema } from "../src/models/encounter";
+import { EncounterEventSchema } from "../src/models/events";
+import { EncounterHistorySchema } from "../src/models/history";
 import { CombatantOptionsSchema } from "../src/models/options";
 import { PackManifestSchema, PatchSchema } from "../src/models/pack";
 import { AreaPreviewSchema, MovePreviewSchema, ReachableSchema } from "../src/models/previews";
@@ -91,6 +93,11 @@ outputs.set("schemas/options.schema.json", result(CombatantOptionsSchema, "Comba
 outputs.set("schemas/reachable.schema.json", result(ReachableSchema, "Reachable squares"));
 outputs.set("schemas/move-preview.schema.json", result(MovePreviewSchema, "Move preview"));
 outputs.set("schemas/area-preview.schema.json", result(AreaPreviewSchema, "Area preview"));
+outputs.set("schemas/encounter-event.schema.json", result(EncounterEventSchema, "Encounter event"));
+outputs.set(
+  "schemas/history.schema.json",
+  schema(EncounterHistorySchema, "Encounter history", false),
+);
 
 let stale = 0;
 for (const [rel, content] of outputs) {

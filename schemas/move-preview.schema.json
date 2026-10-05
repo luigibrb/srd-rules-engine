@@ -14,6 +14,30 @@
             "type": "string"
           }
         },
+        "codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "pending_decision",
+              "not_started",
+              "not_your_turn",
+              "incapacitated",
+              "defeated",
+              "economy_used",
+              "no_attacks_left",
+              "once_per_turn",
+              "out_of_range",
+              "total_cover",
+              "no_path",
+              "no_movement",
+              "no_resources",
+              "unknown",
+              "incomplete",
+              "refused"
+            ]
+          }
+        },
         "path": {
           "type": "array",
           "items": {
@@ -122,6 +146,7 @@
       "required": [
         "ok",
         "reasons",
+        "codes",
         "path",
         "cost",
         "movement_left",

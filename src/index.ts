@@ -197,6 +197,13 @@ export {
   ZoneSchema,
 } from "./models/encounter";
 export {
+  type EncounterEvent,
+  EncounterEventSchema,
+  REFUSAL_CODES,
+  type RefusalCode,
+} from "./models/events";
+export { type EncounterHistory, EncounterHistorySchema } from "./models/history";
+export {
   type ActionCheck,
   ActionCheckSchema,
   type CombatantOptions,
@@ -420,6 +427,13 @@ export {
   type MapCover,
   mapCover,
 } from "./services/encounter";
+export { encounterEvents } from "./services/events";
+export {
+  createHistory,
+  recordAction,
+  replayHistory,
+  undoAction,
+} from "./services/history";
 export {
   checkAction,
   combatantOptions,
@@ -441,3 +455,4 @@ export {
   previewMove,
   reachableSquares,
 } from "./services/previews";
+export { refusalCode } from "./services/refusals";

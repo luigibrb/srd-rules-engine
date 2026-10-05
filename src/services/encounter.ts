@@ -32,6 +32,7 @@ import {
   type SpellMark,
   type Zone,
 } from "../models/encounter";
+import type { EncounterEvent, RefusalCode } from "../models/events";
 import type { CharacterState, PlayAction } from "../models/state";
 import {
   type AreaPlacement,
@@ -86,14 +87,19 @@ import {
 } from "../rules/grid";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
+import { encounterEvents } from "./events";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
+import { refusalCode } from "./refusals";
 
 export class EncounterError extends Error {
   override name = "EncounterError";
   readonly messages: readonly string[];
+  /** A code per message, for a UI (`REFUSAL_CODES`). */
+  readonly codes: readonly RefusalCode[];
   constructor(messages: readonly string[]) {
     super(messages.join("; "));
     this.messages = messages;
+    this.codes = messages.map(refusalCode);
   }
 }
 
@@ -124,6 +130,13 @@ export interface EncounterResult {
     | null;
   /** The decision the action stopped for (also in `encounter.pending`), if any. */
   readonly pending?: Pending | null;
+  /** What changed, as data (turns, moves, HP, conditions, resources, effects, zones…). */
+  readonly events: readonly EncounterEvent[];
+  /**
+   * The dice the action drew from `rng`, in order: replaying the action with them (`scriptedRng`)
+   * gives the same result (`replayHistory`).
+   */
+  readonly rolls: readonly number[];
 }
 
 /** A new encounter. `auto_death_saves: false` leaves Death Saving Throws to the players. */
@@ -217,16 +230,42 @@ export function applyEncounterAction(
   encounter: Encounter,
   action: EncounterAction,
   outer: EncounterContext,
+  /** `events: false` skips working out `events` (a dry run doesn't need them). */
+  { events: withEvents = true }: { events?: boolean } = {},
 ): EncounterResult {
   const pending = encounter.pending;
+  const drawn: number[] = [];
+  const base = outer.rng ?? mathRng;
+  const counted: EncounterContext = {
+    ...outer,
+    rng: {
+      int: (min, max) => {
+        const value = base.int(min, max);
+        drawn.push(value);
+        return value;
+      },
+    },
+  };
+  let r: Omit<EncounterResult, "events" | "rolls">;
   if (action.type === "decide") {
     if (!pending) fail("There's no decision to make");
     // Replay the stopped action with the same dice and one more answer.
     const clear = { ...encounter, pending: null };
-    return attempt(clear, pending.action, outer, pending.rolls, [...pending.answers, action.use]);
+    r = attempt(clear, pending.action, counted, pending.rolls, [...pending.answers, action.use]);
+  } else {
+    if (pending) fail(`Waiting for a decision: ${pending.question}`);
+    r = attempt(encounter, action, counted, [], []);
   }
-  if (pending) fail(`Waiting for a decision: ${pending.question}`);
-  return attempt(encounter, action, outer, [], []);
+  if (!withEvents) return { ...r, events: [], rolls: drawn };
+  const events = encounterEvents(
+    encounter,
+    r.encounter,
+    outer.catalog,
+    outer.characters,
+    r.states,
+    action.type === "decide" && pending ? pending.action : action,
+  );
+  return { ...r, events, rolls: drawn };
 }
 
 /** Thrown when an action needs an answer it doesn't have: the action stops with nothing applied. */
@@ -246,7 +285,7 @@ function attempt(
   outer: EncounterContext,
   rolls: readonly number[],
   answers: readonly boolean[],
-): EncounterResult {
+): Omit<EncounterResult, "events" | "rolls"> {
   const recorded: number[] = [];
   const base = outer.rng ?? mathRng;
   const rng: Rng = {
@@ -285,7 +324,7 @@ function run(
   action: EncounterAction,
   outer: EncounterContext,
   answers: readonly boolean[],
-): EncounterResult {
+): Omit<EncounterResult, "events" | "rolls"> {
   const e = structuredClone(encounter) as Encounter;
   const notes: string[] = [];
   const states: Record<string, CharacterState> = {};

@@ -56,6 +56,15 @@ migrated when it's loaded.
   `POST /v1/encounters/reachable`, `/preview-move`, `/preview-area`; JSON Schemas
   `reachable`, `move-preview`, `area-preview`.
 
+- Encounter results have `events` (`EncounterEventSchema`, `schemas/encounter-event.schema.json`):
+  turns, moves, HP, conditions, status, Concentration, the economy and resources spent, effects,
+  zones and map changes, as data; and `rolls`, the dice the action drew.
+- Refusal codes: `EncounterError.codes` (`REFUSAL_CODES`, `refusalCode`), also in `checkAction`,
+  options, previews and the HTTP API's 400 responses (`codes`).
+- Undo and replay: `createHistory`, `recordAction`, `replayHistory`, `undoAction`
+  (`EncounterHistory`, `schemas/history.schema.json`). `POST /v1/encounters/apply` returns
+  `events` and `log` (each action with its dice). `srd-rules fight`: `undo`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
