@@ -19,7 +19,7 @@ src/
                    #   srd.ts (bundled SRD), split.ts (splitPack/loadPack: per-table JSON)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
-                   #   build-resolution, build-validation, sheet
+                   #   areas, grid (map: steps, walls, paths), build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   encounter.ts (initiative, turns, action economy, effects on combatants),
                    #   options.ts (what a combatant can do now: combatantOptions, checkAction),

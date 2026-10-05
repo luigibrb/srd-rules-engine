@@ -482,6 +482,21 @@ list of actions.
   (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
   within 5 feet or in range, as before. Cover is given per attack (`cover`) or per target
   (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted.
+- **The map.** `encounter.map` holds walls (segments between grid corners: corner `x,y` is the
+  top-left corner of square `x,y`), Difficult Terrain squares and blocked squares (a pillar,
+  solid rock); `set_terrain`, `add_wall` and `remove_wall` change it (the GM's actions, no
+  economy). The pure grid rules are in `src/rules/grid.ts` (`gridDistance`, `straightPath`,
+  `stepBlocked`, `stepCost`, `findPath`). A step costs 5 feet, or 10 when a square it enters is
+  Difficult Terrain: the map's, a zone's whose spell says so (`zone.difficult`: Web, Grease,
+  Spike Growth, Sleet Storm, Black Tentacles, Insect Plague), or another creature's space that
+  isn't an ally's or a Tiny creature's (SRD "Moving around Other Creatures"). A creature passes
+  through an ally, an Incapacitated creature, a Tiny one or one two sizes larger or smaller;
+  any other creature's space, a wall or a blocked square stops the step. A `path` is checked
+  step by step; a move `to` a square goes straight when nothing blocks it, else along the
+  cheapest path (A* over the 8 neighbours, deterministic ties, so a replayed decision moves the
+  same way), refused with its cost when it's too far ("can't reach 4,7 (needs 40 ft, 30
+  left)"). An enemy whose reach the mover leaves at any step is noted for its Opportunity
+  Attack. A move can't end in a blocked square, nor can `place`.
 - **Areas of effect.** A spell's `mechanics.area` and a monster save effect's `area` (read from
   "each creature in a 60-foot Cone") place on the grid with `area: { point }` (a Sphere,
   Cylinder or Cube) or `area: { toward }` (a Cone or Line aimed at a square) on `cast`,
@@ -714,9 +729,20 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Positions**
 
-- Moving to a square costs the straight count of squares; Difficult Terrain, walls and the path
-  taken aren't on the map (give `feet` instead for a longer route). Leaving an enemy's reach is
-  judged from where the move starts and ends.
+- **Walls on the grid.** The SRD doesn't say how walls sit on a grid: a wall is a segment
+  between grid corners, so it stands between squares; a step goes from square center to square
+  center and is blocked when that line touches a wall, so a diagonal can't cut a wall's corner
+  (SRD "Corners") nor pass the corner of a blocked square.
+- **Larger creatures on the map.** A Large or bigger creature moves all its squares by the same
+  step, each of which must be free; the step costs double when any square it enters is
+  Difficult Terrain.
+- **Which path.** A move `to` a square goes straight (diagonals first) when nothing blocks it,
+  even if a detour would cost less; otherwise it takes the cheapest path, which doesn't avoid
+  zones (give `path` to choose the route). The whole route's cost is checked against the
+  movement left before the move starts, even if something stops the creature on the way.
+- **Leaving reach on the way.** An enemy whose reach the mover leaves at any step of its path can
+  make an Opportunity Attack (noted once per enemy, after the move).
+- Spirit Guardians' "Speed is halved in the Emanation" isn't applied.
 - A Tiny creature takes one square; several Tiny creatures can't share it.
 - Close combat's "an enemy who can see you", and cover itself, are the caller's to judge.
 - An Opportunity Attack (`opportunity: true`) skips the reach check: it happens just before the
@@ -766,7 +792,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there's no map of walls and Difficult Terrain, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
+cover and line of sight aren't worked out from the map, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

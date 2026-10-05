@@ -20,6 +20,7 @@ import {
   currentCombatant,
   EncounterError,
   encounterCombatant,
+  zoneArea,
 } from "../services/encounter";
 import { combatantOptions } from "../services/options";
 import { computePlaySheet, createState } from "../services/play";
@@ -52,6 +53,8 @@ Targets are ids, names or numbers from the status table.
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
   escape · stand · move <feet> · move <x> <y> · check <skill|ability> [dc]
   place <who> <x> <y>   put a combatant on the grid (5-foot squares)    map   show the grid
+  terrain difficult|blocked|clear <x> <y> [<x2> <y2>]   (a square or a rectangle)
+  wall [remove] <x1> <y1> <x2> <y2>   a wall between grid corners (corner x,y: square x,y's top left)
   dmg <t> <n> [type] · heal <t> <n> · cond <t> <condition> · cond <t> -<condition>
   ask on|off [<t>]   decisions after a roll: ask, or let the engine decide (auto)
   options [<who>]    what a combatant can do now, and why not (dimmed)
@@ -188,39 +191,82 @@ export class FightApp {
     return `${c.name} [${c.id}] AC ${view.armor_class} · ${hp}${temp}${conditions}${tail} · Init ${c.initiative}${at}`;
   }
 
-  /** The grid around the positioned combatants: each shown by its number in the order. */
+  /**
+   * The grid around the positioned combatants, each shown by its number in the order: `#`
+   * blocked, `~` Difficult Terrain, `*` a zone; walls as `|` and `—` between squares.
+   */
   private map(): void {
     const e = this.encounter;
+    const ctx = this.context();
     const placed = e.order
       .map((id, i) => [e.combatants.find((c) => c.id === id) as EncounterCombatant, i + 1] as const)
       .filter(([c]) => c.position && !c.defeated);
-    if (!placed.length) {
+    const { walls, difficult, blocked } = e.map;
+    if (!placed.length && !walls.length && !difficult.length && !blocked.length) {
       this.con.info("Nobody is on the grid: 'place <who> <x> <y>'.");
       return;
     }
     const cells = new Map<string, string>();
+    const at = (p: { x: number; y: number }) => `${p.x},${p.y}`;
+    for (const z of e.zones) {
+      for (const sq of zoneArea(e, ctx, z) ?? []) cells.set(sq, z.difficult ? "~" : "*");
+    }
+    for (const p of difficult) cells.set(at(p), "~");
+    for (const p of blocked) cells.set(at(p), "#");
+    const bounds: { x: number; y: number }[] = [...difficult, ...blocked];
+    for (const w of walls) bounds.push(w.from, { x: w.to.x - 1, y: w.to.y - 1 });
     for (const [c, n] of placed) {
       const pos = c.position as { x: number; y: number };
       const size =
         { large: 2, huge: 3, gargantuan: 4 }[
-          (encounterCombatant(e, c.id, this.context()).size ?? "") as "large"
+          (encounterCombatant(e, c.id, ctx).size ?? "") as "large"
         ] ?? 1;
       const mark = n < 10 ? String(n) : String.fromCharCode(87 + n); // 10 → a
       for (let dx = 0; dx < size; dx++)
-        for (let dy = 0; dy < size; dy++) cells.set(`${pos.x + dx},${pos.y + dy}`, mark);
+        for (let dy = 0; dy < size; dy++) {
+          cells.set(`${pos.x + dx},${pos.y + dy}`, mark);
+          bounds.push({ x: pos.x + dx, y: pos.y + dy });
+        }
     }
-    const xs = [...cells.keys()].map((k) => Number(k.split(",")[0]));
-    const ys = [...cells.keys()].map((k) => Number(k.split(",")[1]));
+    const xs = bounds.map((p) => p.x);
+    const ys = bounds.map((p) => p.y);
     const [x0, x1, y0, y1] = [
       Math.min(...xs) - 1,
       Math.max(...xs) + 1,
       Math.min(...ys) - 1,
       Math.max(...ys) + 1,
     ];
+    // A wall along grid line x (vertical) or y (horizontal) covering one square's edge.
+    const vertical = (x: number, y: number) =>
+      walls.some(
+        (w) =>
+          w.from.x === x &&
+          w.to.x === x &&
+          Math.min(w.from.y, w.to.y) <= y &&
+          y + 1 <= Math.max(w.from.y, w.to.y),
+      );
+    const horizontal = (x: number, y: number) =>
+      walls.some(
+        (w) =>
+          w.from.y === y &&
+          w.to.y === y &&
+          Math.min(w.from.x, w.to.x) <= x &&
+          x + 1 <= Math.max(w.from.x, w.to.x),
+      );
     this.con.info(`x ${x0}…${x1}, y ${y0}…${y1}; each square is 5 feet`);
     for (let y = y0; y <= y1; y++) {
-      let row = "  ";
-      for (let x = x0; x <= x1; x++) row += `${cells.get(`${x},${y}`) ?? "·"} `;
+      let edge = "  ";
+      let any = false;
+      for (let x = x0; x <= x1; x++) {
+        const wall = horizontal(x, y);
+        any ||= wall;
+        edge += wall ? "— " : "  ";
+      }
+      if (any) this.con.say(edge.trimEnd());
+      let row = ` ${vertical(x0, y) ? "|" : " "}`;
+      for (let x = x0; x <= x1; x++) {
+        row += `${cells.get(`${x},${y}`) ?? "·"}${vertical(x + 1, y) ? "|" : " "}`;
+      }
       this.con.say(row);
     }
   }
@@ -394,6 +440,37 @@ export class FightApp {
       }
       case "map":
         return this.map();
+      case "terrain": {
+        const [kind, ...rest] = args;
+        const [x, y, x2 = x, y2 = y] = rest.map(Number);
+        if (
+          !["difficult", "blocked", "clear"].includes(kind ?? "") ||
+          ![x, y, x2, y2].every(Number.isInteger)
+        ) {
+          return this.con.error("Usage: terrain difficult|blocked|clear <x> <y> [<x2> <y2>]");
+        }
+        const squares: { x: number; y: number }[] = [];
+        const [ax, bx] = [Math.min(x as number, x2 as number), Math.max(x as number, x2 as number)];
+        const [ay, by] = [Math.min(y as number, y2 as number), Math.max(y as number, y2 as number)];
+        for (let i = ax; i <= bx; i++) for (let j = ay; j <= by; j++) squares.push({ x: i, y: j });
+        return this.apply({
+          type: "set_terrain",
+          squares,
+          kind: kind as "difficult" | "blocked" | "clear",
+        });
+      }
+      case "wall": {
+        const remove = args[0] === "remove";
+        const [x1, y1, x2, y2] = args.slice(remove ? 1 : 0).map(Number);
+        if (![x1, y1, x2, y2].every(Number.isInteger)) {
+          return this.con.error("Usage: wall [remove] <x1> <y1> <x2> <y2> (grid corners)");
+        }
+        return this.apply({
+          type: remove ? "remove_wall" : "add_wall",
+          from: { x: x1 as number, y: y1 as number },
+          to: { x: x2 as number, y: y2 as number },
+        });
+      }
       case "check":
         return this.check(id, args);
       case "dmg":

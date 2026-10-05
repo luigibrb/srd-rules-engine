@@ -26083,7 +26083,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": true
                 }
             }
         },
@@ -27439,7 +27440,8 @@
                     "anchor": "point",
                     "space": 1,
                     "ram": true,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -27880,7 +27882,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -28233,7 +28236,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": true
                 }
             }
         },
@@ -28377,7 +28381,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": true
                 }
             }
         },
@@ -28616,7 +28621,8 @@
                     "anchor": "point",
                     "space": 2,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -29281,7 +29287,8 @@
                     "ram": false,
                     "on_fail": [
                         "lose_concentration"
-                    ]
+                    ],
+                    "difficult": true
                 }
             }
         },
@@ -29413,7 +29420,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -29476,7 +29484,8 @@
                     "ram": false,
                     "on_fail": [
                         "no_actions"
-                    ]
+                    ],
+                    "difficult": false
                 }
             }
         },
@@ -29749,7 +29758,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": true
                 }
             }
         },
@@ -30008,7 +30018,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -30703,7 +30714,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },
@@ -31134,7 +31146,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": true
                 }
             }
         },
@@ -33022,7 +33035,8 @@
                     "anchor": "caster",
                     "space": 1,
                     "ram": false,
-                    "on_fail": []
+                    "on_fail": [],
+                    "difficult": false
                 }
             }
         },

@@ -161,7 +161,7 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     conditions: [{ condition: "prone", on: "failed_save" }],
     area: { shape: "cube", size: 10 }, // "a 10-foot square"
     // No "only once per turn".
-    zone: { triggers: ["enter", "end_turn"], once_per_turn: false },
+    zone: { triggers: ["enter", "end_turn"], once_per_turn: false, difficult: true },
   },
   // Level 2
   moonbeam: {
@@ -176,7 +176,7 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     // "while in the webs or until it breaks free": a Strength (Athletics) check, as an action.
     conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
     area: { shape: "cube", size: 20 },
-    zone: { triggers: ["enter", "start_turn"], on_cast: false },
+    zone: { triggers: ["enter", "start_turn"], on_cast: false, difficult: true },
   },
   "flaming-sphere": {
     save: { ability: "dex", on_success: "half" },
@@ -196,7 +196,7 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     // "2d4 Piercing damage for every 5 feet it travels" in the area; no save.
     damage: [{ dice: "2d4", type: "piercing" }],
     area: { shape: "sphere", size: 20 },
-    zone: { triggers: ["move"], on_cast: false },
+    zone: { triggers: ["move"], on_cast: false, difficult: true },
   },
   // Level 3
   "conjure-animals": {
@@ -217,7 +217,12 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     save: { ability: "dex", on_success: "none" },
     conditions: [{ condition: "prone", on: "failed_save" }],
     area: { shape: "cylinder", size: 20 },
-    zone: { triggers: ["enter", "start_turn"], on_cast: false, on_fail: ["lose_concentration"] },
+    zone: {
+      triggers: ["enter", "start_turn"],
+      on_cast: false,
+      on_fail: ["lose_concentration"],
+      difficult: true,
+    },
   },
   "stinking-cloud": {
     save: { ability: "con", on_success: "none" },
@@ -241,7 +246,7 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     // "has the Restrained condition until the spell ends"
     conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
     area: { shape: "cube", size: 20 }, // "a 20-foot square"
-    zone: { triggers: ["enter", "end_turn"] },
+    zone: { triggers: ["enter", "end_turn"], difficult: true },
   },
   "conjure-woodland-beings": {
     save: { ability: "wis", on_success: "half" },
@@ -263,7 +268,7 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     damage: [{ dice: "4d10", type: "piercing" }],
     upcast: { damage: [{ dice: "1d10", type: "piercing" }] },
     area: { shape: "sphere", size: 20 },
-    zone: { triggers: ["enter", "end_turn"] },
+    zone: { triggers: ["enter", "end_turn"], difficult: true },
   },
   // Level 8
   "incendiary-cloud": {

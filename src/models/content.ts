@@ -1018,6 +1018,8 @@ export const SpellMechanicsSchema = z
         ram: z.boolean().default(false),
         /** What a failed save also does: no action or Bonus Action this turn, Concentration lost. */
         on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
+        /** Its area is Difficult Terrain while it lasts (Web, Spike Growth). */
+        difficult: z.boolean().default(false),
       })
       .nullable()
       .default(null),

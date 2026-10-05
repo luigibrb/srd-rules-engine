@@ -373,7 +373,8 @@ mechanics:
 #                                               # an area that lasts (needs save and area)
 #         zone: {triggers: [move]}              # damage per 5 feet moved in it, no save
 #         zone: {..., optional: true, anchor: point, space: 2, ram: false,
-#                on_fail: [no_actions, lose_concentration]}
+#                on_fail: [no_actions, lose_concentration],
+#                difficult: true}               # its area is Difficult Terrain (Web)
 ```
 
 A spell has an attack roll or a save, not both; a `follow_up` save comes after an attack. Damage from a save is rolled once for every
