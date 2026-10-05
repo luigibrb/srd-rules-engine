@@ -480,8 +480,9 @@ list of actions.
   feet", Touch) is checked; Unarmed Strike and Help need 5 ft. Moving to a square costs its
   distance, can't end in another creature's space, and notes the enemies whose reach it leaves
   (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
-  within 5 feet or in range, as before. Cover is given per attack (`cover`) or per target
-  (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted.
+  within 5 feet or in range, as before. Cover can be given per attack (`cover`) or per target
+  (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted;
+  with positions and no cover given, it's worked out from the map (below).
 - **The map.** `encounter.map` holds walls (segments between grid corners: corner `x,y` is the
   top-left corner of square `x,y`), Difficult Terrain squares and blocked squares (a pillar,
   solid rock); `set_terrain`, `add_wall` and `remove_wall` change it (the GM's actions, no
@@ -497,6 +498,16 @@ list of actions.
   same way), refused with its cost when it's too far ("can't reach 4,7 (needs 40 ft, 30
   left)"). An enemy whose reach the mover leaves at any step is noted for its Opportunity
   Attack. A move can't end in a blocked square, nor can `place`.
+- **Cover and line of effect.** With positions, a target's cover is worked out from the map
+  unless the caller gives `cover` (which wins): from the attacker's space for attacks, spells
+  and save effects aimed at creatures, from an area's point of origin for creatures in an area
+  (`mapCover`, `coverDegree` in `rules/grid.ts`). Walls and blocked squares block lines; another
+  creature a clear line passes through gives Half Cover. Half and Three-Quarters Cover add +2 or
+  +5 to AC and Dexterity saves and are noted ("Guard has Half Cover (behind an obstacle)."); a
+  target behind Total Cover can't be targeted (no clear path), and a creature in an area with
+  Total Cover from its point of origin isn't affected. An area's squares (zones' too) leave out
+  blocked squares and those with no clear line from the point of origin (SRD "Area of Effect").
+  `combatantOptions` leaves targets behind Total Cover out of its candidates.
 - **Areas of effect.** A spell's `mechanics.area` and a monster save effect's `area` (read from
   "each creature in a 60-foot Cone") place on the grid with `area: { point }` (a Sphere,
   Cylinder or Cube) or `area: { toward }` (a Cone or Line aimed at a square) on `cast`,
@@ -744,9 +755,27 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   make an Opportunity Attack (noted once per enemy, after the move).
 - Spirit Guardians' "Speed is halved in the Emanation" isn't applied.
 - A Tiny creature takes one square; several Tiny creatures can't share it.
-- Close combat's "an enemy who can see you", and cover itself, are the caller's to judge.
+- Close combat's "an enemy who can see you" is the caller's to judge; so is cover without
+  positions.
 - An Opportunity Attack (`opportunity: true`) skips the reach check: it happens just before the
   target leaves, after the target's move was recorded.
+
+**Cover and line of effect**
+
+- **Cover on a grid.** The SRD gives cover's degrees and what offers them, not how to find them
+  on a grid; the engine uses the DMG's grid method: from the corner of the attacker's space that
+  sees best (or an area's point of origin), lines to the four corners of the target's least
+  covered square; none blocked: no cover; 1–2: Half; 3: Three-Quarters; 4: Total. A line that
+  only grazes an obstacle (along a wall's face, past its free end, or past a single corner) isn't
+  blocked; one through the corner where two walls or blocked squares meet is.
+- **Creatures as cover.** Another creature (ally or enemy) that a clear line passes through gives
+  Half Cover, against areas too (SRD: "another creature"); it never gives more than Half.
+- **Points of origin.** A Sphere's or Cylinder's is its grid intersection, a Cube's its center
+  (the SRD puts it on a face), an Emanation's, Cone's or Line's the center of the space it comes
+  from. A square is in an area when the line from the point of origin to its center is clear
+  (the SRD: when not all lines to it are blocked).
+- Cover isn't worked out for a zone's later saves, nor for a follow-up save's creatures (Ice
+  Knife); "a creature you can see" (vision, light, Invisible) stays the caller's.
 
 **Areas of effect**
 
@@ -792,7 +821,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-cover and line of sight aren't worked out from the map, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
+spell walls (Wall of Fire, Blade Barrier) aren't on the map, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

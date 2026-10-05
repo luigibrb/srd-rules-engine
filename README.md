@@ -276,7 +276,8 @@ Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a g
 Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
 Slow, Topple, Push, Cleave, Nick), positions on a 5-foot grid (optional: reach, range, close
 combat, spell range, cover, Opportunity Attacks when leaving reach, areas of effect choosing their
-targets; a map of walls, blocked squares and Difficult Terrain that moves find their way around), casting times, monsters' spells (through the action that
+targets; a map of walls, blocked squares and Difficult Terrain that moves find their way around,
+and cover and lines of effect worked out from it), casting times, monsters' spells (through the action that
 lists them, with daily uses and fixed levels), class features used in turns (`feature`: Second Wind, Action Surge, Flurry of
 Blows, Stunning Strike, Bardic Inspiration…), and decisions after a roll (Bardic Inspiration,
 Legendary Resistance, Uncanny Dodge): with `decisions: "ask"` the action stops and shows the roll
@@ -466,9 +467,9 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, ability and skill checks, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), spellcasting (97 casting actions: spell lists, daily uses, fixed levels), "X/Day" limits, legendary actions and Legendary Resistance usable in combat; other traits as text |
-| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, spell areas that last (zones), casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration, walls and Difficult Terrain on the grid; what a combatant can do now, with the reasons for what it can't |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, spell areas that last (zones), casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration, walls and Difficult Terrain on the grid, cover and line of effect from them; what a combatant can do now, with the reasons for what it can't |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository; the SRD split by table for browsers, catalogs with only some tables |
-| Not yet | Cover and line of sight worked out from the map, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
+| Not yet | Spell walls (Wall of Fire, Blade Barrier) on the map, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 
 What comes next is in [docs/ROADMAP.md](docs/ROADMAP.md); the design is in
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).

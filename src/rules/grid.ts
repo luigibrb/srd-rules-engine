@@ -239,3 +239,157 @@ function directions(p: GridPoint, to: GridPoint): [number, number][] {
     Math.abs(dx - sx) + Math.abs(dy - sy) - (dx && dy ? 0.5 : 0);
   return all.sort((a, b) => score(a) - score(b));
 }
+
+// --- line of effect and cover -------------------------------------------------------------------
+//
+// The SRD gives cover's degrees but no way to work them out on a grid; this reads them the way
+// the DMG's grid variant does (flagged in ARCHITECTURE.md): from the corner of the attacker's
+// space (or an area's point of origin) that sees best, lines to the four corners of the target's
+// square that's least covered; walls and blocked squares block lines: none blocked, no cover; 1–2,
+// Half; 3, Three-Quarters; 4, Total. A line that only grazes an obstacle (along its face, past a
+// free end or a single corner) isn't blocked. Another creature a clear line passes through gives
+// Half Cover.
+
+export type CoverDegree = "none" | "half" | "three_quarters" | "total";
+
+/** Walls plus the four edges of every blocked square: everything that blocks a line. */
+export function obstacles(walls: readonly Wall[], blocked: Iterable<string>): Wall[] {
+  const out = [...walls];
+  for (const k of blocked) {
+    const [x, y] = k.split(",").map(Number) as [number, number];
+    out.push(
+      { from: { x, y }, to: { x: x + 1, y } },
+      { from: { x: x + 1, y }, to: { x: x + 1, y: y + 1 } },
+      { from: { x: x + 1, y: y + 1 }, to: { x, y: y + 1 } },
+      { from: { x, y: y + 1 }, to: { x, y } },
+    );
+  }
+  return out;
+}
+
+const EPS = 1e-9;
+const cross = (ax: number, ay: number, bx: number, by: number) => ax * by - ay * bx;
+
+/**
+ * Whether the line from `a` to `b` gets past every obstacle. It's blocked where obstacles meet it
+ * at a point between its ends with parts on both of its sides (it crosses a wall, or goes through
+ * the corner where two walls meet); a line that only touches one side isn't.
+ */
+export function lineClear(a: GridPoint, b: GridPoint, walls: readonly Wall[]): boolean {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  if (Math.abs(dx) < EPS && Math.abs(dy) < EPS) return true;
+  // Points along the line (by t in (0, 1)) and the sides obstacles reach from them.
+  const sides = new Map<string, { left: boolean; right: boolean }>();
+  const mark = (t: number, ox: number, oy: number) => {
+    const side = cross(dx, dy, ox, oy);
+    if (Math.abs(side) < EPS) return;
+    const k = t.toFixed(9);
+    const s = sides.get(k) ?? { left: false, right: false };
+    if (side > 0) s.left = true;
+    else s.right = true;
+    sides.set(k, s);
+  };
+  for (const w of walls) {
+    const ex = w.to.x - w.from.x;
+    const ey = w.to.y - w.from.y;
+    const denom = cross(dx, dy, ex, ey);
+    if (Math.abs(denom) < EPS) continue; // parallel or along it: it doesn't cross
+    const fx = w.from.x - a.x;
+    const fy = w.from.y - a.y;
+    const t = cross(fx, fy, ex, ey) / denom; // along the line
+    const u = cross(fx, fy, dx, dy) / denom; // along the wall
+    if (t <= EPS || t >= 1 - EPS || u < -EPS || u > 1 + EPS) continue;
+    // From the meeting point, the wall goes toward its ends that aren't the point itself.
+    if (u > EPS) mark(t, -ex * u, -ey * u);
+    if (u < 1 - EPS) mark(t, ex * (1 - u), ey * (1 - u));
+  }
+  for (const s of sides.values()) if (s.left && s.right) return false;
+  return true;
+}
+
+/** Whether the line from `a` to `b` passes through the inside of a space (its edges don't count). */
+export function throughSpace(
+  a: GridPoint,
+  b: GridPoint,
+  space: { position: GridPoint; size: number },
+): boolean {
+  const [x0, y0] = [space.position.x, space.position.y];
+  const [x1, y1] = [x0 + space.size, y0 + space.size];
+  let lo = 0;
+  let hi = 1;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  for (const [p, q] of [
+    [-dx, a.x - x0],
+    [dx, x1 - a.x],
+    [-dy, a.y - y0],
+    [dy, y1 - a.y],
+  ] as const) {
+    if (Math.abs(p) < EPS) {
+      if (q <= EPS) return false; // along an edge or outside
+      continue;
+    }
+    const r = q / p;
+    if (p < 0) lo = Math.max(lo, r);
+    else hi = Math.min(hi, r);
+  }
+  if (hi - lo <= EPS) return false;
+  const mx = a.x + dx * ((lo + hi) / 2);
+  const my = a.y + dy * ((lo + hi) / 2);
+  return mx > x0 + EPS && mx < x1 - EPS && my > y0 + EPS && my < y1 - EPS;
+}
+
+/** The four corners of a space (its outer corners, for a creature larger than Medium). */
+export function spaceCorners(space: { position: GridPoint; size: number }): GridPoint[] {
+  const { x, y } = space.position;
+  const s = space.size;
+  return [
+    { x, y },
+    { x: x + s, y },
+    { x, y: y + s },
+    { x: x + s, y: y + s },
+  ];
+}
+
+const DEGREES: readonly CoverDegree[] = ["none", "half", "three_quarters", "total"];
+
+/**
+ * A target's cover from `origins` (the corners of an attacker's space, or an area's point of
+ * origin): the least covered of its squares, seen from the origin that sees best. `creatures`
+ * are the other creatures' spaces; `by` is the index of the one giving Half Cover, if that's
+ * what decided it.
+ */
+export function coverDegree(
+  origins: readonly GridPoint[],
+  target: { position: GridPoint; size: number },
+  walls: readonly Wall[],
+  creatures: readonly { position: GridPoint; size: number }[] = [],
+): { degree: CoverDegree; by: number | null } {
+  let best: { degree: CoverDegree; by: number | null } = { degree: "total", by: null };
+  const squares: GridPoint[] = [];
+  for (let dx = 0; dx < target.size; dx++)
+    for (let dy = 0; dy < target.size; dy++) {
+      squares.push({ x: target.position.x + dx, y: target.position.y + dy });
+    }
+  for (const a of origins) {
+    for (const sq of squares) {
+      const corners = spaceCorners({ position: sq, size: 1 });
+      const clear = corners.filter((c) => lineClear(a, c, walls));
+      const blocked = 4 - clear.length;
+      let degree: CoverDegree =
+        blocked === 0 ? "none" : blocked <= 2 ? "half" : blocked === 3 ? "three_quarters" : "total";
+      let by: number | null = null;
+      if (degree === "none") {
+        const i = creatures.findIndex((space) => clear.some((c) => throughSpace(a, c, space)));
+        if (i >= 0) {
+          degree = "half";
+          by = i;
+        }
+      }
+      if (DEGREES.indexOf(degree) < DEGREES.indexOf(best.degree)) best = { degree, by };
+      if (best.degree === "none") return best;
+    }
+  }
+  return best;
+}

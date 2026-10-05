@@ -71,10 +71,11 @@ Lute: Bard 5, HP 33, AC 14, slots 4×L1 3×L2 2×L3, with Vicious Mockery, Heali
 
   Round 1: Ilse's turn.
   Fireball's Sphere covers Red Dragon Wyrmling, Goblin Warrior 2, Goblin Warrior 3.
+  Goblin Warrior 2 has Half Cover (behind Goblin Warrior 3).
   Ilse casts Fireball.
   Red Dragon Wyrmling: fails (8 vs DC 14): 36 fire.
   Immunity to fire: 36 damage ignored.
-  Goblin Warrior 2: fails (13 vs DC 14): 36 fire.
+  Goblin Warrior 2: succeeds (15 vs DC 14): 18 fire.
   Goblin Warrior 2 drops to 0 Hit Points and dies.
   Goblin Warrior 3: succeeds (18 vs DC 14): 18 fire.
   Goblin Warrior 3 drops to 0 Hit Points and dies.
@@ -88,9 +89,10 @@ Lute: Bard 5, HP 33, AC 14, slots 4×L1 3×L2 2×L3, with Vicious Mockery, Heali
   Round 2: Red Dragon Wyrmling's turn.
   ? Brakka: Dexterity saving throw 10 vs 13. Add the Bardic Inspiration die (d8)? → yes
   Fire Breath's Cone covers Brakka, Goblin Warrior.
+  Goblin Warrior has Half Cover (behind Brakka).
   Brakka adds its Bardic Inspiration die: 4.
   Brakka: succeeds (14 vs DC 13): 13 fire.
-  Goblin Warrior: fails (3 vs DC 13): 26 fire.
+  Goblin Warrior: fails (5 vs DC 13): 26 fire.
   Goblin Warrior drops to 0 Hit Points and dies.
   Goblin Warrior is out of the fight: turn skipped.
   Goblin Warrior 2 is out of the fight: turn skipped.
