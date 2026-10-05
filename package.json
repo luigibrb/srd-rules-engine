@@ -99,10 +99,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/srd-rules-engine.git"
+    "url": "git+https://github.com/luigibrb/srd-rules-engine.git"
   },
-  "homepage": "https://github.com/OWNER/srd-rules-engine#readme",
+  "homepage": "https://github.com/luigibrb/srd-rules-engine#readme",
   "bugs": {
-    "url": "https://github.com/OWNER/srd-rules-engine/issues"
+    "url": "https://github.com/luigibrb/srd-rules-engine/issues"
   }
 }
