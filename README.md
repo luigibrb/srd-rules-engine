@@ -56,7 +56,7 @@ npm install srd-rules-engine
 | `srd-rules-engine/http` | `createHandler()`: the HTTP API as a `fetch` handler | everywhere |
 | `srd-rules-engine/node` | Everything above, plus `loadContentPack(dir)` and `serveNode()` | Node |
 | `srd-rules-engine/srd-5.2.1.json` | The SRD content as one JSON file | any language |
-| `srd-rules-engine/schemas/*.json` | JSON Schemas for content files, pack manifests, patches and builds | any language |
+| `srd-rules-engine/schemas/*.json` | JSON Schemas for content files, pack manifests, patches, builds, play states, encounters and their actions | any language |
 
 ## Usage
 
@@ -402,8 +402,10 @@ content from other books in your own (private) packs.
 The engine is TypeScript, but you don't need TypeScript to use it:
 
 - **Data only:** `srd-5.2.1.json` holds every validated entity (monsters included) with
-  defaults filled in, and `schemas/` describes content files, pack manifests, patches and saved
-  builds.
+  defaults filled in, and `schemas/` describes content files, pack manifests, patches, saved
+  builds, play states (`state.schema.json`), encounters (`encounter.schema.json`) and the actions
+  that change them (`play-action.schema.json`, `encounter-action.schema.json`: one action or a
+  list).
 - **Rules as a service:** run `npx srd-rules serve` (or deploy the handler) and call
   `POST /v1/builds/evaluate`, `/v1/state/apply` or `/v1/encounters/apply` from Python, Go, C#,
   GDScript, or anything else.

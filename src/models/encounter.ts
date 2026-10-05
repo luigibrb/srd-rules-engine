@@ -269,290 +269,296 @@ const n = z.int();
 export const ECONOMY = ["action", "bonus_action", "reaction"] as const;
 
 /** Everything that can happen in an encounter, as plain JSON. */
-export const EncounterActionSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("add_monster"),
-    monster: z.string(),
-    /** Default: the monster's id, numbered if taken (`goblin-warrior-2`). */
-    id: id.optional(),
-    name: z.string().optional(),
-    side: z.string().optional(),
-    /** Fixed HP; default the stat block's average, or `roll_hp` to roll its Hit Dice. */
-    hp: n.min(1).optional(),
-    roll_hp: z.boolean().optional(),
-    /** In its lair: the stat block's lair values for legendary uses. */
-    in_lair: z.boolean().optional(),
-    /** `false`: don't spend Legendary Resistance automatically on a failed save. */
-    auto_legendary_resistance: z.boolean().optional(),
-    decisions: z.enum(["ask", "auto"]).optional(),
-  }),
-  z.object({
-    type: z.literal("add_character"),
-    character: z.string(),
-    id: id.optional(),
-    name: z.string().optional(),
-    side: z.string().optional(),
-    decisions: z.enum(["ask", "auto"]).optional(),
-  }),
-  /** Answer the pending decision. */
-  z.object({ type: z.literal("decide"), use: z.boolean() }),
-  /** Change who decides: one combatant's mode (`null`: the encounter's), or the encounter's. */
-  z.object({
-    type: z.literal("set_decisions"),
-    id: z.string().optional(),
-    mode: z.enum(["ask", "auto"]).nullable(),
-  }),
-  z.object({ type: z.literal("remove"), id: z.string() }),
-  z.object({
-    type: z.literal("roll_initiative"),
-    /** Who rolls (default: everyone without an Initiative yet). */
-    ids: z.array(z.string()).optional(),
-    /** Surprised combatants roll with Disadvantage. */
-    surprised: z.array(z.string()).optional(),
-    /** Identical monsters (same stat block) share one roll. */
-    group: z.boolean().optional(),
-  }),
-  z.object({ type: z.literal("set_initiative"), id: z.string(), value: n }),
-  /** Put tied combatants in the order the GM and players decide: every id, in order. */
-  z.object({ type: z.literal("set_order"), ids: z.array(z.string()) }),
-  z.object({ type: z.literal("start") }),
-  z.object({ type: z.literal("next_turn") }),
-  z.object({ type: z.literal("end") }),
-  z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
-  /**
-   * Move `feet`, or to the square `to` (its position: a straight count of squares, diagonals
-   * included, 5 feet each). Leaving an enemy's reach is noted: it can make an Opportunity
-   * Attack (unless the mover Disengaged).
-   */
-  z.object({
-    type: z.literal("move"),
-    id: z.string(),
-    feet: n.min(0).optional(),
-    to: z.object({ x: n, y: n }).optional(),
-  }),
-  /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
-  z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
-  /**
-   * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
-   * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
-   * Action), as for `disengage` and `dodge`.
-   */
-  z.object({ type: z.literal("dash"), id: z.string(), bonus_action: z.boolean().optional() }),
-  /** The Disengage action: its movement doesn't provoke Opportunity Attacks this turn. */
-  z.object({ type: z.literal("disengage"), id: z.string(), bonus_action: z.boolean().optional() }),
-  /**
-   * The Dodge action: until the start of its next turn, attack rolls against it have
-   * Disadvantage and it makes Dexterity saves with Advantage (not while Incapacitated or at
-   * Speed 0).
-   */
-  z.object({ type: z.literal("dodge"), id: z.string(), bonus_action: z.boolean().optional() }),
-  /**
-   * The Help action: Advantage on an ally's next attack roll against `target` (an enemy), or,
-   * with `skill` (one the helper is proficient in), on `target`'s (an ally's) next check with
-   * it. Either expires at the start of the helper's next turn.
-   */
-  z.object({
-    type: z.literal("help"),
-    id: z.string(),
-    target: z.string(),
-    skill: z.enum(SKILLS).optional(),
-  }),
-  /**
-   * An Unarmed Strike to grapple or shove (in place of one attack, like `attack`): the target
-   * saves (Strength or Dexterity: default the better) against 8 + Strength modifier + Proficiency
-   * Bonus, or is Grappled (escape DC the same) or shoved (`push` 5 feet, or `prone`).
-   */
-  z.object({
-    type: z.literal("unarmed"),
-    id: z.string(),
-    target: z.string(),
-    option: z.enum(["grapple", "shove"]),
-    shove: z.enum(["push", "prone"]).optional(),
-    save: z.enum(["str", "dex"]).optional(),
-    reaction: z.boolean().optional(),
-  }),
-  /**
-   * Escape a grapple or a spell's hold (Black Tentacles, Web): the action, a Strength (Athletics)
-   * or Dexterity (Acrobatics) check (default the better; some allow only Athletics) against its
-   * escape DC. `effect` picks the one when there are several.
-   */
-  z.object({
-    type: z.literal("escape"),
-    id: z.string(),
-    skill: z.enum(["athletics", "acrobatics"]).optional(),
-    effect: z.string().optional(),
-  }),
-  /** Right itself from Prone: half its Speed in movement. */
-  z.object({ type: z.literal("stand"), id: z.string() }),
-  /**
-   * Apply play actions to a combatant (what `makeAttack`, `castSpell` and `useSaveAction` return):
-   * a character's go to its state; a monster supports damage, heal, set_temp_hp and conditions.
-   */
-  z.object({
-    type: z.literal("effects"),
-    id: z.string(),
-    actions: z.array(PlayActionSchema),
-    /** Who caused them: a condition added here becomes a timed effect when a duration is given. */
-    source: z.string().optional(),
-    /** `N` rounds (ends at the start of the source's turn, or the target's), or… */
-    rounds: n.min(1).optional(),
-    /** …until the start or end of someone's next turn (default: the source's). */
-    until: z.object({ at: z.enum(["start", "end"]), of: z.string().optional() }).optional(),
-    /** The conditions end when the source's Concentration on `label` ends. */
-    concentration: z.boolean().optional(),
-    label: z.string().optional(),
-    /** A grapple from `source` (a stat block's "escape DC 13"): `escape` checks against it. */
-    escape_dc: n.optional(),
-  }),
-  z.object({ type: z.literal("end_effect"), effect: z.string() }),
-  /**
-   * One attack with an attack line (`makeAttack`), applied to the target. The first attack of a
-   * turn uses the action (Extra Attack allows more); `reaction: true` uses the reaction instead
-   * (`opportunity: true`: an Opportunity Attack, melee only, refused against a Disengaged
-   * target). `light_extra: true` is the Light property's extra attack: a Bonus Action after
-   * attacking with a Light weapon in the Attack action, with a different Light weapon, without a
-   * positive ability modifier on damage (with a Nick weapon: part of the Attack action, once per
-   * turn). `cleave: true` is the Cleave mastery's attack against a second creature after a hit.
-   * The weapon's mastery property applies unless `mastery: false`. Once-per-turn riders are
-   * enforced; an attack roll extends Rage; Help against the target is used up.
-   */
-  z.object({
-    type: z.literal("attack"),
-    id: z.string(),
-    target: z.string(),
-    attack: z.string(),
-    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-    two_handed: z.boolean().optional(),
-    riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
-    ally_adjacent: z.boolean().optional(),
-    /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
-    within_5ft: z.boolean().optional(),
-    reaction: z.boolean().optional(),
-    opportunity: z.boolean().optional(),
-    light_extra: z.boolean().optional(),
-    cleave: z.boolean().optional(),
-    mastery: z.boolean().optional(),
-    /** One of the attacks a feature granted this turn (Flurry of Blows). */
-    granted: z.boolean().optional(),
-    /** Throw a melee weapon with the Thrown property: a ranged attack at its range. */
-    thrown: z.boolean().optional(),
-    /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
-    cover: z.enum(["half", "three_quarters", "total"]).optional(),
-  }),
-  /**
-   * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and
-   * resource are spent, then it heals, gives an additional action (Action Surge), takes
-   * standard actions (Patient Defense), grants attacks (Flurry of Blows), forces a save after a
-   * hit (Stunning Strike), or gives a Bardic Inspiration die. `amount` for a pool (Lay on Hands).
-   */
-  z.object({
-    type: z.literal("feature"),
-    id: z.string(),
-    feature: z.string(),
-    target: z.string().optional(),
-    amount: n.min(1).optional(),
-  }),
-  /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
-  z.object({
-    type: z.literal("save_action"),
-    id: z.string(),
-    ability: z.string(),
-    targets: z.array(z.string()).optional(),
-    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
-     * Line); its targets are the positioned creatures in it. */
-    area: z
-      .object({
-        point: z.object({ x: n, y: n }).optional(),
-        toward: z.object({ x: n, y: n }).optional(),
-      })
-      .optional(),
-    /** Targets' cover, by id: +2 or +5 to Dexterity saves; Total Cover can't be targeted. */
-    cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
-  }),
-  /**
-   * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
-   * time says, spends the slot, applies the effects; a Concentration spell's conditions last
-   * while the caster concentrates, up to its duration. A monster casts it through the action
-   * that lists it (`via` when several do): that action's section decides the economy, its level
-   * is fixed, and daily uses and Recharge are counted.
-   */
-  z.object({
-    type: z.literal("cast"),
-    id: z.string(),
-    spell: z.string(),
-    via: z.string().optional(),
-    targets: z.array(z.string()).optional(),
-    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
-     * Line); its targets are the positioned creatures in it. */
-    area: z
-      .object({
-        point: z.object({ x: n, y: n }).optional(),
-        toward: z.object({ x: n, y: n }).optional(),
-      })
-      .optional(),
-    /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
-    cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
-    slot_level: n.min(1).max(9).optional(),
-    pact: z.boolean().optional(),
-    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+export const EncounterActionSchema = z
+  .discriminatedUnion("type", [
+    z.object({
+      type: z.literal("add_monster"),
+      monster: z.string(),
+      /** Default: the monster's id, numbered if taken (`goblin-warrior-2`). */
+      id: id.optional(),
+      name: z.string().optional(),
+      side: z.string().optional(),
+      /** Fixed HP; default the stat block's average, or `roll_hp` to roll its Hit Dice. */
+      hp: n.min(1).optional(),
+      roll_hp: z.boolean().optional(),
+      /** In its lair: the stat block's lair values for legendary uses. */
+      in_lair: z.boolean().optional(),
+      /** `false`: don't spend Legendary Resistance automatically on a failed save. */
+      auto_legendary_resistance: z.boolean().optional(),
+      decisions: z.enum(["ask", "auto"]).optional(),
+    }),
+    z.object({
+      type: z.literal("add_character"),
+      character: z.string(),
+      id: id.optional(),
+      name: z.string().optional(),
+      side: z.string().optional(),
+      decisions: z.enum(["ask", "auto"]).optional(),
+    }),
+    /** Answer the pending decision. */
+    z.object({ type: z.literal("decide"), use: z.boolean() }),
+    /** Change who decides: one combatant's mode (`null`: the encounter's), or the encounter's. */
+    z.object({
+      type: z.literal("set_decisions"),
+      id: z.string().optional(),
+      mode: z.enum(["ask", "auto"]).nullable(),
+    }),
+    z.object({ type: z.literal("remove"), id: z.string() }),
+    z.object({
+      type: z.literal("roll_initiative"),
+      /** Who rolls (default: everyone without an Initiative yet). */
+      ids: z.array(z.string()).optional(),
+      /** Surprised combatants roll with Disadvantage. */
+      surprised: z.array(z.string()).optional(),
+      /** Identical monsters (same stat block) share one roll. */
+      group: z.boolean().optional(),
+    }),
+    z.object({ type: z.literal("set_initiative"), id: z.string(), value: n }),
+    /** Put tied combatants in the order the GM and players decide: every id, in order. */
+    z.object({ type: z.literal("set_order"), ids: z.array(z.string()) }),
+    z.object({ type: z.literal("start") }),
+    z.object({ type: z.literal("next_turn") }),
+    z.object({ type: z.literal("end") }),
+    z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
     /**
-     * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),
-     * when positions aren't used; with positions they're found on the grid.
+     * Move `feet`, or to the square `to` (its position: a straight count of squares, diagonals
+     * included, 5 feet each). Leaving an enemy's reach is noted: it can make an Opportunity
+     * Attack (unless the mover Disengaged).
      */
-    nearby: z.array(z.string()).optional(),
-    /** The damage type, for a spell that offers a choice (Spirit Guardians). */
-    damage_type: z.enum(DAMAGE_TYPES).optional(),
-    /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
-    unaffected: z.array(z.string()).optional(),
-  }),
-  /**
-   * Creatures save against a zone (when positions don't tell who enters it or ends its turn
-   * there); each saves once per turn when the spell says so.
-   */
-  z.object({
-    type: z.literal("zone_save"),
-    zone: z.string(),
-    targets: z.array(z.string()),
-  }),
-  /**
-   * Move a zone's point (Moonbeam's Magic action, Cloudkill drifting): the creatures it moves
-   * onto save. The action it takes is the caller's.
-   */
-  z.object({ type: z.literal("move_zone"), zone: z.string(), point: z.object({ x: n, y: n }) }),
-  z.object({ type: z.literal("end_zone"), zone: z.string() }),
-  /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
-  z.object({
-    type: z.literal("check"),
-    id: z.string(),
-    skill: z.enum(SKILLS).optional(),
-    ability: z.enum(ABILITIES).optional(),
-    dc: n.optional(),
-    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-  }),
-  /** Extend Rage this turn some other way (forcing a saving throw). */
-  z.object({ type: z.literal("extend"), id: z.string() }),
-  /**
-   * A legendary action, taken right after another creature's turn: an attack (`target`, and
-   * `attack` when it offers a choice), a saving throw effect (`targets`), another action it uses,
-   * or text. Uses per round come back at the start of the monster's turn.
-   */
-  z.object({
-    type: z.literal("legendary"),
-    id: z.string(),
-    action: z.string(),
-    target: z.string().optional(),
-    targets: z.array(z.string()).optional(),
-    /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
-     * Line); its targets are the positioned creatures in it. */
-    area: z
-      .object({
-        point: z.object({ x: n, y: n }).optional(),
-        toward: z.object({ x: n, y: n }).optional(),
-      })
-      .optional(),
-    attack: z.string().optional(),
-    mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-    within_5ft: z.boolean().optional(),
-  }),
-]);
+    z.object({
+      type: z.literal("move"),
+      id: z.string(),
+      feet: n.min(0).optional(),
+      to: z.object({ x: n, y: n }).optional(),
+    }),
+    /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
+    z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
+    /**
+     * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
+     * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
+     * Action), as for `disengage` and `dodge`.
+     */
+    z.object({ type: z.literal("dash"), id: z.string(), bonus_action: z.boolean().optional() }),
+    /** The Disengage action: its movement doesn't provoke Opportunity Attacks this turn. */
+    z.object({
+      type: z.literal("disengage"),
+      id: z.string(),
+      bonus_action: z.boolean().optional(),
+    }),
+    /**
+     * The Dodge action: until the start of its next turn, attack rolls against it have
+     * Disadvantage and it makes Dexterity saves with Advantage (not while Incapacitated or at
+     * Speed 0).
+     */
+    z.object({ type: z.literal("dodge"), id: z.string(), bonus_action: z.boolean().optional() }),
+    /**
+     * The Help action: Advantage on an ally's next attack roll against `target` (an enemy), or,
+     * with `skill` (one the helper is proficient in), on `target`'s (an ally's) next check with
+     * it. Either expires at the start of the helper's next turn.
+     */
+    z.object({
+      type: z.literal("help"),
+      id: z.string(),
+      target: z.string(),
+      skill: z.enum(SKILLS).optional(),
+    }),
+    /**
+     * An Unarmed Strike to grapple or shove (in place of one attack, like `attack`): the target
+     * saves (Strength or Dexterity: default the better) against 8 + Strength modifier + Proficiency
+     * Bonus, or is Grappled (escape DC the same) or shoved (`push` 5 feet, or `prone`).
+     */
+    z.object({
+      type: z.literal("unarmed"),
+      id: z.string(),
+      target: z.string(),
+      option: z.enum(["grapple", "shove"]),
+      shove: z.enum(["push", "prone"]).optional(),
+      save: z.enum(["str", "dex"]).optional(),
+      reaction: z.boolean().optional(),
+    }),
+    /**
+     * Escape a grapple or a spell's hold (Black Tentacles, Web): the action, a Strength (Athletics)
+     * or Dexterity (Acrobatics) check (default the better; some allow only Athletics) against its
+     * escape DC. `effect` picks the one when there are several.
+     */
+    z.object({
+      type: z.literal("escape"),
+      id: z.string(),
+      skill: z.enum(["athletics", "acrobatics"]).optional(),
+      effect: z.string().optional(),
+    }),
+    /** Right itself from Prone: half its Speed in movement. */
+    z.object({ type: z.literal("stand"), id: z.string() }),
+    /**
+     * Apply play actions to a combatant (what `makeAttack`, `castSpell` and `useSaveAction` return):
+     * a character's go to its state; a monster supports damage, heal, set_temp_hp and conditions.
+     */
+    z.object({
+      type: z.literal("effects"),
+      id: z.string(),
+      actions: z.array(PlayActionSchema),
+      /** Who caused them: a condition added here becomes a timed effect when a duration is given. */
+      source: z.string().optional(),
+      /** `N` rounds (ends at the start of the source's turn, or the target's), or… */
+      rounds: n.min(1).optional(),
+      /** …until the start or end of someone's next turn (default: the source's). */
+      until: z.object({ at: z.enum(["start", "end"]), of: z.string().optional() }).optional(),
+      /** The conditions end when the source's Concentration on `label` ends. */
+      concentration: z.boolean().optional(),
+      label: z.string().optional(),
+      /** A grapple from `source` (a stat block's "escape DC 13"): `escape` checks against it. */
+      escape_dc: n.optional(),
+    }),
+    z.object({ type: z.literal("end_effect"), effect: z.string() }),
+    /**
+     * One attack with an attack line (`makeAttack`), applied to the target. The first attack of a
+     * turn uses the action (Extra Attack allows more); `reaction: true` uses the reaction instead
+     * (`opportunity: true`: an Opportunity Attack, melee only, refused against a Disengaged
+     * target). `light_extra: true` is the Light property's extra attack: a Bonus Action after
+     * attacking with a Light weapon in the Attack action, with a different Light weapon, without a
+     * positive ability modifier on damage (with a Nick weapon: part of the Attack action, once per
+     * turn). `cleave: true` is the Cleave mastery's attack against a second creature after a hit.
+     * The weapon's mastery property applies unless `mastery: false`. Once-per-turn riders are
+     * enforced; an attack roll extends Rage; Help against the target is used up.
+     */
+    z.object({
+      type: z.literal("attack"),
+      id: z.string(),
+      target: z.string(),
+      attack: z.string(),
+      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+      two_handed: z.boolean().optional(),
+      riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
+      ally_adjacent: z.boolean().optional(),
+      /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
+      within_5ft: z.boolean().optional(),
+      reaction: z.boolean().optional(),
+      opportunity: z.boolean().optional(),
+      light_extra: z.boolean().optional(),
+      cleave: z.boolean().optional(),
+      mastery: z.boolean().optional(),
+      /** One of the attacks a feature granted this turn (Flurry of Blows). */
+      granted: z.boolean().optional(),
+      /** Throw a melee weapon with the Thrown property: a ranged attack at its range. */
+      thrown: z.boolean().optional(),
+      /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
+      cover: z.enum(["half", "three_quarters", "total"]).optional(),
+    }),
+    /**
+     * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and
+     * resource are spent, then it heals, gives an additional action (Action Surge), takes
+     * standard actions (Patient Defense), grants attacks (Flurry of Blows), forces a save after a
+     * hit (Stunning Strike), or gives a Bardic Inspiration die. `amount` for a pool (Lay on Hands).
+     */
+    z.object({
+      type: z.literal("feature"),
+      id: z.string(),
+      feature: z.string(),
+      target: z.string().optional(),
+      amount: n.min(1).optional(),
+    }),
+    /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
+    z.object({
+      type: z.literal("save_action"),
+      id: z.string(),
+      ability: z.string(),
+      targets: z.array(z.string()).optional(),
+      /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+       * Line); its targets are the positioned creatures in it. */
+      area: z
+        .object({
+          point: z.object({ x: n, y: n }).optional(),
+          toward: z.object({ x: n, y: n }).optional(),
+        })
+        .optional(),
+      /** Targets' cover, by id: +2 or +5 to Dexterity saves; Total Cover can't be targeted. */
+      cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
+    }),
+    /**
+     * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
+     * time says, spends the slot, applies the effects; a Concentration spell's conditions last
+     * while the caster concentrates, up to its duration. A monster casts it through the action
+     * that lists it (`via` when several do): that action's section decides the economy, its level
+     * is fixed, and daily uses and Recharge are counted.
+     */
+    z.object({
+      type: z.literal("cast"),
+      id: z.string(),
+      spell: z.string(),
+      via: z.string().optional(),
+      targets: z.array(z.string()).optional(),
+      /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+       * Line); its targets are the positioned creatures in it. */
+      area: z
+        .object({
+          point: z.object({ x: n, y: n }).optional(),
+          toward: z.object({ x: n, y: n }).optional(),
+        })
+        .optional(),
+      /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
+      cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
+      slot_level: n.min(1).max(9).optional(),
+      pact: z.boolean().optional(),
+      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+      /**
+       * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),
+       * when positions aren't used; with positions they're found on the grid.
+       */
+      nearby: z.array(z.string()).optional(),
+      /** The damage type, for a spell that offers a choice (Spirit Guardians). */
+      damage_type: z.enum(DAMAGE_TYPES).optional(),
+      /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
+      unaffected: z.array(z.string()).optional(),
+    }),
+    /**
+     * Creatures save against a zone (when positions don't tell who enters it or ends its turn
+     * there); each saves once per turn when the spell says so.
+     */
+    z.object({
+      type: z.literal("zone_save"),
+      zone: z.string(),
+      targets: z.array(z.string()),
+    }),
+    /**
+     * Move a zone's point (Moonbeam's Magic action, Cloudkill drifting): the creatures it moves
+     * onto save. The action it takes is the caller's.
+     */
+    z.object({ type: z.literal("move_zone"), zone: z.string(), point: z.object({ x: n, y: n }) }),
+    z.object({ type: z.literal("end_zone"), zone: z.string() }),
+    /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
+    z.object({
+      type: z.literal("check"),
+      id: z.string(),
+      skill: z.enum(SKILLS).optional(),
+      ability: z.enum(ABILITIES).optional(),
+      dc: n.optional(),
+      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+    }),
+    /** Extend Rage this turn some other way (forcing a saving throw). */
+    z.object({ type: z.literal("extend"), id: z.string() }),
+    /**
+     * A legendary action, taken right after another creature's turn: an attack (`target`, and
+     * `attack` when it offers a choice), a saving throw effect (`targets`), another action it uses,
+     * or text. Uses per round come back at the start of the monster's turn.
+     */
+    z.object({
+      type: z.literal("legendary"),
+      id: z.string(),
+      action: z.string(),
+      target: z.string().optional(),
+      targets: z.array(z.string()).optional(),
+      /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+       * Line); its targets are the positioned creatures in it. */
+      area: z
+        .object({
+          point: z.object({ x: n, y: n }).optional(),
+          toward: z.object({ x: n, y: n }).optional(),
+        })
+        .optional(),
+      attack: z.string().optional(),
+      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+      within_5ft: z.boolean().optional(),
+    }),
+  ])
+  .meta({ id: "EncounterAction" });
 export type EncounterAction = z.infer<typeof EncounterActionSchema>;

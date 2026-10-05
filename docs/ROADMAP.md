@@ -108,8 +108,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   `npm run content` reports it over its gzip budget, publish the large tables as separate JSON
   assets loaded on demand (monsters and magic items first), with `srdCatalog()` still returning
   every table for servers.
-- **JSON Schemas for play documents (S).** `CharacterState` and `Encounter` have Zod schemas but
-  no generated JSON Schema yet (builds and content do).
 
 ### Tools
 

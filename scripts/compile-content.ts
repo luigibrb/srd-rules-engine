@@ -17,7 +17,9 @@ import { createCatalog, TABLE_NAMES, TABLE_SCHEMAS } from "../src/content/catalo
 import { loadContentPack } from "../src/content/load";
 import { CharacterBuildSchema } from "../src/models/build";
 import { CreationSchema } from "../src/models/content";
+import { EncounterActionSchema, EncounterSchema } from "../src/models/encounter";
 import { PackManifestSchema, PatchSchema } from "../src/models/pack";
+import { CharacterStateSchema, PlayActionSchema } from "../src/models/state";
 
 const root = join(import.meta.dirname, "..");
 /** Budget for the bundled SRD, gzipped (what a browser downloads). */
@@ -35,7 +37,7 @@ const pack = {
 };
 outputs.set("src/content/data/srd-5.2.1.json", `${JSON.stringify(pack, null, 4)}\n`);
 
-// 2. JSON Schemas: one per content file kind, plus the saved character build.
+// 2. JSON Schemas: one per content file kind, the saved character build, play documents.
 const schema = (s: z.ZodType, title: string, list: boolean) => {
   const json = z.toJSONSchema(list ? z.union([s, z.array(s)]) : s, {
     io: "input",
@@ -56,6 +58,17 @@ for (const table of TABLE_NAMES) {
 outputs.set("schemas/pack.schema.json", schema(PackManifestSchema, "Content pack manifest", false));
 outputs.set("schemas/patches.schema.json", schema(PatchSchema, "Content patches", true));
 outputs.set("schemas/build.schema.json", schema(CharacterBuildSchema, "Character build", false));
+// Play documents and the actions that change them (frontends, servers, other languages).
+outputs.set(
+  "schemas/state.schema.json",
+  schema(CharacterStateSchema, "Character play state", false),
+);
+outputs.set("schemas/encounter.schema.json", schema(EncounterSchema, "Encounter", false));
+outputs.set("schemas/play-action.schema.json", schema(PlayActionSchema, "Play action", true));
+outputs.set(
+  "schemas/encounter-action.schema.json",
+  schema(EncounterActionSchema, "Encounter action", true),
+);
 
 let stale = 0;
 for (const [rel, content] of outputs) {

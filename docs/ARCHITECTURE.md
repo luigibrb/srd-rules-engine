@@ -757,7 +757,9 @@ builder, a VTT client, an edge function and a server.
   The TypeScript types are inferred from them, except for the recursive `Grants`/`ChoiceDef`/
   `ChoiceOption`/`ToggleDef`, which are written by hand. The same schemas generate
   `schemas/*.schema.json` for content authors and for other languages (content files, pack
-  manifests, patches and builds).
+  manifests, patches, builds, play states, encounters and the play and encounter actions);
+  `tests/json-schemas.test.ts` checks them with a JSON Schema validator against the bundled SRD
+  and against documents the engine writes.
 - **snake_case data.** Fields keep the YAML/JSON names (`class_id`, `base_ac`), so content,
   saved documents, sheets and HTTP payloads share one format, and builds saved by the Python
   version still load. Functions are camelCase.
