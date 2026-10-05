@@ -663,18 +663,9 @@ function run(
     }
     c.position = { ...to };
   };
-  /** Feet between two positioned combatants (nearest squares of their spaces), else `null`. */
-  const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null => {
-    if (!a.position || !b.position) return null;
-    return gridDistance(a.position, spaceOf(ctx, a), b.position, spaceOf(ctx, b));
-  };
-  /** Positioned enemies of `c` within 5 feet that aren't Incapacitated (close combat). */
-  const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] =>
-    e.combatants.filter((x) => {
-      if (x.id === c.id || x.defeated || alliesOf(e, x.id, c)) return false;
-      const d = feetBetween(c, x);
-      return d !== null && d <= 5 && !conditionsOf(ctx, x).has("incapacitated");
-    });
+  const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null =>
+    feetApart(ctx, a, b);
+  const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] => enemiesWithin5(e, ctx, c);
   /**
    * What positions say about an attack: a melee attack within reach, a ranged one within long
    * range (Disadvantage beyond normal range, and with an enemy within 5 feet), whether it's
@@ -805,17 +796,16 @@ function run(
     placement: AreaPlacement,
   ): string[] => {
     const area = spell.mechanics?.area ?? fail(`${spell.name} has no area to place`);
-    const feet = /^(\d+) feet$/.exec(spell.range)?.[1];
-    const ids = areaTargets(c, area, placement, feet ? Number(feet) : null, spell.name);
+    const ids = areaTargets(c, area, placement, spellRangeFeet(spell), spell.name);
     notes.push(areaNote(spell.name, area, ids));
     return ids;
   };
   /** A zone's point out of a positioned caster's spell range is refused. */
   const checkZonePoint = (c: EncounterCombatant, spell: SpellDef, point?: GridPoint) => {
-    const reach = /^(\d+) feet$/.exec(spell.range)?.[1];
-    if (!point || !c.position || !reach) return;
+    const reach = spellRangeFeet(spell);
+    if (!point || !c.position || reach === null) return;
     const d = gridDistance(point, 1, c.position, spaceOf(ctx, c));
-    if (d > Number(reach))
+    if (d > reach)
       fail(`That point is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
   };
   /** A target out of a positioned caster's spell range is refused ("60 feet", "Touch"). */
@@ -824,8 +814,7 @@ function run(
     spell: SpellDef,
     targets: EncounterCombatant[],
   ) => {
-    const reach = /^(\d+) feet$/.exec(spell.range)?.[1];
-    const limit = spell.range === "Touch" ? 5 : reach ? Number(reach) : null;
+    const limit = spellTargetRange(spell);
     if (limit === null) return;
     for (const t of targets) {
       const d = t === c ? 0 : feetBetween(c, t);
@@ -2217,11 +2206,11 @@ function signedText(n: number): string {
   return n < 0 ? `- ${-n}` : `+ ${n}`;
 }
 
-function monsterDef(ctx: EncounterContext, c: EncounterCombatant): MonsterDef {
+export function monsterDef(ctx: EncounterContext, c: EncounterCombatant): MonsterDef {
   return lookup(ctx.catalog.monsters, c.monster) ?? fail(`Unknown monster '${c.monster}'`);
 }
 
-function characterRef(ctx: EncounterContext, c: EncounterCombatant): CharacterRef {
+export function characterRef(ctx: EncounterContext, c: EncounterCombatant): CharacterRef {
   return (
     ctx.characters?.[c.character ?? ""] ??
     fail(`${c.name}: the character '${c.character}' wasn't given`)
@@ -2235,7 +2224,7 @@ function initiativeBonus(ctx: EncounterContext, c: EncounterCombatant): number {
 }
 
 /** Active conditions, implied ones included. */
-function conditionsOf(ctx: EncounterContext, c: EncounterCombatant): Set<string> {
+export function conditionsOf(ctx: EncounterContext, c: EncounterCombatant): Set<string> {
   if (c.monster === null) {
     const ref = characterRef(ctx, c);
     const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
@@ -2252,7 +2241,7 @@ function conditionsOf(ctx: EncounterContext, c: EncounterCombatant): Set<string>
 }
 
 /** Walking Speed now (0 while a condition sets it to 0: Grappled, Restrained…). */
-function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encounter): number {
+export function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encounter): number {
   let speed: number;
   if (c.monster === null) {
     const ref = characterRef(ctx, c);
@@ -2269,7 +2258,7 @@ function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encounter): nu
 }
 
 /** Out of the fight: a defeated monster, or a dead character. */
-function outOfFight(ctx: EncounterContext, c: EncounterCombatant): boolean {
+export function outOfFight(ctx: EncounterContext, c: EncounterCombatant): boolean {
   if (c.monster !== null) return c.defeated;
   return characterRef(ctx, c).state.dead;
 }
@@ -2426,7 +2415,7 @@ function saveText(save: SaveResult): string {
 }
 
 /** The squares of a straight move, one step (diagonal first) at a time, `to` included. */
-function straightPath(from: GridPoint, to: GridPoint): GridPoint[] {
+export function straightPath(from: GridPoint, to: GridPoint): GridPoint[] {
   const path: GridPoint[] = [];
   let { x, y } = from;
   while (x !== to.x || y !== to.y) {
@@ -2438,7 +2427,7 @@ function straightPath(from: GridPoint, to: GridPoint): GridPoint[] {
 }
 
 /** A given path: each square next to the one before it (diagonals included). */
-function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPoint[] {
+export function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPoint[] {
   let at = from;
   for (const square of path) {
     if (Math.max(Math.abs(square.x - at.x), Math.abs(square.y - at.y)) !== 1) {
@@ -2450,11 +2439,45 @@ function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPoint[] {
 }
 
 /** The action economy a spell's casting time uses. */
-function castingEconomy(spell: SpellDef): "action" | "bonus_action" | "reaction" {
+export function castingEconomy(spell: SpellDef): "action" | "bonus_action" | "reaction" {
   if (/^Action/i.test(spell.casting_time)) return "action";
   if (/^Bonus Action/i.test(spell.casting_time)) return "bonus_action";
   if (/^Reaction/i.test(spell.casting_time)) return "reaction";
   return fail(`${spell.name} takes ${spell.casting_time} to cast: not in combat`);
+}
+
+/** A spell's range in feet ("60 feet"), or `null` (Self, Touch, Sight, Unlimited…). */
+export function spellRangeFeet(spell: SpellDef): number | null {
+  const feet = /^(\d+) feet$/.exec(spell.range)?.[1];
+  return feet ? Number(feet) : null;
+}
+
+/** How far a spell's target can be: its range in feet, 5 for Touch, else `null` (unchecked). */
+export function spellTargetRange(spell: SpellDef): number | null {
+  return spell.range === "Touch" ? 5 : spellRangeFeet(spell);
+}
+
+/** Feet between two positioned combatants (nearest squares of their spaces), else `null`. */
+export function feetApart(
+  ctx: EncounterContext,
+  a: EncounterCombatant,
+  b: EncounterCombatant,
+): number | null {
+  if (!a.position || !b.position) return null;
+  return gridDistance(a.position, spaceOf(ctx, a), b.position, spaceOf(ctx, b));
+}
+
+/** Positioned enemies of `c` within 5 feet that aren't Incapacitated (close combat). */
+export function enemiesWithin5(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+): EncounterCombatant[] {
+  return e.combatants.filter((x) => {
+    if (x.id === c.id || x.defeated || alliesOf(e, x.id, c)) return false;
+    const d = feetApart(ctx, c, x);
+    return d !== null && d <= 5 && !conditionsOf(ctx, x).has("incapacitated");
+  });
 }
 
 /** "Concentration, up to 1 minute" → 10 rounds; `null` when it isn't counted in rounds. */
@@ -2466,13 +2489,13 @@ function durationRounds(spell: SpellDef): number | null {
 }
 
 /** Whether `c` is an ally of combatant `id`: on its side (combatants without a side are all allies). */
-function alliesOf(e: Encounter, id: string, c: EncounterCombatant): boolean {
+export function alliesOf(e: Encounter, id: string, c: EncounterCombatant): boolean {
   const other = e.combatants.find((x) => x.id === id);
   return !!other && other.side === c.side;
 }
 
 /** Proficient in a skill: a character's sheet, or a skill a monster's stat block lists. */
-function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill: string): boolean {
+export function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill: string): boolean {
   if (c.monster !== null) return Object.hasOwn(monsterDef(ctx, c).skills, skill);
   const ref = characterRef(ctx, c);
   const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
@@ -2480,7 +2503,7 @@ function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill: strin
 }
 
 /** A monster action's uses per day ("(1/Day)" in its name), or `null`. */
-function dailyUses(ctx: EncounterContext, c: EncounterCombatant, name: string): number | null {
+export function dailyUses(ctx: EncounterContext, c: EncounterCombatant, name: string): number | null {
   const def = monsterDef(ctx, c);
   const all = [...def.actions, ...def.bonus_actions, ...def.reactions];
   return all.find((a) => a.name === name)?.per_day ?? null;
@@ -2502,7 +2525,7 @@ function withCover(view: Combatant, cover: Cover | undefined): Combatant {
 
 /** Squares on a side of a creature's space (SRD "Creature Size and Space"); Tiny counts as one. */
 const SPACE: Readonly<Record<string, number>> = { large: 2, huge: 3, gargantuan: 4 };
-function spaceOf(ctx: EncounterContext, c: EncounterCombatant): number {
+export function spaceOf(ctx: EncounterContext, c: EncounterCombatant): number {
   const size =
     c.monster !== null
       ? monsterDef(ctx, c).size.split(" ")[0]?.toLowerCase()
@@ -2527,7 +2550,7 @@ export function gridDistance(
 }
 
 /** The longest reach of a combatant's melee attacks, or `null` without one. */
-function meleeReach(ctx: EncounterContext, e: Encounter, c: EncounterCombatant): number | null {
+export function meleeReach(ctx: EncounterContext, e: Encounter, c: EncounterCombatant): number | null {
   const reaches = encounterCombatant(e, c.id, ctx)
     .attacks.filter((a) => a.kind === "melee")
     .map((a) => a.reach ?? 5);
