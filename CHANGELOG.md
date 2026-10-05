@@ -24,7 +24,19 @@ migrated when it's loaded.
   same for one action by a dry run. Routes `POST /v1/encounters/options` and
   `/v1/encounters/check`; JSON Schema `schemas/options.schema.json`.
 
+- `srd-rules-engine/srd`: the bundled SRD (`srdCatalog`, `srdPack`), also in
+  `srd-rules-engine/node`.
+- The SRD split by table, published as `srd-rules-engine/srd-5.2.1/*.json` (`manifest.json` and
+  one file per table); `splitPack(pack)` splits any pack, `loadPack(fetchJson, { tables })`
+  reads one back.
+- `createCatalog(packs, { tables })` loads only some tables (`CORE_TABLES`: what a character
+  builder needs first); reading a table that wasn't loaded throws a `ContentError`; `isLoaded`.
+
 ### Changed
+- **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
+  `srd-rules-engine/srd` (or `srd-rules-engine/node`), so the main entry no longer bundles the
+  SRD data (about 2 MB). Migration: `import { srdCatalog } from "srd-rules-engine/srd"`.
+  `SRD_PACK_ID` stays in the main entry.
 - `srd-rules fight`: `options` shows what's left this turn and every option, dimmed with the
   reason when the engine would refuse it.
 

@@ -9,10 +9,9 @@
 import { type Catalog, type ContentPack, createCatalog } from "./catalog";
 import data from "./data/srd-5.2.1.json" with { type: "json" };
 
-export const srdPack: ContentPack = data as ContentPack;
+export { SRD_PACK_ID } from "./srd-id";
 
-/** The manifest id of the bundled SRD pack. */
-export const SRD_PACK_ID = "srd-5.2.1";
+export const srdPack: ContentPack = data as ContentPack;
 
 let cached: Catalog | undefined;
 

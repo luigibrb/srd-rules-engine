@@ -38,6 +38,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./srd": {
+      "import": {
+        "types": "./dist/srd.d.ts",
+        "default": "./dist/srd.js"
+      },
+      "require": {
+        "types": "./dist/srd.d.cts",
+        "default": "./dist/srd.cjs"
+      }
+    },
     "./node": {
       "import": {
         "types": "./dist/node.d.ts",
@@ -59,6 +69,7 @@
       }
     },
     "./srd-5.2.1.json": "./dist/srd-5.2.1.json",
+    "./srd-5.2.1/*": "./dist/srd-5.2.1/*",
     "./schemas/*": "./schemas/*",
     "./package.json": "./package.json"
   },
@@ -66,7 +77,7 @@
     "srd-rules": "./dist/cli.mjs"
   },
   "scripts": {
-    "build": "npm run content && tsdown",
+    "build": "npm run content && tsdown --config-loader tsx",
     "content": "tsx scripts/compile-content.ts",
     "demo": "tsx examples/battle-demo.ts",
     "builder": "tsx src/cli/main.ts build",

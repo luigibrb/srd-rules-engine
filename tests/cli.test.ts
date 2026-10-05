@@ -13,8 +13,8 @@ import {
   parseBuild,
   parseState,
   seededRng,
-  srdPack,
 } from "../src/index";
+import { srdPack } from "../src/srd";
 import { autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 async function runScript(answers: string[], build?: CharacterBuild) {

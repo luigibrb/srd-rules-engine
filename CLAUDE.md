@@ -10,11 +10,13 @@
 
 ```
 src/
-  index.ts         # public API (platform-neutral: no node:* imports)
-  node.ts          # index + loadContentPack/loadCatalog + serveNode
+  index.ts         # public API (platform-neutral: no node:* imports, no bundled SRD data)
+  srd.ts           # `srd-rules-engine/srd`: srdCatalog/srdPack (the bundled SRD JSON)
+  node.ts          # index + srd + loadContentPack/loadCatalog + serveNode
   models/          # Zod schemas + types: content, pack (manifest, patches), build, state (play),
                    #   encounter, options (computed), character, combat, spell
-  content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
+  content/         # catalog.ts (createCatalog, lookup, `tables`), load.ts (fs, Node only),
+                   #   srd.ts (bundled SRD), split.ts (splitPack/loadPack: per-table JSON)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
                    #   build-resolution, build-validation, sheet
@@ -44,6 +46,8 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 ## Key conventions
 
 - **rules/** is pure logic: no I/O. `src/index.ts` and `src/http/` must stay platform-neutral.
+  `src/index.ts` never imports `content/srd.ts` (the bundled data): import `srdCatalog` from
+  `src/srd.ts` (tests: `../src/srd`).
 - Data is **immutable** and **snake_case** (shared wire/file format); functions are camelCase.
   Builds change via `updateBuild(build, {...})`; setters return `{ build, notes }`.
 - Look up catalog ids with `lookup(table, id)` (never `table[id]` / `id in table`).
@@ -145,8 +149,10 @@ npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, 
 
 - `src/content/data/srd-5.2.1.json` and `schemas/*.schema.json`: from `npm run content`.
   CI fails (`npm run content -- --check`) if they're out of date, so commit them. It also reports
-  the bundle's size and fails over `MAX_GZIP_KB` (gzipped, in `scripts/compile-content.ts`).
-- `dist/srd-5.2.1.json` is written minified by the build (`tsdown.config.ts`).
+  the bundle's size and fails over `MAX_GZIP_KB` (whole) or `MAX_CORE_GZIP_KB` (`CORE_TABLES`),
+  gzipped, in `scripts/compile-content.ts`.
+- `dist/srd-5.2.1.json` and `dist/srd-5.2.1/*.json` (split by table) are written minified by
+  the build (`tsdown.config.ts`).
 - `dist/`: from `npm run build` (git-ignored).
 
 ## API base

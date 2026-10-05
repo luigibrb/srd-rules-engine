@@ -4,10 +4,10 @@ import {
   type CharacterBuild,
   createBuild,
   resolve,
-  srdCatalog,
   updateBuild,
 } from "../src/index";
 import * as svc from "../src/services/builder";
+import { srdCatalog } from "../src/srd";
 
 export const catalog: Catalog = srdCatalog();
 

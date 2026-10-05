@@ -1,18 +1,22 @@
 /**
  * srd-rules-engine — a 5th-edition (SRD 5.2.1) rules engine and character builder.
  *
- * Runs anywhere JavaScript does (Node, Deno, Bun, browsers, workers). Loading YAML content
- * from disk is in `srd-rules-engine/node`; the HTTP handler is in `srd-rules-engine/http`.
+ * Runs anywhere JavaScript does (Node, Deno, Bun, browsers, workers). The bundled SRD content is
+ * in `srd-rules-engine/srd` (or per table, `srd-rules-engine/srd-5.2.1/*.json`, for `loadPack`);
+ * loading YAML content from disk is in `srd-rules-engine/node`; the HTTP handler is in
+ * `srd-rules-engine/http`.
  */
 
 // Content
 export {
   type Catalog,
   type CatalogOptions,
+  CORE_TABLES,
   ContentError,
   type ContentPack,
   createCatalog,
   type Item,
+  isLoaded,
   lookup,
   TABLE_NAMES,
   TABLE_SCHEMAS,
@@ -20,7 +24,14 @@ export {
   type TableName,
   validateReferences,
 } from "./content/catalog";
-export { SRD_PACK_ID, srdCatalog, srdPack } from "./content/srd";
+export {
+  type LoadPackOptions,
+  loadPack,
+  type SplitManifest,
+  splitPack,
+} from "./content/split";
+// The bundled SRD data is in `srd-rules-engine/srd`, not here: the engine stays small.
+export { SRD_PACK_ID } from "./content/srd-id";
 // Models
 export {
   ABILITY_METHODS,

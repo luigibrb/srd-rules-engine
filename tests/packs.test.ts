@@ -2,15 +2,9 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  type ContentPack,
-  createCatalog,
-  evaluate,
-  srdCatalog,
-  srdPack,
-  updateBuild,
-} from "../src/index";
+import { type ContentPack, createCatalog, evaluate, updateBuild } from "../src/index";
 import { loadContentPack } from "../src/node";
+import { srdCatalog, srdPack } from "../src/srd";
 import { fighterBuild } from "./helpers";
 
 // Invented homebrew only: this repo holds no non-SRD content.

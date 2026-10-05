@@ -5,16 +5,23 @@
  *   npm run content             write the outputs
  *   npm run content -- --check  fail if the outputs are out of date (used in CI)
  *
- * Both report the bundle's size and fail if its gzipped size is over MAX_GZIP_KB: past that,
- * the content should be split by table (docs/ROADMAP.md, "Split content by table").
+ * Both report the bundle's size and fail if its gzipped size is over MAX_GZIP_KB, or the core
+ * tables' (what a builder fetches first, `CORE_TABLES`) over MAX_CORE_GZIP_KB.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { z } from "zod";
-import { createCatalog, TABLE_NAMES, TABLE_SCHEMAS } from "../src/content/catalog";
+import {
+  CORE_TABLES,
+  type ContentPack,
+  createCatalog,
+  TABLE_NAMES,
+  TABLE_SCHEMAS,
+} from "../src/content/catalog";
 import { loadContentPack } from "../src/content/load";
+import { splitPack } from "../src/content/split";
 import { CharacterBuildSchema } from "../src/models/build";
 import { CreationSchema } from "../src/models/content";
 import { EncounterActionSchema, EncounterSchema } from "../src/models/encounter";
@@ -23,8 +30,10 @@ import { PackManifestSchema, PatchSchema } from "../src/models/pack";
 import { CharacterStateSchema, PlayActionSchema } from "../src/models/state";
 
 const root = join(import.meta.dirname, "..");
-/** Budget for the bundled SRD, gzipped (what a browser downloads). */
+/** Budget for the bundled SRD, gzipped (every table). */
 const MAX_GZIP_KB = 1024;
+/** Budget for the core tables a character builder loads first, gzipped (split files). */
+const MAX_CORE_GZIP_KB = 128;
 const check = process.argv.includes("--check");
 const outputs = new Map<string, string>();
 
@@ -118,10 +127,22 @@ const largest = TABLE_NAMES.map(
 console.log(
   `bundle: ${kb(minified.length)} KB minified, ${gzipKb} KB gzip (${largest.join(", ")})`,
 );
+// What a character builder fetches first (`CORE_TABLES` of the split files, with the manifest).
+const core = splitPack(pack as ContentPack);
+const coreKb = kb(
+  ["manifest.json", ...CORE_TABLES.map((t) => `${t}.json`)].reduce(
+    (sum, file) => sum + gzipSync(JSON.stringify(core[file] ?? [])).length,
+    0,
+  ),
+);
+console.log(`core tables: ${coreKb} KB gzip (budget ${MAX_CORE_GZIP_KB} KB)`);
 if (gzipKb > MAX_GZIP_KB) {
+  console.error(`The bundled SRD is over its budget (${gzipKb} KB > ${MAX_GZIP_KB} KB gzipped).`);
+  process.exit(1);
+}
+if (coreKb > MAX_CORE_GZIP_KB) {
   console.error(
-    `The bundled SRD is over its budget (${gzipKb} KB > ${MAX_GZIP_KB} KB gzipped): ` +
-      'split content by table (docs/ROADMAP.md, "Split content by table").',
+    `The core tables are over their budget (${coreKb} KB > ${MAX_CORE_GZIP_KB} KB gzipped).`,
   );
   process.exit(1);
 }

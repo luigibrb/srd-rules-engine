@@ -49,6 +49,18 @@ Rules content is YAML validated by the Zod schemas in `src/models/content.ts` (p
 - **Sources.** Every entity has a `source`. `createCatalog(packs, { sources })` keeps only the
   entities and patches of those sources (the books a campaign allows). Builds may list the packs
   they need (`build.packs`); a missing one is a validation error.
+- **Entry points and partial catalogs.** The main entry (`src/index.ts`) has no content:
+  the bundled SRD (`src/content/srd.ts`, the compiled JSON) is `srd-rules-engine/srd`, also
+  re-exported by `srd-rules-engine/node` and used by the HTTP handler's default catalog;
+  `tests/api.test.ts` walks the main entry's imports to keep it out. The build also publishes
+  the SRD split by table (`splitPack`: `manifest.json` with the pack manifest, creation rules
+  and patches, plus one `<table>.json` per table); `loadPack(fetchJson, { tables })` reads it
+  back with the caller's loader. `createCatalog(packs, { tables })` loads only those tables:
+  each one left out is a frozen proxy that throws a `ContentError` naming the table on any
+  read (`isLoaded` tells them apart), patches to it are skipped, and `validateReferences`
+  skips references into it (the compiled SRD was checked whole). `npm run content` keeps the
+  full bundle under `MAX_GZIP_KB` and the core tables a builder starts with (`CORE_TABLES`)
+  under `MAX_CORE_GZIP_KB`.
 - **Leak guard.** `npm run check:sources` (part of `npm run check`) fails if `content/` holds
   anything besides `srd-5.2.1/`, if a `source` in `content/` or the bundled JSON isn't
   `srd-5.2.1`, or if one in `examples/` or `tests/fixtures/` isn't `srd-5.2.1`, `homebrew` or
@@ -789,10 +801,11 @@ builder, a VTT client, an edge function and a server.
   filesystem or YAML parser is needed at runtime. Node-only code (reading content
   directories, the `node:http` adapter, the CLI) is in `src/content/load.ts`,
   `src/http/node-server.ts` and `src/cli/`.
-- **Content size.** The SRD is bundled into the core entry and also published, minified, as
-  `srd-5.2.1.json` (the repository copy stays formatted). `npm run content` reports its minified
-  and gzipped size and fails when the gzipped size exceeds `MAX_GZIP_KB`
-  (`scripts/compile-content.ts`); see "Split content by table" in [ROADMAP.md](ROADMAP.md).
+- **Content size.** The SRD is bundled into `srd-rules-engine/srd` (not the main entry) and
+  also published, minified, as `srd-5.2.1.json` and split by table under `srd-5.2.1/` (the
+  repository copy stays formatted). `npm run content` reports the minified and gzipped sizes
+  and fails over `MAX_GZIP_KB` (whole) or `MAX_CORE_GZIP_KB` (the core tables)
+  (`scripts/compile-content.ts`); see "Entry points and partial catalogs" above.
 - **Schemas: Zod.** Content, builds, play states, encounters and API payloads are Zod schemas.
   The TypeScript types are inferred from them, except for the recursive `Grants`/`ChoiceDef`/
   `ChoiceOption`/`ToggleDef`, which are written by hand. The same schemas generate

@@ -33,8 +33,8 @@ import {
   type Rng,
   resolve,
   seededRng,
-  srdCatalog,
 } from "../src/index";
+import { srdCatalog } from "../src/srd";
 
 /** The seed whose fight shows every feature below (found by trying seeds). */
 export const DEMO_SEED = 7;

@@ -33,6 +33,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P19 | Spell mechanics the schema couldn't express: flat damage bonuses, darts and rays (Magic Missile, Scorching Ray), a save after an attack (Ice Knife), hit riders (Guiding Bolt), conditions until the caster's next turn; Help, Vex and Sap on spell attack rolls | Guiding Bolt's Advantage is an encounter mark like Vex's, usable by anyone. Darts share one damage roll (flagged). Five spells gained mechanics: Magic Missile, Scorching Ray, Ice Knife, Disintegrate, Finger of Death |
 | P18b | Areas of effect on the grid: spells' and monster effects' Spheres, Cylinders, Cubes, Cones, Lines and Emanations choose their targets from a point or a direction; monster save effects' areas and ranges read from their text | How shapes cover squares is an engine reading (flagged): a square is in when its center is inside |
 | P22 | What a combatant can do now: `combatantOptions` (attacks, spells, features, monster abilities, legendary and standard actions, zones, each with cost, targets and the reason it's refused) and `checkAction` (a dry run); `POST /v1/encounters/options` and `/check`; the fight CLI's `options` built on them | Legality comes from a dry run of `applyEncounterAction` with fixed dice, never re-derived; pure helpers moved out of the encounter's `run` first |
+| P23 | The bundled SRD out of the main entry: `srd-rules-engine/srd`; the SRD published split by table with `splitPack`/`loadPack`; catalogs with only some tables (`tables`, `CORE_TABLES`); a gzip budget for the core tables | Reading a table that wasn't loaded throws instead of returning nothing. Validating the full SRD at startup took about 70 ms in Node, so precompiled content is still parsed |
 
 ## Decisions
 
@@ -98,14 +99,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
 - **Starting gold and shopping (S).** Fighter option C and background option B.
-
-### Engine and API
-
-- **Split content by table (M).** The whole SRD is bundled into the core entry (about 2 MB
-  minified, 290 KB gzipped; monsters, magic items and spells are three quarters of it). When
-  `npm run content` reports it over its gzip budget, publish the large tables as separate JSON
-  assets loaded on demand (monsters and magic items first), with `srdCatalog()` still returning
-  every table for servers.
 
 ### Tools
 
