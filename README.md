@@ -282,7 +282,8 @@ jump between steps at any time. A live panel shows HP, AC, Initiative, Speed and
 Perception. Options you can't pick are greyed out with the reason, and picks that change
 your numbers show a preview (`Defense · AC 16→17`). `save` writes the build to
 `characters/<name>.json`. Builds saved by the earlier Python version of the builder load
-unchanged.
+unchanged. Builds, play states and encounters record their format `version`, so later formats
+can migrate them.
 
 Once level 1 is complete, `up` levels up the character: pick a class
 (your own, or a new one if you meet the multiclass prerequisites, with the reason shown when
@@ -353,9 +354,9 @@ export default { fetch: handler };                // Cloudflare Workers
 
 Routes that take a hand-filled `Character` snapshot (from the earlier Python version):
 `POST /v1/characters/` (validate one), `/v1/characters/{name}/alive`,
-`/v1/characters/{name}/passive-perception`, `/v1/combat/saving-throw`, `/v1/spells/stats`, and,
-deprecated until 1.0, `/v1/combat/attack` (use `/v1/state/attack` or an encounter),
-`/v1/spells/attack` and `/v1/spells/save` (use `/v1/state/cast`).
+`/v1/characters/{name}/passive-perception`, `/v1/combat/saving-throw` and `/v1/spells/stats`.
+Attacks and spells use builds and states (`/v1/state/attack`, `/v1/state/cast`) or an
+encounter.
 
 Invalid bodies return `422` with a readable message; bad JSON, bad dice expressions and refused
 setters or actions return `400` with the reasons in `detail`; unknown routes and entities `404`.
@@ -434,7 +435,7 @@ What comes next is in [docs/ROADMAP.md](docs/ROADMAP.md); the design is in
 | Path | Contents |
 |---|---|
 | `src/rules/` | Pure rules logic: dice, ability scores, build resolution and validation, sheet, damage, combatants and attacks, casting |
-| `src/services/` | Workflows: the character builder (setters, normalization), play state (actions), encounters, the deprecated `Character` combat functions |
+| `src/services/` | Workflows: the character builder (setters, normalization), play state (actions), encounters, `Character` hit point helpers |
 | `src/models/` | Zod schemas and types for content, packs and patches, builds, play states, encounters |
 | `src/content/` | Catalog creation and validation, the bundled SRD, loading content from disk |
 | `src/http/` | HTTP API (`fetch` handler) and the Node server adapter |

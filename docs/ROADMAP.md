@@ -39,7 +39,11 @@ Taken with the P0–P7 plan; they still hold.
 - Patches are a small list of operations (`set`, `append`, `remove` on a path), not JSON Merge
   Patch, which can't append to lists.
 - Builds may list the packs they need (`packs`, optional), so loading one without them says so.
-- The `Character`-based API and its routes stay as deprecated adapters until 1.0.
+- The `Character`-based attack and spell functions and their routes were removed before 1.0;
+  the other `Character` routes (validation, alive, passive Perception, saving throw, spell stats)
+  stay.
+- Saved documents carry one format version (`DOCUMENT_VERSION`); a format change migrates older
+  versions when they're parsed.
 - `import-srd-classes.py` stays in Python for now.
 - The leak guard runs in CI (`npm run check`); no pre-commit hook dependency.
 - No `ruleset` field beyond the manifest's informational one: the engine targets the 2024
@@ -97,12 +101,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Engine and API
 
-- **A `version` field on builds and states (S).** When the first migration is needed; a document
-  without one is version 1.
-- **1.0 cleanup (M).** Remove the deprecated `Character` API (`resolveAttack`, `attackRoll`, the
-  `Spell` model, the `Character` spell functions, `/v1/combat/attack`, `/v1/spells/attack` and
-  `/save`), and stop exporting internal helpers (`answers`, `definedEntries`, `replaceErrors`,
-  `choiceIssues`, `classLevelKey`, `entityName`…) with explicit exports.
 - **Split content by table (M).** The whole SRD is bundled into the core entry (about 2 MB
   minified, 290 KB gzipped; monsters, magic items and spells are three quarters of it). When
   `npm run content` reports it over its gzip budget, publish the large tables as separate JSON

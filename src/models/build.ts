@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { ABILITIES, type Ability } from "./content";
+import { DocumentVersionSchema } from "./version";
 
 export const ABILITY_METHODS = ["standard_array", "point_buy", "roll"] as const;
 export type AbilityMethod = (typeof ABILITY_METHODS)[number];
@@ -43,6 +44,8 @@ export type LevelUp = z.infer<typeof LevelUpSchema>;
  * it, e.g. `{"class:fighter#skills": ["athletics", "perception"]}`.
  */
 export const CharacterBuildSchema = z.object({
+  /** The document format (`DOCUMENT_VERSION`); missing means 1. */
+  version: DocumentVersionSchema,
   name: z.string().default(""),
   alignment: z.enum(ALIGNMENTS).nullable().default(null),
   class_id: z.string().nullable().default(null),

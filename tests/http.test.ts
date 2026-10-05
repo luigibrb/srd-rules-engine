@@ -69,19 +69,6 @@ describe("HTTP API", () => {
     expect((await api.post("/v1/combat/roll", { expression: "99999d6" })).status).toBe(400);
   });
 
-  it("resolves an attack", async () => {
-    const res = await api.post("/v1/combat/attack", {
-      attacker: character(),
-      target: character(),
-      attack_bonus: 5,
-      damage_dice: "1d8",
-      damage_type: "slashing",
-    });
-    expect(res.body.attack.critical_hit).toBe(true);
-    expect(res.body.damage.dice_expression).toBe("2d8");
-    expect(res.body.target_hp).toBe(44 - 40);
-  });
-
   it("saving throws accept any ability capitalization", async () => {
     const res = await api.post("/v1/combat/saving-throw", {
       character: character(),

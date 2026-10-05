@@ -308,8 +308,8 @@ Temporary HP, saving throw bonuses, damage defenses, conditions and condition im
 lines, critical range, attacks per action, spellcasting (DC, attack bonus, modifier per
 feature), Advantage, saving throw effects. It's a read-only view built from something else:
 `combatantFromCharacter(build, state, catalog)` (from the play sheet),
-`combatantFromMonster(monster, state)` (a stat block), `combatantFromSnapshot(character)` (the
-deprecated `Character` model), or `encounterCombatant(encounter, id, ctx)`.
+`combatantFromMonster(monster, state)` (a stat block), `combatantFromSnapshot(character)` (a
+hand-filled `Character`), or `encounterCombatant(encounter, id, ctx)`.
 
 `makeAttack(attacker, attackName, target, { mode, two_handed, riders, ally_adjacent, rng })`
 rolls the d20 (twice with Advantage or Disadvantage), decides hit and Critical Hit, adds the
@@ -770,10 +770,12 @@ builder, a VTT client, an edge function and a server.
   `seededRng` (mulberry32) gives the same sequence on every platform; `scriptedRng` and
   `fixedRng` are for tests.
 - **Public API.** `tests/api.test.ts` snapshots the names each entry point exports; changing
-  the snapshot is a deliberate API change, noted in the CHANGELOG. Some internal helpers are
-  exported through `export *` and will be hidden before 1.0 (see [ROADMAP.md](ROADMAP.md)). The
-  `Character`-based combat and spell functions from the Python version (`resolveAttack`,
-  `attackRoll`, `resolveSpellSave`…) are deprecated adapters, kept until 1.0.
+  the snapshot is a deliberate API change, noted in the CHANGELOG. `src/index.ts` lists every
+  export by name, so a new helper stays internal unless it's added there.
+- **Document versions.** Builds, play states and encounters have a `version`
+  (`DOCUMENT_VERSION`, in `models/version.ts`). A document without one is version 1; parsing
+  refuses a newer one. A format change raises the version and migrates older documents on
+  parse, so saved documents keep loading.
 - **HTTP.** A Web-standard `fetch` handler with no router dependency. Request bodies are
   validated with the same Zod schemas (422 on failure). The Node adapter limits bodies to
   1 MB, and dice expressions are limited to 1000 dice of up to 1000 sides.

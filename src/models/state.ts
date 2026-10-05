@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { DocumentVersionSchema } from "./version";
 
 export const ItemInstanceSchema = z.object({
   /** Stable id within this state's inventory (`i1`, `i2`…). */
@@ -29,6 +30,8 @@ export const CURRENCIES = ["cp", "sp", "ep", "gp", "pp"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
 export const CharacterStateSchema = z.object({
+  /** The document format (`DOCUMENT_VERSION`); missing means 1. */
+  version: DocumentVersionSchema,
   hp: z
     .object({
       /** Current Hit Points; `null` means at the maximum (it follows the maximum if it changes). */

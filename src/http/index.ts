@@ -13,14 +13,12 @@ import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
 import { EncounterActionSchema, EncounterSchema } from "../models/encounter";
-import { SpellSchema } from "../models/spell";
 import { type CharacterState, CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { castSpell } from "../rules/casting";
-import { savingThrow } from "../rules/combat";
+import { abilityScore, savingThrow } from "../rules/combat";
 import { makeAttack, ROLL_MODES } from "../rules/combatant";
-import { roll } from "../rules/dice";
+import { abilityModifier, roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
-import { spellAttackBonus, spellSaveDc } from "../rules/spells";
 import {
   BuildError,
   evaluate,
@@ -33,13 +31,7 @@ import {
   setLevelClass,
   setLevelHp,
 } from "../services/builder";
-import {
-  isAlive,
-  passivePerception,
-  resolveAttack,
-  resolveSpellAttack,
-  resolveSpellSave,
-} from "../services/combat";
+import { isAlive, passivePerception } from "../services/combat";
 import { applyEncounterAction, type CharacterRef, EncounterError } from "../services/encounter";
 import {
   applyAction,
@@ -72,23 +64,14 @@ type Route = {
 };
 
 const RollRequest = z.object({ expression: z.string() });
-const AttackRequest = z.object({
-  attacker: CharacterSchema,
-  target: CharacterSchema,
-  attack_bonus: z.int(),
-  damage_dice: z.string(),
-  damage_type: z.string(),
-});
 const SavingThrowRequest = z.object({
   character: CharacterSchema,
   ability: AbilityFullNameSchema,
   dc: z.int(),
   proficient: z.boolean().default(false),
 });
-const SpellCastRequest = z.object({
+const SpellStatsRequest = z.object({
   caster: CharacterSchema,
-  target: CharacterSchema,
-  spell: SpellSchema,
   spellcasting_ability: AbilityFullNameSchema,
 });
 const BuildRequest = z.object({ build: z.unknown() });
@@ -137,10 +120,6 @@ const PreviewRequest = BuildRequest.extend({
   values: z.array(z.string()).optional(),
   level: z.int().min(1).optional(),
   class_id: z.string().optional(),
-});
-const SpellStatsRequest = z.object({
-  caster: CharacterSchema,
-  spellcasting_ability: AbilityFullNameSchema,
 });
 
 class HttpError extends Error {
@@ -198,26 +177,6 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     },
     {
       method: "POST",
-      pattern: /^\/v1\/combat\/attack$/,
-      handle: ({ body }) => {
-        const req = AttackRequest.parse(body);
-        const out = resolveAttack(
-          req.attacker,
-          req.target,
-          req.attack_bonus,
-          req.damage_dice,
-          req.damage_type,
-          { rng },
-        );
-        return {
-          attack: out.attack,
-          damage: out.damage,
-          target_hp: out.target.current_hit_points,
-        };
-      },
-    },
-    {
-      method: "POST",
       pattern: /^\/v1\/combat\/saving-throw$/,
       handle: ({ body }) => {
         const req = SavingThrowRequest.parse(body);
@@ -234,47 +193,9 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       pattern: /^\/v1\/spells\/stats$/,
       handle: ({ body }) => {
         const req = SpellStatsRequest.parse(body);
-        return {
-          save_dc: spellSaveDc(req.caster, req.spellcasting_ability),
-          attack_bonus: spellAttackBonus(req.caster, req.spellcasting_ability),
-        };
-      },
-    },
-    {
-      method: "POST",
-      pattern: /^\/v1\/spells\/attack$/,
-      handle: ({ body }) => {
-        const req = SpellCastRequest.parse(body);
-        const out = resolveSpellAttack(
-          req.caster,
-          req.target,
-          req.spell,
-          req.spellcasting_ability,
-          {
-            rng,
-          },
-        );
-        return {
-          attack: out.attack,
-          damage: out.damage,
-          target_hp: out.target.current_hit_points,
-        };
-      },
-    },
-    {
-      method: "POST",
-      pattern: /^\/v1\/spells\/save$/,
-      handle: ({ body }) => {
-        const req = SpellCastRequest.parse(body);
-        const out = resolveSpellSave(req.caster, req.target, req.spell, req.spellcasting_ability, {
-          rng,
-        });
-        return {
-          save: out.save,
-          damage: out.damage,
-          damage_dealt: out.damage_dealt,
-          target_hp: out.target.current_hit_points,
-        };
+        const modifier = abilityModifier(abilityScore(req.caster, req.spellcasting_ability));
+        const attack_bonus = req.caster.proficiency_bonus + modifier;
+        return { save_dc: 8 + attack_bonus, attack_bonus };
       },
     },
 

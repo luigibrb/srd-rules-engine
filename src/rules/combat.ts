@@ -1,43 +1,7 @@
 import { ABILITY_FULL_NAMES, type AbilityFullName, type Character } from "../models/character";
-import type { AttackRoll, DamageRoll, SavingThrow } from "../models/combat";
-import { abilityModifier, formatDiceExpression, parseDiceExpression, roll } from "./dice";
+import type { SavingThrow } from "../models/combat";
+import { abilityModifier, roll } from "./dice";
 import { mathRng, type Rng } from "./rng";
-
-/**
- * A natural 20 always hits (and crits); a natural 1 always misses.
- *
- * @deprecated Use `makeAttack` (critical range, Advantage and Disadvantage). Kept until 1.0.
- */
-export function attackRoll(
-  attacker: Character,
-  target: Character,
-  attackBonus: number,
-  { rng = mathRng }: { rng?: Rng } = {},
-): AttackRoll {
-  const result = roll("1d20", rng);
-  const d20 = result.rolls[0] as number;
-  const total = d20 + attackBonus;
-  return {
-    attacker_name: attacker.name,
-    target_name: target.name,
-    attack_bonus: attackBonus,
-    target_ac: target.armor_class,
-    roll: result,
-    hit: d20 === 20 || (d20 !== 1 && total >= target.armor_class),
-    critical_hit: d20 === 20,
-    critical_miss: d20 === 1,
-  };
-}
-
-/** Roll damage. A critical hit doubles every die (not the modifier). */
-export function damageRoll(
-  diceExpression: string,
-  damageType: string,
-  { critical = false, rng = mathRng }: { critical?: boolean; rng?: Rng } = {},
-): DamageRoll {
-  const expr = critical ? doubleDice(diceExpression) : diceExpression;
-  return { dice_expression: expr, roll: roll(expr, rng), damage_type: damageType };
-}
 
 export function abilityScore(character: Character, ability: string): number {
   const key = ability.toLowerCase();
@@ -64,9 +28,4 @@ export function savingThrow(
     roll: result,
     success: result.total + bonus >= dc,
   };
-}
-
-function doubleDice(expression: string): string {
-  const parsed = parseDiceExpression(expression);
-  return formatDiceExpression({ ...parsed, count: parsed.count * 2 });
 }

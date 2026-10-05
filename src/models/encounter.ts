@@ -10,6 +10,7 @@
 import { z } from "zod";
 import { ABILITIES, DAMAGE_TYPES, SKILLS, SpellAreaSchema } from "./content";
 import { PlayActionSchema } from "./state";
+import { DocumentVersionSchema } from "./version";
 
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs");
 
@@ -233,6 +234,8 @@ export const PendingSchema = z.object({
 export type Pending = z.infer<typeof PendingSchema>;
 
 export const EncounterSchema = z.object({
+  /** The document format (`DOCUMENT_VERSION`); missing means 1. */
+  version: DocumentVersionSchema,
   /** 0 before the fight starts. */
   round: z.int().min(0).default(0),
   /** Index into `order` of whose turn it is. */

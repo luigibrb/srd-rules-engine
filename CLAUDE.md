@@ -52,8 +52,11 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
 - Saving throw damage: half (rounded down) on success, full on failure.
 - Combat works on `Combatant`s (`rules/combatant.ts`: a read-only view; `combatantFromCharacter`
   in `services/play.ts`). `makeAttack` returns rolls + damage `instances`; the caller applies
-  them (play action `{ type: "damage", instances, critical }`). The `Character`-based
-  `resolveAttack`/`attackRoll` are deprecated adapters kept until 1.0.
+  them (play action `{ type: "damage", instances, critical }`).
+- Public API: `src/index.ts` exports by name (no `export *`); add a new public function there
+  and update `tests/__snapshots__/api.test.ts.snap`. Saved documents (build, state, encounter)
+  have `version` (`DOCUMENT_VERSION`): a breaking format change raises it and migrates older
+  documents on parse.
 - Spells: `mechanics` on catalog spells, written by import-srd-spells.ts (never hand-edited in
   spells.yaml): parser drafts used only for ids in `REVIEWED` (each checked against the SRD
   text), `REJECTED` drafts with a reason, hand-written `MECHANICS` (win). `--report` lists drafts
@@ -161,11 +164,8 @@ npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, 
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  
 `POST /v1/characters/{name}/passive-perception` — passive Perception (`?proficient=true`)  
 `POST /v1/combat/roll` — roll any dice expression (`{"expression": "2d6+3"}`)  
-`POST /v1/combat/attack` — full attack resolution (deprecated `Character` API)  
 `POST /v1/combat/saving-throw` — saving throw  
-`POST /v1/spells/stats` — spell save DC + attack bonus  
-`POST /v1/spells/attack` — spell attack  
-`POST /v1/spells/save` — save-based spell (also returns `damage_dealt`)
+`POST /v1/spells/stats` — spell save DC + attack bonus (`Character`)
 
 Errors: 422 invalid body (Zod), 400 bad JSON, dice expression, or a refused setter/action (`detail`: messages), 404 unknown route/entity,
 405 wrong method. `createHandler({ catalog, rng, basePath, cors })` configures it.
