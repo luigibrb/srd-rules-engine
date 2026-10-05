@@ -968,6 +968,7 @@
     conditions:
       - condition: blinded
         on: failed_save
+        until: end_of_your_next_turn
     area:
       shape: cone
       size: 15
@@ -1547,6 +1548,8 @@
       damage:
         - dice: 1d6
           type: radiant
+    on_hit:
+      - advantage_against
 - id: healing-word
   name: Healing Word
   level: 1
@@ -1740,6 +1743,23 @@
 
     _Using a Higher-Level Spell Slot._ The Cold damage increases by 1d6 for each spell slot level
     above 1.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 1d10
+        type: piercing
+    targets: 1
+    follow_up:
+      save:
+        ability: dex
+        on_success: none
+      damage:
+        - dice: 2d6
+          type: cold
+      upcast:
+        - dice: 1d6
+          type: cold
+      radius: 5
 - id: identify
   name: Identify
   level: 1
@@ -1900,6 +1920,14 @@
 
     _Using a Higher-Level Spell Slot._ The spell creates one more dart for each spell slot level
     above 1.
+  mechanics:
+    damage:
+      - dice: 1d4
+        type: force
+        bonus: 1
+    projectiles:
+      count: 3
+      upcast: 1
 - id: protection-from-evil-and-good
   name: Protection from Evil and Good
   level: 1
@@ -1970,6 +1998,7 @@
     conditions:
       - condition: poisoned
         on: hit
+        until: end_of_your_next_turn
     targets: 1
     upcast:
       damage:
@@ -3501,6 +3530,14 @@
 
     _Using a Higher-Level Spell Slot._ You create one additional ray for each spell slot level above
     2.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 2d6
+        type: fire
+    projectiles:
+      count: 3
+      upcast: 1
 - id: see-invisibility
   name: See Invisibility
   level: 2
@@ -7808,6 +7845,19 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 3d6 for each spell slot level above
     6.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    damage:
+      - dice: 10d6
+        type: force
+        bonus: 40
+    targets: 1
+    upcast:
+      damage:
+        - dice: 3d6
+          type: force
 - id: eyebite
   name: Eyebite
   level: 6
@@ -8428,6 +8478,7 @@
     conditions:
       - condition: blinded
         on: failed_save
+        until: start_of_your_next_turn
     area:
       shape: line
       size: 60
@@ -8788,6 +8839,15 @@
 
     A Humanoid killed by this spell rises at the start of your next turn as a **Zombie** (see
     "Monsters") that follows your verbal orders.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 7d8
+        type: necrotic
+        bonus: 30
+    targets: 1
 - id: fire-storm
   name: Fire Storm
   level: 7

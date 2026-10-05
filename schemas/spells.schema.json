@@ -245,6 +245,12 @@
               "add_modifier": {
                 "default": false,
                 "type": "boolean"
+              },
+              "bonus": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
               }
             },
             "required": [
@@ -390,6 +396,21 @@
                   "failed_save",
                   "hit"
                 ]
+              },
+              "until": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "start_of_your_next_turn",
+                      "end_of_your_next_turn"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -438,6 +459,168 @@
               "type": "null"
             }
           ]
+        },
+        "projectiles": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 9007199254740991
+                },
+                "upcast": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "count"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "follow_up": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "save": {
+                  "type": "object",
+                  "properties": {
+                    "ability": {
+                      "type": "string",
+                      "enum": [
+                        "str",
+                        "dex",
+                        "con",
+                        "int",
+                        "wis",
+                        "cha"
+                      ]
+                    },
+                    "on_success": {
+                      "default": "none",
+                      "type": "string",
+                      "enum": [
+                        "half",
+                        "none"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "ability"
+                  ],
+                  "additionalProperties": false
+                },
+                "damage": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dice": {
+                        "type": "string",
+                        "pattern": "^\\d+d\\d+$"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "acid",
+                          "bludgeoning",
+                          "cold",
+                          "fire",
+                          "force",
+                          "lightning",
+                          "necrotic",
+                          "piercing",
+                          "poison",
+                          "psychic",
+                          "radiant",
+                          "slashing",
+                          "thunder"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "dice",
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "upcast": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dice": {
+                        "type": "string",
+                        "pattern": "^\\d+d\\d+$"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "acid",
+                          "bludgeoning",
+                          "cold",
+                          "fire",
+                          "force",
+                          "lightning",
+                          "necrotic",
+                          "piercing",
+                          "poison",
+                          "psychic",
+                          "radiant",
+                          "slashing",
+                          "thunder"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "dice",
+                      "type"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "radius": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "save",
+                "damage"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "on_hit": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "advantage_against"
+            ]
+          }
         }
       },
       "additionalProperties": false

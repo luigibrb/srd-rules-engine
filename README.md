@@ -203,7 +203,8 @@ const cast = castSpell(wizard, fireball, [goblin, orc], { slot_level: 5, rng: se
 ```
 
 Catalog spells carry their `mechanics`: attack or save (half damage on a success), damage by
-type, upcasting, Cantrip Upgrade, healing and conditions. 53 SRD spells have mechanics, each
+type, upcasting, Cantrip Upgrade, healing, conditions, darts and rays, a save after an attack
+and hit riders. 58 SRD spells have mechanics, each
 reviewed against the SRD text; the others are cast with their text (slot and Concentration
 only).
 
@@ -414,12 +415,12 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Character creation | Complete: all 12 SRD classes, 9 species, 4 backgrounds |
 | Levels | 1–20 with multiclassing (prerequisites, partial proficiencies, combined spell slots, Pact Magic), fixed or rolled Hit Points, Ability Score Improvements, feats with prerequisites, Epic Boons |
 | Class features | Every SRD class feature to level 20 and every SRD subclass (one per class). Numbers the sheet computes: HP, AC options (Unarmored Defense, Draconic Resilience, Mage Armor), Extra Attack, Martial Arts, Expertise, Jack of All Trades, Aura of Protection, Champion critical range, speed bonuses, subclass spells. In rolls: Danger Sense, Reckless Attack, Feral Instinct, Frenzy, Evasion, Reliable Talent, Divine and Primal Strike, Sneak Attack, Colossus Slayer, Potent Spellcasting, Potent Cantrip, Empowered Evocation, Elemental Affinity. Used in turns: Second Wind, Action Surge, Lay On Hands, Flurry of Blows, Patient Defense, Step of the Wind, Stunning Strike, Uncanny Dodge, Bardic Inspiration; the rest is shown as the SRD text |
-| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions) for 53 reviewed spells; the rest are cast with their text |
+| Spells | All 339 SRD spells with full text; class spell choices by level, Wizard spellbook, Magical Secrets, Mystic Arcanum, Eldritch Invocations, Metamagic; casting with modeled mechanics (attack or save, upcasting, Cantrip Upgrade, healing, conditions, darts and rays, Ice Knife's save, Guiding Bolt's Advantage) for 58 reviewed spells; the rest are cast with their text |
 | Changing choices | Every SRD replacement rule: one pick per level for "whenever you gain a level" features, free lists for "after a Long Rest" ones; changing any past choice, a past level's class or Hit Points, with a preview and legality checks |
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, ability and skill checks, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), spellcasting (97 casting actions: spell lists, daily uses, fixed levels), "X/Day" limits, legendary actions and Legendary Resistance usable in combat; other traits as text |
-| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
 | Not yet | A map of walls and terrain, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 

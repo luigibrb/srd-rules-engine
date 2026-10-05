@@ -28,6 +28,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P16 | Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask` stops the action with the roll shown until `decide`, `auto` uses them only when they can change the outcome; per combatant or per encounter | Resumed by replaying the action with its recorded dice, so nothing is undone; it replaces P15's automatic Bardic Inspiration and the `target_feature` option |
 | P17 | `srd-rules fight`: an encounter in the terminal with saved characters and SRD monsters, decisions as y/n questions | Playing fights by hand led to fixes in the engine's notes (each target of a spell, skill names, which character refused a change) and in the CLI's name matching |
 | P18a | Positions on a 5-foot grid (optional): distances, reach, normal and long range, close combat, thrown weapons, spell range, movement to a square with Opportunity Attacks noted, cover given per attack or target | Positions are optional: without them the caller still says what's within 5 feet or in range. Areas of effect are P18b |
+| P19 | Spell mechanics the schema couldn't express: flat damage bonuses, darts and rays (Magic Missile, Scorching Ray), a save after an attack (Ice Knife), hit riders (Guiding Bolt), conditions until the caster's next turn; Help, Vex and Sap on spell attack rolls | Guiding Bolt's Advantage is an encounter mark like Vex's, usable by anyone. Darts share one damage roll (flagged). Five spells gained mechanics: Magic Missile, Scorching Ray, Ice Knife, Disintegrate, Finger of Death |
 | P18b | Areas of effect on the grid: spells' and monster effects' Spheres, Cylinders, Cubes, Cones, Lines and Emanations choose their targets from a point or a direction; monster save effects' areas and ranges read from their text | How shapes cover squares is an engine reading (flagged): a square is in when its center is inside |
 
 ## Decisions
@@ -56,13 +57,12 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 ### Combat rules
 
 - **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
-  Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM; Help's
-  Advantage and Sap's Disadvantage don't reach spell attack rolls yet.
+  Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM.
 - **A map (L).** Walls, Difficult Terrain and obstacles on the grid: paths and their cost, line
   of sight, cover worked out instead of given.
 - **Ongoing area effects (L).** Spells and traits that deal damage when a creature enters an area
   or starts its turn there (Moonbeam, Spirit Guardians, Cloud of Daggers, a Remorhaz's swallowed
-  creature): an encounter "zone" with triggers. Most of the 79 spells left as text need this.
+  creature): an encounter "zone" with triggers. Most of the 77 spells left as text need this.
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
   some of them.
@@ -71,18 +71,17 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   with Concentration); the two casting actions left as text (Pit Fiend, Unicorn); restrictions
   such as "self only".
 - **Smaller flagged items (S each).** Divine Strike only on your own turns; which attacks a
-  Multiattack allows; Rage's 10-minute cap; Dash with a Fly or Swim Speed; durations written only
-  in a spell's text (Color Spray's blindness "until the end of your next turn").
+  Multiattack allows; Rage's 10-minute cap; Dash with a Fly or Swim Speed.
 
 ### Content coverage
 
-- **Spells left as text (L, ongoing).** 79 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 77 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
   first.
-- **Spell mechanics the schema can't express yet (M).** A flat bonus per dart (Magic Missile),
-  spells with both an attack and a save, and riders on a hit such as Guiding Bolt's Advantage on
-  the next attack.
+- **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
+  reactions (Shocking Grasp), less Speed (Ray of Frost), no healing (Chill Touch), Dim Light
+  (Starry Wisp); a damage type chosen when casting and the leap on doubles (Chromatic Orb).
 - **Monster save effects left as text (M).** 19 effects without plain damage or conditions
   (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
 - **Class features used in turns, what's left (M).** Indomitable (a reroll of a failed save),

@@ -60,7 +60,7 @@ const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizar
 describe("golden spells (mechanics checked against the SRD text)", () => {
   it("every spell's mechanics, as reviewed (a change here needs a review against the SRD)", () => {
     const withMechanics = Object.values(catalog.spells).filter((s) => s.mechanics);
-    expect(withMechanics).toHaveLength(53);
+    expect(withMechanics).toHaveLength(58);
     expect(Object.fromEntries(withMechanics.map((s) => [s.id, s.mechanics]))).toMatchSnapshot();
   });
 
@@ -70,7 +70,7 @@ describe("golden spells (mechanics checked against the SRD text)", () => {
       if (!m) continue;
       if (m.cantrip_scaling) expect(s.level, s.id).toBe(0);
       if (m.upcast) expect(s.level, s.id).toBeGreaterThan(0);
-      const count = Math.min(m.targets ?? 2, 2);
+      const count = m.projectiles ? 1 : Math.min(m.targets ?? 2, 2);
       const targets = Array.from({ length: count }, () => creature());
       const slots = s.level === 0 ? [undefined] : [s.level, 9];
       for (const slot_level of slots) {
@@ -202,6 +202,134 @@ describe("golden spells (mechanics checked against the SRD text)", () => {
   });
 });
 
+describe("darts, rays, flat bonuses, follow-up saves and riders", () => {
+  it("Magic Missile: three darts of 1d4 + 1 that hit, one roll for all; one more per slot", () => {
+    const r = castSpell(mage(), spell("magic-missile"), [creature()], { rng: scriptedRng([3]) });
+    expect(r.damage?.total).toBe(4);
+    expect(r.targets.map((t) => [t.target, t.attack, t.instances])).toEqual([
+      [0, null, [{ amount: 4, type: "force" }]],
+      [0, null, [{ amount: 4, type: "force" }]],
+      [0, null, [{ amount: 4, type: "force" }]],
+    ]);
+    // Split: two darts at the first creature, one at the second.
+    const a = creature({ name: "A" });
+    const b = creature({ name: "B" });
+    const split = castSpell(mage(), spell("magic-missile"), [a, a, b], { rng: scriptedRng([1]) });
+    expect(split.targets.map((t) => [t.name, t.instances[0]?.amount])).toEqual([
+      ["A", 2],
+      ["A", 2],
+      ["B", 2],
+    ]);
+    const third = castSpell(mage(), spell("magic-missile"), [creature()], {
+      slot_level: 3,
+      rng: scriptedRng([4]),
+    });
+    expect(third.targets).toHaveLength(5);
+    expect(() => castSpell(mage(), spell("magic-missile"), [a, b])).toThrow(
+      /3 darts: give 1 target or 3/,
+    );
+  });
+
+  it("Magic Missile: a one-roll damage bonus (Empowered Evocation) goes to one dart", () => {
+    const evoker = creature({
+      ...mage(),
+      spell_damage: [
+        {
+          name: "Empowered Evocation",
+          bonus: 3,
+          cantrip: false,
+          list: null,
+          school: "evocation",
+          damage_type: null,
+          one_roll: true,
+        },
+      ],
+    });
+    const r = castSpell(evoker, spell("magic-missile"), [creature()], { rng: scriptedRng([2]) });
+    expect(r.targets.map((t) => t.instances[0]?.amount)).toEqual([6, 3, 3]);
+  });
+
+  it("Scorching Ray: an attack per ray, three at level 2 and four at level 3", () => {
+    const r = castSpell(mage(), spell("scorching-ray"), [creature()], {
+      rng: scriptedRng([15, 3, 3, 2, 15, 1, 2]),
+    });
+    expect(r.targets.map((t) => [t.attack?.hit, t.instances])).toEqual([
+      [true, [{ amount: 6, type: "fire" }]],
+      [false, []],
+      [true, [{ amount: 3, type: "fire" }]],
+    ]);
+    const up = castSpell(mage(), spell("scorching-ray"), [creature()], {
+      slot_level: 3,
+      rng: scriptedRng([2, 2, 2, 2]),
+    });
+    expect(up.targets).toHaveLength(4);
+  });
+
+  it("Ice Knife: the attack, then a Dexterity save for the target and the creatures near it", () => {
+    const near = creature({ name: "Near" });
+    const r = castSpell(mage(), spell("ice-knife"), [creature()], {
+      nearby: [near],
+      rng: scriptedRng([15, 6, 2, 19, 3, 4]),
+    });
+    expect(r.targets[0]).toMatchObject({
+      attack: { hit: true },
+      instances: [{ amount: 6, type: "piercing" }],
+    });
+    expect(r.follow_up).toMatchObject({ ability: "dex", dc: 13, damage: { total: 7 } });
+    expect(
+      r.follow_up?.targets.map((t) => [t.target, t.name, t.save?.success, t.instances]),
+    ).toEqual([
+      [0, "Target", false, [{ amount: 7, type: "cold" }]],
+      [1, "Near", true, []],
+    ]);
+    // A miss still explodes; the upcast adds Cold dice only.
+    const miss = castSpell(mage(), spell("ice-knife"), [creature()], {
+      slot_level: 2,
+      rng: scriptedRng([2, 2, 1, 1, 1]),
+    });
+    expect(miss.targets[0]?.instances).toEqual([]);
+    expect(miss.follow_up?.damage?.parts.map((p) => p.dice)).toEqual(["3d6"]);
+    expect(miss.follow_up?.targets[0]?.instances).toEqual([{ amount: 3, type: "cold" }]);
+  });
+
+  it("Disintegrate and Finger of Death: dice plus a flat bonus", () => {
+    const dis = castSpell(mage(), spell("disintegrate"), [creature({ hp: 100, max_hp: 100 })], {
+      rng: scriptedRng([2, ...Array(10).fill(1)]),
+    });
+    expect(dis.targets[0]?.instances).toEqual([{ amount: 50, type: "force" }]);
+    const finger = castSpell(mage(), spell("finger-of-death"), [creature()], {
+      rng: scriptedRng([20, ...Array(7).fill(1)]),
+    });
+    expect(finger.targets[0]?.instances).toEqual([{ amount: 18, type: "necrotic" }]); // 37 / 2
+  });
+
+  it("Guiding Bolt: a hit says the next attack roll against the target has Advantage", () => {
+    const hit = castSpell(mage(), spell("guiding-bolt"), [creature()], {
+      rng: scriptedRng([15, 1, 1, 1, 1]),
+    });
+    expect(hit.targets[0]?.on_hit).toEqual(["advantage_against"]);
+    const miss = castSpell(mage(), spell("guiding-bolt"), [creature()], { rng: scriptedRng([2]) });
+    expect(miss.targets[0]?.on_hit).toEqual([]);
+  });
+
+  it("modesFor gives reasons for one roll, melee spell attacks included", () => {
+    const calls: [number, number][] = [];
+    const r = castSpell(mage(), spell("chill-touch"), [creature()], {
+      rng: scriptedRng([3, 18, 1]),
+      modesFor: (target, shot) => {
+        calls.push([target, shot]);
+        return [{ mode: "advantage", reason: "a test" }];
+      },
+    });
+    expect(calls).toEqual([[0, 0]]);
+    expect(r.targets[0]?.attack).toMatchObject({
+      hit: true,
+      roll: { mode: "advantage" },
+      reasons: ["Advantage: a test"],
+    });
+  });
+});
+
 describe("parsed and corrected spells", () => {
   it("Hideous Laughter gives both Prone and Incapacitated", () => {
     const r = castSpell(mage(), spell("hideous-laughter"), [creature()], { rng: scriptedRng([1]) });
@@ -224,7 +352,7 @@ describe("parsed and corrected spells", () => {
 
   it("Weird deals only its first 10d10 when cast", () => {
     expect(spell("weird").mechanics?.damage).toEqual([
-      { dice: "10d10", type: "psychic", add_modifier: false },
+      { dice: "10d10", type: "psychic", add_modifier: false, bonus: 0 },
     ]);
   });
 

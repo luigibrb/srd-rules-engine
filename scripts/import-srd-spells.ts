@@ -62,17 +62,37 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     damage: [{ dice: "4d6", type: "radiant" }],
     targets: 1,
     upcast: { damage: [{ dice: "1d6", type: "radiant" }] },
+    // "the next attack roll made against it before the end of your next turn has Advantage"
+    on_hit: ["advantage_against"],
   },
   "healing-word": {
     heal: { dice: "2d4", add_modifier: true },
     targets: 1,
     upcast: { heal: "2d4" },
   },
+  "ice-knife": {
+    attack: "ranged",
+    damage: [{ dice: "1d10", type: "piercing" }],
+    targets: 1,
+    // "Hit or miss, the shard then explodes. The target and each creature within 5 feet of it
+    // must succeed on a Dexterity saving throw or take 2d6 Cold damage."
+    follow_up: {
+      save: { ability: "dex", on_success: "none" },
+      damage: [{ dice: "2d6", type: "cold" }],
+      upcast: [{ dice: "1d6", type: "cold" }],
+      radius: 5,
+    },
+  },
   "inflict-wounds": {
     save: { ability: "con", on_success: "half" },
     damage: [{ dice: "2d10", type: "necrotic" }],
     targets: 1,
     upcast: { damage: [{ dice: "1d10", type: "necrotic" }] },
+  },
+  "magic-missile": {
+    // "A dart deals 1d4 + 1 Force damage to its target."
+    damage: [{ dice: "1d4", type: "force", bonus: 1 }],
+    projectiles: { count: 3, upcast: 1 },
   },
   // Level 3
   "mass-healing-word": {
@@ -111,6 +131,11 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     upcast: { targets: 1 },
     conditions: [{ condition: "paralyzed", on: "failed_save" }],
   },
+  "scorching-ray": {
+    attack: "ranged",
+    damage: [{ dice: "2d6", type: "fire" }],
+    projectiles: { count: 3, upcast: 1 },
+  },
   // Level 3
   fireball: {
     save: { ability: "dex", on_success: "half" },
@@ -141,7 +166,7 @@ const ABILITY_WORDS: Record<string, string> = {
   Charisma: "cha",
 };
 const DAMAGE =
-  /(\d+d\d+) (Acid|Bludgeoning|Cold|Fire|Force|Lightning|Necrotic|Piercing|Poison|Psychic|Radiant|Slashing|Thunder) damage/g;
+  /(\d+d\d+)(?: \+ (\d+))? (Acid|Bludgeoning|Cold|Fire|Force|Lightning|Necrotic|Piercing|Poison|Psychic|Radiant|Slashing|Thunder) damage/g;
 const CONDITION_NAMES =
   "Blinded|Charmed|Deafened|Frightened|Grappled|Incapacitated|Invisible|Paralyzed|Petrified|Poisoned|Prone|Restrained|Stunned|Unconscious";
 /** "the Blinded condition", or "the Prone and Incapacitated conditions". */
@@ -212,7 +237,11 @@ function parseMechanics(level: number, description: string): Draft {
     );
   }
   const damage = resolving.flatMap((x) =>
-    [...x.matchAll(DAMAGE)].map((m) => ({ dice: m[1], type: (m[2] as string).toLowerCase() })),
+    [...x.matchAll(DAMAGE)].map((m) => ({
+      dice: m[1],
+      type: (m[3] as string).toLowerCase(),
+      ...(m[2] ? { bonus: Number(m[2]) } : {}),
+    })),
   );
   if (damageAll.length !== damage.length) {
     return { skip: "damage outside the sentence that resolves the attack or save" };
@@ -223,14 +252,17 @@ function parseMechanics(level: number, description: string): Draft {
   }
   CONDITION.lastIndex = 0;
   if (damage.length) mechanics.damage = damage;
-  const conditions = resolving.flatMap((x) =>
-    [...x.matchAll(CONDITION)].flatMap((m) =>
+  const conditions = resolving.flatMap((x) => {
+    // "has the Blinded condition until the end of your next turn"
+    const until = /conditions? until the (start|end) of your next turn/.exec(x)?.[1];
+    return [...x.matchAll(CONDITION)].flatMap((m) =>
       (m[1] as string).split(" and ").map((name) => ({
         condition: name.toLowerCase(),
         on: attack ? "hit" : "failed_save",
+        ...(until ? { until: `${until}_of_your_next_turn` } : {}),
       })),
-    ),
-  );
+    );
+  });
   if (conditions.length) mechanics.conditions = conditions;
   if (heal) {
     if (damage.length || attack || mechanics.save) return { skip: "healing mixed with damage" };
@@ -292,8 +324,10 @@ const REVIEWED = new Set<string>([
   "color-spray",
   "compulsion",
   "cone-of-cold",
+  "disintegrate", // turning to dust at 0 Hit Points stays text
   "dissonant-whispers",
   "entangle",
+  "finger-of-death", // rising as a Zombie stays text
   "fire-storm",
   "flesh-to-stone", // Restrained; turning to stone after three failed saves stays text
   "freezing-sphere",

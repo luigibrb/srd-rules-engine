@@ -339,23 +339,29 @@ other rolls; without a DC, `success` is `null` (a contest, or the GM decides).
 
 ### Casting spells
 
-Catalog spells can carry `mechanics` (attack or save, damage by type, healing, targets,
-upcasting, Cantrip Upgrade, conditions, area). `castSpell(caster, spell, targets, { slot_level,
-pact, spellcasting, mode, rng })` in `rules/casting.ts` resolves them between combatants: a spell
-attack per target (per beam for Eldritch Blast), or a save with the damage rolled once for all
-targets; healing; conditions on a hit or a failed save (not for a target immune to them). It
-returns each target's result with the play actions that apply it (`targets[i].actions`) and the
-caster's (`spend_slot` or `spend_pact_slot`, `set_concentration`). `POST /v1/state/cast` checks
+Catalog spells can carry `mechanics` (attack or save, damage by type with a flat bonus,
+healing, targets, upcasting, Cantrip Upgrade, conditions with their duration, area, darts or
+rays, a follow-up save, hit riders). `castSpell(caster, spell, targets, { slot_level, pact,
+spellcasting, mode, modesFor, nearby, rng })` in `rules/casting.ts` resolves them between
+combatants: a spell attack per target (per beam or ray: Eldritch Blast, Scorching Ray), or a
+save with the damage rolled once for all targets; darts that hit automatically (Magic Missile);
+healing; conditions on a hit or a failed save (not for a target immune to them). Beams, rays
+and darts go at one target or one `targets` entry each, so a target given twice takes two. A
+follow-up save (Ice Knife) comes after the attack, hit or miss, for the target and `nearby`
+(`follow_up`); a hit's riders are in `targets[i].on_hit`. `modesFor(target, shot)` gives
+Advantage or Disadvantage to one spell attack roll. It returns each target's result with the
+play actions that apply it (`targets[i].actions`) and the caster's (`spend_slot` or
+`spend_pact_slot`, `set_concentration`). `POST /v1/state/cast` checks
 that the caster has the spell and applies everything to the states.
 
 The spellcasting feature used is the one asked for, else the one with the best save DC whose
 spell list has the spell, else the best overall (a species' fixed spells). A spell without
 `mechanics` is still cast (slot, Concentration) with a note that its effects are in the text.
 
-53 SRD spells have mechanics: 11 hand-written golden spells with worked tests, 38 drafts from
+58 SRD spells have mechanics: 14 hand-written golden spells with worked tests, 40 drafts from
 the importer's parser reviewed against their text, and 4 corrected by hand (`tests/casting.test.ts`
-snapshots them all). The other 286 are cast with their text: 207 have nothing to model (utility
-spells), and 79 have effects the parser deliberately doesn't guess (damage after casting, several
+snapshots them all). The other 281 are cast with their text: 204 have nothing to model (utility
+spells), and 77 have effects the parser deliberately doesn't guess (damage after casting, several
 saves, tables…).
 
 ### Monsters
@@ -493,7 +499,15 @@ list of actions.
   forces a Constitution save (DC 8 + the attack's modifier + Proficiency Bonus) or Prone; Push is
   noted; Cleave allows one `attack` with `cleave: true` against a second creature per turn
   (`cleave_damage_parts`: no positive modifier), not counted among the Attack action's attacks;
-  Nick makes the Light extra attack part of the Attack action once per turn.
+  Nick makes the Light extra attack part of the Attack action once per turn. Help, Vex and Sap
+  reach spell attack rolls too.
+- **Spells in turns:** `cast` applies `castSpell`'s results. Guiding Bolt's hit is an
+  `encounter.marks` entry (Advantage on the next attack roll against the target, by anyone,
+  until the end of the caster's next turn), used up by the roll it changes. A follow-up save's
+  creatures are the positioned ones within its radius of the target, or `nearby` without
+  positions. Conditions with a duration in the spell's text (Ray of Sickness, Color Spray,
+  Sunbeam) are timed effects that end at the start or end of the caster's next turn; a
+  Concentration spell's other conditions last while it concentrates.
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
@@ -571,6 +585,12 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Resistance applies per type.
 - Healing that several targets receive is rolled once, like damage.
 - Each beam's damage preview is against the target as it was before the spell.
+- Magic Missile's darts share one damage roll ("The darts all strike simultaneously"); each dart
+  is still its own damage, so a concentrating target makes a save per dart.
+- Ice Knife's Cold damage is rolled once for every creature that saves, like other save damage;
+  a creature within 5 feet of the target includes the caster.
+- Guiding Bolt's Advantage applies to the next attack roll against the target by anyone,
+  spell attacks included, and a new hit replaces the old mark.
 
 **Monsters**
 
@@ -607,7 +627,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Reckless Attack are both on.
 - Primal Strike applies to weapon attacks; Beast-form attacks aren't attack lines.
 - Empowered Evocation's and Elemental Affinity's "one damage roll" is the first damage part of
-  the first roll (the first beam of a multi-beam spell); Potent Spellcasting adds to every roll.
+  the first roll (the first beam, ray or dart of a spell that has several; never a follow-up
+  save's damage); Potent Spellcasting adds to every roll.
 - Reliable Talent covers skill checks; tool proficiencies aren't checks the engine rolls.
 - Action Surge can be used once the turn's action is spent (the additional action replaces it).
 - In `auto` mode, a Bardic Inspiration die is used on a failed D20 Test only when its highest
@@ -673,7 +694,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there's no map of walls and Difficult Terrain, 79 spells keep their effects in text, and shopping with starting gold isn't automated.
+there's no map of walls and Difficult Terrain, 77 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 
