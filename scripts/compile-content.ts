@@ -27,6 +27,7 @@ import { CreationSchema } from "../src/models/content";
 import { EncounterActionSchema, EncounterSchema } from "../src/models/encounter";
 import { CombatantOptionsSchema } from "../src/models/options";
 import { PackManifestSchema, PatchSchema } from "../src/models/pack";
+import { AreaPreviewSchema, MovePreviewSchema, ReachableSchema } from "../src/models/previews";
 import { CharacterStateSchema, PlayActionSchema } from "../src/models/state";
 
 const root = join(import.meta.dirname, "..");
@@ -79,18 +80,17 @@ outputs.set(
   "schemas/encounter-action.schema.json",
   schema(EncounterActionSchema, "Encounter action", true),
 );
-// A computed result, not a document: what `POST /v1/encounters/options` returns.
-outputs.set(
-  "schemas/options.schema.json",
+// Computed results, not documents: what the options and preview routes return.
+const result = (s: z.ZodType, title: string) =>
   `${JSON.stringify(
-    {
-      ...z.toJSONSchema(CombatantOptionsSchema, { io: "output", unrepresentable: "any" }),
-      title: "Combatant options",
-    },
+    { ...z.toJSONSchema(s, { io: "output", unrepresentable: "any" }), title },
     null,
     2,
-  )}\n`,
-);
+  )}\n`;
+outputs.set("schemas/options.schema.json", result(CombatantOptionsSchema, "Combatant options"));
+outputs.set("schemas/reachable.schema.json", result(ReachableSchema, "Reachable squares"));
+outputs.set("schemas/move-preview.schema.json", result(MovePreviewSchema, "Move preview"));
+outputs.set("schemas/area-preview.schema.json", result(AreaPreviewSchema, "Area preview"));
 
 let stale = 0;
 for (const [rel, content] of outputs) {

@@ -219,6 +219,14 @@ export {
   PatchSchema,
 } from "./models/pack";
 export {
+  type AreaPreview,
+  AreaPreviewSchema,
+  type MovePreview,
+  MovePreviewSchema,
+  type Reachable,
+  ReachableSchema,
+} from "./models/previews";
+export {
   type CharacterState,
   CharacterStateSchema,
   CURRENCIES,
@@ -427,3 +435,9 @@ export {
   reconcileState,
   validateState,
 } from "./services/play";
+export {
+  type AreaRequest,
+  previewArea,
+  previewMove,
+  reachableSquares,
+} from "./services/previews";

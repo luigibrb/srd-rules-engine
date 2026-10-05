@@ -43,6 +43,7 @@ import {
   reconcileState,
   validateState,
 } from "../services/play";
+import { previewArea, previewMove, reachableSquares } from "../services/previews";
 
 export interface HandlerOptions {
   /** Content to serve and build against. Defaults to the bundled SRD 5.2.1. */
@@ -120,6 +121,17 @@ const CheckRequest = z.object({
   characters: z.record(z.string(), StateRequest).default({}),
   action: EncounterActionSchema,
 });
+const Square = z.object({ x: z.int(), y: z.int() });
+const MovePreviewRequest = OptionsRequest.extend({
+  to: Square.optional(),
+  path: z.array(Square).min(1).optional(),
+});
+const AreaPreviewRequest = OptionsRequest.extend({
+  area: z.object({ point: Square.optional(), toward: Square.optional() }),
+  spell: z.string().optional(),
+  ability: z.string().optional(),
+  legendary: z.string().optional(),
+});
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
   class_id: z.string(),
@@ -151,6 +163,10 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     catalog ??= srdCatalog();
     return catalog;
   };
+  /** The catalog and characters an encounter route works with. */
+  const encounterContext = (
+    characters: Readonly<Record<string, { build: unknown; state: CharacterState }>>,
+  ) => ({ catalog: getCatalog(), characters: characterRefs(characters) });
 
   const routes: Route[] = [
     { method: "GET", pattern: /^\/health$/, handle: () => ({ status: "ok" }) },
@@ -495,6 +511,30 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           catalog: getCatalog(),
           characters: characterRefs(req.characters),
         });
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/encounters\/reachable$/,
+      handle: ({ body }) => {
+        const req = OptionsRequest.parse(body);
+        return reachableSquares(req.encounter, req.id, encounterContext(req.characters));
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/encounters\/preview-move$/,
+      handle: ({ body }) => {
+        const req = MovePreviewRequest.parse(body);
+        return previewMove(req.encounter, req, encounterContext(req.characters));
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/encounters\/preview-area$/,
+      handle: ({ body }) => {
+        const req = AreaPreviewRequest.parse(body);
+        return previewArea(req.encounter, req, encounterContext(req.characters));
       },
     },
     {

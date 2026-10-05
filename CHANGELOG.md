@@ -50,6 +50,12 @@ migrated when it's loaded.
   leaves targets behind Total Cover out. `mapCover`; `rules/grid.ts`: `lineClear`, `coverDegree`,
   `obstacles`.
 
+- Previews for a map: `reachableSquares` (the squares a combatant can end a move on, with
+  their cost), `previewMove` (a move's path, cost, zones on the way and Opportunity Attacks) and
+  `previewArea` (an area's squares and the creatures in it, with their cover); routes
+  `POST /v1/encounters/reachable`, `/preview-move`, `/preview-area`; JSON Schemas
+  `reachable`, `move-preview`, `area-preview`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to

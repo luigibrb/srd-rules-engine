@@ -393,3 +393,37 @@ export function coverDegree(
   }
   return best;
 }
+
+/**
+ * Every square a `size`-wide creature at `from` can reach for at most `maxCost` feet, with the
+ * cheapest cost (`from` itself excluded). Squares it can only pass through are included: the
+ * caller leaves out those it can't end in.
+ */
+export function reachable(
+  terrain: Terrain,
+  from: GridPoint,
+  { size = 1, maxCost }: { size?: number; maxCost: number },
+): Map<string, { point: GridPoint; cost: number }> {
+  const best = new Map<string, { point: GridPoint; cost: number }>([
+    [key(from), { point: from, cost: 0 }],
+  ]);
+  // Costs are 5 or 10: a queue per cost level is enough.
+  const levels = new Map<number, GridPoint[]>([[0, [from]]]);
+  for (let cost = 0; cost <= maxCost; cost += 5) {
+    for (const p of levels.get(cost) ?? []) {
+      if ((best.get(key(p))?.cost ?? -1) !== cost) continue;
+      for (const [dx, dy] of directions(p, p)) {
+        const next = { x: p.x + dx, y: p.y + dy };
+        if (stepBlocked(terrain, p, next, size)) continue;
+        const total = cost + stepCost(terrain, p, next, size);
+        if (total > maxCost || total >= (best.get(key(next))?.cost ?? Number.POSITIVE_INFINITY)) {
+          continue;
+        }
+        best.set(key(next), { point: next, cost: total });
+        levels.set(total, [...(levels.get(total) ?? []), next]);
+      }
+    }
+  }
+  best.delete(key(from));
+  return best;
+}
