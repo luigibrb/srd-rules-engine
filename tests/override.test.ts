@@ -8,9 +8,9 @@ import {
   reportErrors,
   resolve,
   seededRng,
-  srdPack,
 } from "../src/index";
 import * as svc from "../src/services/builder";
+import { srdPack } from "../src/srd";
 import { apply, autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 const set = (b: CharacterBuild, key: string, values: string[]) =>

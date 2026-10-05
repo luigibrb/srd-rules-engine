@@ -20,6 +20,7 @@ exports[`public API > srd-rules-engine 1`] = `
   "BuildError",
   "CHARACTER_CLASSES",
   "CHOICE_KINDS",
+  "CORE_TABLES",
   "CURRENCIES",
   "CharacterBuildSchema",
   "CharacterSchema",
@@ -145,9 +146,11 @@ exports[`public API > srd-rules-engine 1`] = `
   "gridDistance",
   "inArea",
   "isAlive",
+  "isLoaded",
   "isSkill",
   "issuesForLevel",
   "issuesForStep",
+  "loadPack",
   "lookup",
   "makeAttack",
   "mathRng",
@@ -176,8 +179,7 @@ exports[`public API > srd-rules-engine 1`] = `
   "scriptedRng",
   "seededRng",
   "skillName",
-  "srdCatalog",
-  "srdPack",
+  "splitPack",
   "stat",
   "takeDamage",
   "updateBuild",
@@ -214,6 +216,7 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "BuildError",
   "CHARACTER_CLASSES",
   "CHOICE_KINDS",
+  "CORE_TABLES",
   "CURRENCIES",
   "CharacterBuildSchema",
   "CharacterSchema",
@@ -339,11 +342,13 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "gridDistance",
   "inArea",
   "isAlive",
+  "isLoaded",
   "isSkill",
   "issuesForLevel",
   "issuesForStep",
   "loadCatalog",
   "loadContentPack",
+  "loadPack",
   "lookup",
   "makeAttack",
   "mathRng",
@@ -373,6 +378,7 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "seededRng",
   "serveNode",
   "skillName",
+  "splitPack",
   "srdCatalog",
   "srdPack",
   "stat",
@@ -382,5 +388,13 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "validateBuild",
   "validateReferences",
   "validateState",
+]
+`;
+
+exports[`public API > srd-rules-engine/srd 1`] = `
+[
+  "SRD_PACK_ID",
+  "srdCatalog",
+  "srdPack",
 ]
 `;

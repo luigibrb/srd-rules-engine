@@ -10,11 +10,11 @@ import {
   createCatalog,
   evaluate,
   lookup,
-  srdPack,
   TABLE_NAMES,
 } from "../src/index";
 import { loadCatalog, loadContentPack } from "../src/node";
 import * as svc from "../src/services/builder";
+import { srdPack } from "../src/srd";
 import { catalog, fighterBuild } from "./helpers";
 
 const CONTENT_DIR = join(import.meta.dirname, "..", "content", "srd-5.2.1");

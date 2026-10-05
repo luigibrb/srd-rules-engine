@@ -6,7 +6,8 @@ encounters. Written in TypeScript. It has no framework dependencies and runs in 
 browsers and edge workers.
 
 ```ts
-import { builder, computeSheet, createBuild, explainStat, srdCatalog } from "srd-rules-engine";
+import { builder, computeSheet, createBuild, explainStat } from "srd-rules-engine";
+import { srdCatalog } from "srd-rules-engine/srd";
 
 const catalog = srdCatalog();
 let build = createBuild();
@@ -52,11 +53,32 @@ npm install srd-rules-engine
 
 | Entry point | What | Runs on |
 |---|---|---|
-| `srd-rules-engine` | Engine, schemas, bundled SRD | everywhere |
-| `srd-rules-engine/http` | `createHandler()`: the HTTP API as a `fetch` handler | everywhere |
+| `srd-rules-engine` | The engine and its schemas, without content | everywhere |
+| `srd-rules-engine/srd` | The SRD content bundled in: `srdCatalog()`, `srdPack` (about 2 MB) | everywhere |
+| `srd-rules-engine/http` | `createHandler()`: the HTTP API as a `fetch` handler (bundles the SRD) | everywhere |
 | `srd-rules-engine/node` | Everything above, plus `loadContentPack(dir)` and `serveNode()` | Node |
+| `srd-rules-engine/srd-5.2.1/*.json` | The SRD content split by table (`manifest.json`, `classes.json`…), for `loadPack` | any language |
 | `srd-rules-engine/srd-5.2.1.json` | The SRD content as one JSON file | any language |
 | `srd-rules-engine/schemas/*.json` | JSON Schemas for content files, pack manifests, patches, builds, play states, encounters and their actions | any language |
+
+### In a browser
+
+The main entry has no content, so a web app can fetch the SRD tables it needs and cache them:
+the core tables a character builder starts with are about 60 KB gzipped, the whole SRD about
+300 KB. Serve the files of `srd-rules-engine/srd-5.2.1/` (copy them to your static assets), then:
+
+```ts
+import { CORE_TABLES, createCatalog, loadPack } from "srd-rules-engine";
+
+const base = "/content/srd-5.2.1/";
+const fetchJson = (file: string) => fetch(base + file).then((r) => r.json());
+const tables = [...CORE_TABLES, "spells"] as const;     // add "monsters", "magic_items" later
+const catalog = createCatalog([await loadPack(fetchJson, { tables })], { tables });
+```
+
+A table left out isn't there: reading `catalog.monsters` throws "The table 'monsters' isn't
+loaded in this catalog". To add one, build the catalog again with more tables.
+`splitPack(pack)` splits your own packs the same way.
 
 ## Usage
 
@@ -67,7 +89,8 @@ and returns everything a UI needs: the active choices, every option with the rea
 can't be picked, what's still missing at each step, and the derived sheet.
 
 ```ts
-import { BuildError, builder, createBuild, evaluate, issuesForStep, srdCatalog } from "srd-rules-engine";
+import { BuildError, builder, createBuild, evaluate, issuesForStep } from "srd-rules-engine";
+import { srdCatalog } from "srd-rules-engine/srd";
 
 const catalog = srdCatalog();
 let build = createBuild();
@@ -444,7 +467,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, ability and skill checks, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), spellcasting (97 casting actions: spell lists, daily uses, fixed levels), "X/Day" limits, legendary actions and Legendary Resistance usable in combat; other traits as text |
 | Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, spell areas that last (zones), casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration; what a combatant can do now, with the reasons for what it can't |
-| Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
+| Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository; the SRD split by table for browsers, catalogs with only some tables |
 | Not yet | A map of walls and terrain, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 
 What comes next is in [docs/ROADMAP.md](docs/ROADMAP.md); the design is in
