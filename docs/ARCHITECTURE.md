@@ -620,6 +620,29 @@ engine's "out of reach"), or "No creature within N ft". The result has a Zod sch
 (`CombatantOptionsSchema`, `schemas/options.schema.json`); `POST /v1/encounters/options` and
 `/v1/encounters/check` serve both functions.
 
+### Events, refusal codes and undo
+
+- **Events.** `applyEncounterAction` returns `events` (`src/services/events.ts`,
+  `EncounterEventSchema`), worked out by comparing the encounter and its characters' states
+  before and after the action rather than by instrumenting each rule, so every change is covered
+  whichever rule made it: a new turn or the fight's end, combatants joining or leaving,
+  Initiative, moves (`from`, `to`, feet), HP and Temporary HP, conditions added or removed,
+  status (`defeated`, `down`, `stable`, `dead`, `up`), Concentration, the action economy spent,
+  a character's spell slots, Pact Magic and limited uses, effects and zones added, moved or
+  ended, map changes, and a pending decision. Their order follows the combatants, not the
+  order things happened in; the notes keep that. A dry run (`checkAction`) skips them
+  (`{ events: false }`).
+- **Refusal codes.** `EncounterError.codes` gives each message a code from `REFUSAL_CODES`
+  (`src/services/refusals.ts`: one table of patterns over the engine's messages, `refused` when
+  none matches); `checkAction`, options and previews carry them too, and the HTTP API returns
+  them in `codes`.
+- **Undo.** Every action rolls only through `rng`, and its result lists the dice it drew
+  (`rolls`; for `decide`, only the new ones). An `EncounterHistory` (`src/models/history.ts`, a
+  document of its own: the start and each action with its dice) replays with `scriptedRng` to the
+  same encounter and states (`replayHistory`); `undoAction` replays all but the last action, so
+  undoing a `decide` brings its question back. `POST /v1/encounters/apply` returns the steps in
+  `log`. The fight CLI keeps one for `undo`.
+
 ### Previews
 
 `src/services/previews.ts` answers a map UI's questions without applying anything, with the

@@ -484,12 +484,17 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         const notes: string[] = [];
         const actions = Array.isArray(req.action) ? req.action : [req.action];
         let applied = 0;
+        // Each action applied, with the dice it drew (an encounter history's steps) and events.
+        const log: { action: unknown; rolls: readonly number[] }[] = [];
+        const events: unknown[] = [];
         for (const action of actions) {
           const result = applyEncounterAction(encounter, action, { catalog, characters, rng });
           encounter = result.encounter;
+          log.push({ action, rolls: result.rolls });
+          events.push(...result.events);
           if (result.pending) {
             notes.push(...result.notes);
-            return { encounter, states, notes, pending: result.pending, applied };
+            return { encounter, states, notes, events, log, pending: result.pending, applied };
           }
           applied += 1;
           for (const [key, state] of Object.entries(result.states)) {
@@ -498,7 +503,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           }
           notes.push(...result.notes);
         }
-        return { encounter, states, notes, pending: null, applied };
+        return { encounter, states, notes, events, log, pending: null, applied };
       },
     },
     {
@@ -582,7 +587,10 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       }
       if (error instanceof RangeError) return json(400, { detail: error.message }, cors);
       if (error instanceof BuildError) return json(400, { detail: error.messages }, cors);
-      if (error instanceof PlayError || error instanceof EncounterError) {
+      if (error instanceof EncounterError) {
+        return json(400, { detail: error.messages, codes: error.codes }, cors);
+      }
+      if (error instanceof PlayError) {
         return json(400, { detail: error.messages }, cors);
       }
       return json(500, { detail: "Internal Server Error" }, cors);

@@ -434,6 +434,7 @@ describe("checkAction", () => {
     ).toEqual({
       ok: false,
       reasons: ["No combatant 'nobody' in the encounter"],
+      codes: ["unknown"],
     });
   });
 
@@ -452,7 +453,7 @@ describe("checkAction", () => {
     const check: EncounterAction = { type: "check", id: "brakka", skill: "athletics", dc: 25 };
     const r = applyEncounterAction(encounter, check, { ...s.ctx(), rng: scriptedRng([10]) });
     expect(r.pending?.kind).toBe("inspiration");
-    expect(checkAction(encounter, check, s.ctx())).toEqual({ ok: true, reasons: [] });
+    expect(checkAction(encounter, check, s.ctx())).toEqual({ ok: true, reasons: [], codes: [] });
   });
 
   it("ten combatants' options stay quick", () => {

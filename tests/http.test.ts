@@ -308,7 +308,7 @@ describe("encounter options over HTTP", () => {
       characters,
       action: sword.action,
     });
-    expect(ok.body).toEqual({ ok: true, reasons: [] });
+    expect(ok.body).toEqual({ ok: true, reasons: [], codes: [] });
     const refused = await api.post("/v1/encounters/check", {
       encounter,
       characters,
@@ -317,6 +317,7 @@ describe("encounter options over HTTP", () => {
     expect(refused.body).toEqual({
       ok: false,
       reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"],
+      codes: ["not_your_turn"],
     });
     const unknown = await api.post("/v1/encounters/options", { encounter, characters, id: "x" });
     expect(unknown.status).toBe(400);

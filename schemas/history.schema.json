@@ -1,130 +1,1406 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$ref": "#/$defs/CombatantOptions",
+  "$ref": "#/$defs/EncounterHistory",
   "$defs": {
-    "CombatantOptions": {
+    "EncounterHistory": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
+        "version": {
+          "default": 1,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1
         },
-        "name": {
-          "type": "string"
-        },
-        "turn": {
-          "type": "boolean"
-        },
-        "economy": {
+        "start": {
           "type": "object",
           "properties": {
-            "action": {
-              "type": "boolean"
-            },
-            "bonus_action": {
-              "type": "boolean"
-            },
-            "reaction": {
-              "type": "boolean"
-            },
-            "movement": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "attacks_left": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "granted": {
-              "anyOf": [
-                {
+            "encounter": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1
+                },
+                "round": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "turn": {
+                  "default": 0,
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "order": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "combatants": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9][a-z0-9-]*$"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "side": {
+                        "default": "",
+                        "type": "string"
+                      },
+                      "monster": {
+                        "default": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "character": {
+                        "default": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "initiative": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "hp": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "temp_hp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "conditions": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "defeated": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "used": {
+                        "default": {},
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "default": false,
+                            "type": "boolean"
+                          },
+                          "bonus_action": {
+                            "default": false,
+                            "type": "boolean"
+                          },
+                          "reaction": {
+                            "default": false,
+                            "type": "boolean"
+                          }
+                        }
+                      },
+                      "moved": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "extra_movement": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "attacks_left": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "riders_used": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "expended": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "daily_used": {
+                        "default": {},
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "concentration": {
+                        "default": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "toggled_on": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "extended": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "in_lair": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "legendary_used": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "legendary_taken": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "legendary_resistance_used": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "auto_legendary_resistance": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "dodging": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "disengaged": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "light_attacks": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "nick_used": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "cleave": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "attack": {
+                                "type": "string"
+                              },
+                              "target": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "attack",
+                              "target"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "cleave_used": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "surged": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "granted_attacks": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "attack": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "attack",
+                              "count"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "hits": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "features_used": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "decisions": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "ask",
+                              "auto"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "position": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "y": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "inspiration": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "die": {
+                                "type": "integer",
+                                "minimum": 2,
+                                "maximum": 9007199254740991
+                              },
+                              "by": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "die",
+                              "by"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                },
+                "effects": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "string"
+                      },
+                      "condition": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "default": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "concentration": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "ends": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "enum": [
+                                  "start",
+                                  "end"
+                                ]
+                              },
+                              "of": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "skip_current": {
+                                "default": false,
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "of",
+                              "count"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "escape_dc": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "escape_skill": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "athletics",
+                              "acrobatics"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "target",
+                      "condition",
+                      "label"
+                    ]
+                  }
+                },
+                "next_effect": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "helps": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "by": {
+                        "type": "string"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "skill": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "acrobatics",
+                              "animal-handling",
+                              "arcana",
+                              "athletics",
+                              "deception",
+                              "history",
+                              "insight",
+                              "intimidation",
+                              "investigation",
+                              "medicine",
+                              "nature",
+                              "perception",
+                              "performance",
+                              "persuasion",
+                              "religion",
+                              "sleight-of-hand",
+                              "stealth",
+                              "survival"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "by",
+                      "on"
+                    ]
+                  }
+                },
+                "masteries": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "mastery": {
+                        "type": "string",
+                        "enum": [
+                          "vex",
+                          "sap",
+                          "slow"
+                        ]
+                      },
+                      "by": {
+                        "type": "string"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "ends": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "enum": [
+                              "start",
+                              "end"
+                            ]
+                          },
+                          "of": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          },
+                          "skip_current": {
+                            "default": false,
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "of",
+                          "count"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "mastery",
+                      "by",
+                      "on",
+                      "ends"
+                    ]
+                  }
+                },
+                "marks": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "advantage_against"
+                        ]
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "by": {
+                        "type": "string"
+                      },
+                      "on": {
+                        "type": "string"
+                      },
+                      "ends": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string",
+                            "enum": [
+                              "start",
+                              "end"
+                            ]
+                          },
+                          "of": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          },
+                          "skip_current": {
+                            "default": false,
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "of",
+                          "count"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "label",
+                      "by",
+                      "on",
+                      "ends"
+                    ]
+                  }
+                },
+                "zones": {
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "spell": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "by": {
+                        "type": "string"
+                      },
+                      "area": {
+                        "type": "object",
+                        "properties": {
+                          "shape": {
+                            "type": "string",
+                            "enum": [
+                              "cone",
+                              "cube",
+                              "cylinder",
+                              "emanation",
+                              "line",
+                              "sphere"
+                            ]
+                          },
+                          "size": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          },
+                          "width": {
+                            "default": 5,
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "shape",
+                          "size"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "point": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "y": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "save": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "ability": {
+                                "type": "string",
+                                "enum": [
+                                  "str",
+                                  "dex",
+                                  "con",
+                                  "int",
+                                  "wis",
+                                  "cha"
+                                ]
+                              },
+                              "on_success": {
+                                "type": "string",
+                                "enum": [
+                                  "half",
+                                  "none"
+                                ]
+                              },
+                              "dc": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "ability",
+                              "on_success",
+                              "dc"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "damage": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "dice": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "bonus": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "dice",
+                            "bonus",
+                            "type"
+                          ]
+                        }
+                      },
+                      "conditions": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "escape_dc": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "escape_skill": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "athletics",
+                              "acrobatics"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "until": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "end_of_its_turn"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "triggers": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "enter",
+                            "start_turn",
+                            "end_turn",
+                            "move"
+                          ]
+                        }
+                      },
+                      "once_per_turn": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "optional": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "space": {
+                        "default": 1,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "difficult": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "ram": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "on_fail": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "no_actions",
+                            "lose_concentration"
+                          ]
+                        }
+                      },
+                      "unaffected": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "concentration": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "ends": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "enum": [
+                                  "start",
+                                  "end"
+                                ]
+                              },
+                              "of": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "skip_current": {
+                                "default": false,
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "of",
+                              "count"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "saved": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "spell",
+                      "label",
+                      "by",
+                      "area",
+                      "save",
+                      "triggers"
+                    ]
+                  }
+                },
+                "decisions": {
+                  "default": "auto",
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "auto"
+                  ]
+                },
+                "pending": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "$ref": "#/$defs/EncounterAction"
+                        },
+                        "rolls": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "answers": {
+                          "type": "array",
+                          "items": {
+                            "type": "boolean"
+                          }
+                        },
+                        "combatant": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "inspiration",
+                            "legendary_resistance",
+                            "uncanny_dodge",
+                            "zone_force"
+                          ]
+                        },
+                        "question": {
+                          "type": "string"
+                        },
+                        "recommended": {
+                          "default": true,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "action",
+                        "rolls",
+                        "answers",
+                        "combatant",
+                        "kind",
+                        "question"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "auto_death_saves": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "map": {
+                  "default": {},
                   "type": "object",
                   "properties": {
-                    "attack": {
+                    "walls": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "y": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ]
+                          },
+                          "to": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "y": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "to"
+                        ]
+                      }
+                    },
+                    "difficult": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "x": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "y": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ]
+                      }
+                    },
+                    "blocked": {
+                      "default": [],
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "x": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "y": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "states": {
+              "default": {},
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1
+                  },
+                  "hp": {
+                    "default": {},
+                    "type": "object",
+                    "properties": {
+                      "current": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "temp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  },
+                  "hit_dice_spent": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
                       "type": "string"
                     },
-                    "count": {
+                    "additionalProperties": {
                       "type": "integer",
-                      "minimum": -9007199254740991,
+                      "minimum": 0,
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": [
-                    "attack",
-                    "count"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "cleave": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "attack": {
-                      "type": "string"
-                    },
-                    "target": {
+                  "death_saves": {
+                    "default": {},
+                    "type": "object",
+                    "properties": {
+                      "successes": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 3
+                      },
+                      "failures": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 3
+                      }
+                    }
+                  },
+                  "stable": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "dead": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "exhaustion": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "conditions": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "attack",
-                    "target"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "legendary": {
-              "anyOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "left": {
+                  "concentration": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "active": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "heroic_inspiration": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "spell_slots_spent": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
                       "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
-                    },
-                    "max": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
+                      "minimum": 0,
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": [
-                    "left",
-                    "max"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "type": "null"
+                  "pact_slots_spent": {
+                    "default": 0,
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "uses_spent": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "choices": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "inventory": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "item": {
+                          "type": "string"
+                        },
+                        "base": {
+                          "default": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "variant": {
+                          "default": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "qty": {
+                          "default": 1,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "equipped": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "attuned": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "charges_spent": {
+                          "default": 0,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "notes": {
+                          "default": "",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "item"
+                      ]
+                    }
+                  },
+                  "currency": {
+                    "default": {},
+                    "type": "object",
+                    "properties": {
+                      "cp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "sp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "ep": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "gp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "pp": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  },
+                  "next_item": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
                 }
-              ]
+              }
             }
           },
           "required": [
-            "action",
-            "bonus_action",
-            "reaction",
-            "movement",
-            "attacks_left",
-            "granted",
-            "cleave",
-            "legendary"
-          ],
-          "additionalProperties": false
+            "encounter"
+          ]
         },
-        "attacks": {
+        "steps": {
+          "default": [],
           "type": "array",
           "items": {
             "type": "object",
@@ -132,159 +1408,7 @@
               "action": {
                 "$ref": "#/$defs/EncounterAction"
               },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
+              "rolls": {
                 "default": [],
                 "type": "array",
                 "items": {
@@ -292,1491 +1416,17 @@
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991
                 }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
               }
             },
             "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "spells": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "features": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "save_actions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "legendary": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "standard": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "zones": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "$ref": "#/$defs/EncounterAction"
-              },
-              "label": {
-                "type": "string"
-              },
-              "cost": {
-                "type": "string",
-                "enum": [
-                  "action",
-                  "bonus_action",
-                  "reaction",
-                  "attack",
-                  "free",
-                  "movement",
-                  "legendary"
-                ]
-              },
-              "available": {
-                "type": "boolean"
-              },
-              "reason": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "code": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "pending_decision",
-                      "not_started",
-                      "not_your_turn",
-                      "incapacitated",
-                      "defeated",
-                      "economy_used",
-                      "no_attacks_left",
-                      "once_per_turn",
-                      "out_of_range",
-                      "total_cover",
-                      "no_path",
-                      "no_movement",
-                      "no_resources",
-                      "unknown",
-                      "incomplete",
-                      "refused"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "targets": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "creature",
-                          "area",
-                          "self",
-                          "point"
-                        ]
-                      },
-                      "count": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 1,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "range": {
-                        "anyOf": [
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "ids": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "area": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "shape": {
-                                "type": "string",
-                                "enum": [
-                                  "cone",
-                                  "cube",
-                                  "cylinder",
-                                  "emanation",
-                                  "line",
-                                  "sphere"
-                                ]
-                              },
-                              "size": {
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              },
-                              "width": {
-                                "default": 5,
-                                "type": "integer",
-                                "minimum": 1,
-                                "maximum": 9007199254740991
-                              }
-                            },
-                            "required": [
-                              "shape",
-                              "size",
-                              "width"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "count",
-                      "range",
-                      "ids",
-                      "area"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "slot_levels": {
-                "default": [],
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "pact_slot": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "uses": {
-                "default": null,
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "left": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      "max": {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "left",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "note": {
-                "default": null,
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "action",
-              "label",
-              "cost",
-              "available",
-              "reason",
-              "code",
-              "targets",
-              "slot_levels",
-              "pact_slot",
-              "uses",
-              "note"
-            ],
-            "additionalProperties": false
+              "action"
+            ]
           }
         }
       },
       "required": [
-        "id",
-        "name",
-        "turn",
-        "economy",
-        "attacks",
-        "spells",
-        "features",
-        "save_actions",
-        "legendary",
-        "standard",
-        "zones"
-      ],
-      "additionalProperties": false
+        "start"
+      ]
     },
     "EncounterAction": {
       "oneOf": [
@@ -1825,8 +1475,7 @@
           "required": [
             "type",
             "monster"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1859,8 +1508,7 @@
           "required": [
             "type",
             "character"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1876,8 +1524,7 @@
           "required": [
             "type",
             "use"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1907,8 +1554,7 @@
           "required": [
             "type",
             "mode"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1924,8 +1570,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1952,8 +1597,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1975,8 +1619,7 @@
             "type",
             "id",
             "value"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -1995,8 +1638,7 @@
           "required": [
             "type",
             "ids"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2008,8 +1650,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2021,8 +1662,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2034,8 +1674,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2060,8 +1699,7 @@
             "type",
             "id",
             "what"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2095,8 +1733,7 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             },
             "path": {
               "minItems": 1,
@@ -2118,16 +1755,14 @@
                 "required": [
                   "x",
                   "y"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           },
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2155,8 +1790,7 @@
             "id",
             "x",
             "y"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2185,8 +1819,7 @@
                 "required": [
                   "x",
                   "y"
-                ],
-                "additionalProperties": false
+                ]
               }
             },
             "kind": {
@@ -2202,8 +1835,7 @@
             "type",
             "squares",
             "kind"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2229,8 +1861,7 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             },
             "to": {
               "type": "object",
@@ -2249,16 +1880,14 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             }
           },
           "required": [
             "type",
             "from",
             "to"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2284,8 +1913,7 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             },
             "to": {
               "type": "object",
@@ -2304,16 +1932,14 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             }
           },
           "required": [
             "type",
             "from",
             "to"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2332,8 +1958,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2352,8 +1977,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2372,8 +1996,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2416,8 +2039,7 @@
             "type",
             "id",
             "target"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2462,8 +2084,7 @@
             "id",
             "target",
             "option"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2489,8 +2110,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2506,8 +2126,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2549,8 +2168,7 @@
               },
               "required": [
                 "at"
-              ],
-              "additionalProperties": false
+              ]
             },
             "concentration": {
               "type": "boolean"
@@ -2568,8 +2186,7 @@
             "type",
             "id",
             "actions"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2585,8 +2202,7 @@
           "required": [
             "type",
             "effect"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2629,8 +2245,7 @@
                 },
                 "required": [
                   "rider"
-                ],
-                "additionalProperties": false
+                ]
               }
             },
             "ally_adjacent": {
@@ -2674,8 +2289,7 @@
             "id",
             "target",
             "attack"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2703,8 +2317,7 @@
             "type",
             "id",
             "feature"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2745,8 +2358,7 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 },
                 "toward": {
                   "type": "object",
@@ -2765,11 +2377,9 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
-              },
-              "additionalProperties": false
+              }
             },
             "cover": {
               "type": "object",
@@ -2790,8 +2400,7 @@
             "type",
             "id",
             "ability"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2835,8 +2444,7 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 },
                 "toward": {
                   "type": "object",
@@ -2855,11 +2463,9 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
-              },
-              "additionalProperties": false
+              }
             },
             "cover": {
               "type": "object",
@@ -2926,8 +2532,7 @@
             "type",
             "id",
             "spell"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2950,8 +2555,7 @@
             "type",
             "zone",
             "targets"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -2980,8 +2584,7 @@
               "required": [
                 "x",
                 "y"
-              ],
-              "additionalProperties": false
+              ]
             },
             "onto": {
               "type": "string"
@@ -2991,8 +2594,7 @@
             "type",
             "zone",
             "point"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3008,8 +2610,7 @@
           "required": [
             "type",
             "zone"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3072,8 +2673,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3089,8 +2689,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3134,8 +2733,7 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 },
                 "toward": {
                   "type": "object",
@@ -3154,11 +2752,9 @@
                   "required": [
                     "x",
                     "y"
-                  ],
-                  "additionalProperties": false
+                  ]
                 }
-              },
-              "additionalProperties": false
+              }
             },
             "attack": {
               "type": "string"
@@ -3179,8 +2775,7 @@
             "type",
             "id",
             "action"
-          ],
-          "additionalProperties": false
+          ]
         }
       ]
     },
@@ -3220,8 +2815,7 @@
                 },
                 "required": [
                   "amount"
-                ],
-                "additionalProperties": false
+                ]
               }
             },
             "critical": {
@@ -3230,8 +2824,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3249,8 +2842,7 @@
           "required": [
             "type",
             "amount"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3268,8 +2860,7 @@
           "required": [
             "type",
             "current"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3290,8 +2881,7 @@
           "required": [
             "type",
             "amount"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3308,8 +2898,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3321,8 +2910,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3349,15 +2937,13 @@
                 },
                 "required": [
                   "die"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3369,8 +2955,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3388,8 +2973,7 @@
           "required": [
             "type",
             "level"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3407,8 +2991,7 @@
           "required": [
             "type",
             "level"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3420,8 +3003,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3433,8 +3015,7 @@
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3455,8 +3036,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3477,8 +3057,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3499,8 +3078,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3516,8 +3094,7 @@
           "required": [
             "type",
             "condition"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3533,8 +3110,7 @@
           "required": [
             "type",
             "condition"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3552,8 +3128,7 @@
           "required": [
             "type",
             "level"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3572,8 +3147,7 @@
           "required": [
             "type",
             "spell"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3589,8 +3163,7 @@
           "required": [
             "type",
             "value"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3606,8 +3179,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3623,8 +3195,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3647,8 +3218,7 @@
             "type",
             "key",
             "values"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3664,8 +3234,7 @@
           "required": [
             "type",
             "key"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3692,8 +3261,7 @@
           "required": [
             "type",
             "item"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3714,8 +3282,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3735,8 +3302,7 @@
             "type",
             "id",
             "equipped"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3756,8 +3322,7 @@
             "type",
             "id",
             "attuned"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3778,8 +3343,7 @@
           "required": [
             "type",
             "id"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3801,8 +3365,7 @@
             "type",
             "id",
             "spent"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "type": "object",
@@ -3833,11 +3396,10 @@
           "required": [
             "type",
             "changes"
-          ],
-          "additionalProperties": false
+          ]
         }
       ]
     }
   },
-  "title": "Combatant options"
+  "title": "Encounter history"
 }

@@ -10,6 +10,7 @@ import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import { ABILITIES, type Ability, type DamageType, SKILLS, type Skill } from "../models/content";
 import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
+import type { EncounterHistory } from "../models/history";
 import type { OptionEntry } from "../models/options";
 import type { CharacterState } from "../models/state";
 import { type DamagePart, formatDamage } from "../rules/damage";
@@ -22,6 +23,7 @@ import {
   encounterCombatant,
   zoneArea,
 } from "../services/encounter";
+import { createHistory, recordAction, undoAction } from "../services/history";
 import { combatantOptions } from "../services/options";
 import { computePlaySheet, createState } from "../services/play";
 import { BackToMenu, type Console, QuitBuilder } from "./console";
@@ -58,7 +60,7 @@ Targets are ids, names or numbers from the status table.
   dmg <t> <n> [type] · heal <t> <n> · cond <t> <condition> · cond <t> -<condition>
   ask on|off [<t>]   decisions after a roll: ask, or let the engine decide (auto)
   options [<who>]    what a combatant can do now, and why not (dimmed)
-  next · status · end · save · quit`;
+  next · status · undo (the last action) · end · save · quit`;
 
 export function slugOf(name: string): string {
   return (
@@ -78,6 +80,8 @@ export class FightApp {
   private readonly monsters: string[];
   private readonly ask: boolean;
   private dirty = false;
+  /** Every action applied since the start, with its dice: `undo` replays all but the last. */
+  private history: EncounterHistory;
 
   constructor(
     private readonly con: Console,
@@ -95,6 +99,7 @@ export class FightApp {
     this.monsters = monsters;
     this.ask = ask;
     this.encounter = encounter ?? createEncounter({ decisions: ask ? "ask" : "auto" });
+    this.history = createHistory(this.encounter, this.states);
   }
 
   get current(): { encounter: Encounter; states: Record<string, CharacterState> } {
@@ -362,6 +367,8 @@ export class FightApp {
       case "next":
       case "n":
         return this.apply({ type: "next_turn" });
+      case "undo":
+        return this.undo();
       case "end":
         return this.apply({ type: "end" });
       case "save":
@@ -758,6 +765,7 @@ export class FightApp {
       }
       this.encounter = result.encounter;
       Object.assign(this.states, result.states);
+      this.history = recordAction(this.history, next, result);
       this.dirty = true;
       next = null;
       if (result.pending) {
@@ -774,6 +782,21 @@ export class FightApp {
         this.con.say(this.con.style("  All enemies are down ('end' ends the fight).", "green"));
       }
     }
+  }
+
+  /** Take back the last action: replay the history without it. */
+  private undo(): void {
+    const last = this.history.steps.at(-1);
+    if (!last) {
+      this.con.error("Nothing to undo");
+      return;
+    }
+    const r = undoAction(this.history, this.context());
+    this.history = r.history;
+    this.encounter = r.encounter;
+    Object.assign(this.states, r.states);
+    this.dirty = true;
+    this.con.say(`  Undone: ${last.action.type}.`);
   }
 
   /** A combatant by number (status order), id, name, or the start of a word in either. */

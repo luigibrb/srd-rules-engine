@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { REFUSAL_CODES } from "./events";
 
 const square = z.object({ x: z.int(), y: z.int() });
 
@@ -25,6 +26,7 @@ export const MovePreviewSchema = z
     /** The engine would take the move now (a dry run), or why not. */
     ok: z.boolean(),
     reasons: z.array(z.string()),
+    codes: z.array(z.enum(REFUSAL_CODES)),
     /** The squares it would go through, the destination last (empty without positions). */
     path: z.array(square),
     /** Feet it would cost, and the movement left after it. */
@@ -56,6 +58,7 @@ export const AreaPreviewSchema = z
     /** The placement is allowed (in range, a Cube next to its creator…), or why not. */
     ok: z.boolean(),
     reasons: z.array(z.string()),
+    codes: z.array(z.enum(REFUSAL_CODES)),
     /** Its squares, with a clear line from its point of origin. */
     squares: z.array(square),
     /** The creatures in it, with their cover from the point of origin (Dexterity saves). */

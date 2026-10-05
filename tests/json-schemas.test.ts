@@ -8,12 +8,14 @@ import {
   type CharacterState,
   combatantOptions,
   createEncounter,
+  createHistory,
   createState,
   type Encounter,
   type EncounterAction,
   previewArea,
   previewMove,
   reachableSquares,
+  recordAction,
   scriptedRng,
   TABLE_NAMES,
 } from "../src/index";
@@ -170,5 +172,34 @@ describe("options.schema.json", () => {
         ),
       ),
     ).toEqual([]);
+  });
+});
+
+describe("encounter-event.schema.json and history.schema.json", () => {
+  it("accept the events an action returns and a recorded history", () => {
+    const build = fighterBuild();
+    const states = { brakka: createState(build, catalog) };
+    const characters = { brakka: { build, state: states.brakka } };
+    let encounter: Encounter = createEncounter();
+    let history = createHistory(encounter, states);
+    for (const action of [
+      { type: "add_character", character: "brakka" },
+      { type: "add_monster", monster: "goblin-warrior", side: "enemies" },
+      { type: "roll_initiative" },
+      { type: "start" },
+      { type: "attack", id: "brakka", target: "goblin-warrior", attack: "Greatsword" },
+    ] as EncounterAction[]) {
+      const r = applyEncounterAction(encounter, action, {
+        catalog,
+        characters,
+        rng: scriptedRng([15, 5, 18, 6, 6]),
+      });
+      for (const event of r.events)
+        expect(errors("encounter-event.schema.json", event)).toEqual([]);
+      encounter = r.encounter;
+      history = recordAction(history, action, r);
+    }
+    expect(history.steps.length).toBe(5);
+    expect(errors("history.schema.json", history)).toEqual([]);
   });
 });

@@ -40,6 +40,7 @@ import {
   spellTargetRange,
 } from "./encounter";
 import { computePlaySheet } from "./play";
+import { refusalCode } from "./refusals";
 
 /** Dice that always land in the middle: a dry run checks legality, not outcomes. */
 const middle: Rng = { int: (min, max) => Math.floor((min + max) / 2) };
@@ -55,10 +56,12 @@ export function checkAction(
   ctx: EncounterContext,
 ): ActionCheck {
   try {
-    applyEncounterAction(encounter, action, { ...ctx, rng: middle });
-    return { ok: true, reasons: [] };
+    applyEncounterAction(encounter, action, { ...ctx, rng: middle }, { events: false });
+    return { ok: true, reasons: [], codes: [] };
   } catch (error) {
-    if (error instanceof EncounterError) return { ok: false, reasons: [...error.messages] };
+    if (error instanceof EncounterError) {
+      return { ok: false, reasons: [...error.messages], codes: [...error.codes] };
+    }
     throw error;
   }
 }
@@ -123,6 +126,7 @@ export function combatantOptions(
       cost,
       available: reason === null,
       reason,
+      code: reason === null ? null : refusalCode(reason.split("; ")[0] as string),
       targets,
       slot_levels: [],
       pact_slot: null,
