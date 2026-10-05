@@ -38,6 +38,16 @@ All notable changes are documented here. This project follows
 - Dice expressions are limited to 1000 dice of up to 1000 sides.
 
 ### Added
+- Spell zones: `mechanics.zone` (triggers `enter`, `start_turn`, `end_turn`; `once_per_turn`,
+  `on_cast`, `designate`) and `encounter.zones` (`ZoneSchema`). Creatures save when they enter a
+  zone or it moves onto them, and at the start or end of their turn there; the encounter actions
+  `zone_save`, `move_zone` and `end_zone`; `zone` commands in `srd-rules fight`. Eight SRD spells
+  use it: Moonbeam, Spirit Guardians, Cloudkill, Insect Plague, Incendiary Cloud, Black
+  Tentacles, Web, Grease.
+- `mechanics.damage_types` with `castSpell`'s `damage_type` option and `cast`'s `damage_type`
+  (Spirit Guardians); `cast`'s `unaffected`; `castSpell` results' `damage_parts`; `saveAgainst`.
+- `escape` on a spell's conditions: `escape` ends a hold (Black Tentacles, Web) with the
+  check the spell names (`EncounterEffect.escape_skill`).
 - Spell mechanics: a flat damage `bonus` (Magic Missile's 1d4 + 1, Disintegrate, Finger of
   Death); `projectiles` (darts that hit automatically, or rays with an attack each; one target
   or one `targets` entry per projectile); `follow_up`, a saving throw after the attack for the

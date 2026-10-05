@@ -8,7 +8,7 @@
  */
 
 import { z } from "zod";
-import { ABILITIES, SKILLS } from "./content";
+import { ABILITIES, DAMAGE_TYPES, SKILLS, SpellAreaSchema } from "./content";
 import { PlayActionSchema } from "./state";
 
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs");
@@ -134,6 +134,8 @@ export const EncounterEffectSchema = z.object({
   ends: EffectEndSchema.nullable().default(null),
   /** A grapple: the DC of the `escape` check (Athletics or Acrobatics) that ends it. */
   escape_dc: z.int().nullable().default(null),
+  /** The only skill the `escape` check can use (Black Tentacles: Athletics); `null`: either. */
+  escape_skill: z.enum(["athletics", "acrobatics"]).nullable().default(null),
 });
 export type EncounterEffect = z.infer<typeof EncounterEffectSchema>;
 
@@ -176,6 +178,44 @@ export const SpellMarkSchema = z.object({
 export type SpellMark = z.infer<typeof SpellMarkSchema>;
 
 /**
+ * A spell's area that lasts (Moonbeam, Spirit Guardians): creatures in it save again when they
+ * enter it (or it moves onto them), or start or end their turn there (`triggers`). Its square
+ * comes from `point`, or from its caster's space for an Emanation (`point: null`); without
+ * positions, `zone_save` makes the creatures the caller names save.
+ */
+export const ZoneSchema = z.object({
+  id: z.string(),
+  /** The spell's id and name. */
+  spell: z.string(),
+  label: z.string(),
+  by: z.string(),
+  area: SpellAreaSchema,
+  point: z.object({ x: z.int(), y: z.int() }).nullable().default(null),
+  save: z.object({
+    ability: z.enum(ABILITIES),
+    on_success: z.enum(["half", "none"]),
+    dc: z.int(),
+  }),
+  damage: z
+    .array(z.object({ dice: z.string().nullable(), bonus: z.int(), type: z.string() }))
+    .default([]),
+  /** Conditions on a failed save; `escape_dc`: an action's check against it ends one. */
+  conditions: z.array(z.string()).default([]),
+  escape_dc: z.int().nullable().default(null),
+  escape_skill: z.enum(["athletics", "acrobatics"]).nullable().default(null),
+  triggers: z.array(z.enum(["enter", "start_turn", "end_turn"])),
+  once_per_turn: z.boolean().default(true),
+  /** Creatures the caster designated: the zone doesn't affect them. */
+  unaffected: z.array(z.string()).default([]),
+  /** It ends when its caster stops concentrating on `label`. */
+  concentration: z.boolean().default(false),
+  ends: EffectEndSchema.nullable().default(null),
+  /** Creatures that saved against it this turn. */
+  saved: z.array(z.string()).default([]),
+});
+export type Zone = z.infer<typeof ZoneSchema>;
+
+/**
  * An action stopped for a decision: the action, the dice it rolled so far and the answers given;
  * `decide` replays it with the same dice and one more answer.
  */
@@ -210,6 +250,8 @@ export const EncounterSchema = z.object({
   masteries: z.array(MasteryMarkSchema).default([]),
   /** Spell effects on the next attack roll against a creature (Guiding Bolt). */
   marks: z.array(SpellMarkSchema).default([]),
+  /** Spell areas that last (Moonbeam, Spirit Guardians). */
+  zones: z.array(ZoneSchema).default([]),
   /** Decisions after a roll: `ask` the combatant (or its player), or `auto` (the recommendation). */
   decisions: z.enum(["ask", "auto"]).default("auto"),
   /** An action waiting for a decision (`decide`); nothing else can happen until it's answered. */
@@ -330,8 +372,9 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
     reaction: z.boolean().optional(),
   }),
   /**
-   * Escape a grapple: the action, a Strength (Athletics) or Dexterity (Acrobatics) check (default
-   * the better) against its escape DC. `effect` picks the grapple when there are several.
+   * Escape a grapple or a spell's hold (Black Tentacles, Web): the action, a Strength (Athletics)
+   * or Dexterity (Acrobatics) check (default the better; some allow only Athletics) against its
+   * escape DC. `effect` picks the one when there are several.
    */
   z.object({
     type: z.literal("escape"),
@@ -457,7 +500,26 @@ export const EncounterActionSchema = z.discriminatedUnion("type", [
      * when positions aren't used; with positions they're found on the grid.
      */
     nearby: z.array(z.string()).optional(),
+    /** The damage type, for a spell that offers a choice (Spirit Guardians). */
+    damage_type: z.enum(DAMAGE_TYPES).optional(),
+    /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
+    unaffected: z.array(z.string()).optional(),
   }),
+  /**
+   * Creatures save against a zone (when positions don't tell who enters it or ends its turn
+   * there); each saves once per turn when the spell says so.
+   */
+  z.object({
+    type: z.literal("zone_save"),
+    zone: z.string(),
+    targets: z.array(z.string()),
+  }),
+  /**
+   * Move a zone's point (Moonbeam's Magic action, Cloudkill drifting): the creatures it moves
+   * onto save. The action it takes is the caller's.
+   */
+  z.object({ type: z.literal("move_zone"), zone: z.string(), point: z.object({ x: n, y: n }) }),
+  z.object({ type: z.literal("end_zone"), zone: z.string() }),
   /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
   z.object({
     type: z.literal("check"),

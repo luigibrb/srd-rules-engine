@@ -1518,6 +1518,21 @@
     When the grease appears, each creature standing in its area must succeed on a Dexterity saving
     throw or have the Prone condition. A creature that enters the area or ends its turn there must
     also succeed on that save or fall Prone.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    conditions:
+      - condition: prone
+        on: failed_save
+    area:
+      shape: cube
+      size: 10
+    zone:
+      triggers:
+        - enter
+        - end_turn
+      once_per_turn: false
 - id: guiding-bolt
   name: Guiding Bolt
   level: 1
@@ -3375,6 +3390,24 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     2.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 2d10
+        type: radiant
+    upcast:
+      damage:
+        - dice: 1d10
+          type: radiant
+    area:
+      shape: cylinder
+      size: 5
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: pass-without-trace
   name: Pass without Trace
   level: 2
@@ -3796,6 +3829,22 @@
 
     The webs are flammable. Any 5-foot Cube of webs exposed to fire burns away in 1 round, dealing
     2d4 Fire damage to any creature that starts its turn in the fire.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    conditions:
+      - condition: restrained
+        on: failed_save
+        escape: athletics
+    area:
+      shape: cube
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - start_turn
+      on_cast: false
 - id: zone-of-truth
   name: Zone of Truth
   level: 2
@@ -4836,6 +4885,29 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     3.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 3d8
+        type: radiant
+    damage_types:
+      - radiant
+      - necrotic
+    upcast:
+      damage:
+        - dice: 1d8
+          type: radiant
+    area:
+      shape: emanation
+      size: 15
+    zone:
+      triggers:
+        - enter
+        - end_turn
+      on_cast: false
+      designate: true
 - id: stinking-cloud
   name: Stinking Cloud
   level: 3
@@ -5107,6 +5179,24 @@
 
     A Restrained creature can take an action to make a Strength (Athletics) check against your spell
     save DC, ending the condition on itself on a success.
+  mechanics:
+    save:
+      ability: str
+      on_success: none
+    damage:
+      - dice: 3d6
+        type: bludgeoning
+    conditions:
+      - condition: restrained
+        on: failed_save
+        escape: athletics
+    area:
+      shape: cube
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: blight
   name: Blight
   level: 4
@@ -6354,6 +6444,24 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     5.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 5d8
+        type: poison
+    upcast:
+      damage:
+        - dice: 1d8
+          type: poison
+    area:
+      shape: sphere
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: commune
   name: Commune
   level: 5
@@ -6919,6 +7027,24 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     5.
+  mechanics:
+    save:
+      ability: con
+      on_success: half
+    damage:
+      - dice: 4d10
+        type: piercing
+    upcast:
+      damage:
+        - dice: 1d10
+          type: piercing
+    area:
+      shape: sphere
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: legend-lore
   name: Legend Lore
   level: 5
@@ -9903,6 +10029,20 @@
 
     The cloud moves 10 feet away from you in a direction you choose at the start of each of your
     turns.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 10d8
+        type: fire
+    area:
+      shape: sphere
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: maze
   name: Maze
   level: 8
