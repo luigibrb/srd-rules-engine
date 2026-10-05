@@ -13,13 +13,14 @@ src/
   index.ts         # public API (platform-neutral: no node:* imports)
   node.ts          # index + loadContentPack/loadCatalog + serveNode
   models/          # Zod schemas + types: content, pack (manifest, patches), build, state (play),
-                   #   character, combat, spell
+                   #   encounter, options (computed), character, combat, spell
   content/         # catalog.ts (createCatalog, lookup), load.ts (fs, Node only), srd.ts (bundled SRD)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
                    #   build-resolution, build-validation, sheet
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   encounter.ts (initiative, turns, action economy, effects on combatants),
+                   #   options.ts (what a combatant can do now: combatantOptions, checkAction),
                    #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
   cli/             # srd-rules bin: build (interactive builder), play, fight, serve, validate
@@ -159,6 +160,8 @@ npx tsx scripts/import-srd-monsters.ts --report   # monsters: what became data, 
 `POST /v1/state/new` · `/apply` · `/sheet` · `/reconcile` — play state (HP, slots, conditions, inventory)
 `POST /v1/state/cast` — cast a catalog spell (slot spent, effects applied to targets' states)
 `POST /v1/encounters/apply` — encounter actions (initiative, turns, economy, effects on combatants)
+`POST /v1/encounters/options` — what a combatant can do now (`combatantOptions`);
+`/v1/encounters/check` — would the engine take an action (dry run, `checkAction`)  
 `POST /v1/state/attack` — one character attacks another (combatants); damage applied to the target's state  
 `POST /v1/characters/` — validate a `Character`  
 `POST /v1/characters/{name}/alive` — is the character above 0 HP  

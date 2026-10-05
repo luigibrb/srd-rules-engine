@@ -18,6 +18,7 @@ import { loadContentPack } from "../src/content/load";
 import { CharacterBuildSchema } from "../src/models/build";
 import { CreationSchema } from "../src/models/content";
 import { EncounterActionSchema, EncounterSchema } from "../src/models/encounter";
+import { CombatantOptionsSchema } from "../src/models/options";
 import { PackManifestSchema, PatchSchema } from "../src/models/pack";
 import { CharacterStateSchema, PlayActionSchema } from "../src/models/state";
 
@@ -68,6 +69,18 @@ outputs.set("schemas/play-action.schema.json", schema(PlayActionSchema, "Play ac
 outputs.set(
   "schemas/encounter-action.schema.json",
   schema(EncounterActionSchema, "Encounter action", true),
+);
+// A computed result, not a document: what `POST /v1/encounters/options` returns.
+outputs.set(
+  "schemas/options.schema.json",
+  `${JSON.stringify(
+    {
+      ...z.toJSONSchema(CombatantOptionsSchema, { io: "output", unrepresentable: "any" }),
+      title: "Combatant options",
+    },
+    null,
+    2,
+  )}\n`,
 );
 
 let stale = 0;

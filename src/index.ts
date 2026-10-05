@@ -184,6 +184,18 @@ export {
   ZoneSchema,
 } from "./models/encounter";
 export {
+  type ActionCheck,
+  ActionCheckSchema,
+  type CombatantOptions,
+  CombatantOptionsSchema,
+  OPTION_COSTS,
+  type OptionCost,
+  type OptionEntry,
+  OptionEntrySchema,
+  type TargetSpec,
+  TargetSpecSchema,
+} from "./models/options";
+export {
   applyPatch,
   PATCH_OPS,
   type PackManifest,
@@ -372,6 +384,11 @@ export {
   encounterCombatant,
   gridDistance,
 } from "./services/encounter";
+export {
+  checkAction,
+  combatantOptions,
+  type OptionsSettings,
+} from "./services/options";
 export {
   applyAction,
   combatantFromCharacter,

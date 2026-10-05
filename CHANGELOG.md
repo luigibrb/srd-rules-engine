@@ -17,6 +17,16 @@ migrated when it's loaded.
   conditions `until: end_of_its_turn`. Six more SRD spells use them: Spike Growth, Stinking
   Cloud, Sleet Storm, Flaming Sphere, Conjure Animals, Conjure Woodland Beings.
 - `srd-rules fight`: `zone <id> move <x> <y> onto <who>`.
+- `combatantOptions(encounter, id, ctx)`: what a combatant can do now (attacks and their
+  variants, spells with slot levels left, features with uses left, monster saving throw effects
+  and legendary actions, standard actions, its zones), each as an encounter action with its cost,
+  candidate targets, and whether the engine would take it or why not. `checkAction` answers the
+  same for one action by a dry run. Routes `POST /v1/encounters/options` and
+  `/v1/encounters/check`; JSON Schema `schemas/options.schema.json`.
+
+### Changed
+- `srd-rules fight`: `options` shows what's left this turn and every option, dimmed with the
+  reason when the engine would refuse it.
 
 ## [0.1.0] - 2026-10-05
 

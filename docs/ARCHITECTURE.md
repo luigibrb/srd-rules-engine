@@ -559,6 +559,29 @@ list of actions.
 - **Checks:** the `check` action rolls an ability or skill check, with or without a DC; it uses no
   action by itself.
 
+### What a combatant can do now
+
+`combatantOptions(encounter, id, ctx)` (`src/services/options.ts`) lists a combatant's options
+for a UI: attack lines and their variants (thrown, Opportunity Attack out of turn, the Light
+extra attack, Cleave, granted attacks), spells (a character's cantrips and prepared spells with
+the slot levels and Pact Magic slot left; a monster's listed spells with their fixed level and
+daily uses), a character's `sheet.actions` features with uses left, a monster's saving throw
+effects (those waiting for a Recharge too) and legendary actions (uses left this round), the
+standard actions (Dash, Disengage, Dodge, Help, Grapple, Shove, escaping a hold, standing up,
+moving) and the zones it created. Each option is an `EncounterAction` ready to send, with its
+cost, label, candidate targets (`TargetSpec`: enemies first, then nearest first; only those
+within reach or range when positioned), and `available`/`reason`.
+
+Legality isn't re-derived: `checkAction(encounter, action, ctx)` dry-runs
+`applyEncounterAction` with dice fixed in the middle of their range and returns the
+`EncounterError` messages, and `combatantOptions` judges every option that way (`{ check: false
+}` skips it). An action that stops for a decision counts as allowed. The dry run says whether an
+action is allowed, not how its dice would land. An option aimed at a creature is judged against
+its first candidate; with none in range, against the nearest creature (so the reason is the
+engine's "out of reach"), or "No creature within N ft". The result has a Zod schema
+(`CombatantOptionsSchema`, `schemas/options.schema.json`); `POST /v1/encounters/options` and
+`/v1/encounters/check` serve both functions.
+
 ## Interpretations (flagged, not invented)
 
 Where the SRD is silent or ambiguous, the engine picks a reading and lists it here.

@@ -2503,7 +2503,11 @@ export function proficientIn(ctx: EncounterContext, c: EncounterCombatant, skill
 }
 
 /** A monster action's uses per day ("(1/Day)" in its name), or `null`. */
-export function dailyUses(ctx: EncounterContext, c: EncounterCombatant, name: string): number | null {
+export function dailyUses(
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+  name: string,
+): number | null {
   const def = monsterDef(ctx, c);
   const all = [...def.actions, ...def.bonus_actions, ...def.reactions];
   return all.find((a) => a.name === name)?.per_day ?? null;
@@ -2550,7 +2554,11 @@ export function gridDistance(
 }
 
 /** The longest reach of a combatant's melee attacks, or `null` without one. */
-export function meleeReach(ctx: EncounterContext, e: Encounter, c: EncounterCombatant): number | null {
+export function meleeReach(
+  ctx: EncounterContext,
+  e: Encounter,
+  c: EncounterCombatant,
+): number | null {
   const reaches = encounterCombatant(e, c.id, ctx)
     .attacks.filter((a) => a.kind === "melee")
     .map((a) => a.reach ?? 5);

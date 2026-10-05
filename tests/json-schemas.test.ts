@@ -6,6 +6,7 @@ import {
   applyAction,
   applyEncounterAction,
   type CharacterState,
+  combatantOptions,
   createEncounter,
   createState,
   type Encounter,
@@ -121,5 +122,27 @@ describe("JSON Schemas", () => {
     expect(errors("encounter-action.schema.json", { type: "teleport", id: "ogre" })).not.toEqual(
       [],
     );
+  });
+});
+
+describe("options.schema.json", () => {
+  it("accepts what combatantOptions returns", () => {
+    const build = fighterBuild();
+    const characters = { brakka: { build, state: createState(build, catalog) } };
+    let encounter: Encounter = createEncounter();
+    for (const action of [
+      { type: "add_character", character: "brakka" },
+      { type: "add_monster", monster: "adult-red-dragon", side: "enemies" },
+      { type: "set_initiative", id: "brakka", value: 20 },
+      { type: "set_initiative", id: "adult-red-dragon", value: 10 },
+      { type: "start" },
+    ] as EncounterAction[]) {
+      encounter = applyEncounterAction(encounter, action, { catalog, characters }).encounter;
+    }
+    for (const id of ["brakka", "adult-red-dragon"]) {
+      const options = combatantOptions(encounter, id, { catalog, characters });
+      expect(errors("options.schema.json", options)).toEqual([]);
+    }
+    expect(errors("options.schema.json", { id: "x" }).length).toBeGreaterThan(0);
   });
 });
