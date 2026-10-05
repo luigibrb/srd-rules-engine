@@ -11,6 +11,7 @@ import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import {
   ABILITY_NAMES,
+  type DamageType,
   type MonsterDef,
   type Skill,
   type SpellArea,
@@ -29,6 +30,7 @@ import {
   type MasteryMark,
   type Pending,
   type SpellMark,
+  type Zone,
 } from "../models/encounter";
 import type { CharacterState, PlayAction } from "../models/state";
 import {
@@ -36,6 +38,7 @@ import {
   areaSquares,
   distanceToPoint,
   type GridPoint,
+  type GridSpace,
   inArea,
 } from "../rules/areas";
 import {
@@ -43,6 +46,7 @@ import {
   type SaveActionResult,
   type SpellCastResult,
   type SpellTargetResult,
+  saveAgainst,
   useSaveAction,
 } from "../rules/casting";
 import {
@@ -356,6 +360,7 @@ function run(
       concentration: boolean;
       ends: EffectEnd | null;
       escape_dc?: number | null;
+      escape_skill?: "athletics" | "acrobatics" | null;
     },
   ): void => {
     const has = conditionsOf(ctx, target);
@@ -367,6 +372,7 @@ function run(
         condition,
         ...opts,
         escape_dc: opts.escape_dc ?? null,
+        escape_skill: opts.escape_skill ?? null,
       });
     }
   };
@@ -415,9 +421,93 @@ function run(
       if (ends.skip_current) ends.skip_current = false;
       else if (--ends.count <= 0) e.marks = e.marks.filter((m) => m !== mark);
     }
+    for (const zone of [...e.zones]) {
+      const ends = zone.ends;
+      if (!ends || ends.at !== at || ends.of !== c.id) continue;
+      if (ends.skip_current) ends.skip_current = false;
+      else if (--ends.count <= 0) endZone(zone, "its duration is over");
+    }
+  };
+  /** The squares' origin of a zone: its point, or its caster's space for an Emanation. */
+  const zoneOrigin = (z: Zone): GridSpace | null => {
+    if (z.area.shape !== "emanation") return z.point ? { position: z.point, size: 1 } : null;
+    const by = e.combatants.find((x) => x.id === z.by);
+    return by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
+  };
+  /** The positioned creatures in a zone (an Emanation doesn't include its caster). */
+  const inZone = (z: Zone): string[] => {
+    const origin = zoneOrigin(z);
+    if (!origin) return [];
+    const squares = areaSquares(z.area, origin, { point: z.point ?? undefined });
+    return e.combatants
+      .filter((x) => !outOfFight(ctx, x) && x.position)
+      .filter((x) => !(z.area.shape === "emanation" && x.id === z.by))
+      .filter((x) => inArea(squares, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
+      .map((x) => x.id);
+  };
+  /**
+   * Creatures save against a zone (`why`: "ends its turn in it"), each once per turn when the
+   * spell says so; the damage is rolled once for all of them.
+   */
+  const zoneSave = (z: Zone, ids: readonly string[], why: string): void => {
+    const who = ids
+      .map(find)
+      .filter(
+        (t) =>
+          !z.unaffected.includes(t.id) &&
+          !outOfFight(ctx, t) &&
+          !(z.once_per_turn && z.saved.includes(t.id)),
+      );
+    if (!who.length) return;
+    const views = who.map((t) => encounterCombatant(e, t.id, ctx));
+    const effect = { ...z.save, conditions: z.conditions };
+    const r = saveAgainst(effect, z.damage, views, { rng, decide });
+    const names = who.map((t) => t.name).join(", ");
+    notes.push(`${z.label}: ${names} ${why} (${ABILITY_NAMES[z.save.ability]} DC ${z.save.dc}).`);
+    for (const hit of r.targets) {
+      const t = who[hit.target] as EncounterCombatant;
+      z.saved.push(t.id);
+      spendLegendaryResistance(t, hit.save);
+      notes.push(targetNote(t.name, hit));
+      applyTo(t, hit.actions);
+      if (z.concentration && hit.conditions.length) {
+        addEffects(t, hit.conditions, {
+          source: z.by,
+          label: z.label,
+          concentration: true,
+          ends: null,
+          escape_dc: z.escape_dc,
+          escape_skill: z.escape_skill,
+        });
+      }
+    }
+  };
+  /** Who is in each zone now, to find who enters one after a move. */
+  const zoneOccupants = (): Map<string, Set<string>> =>
+    new Map(e.zones.map((z) => [z.id, new Set(inZone(z))]));
+  /** Creatures now in a zone that weren't before (they entered it, or it moved onto them) save. */
+  const zoneEntries = (before: Map<string, Set<string>>): void => {
+    for (const z of [...e.zones]) {
+      if (!z.triggers.includes("enter")) continue;
+      const was = before.get(z.id) ?? new Set<string>();
+      const entered = inZone(z).filter((id) => !was.has(id));
+      if (entered.length) zoneSave(z, entered, entered.length > 1 ? "are in it now" : "enters it");
+    }
+  };
+  /** Zones with this trigger that `c` is in make it save. */
+  const zoneTurn = (c: EncounterCombatant, at: "start_turn" | "end_turn"): void => {
+    for (const z of [...e.zones]) {
+      if (!z.triggers.includes(at) || !inZone(z).includes(c.id)) continue;
+      zoneSave(z, [c.id], at === "start_turn" ? "starts its turn in it" : "ends its turn in it");
+    }
+  };
+  const endZone = (z: Zone, why: string): void => {
+    e.zones = e.zones.filter((x) => x.id !== z.id);
+    notes.push(`${z.label} ends (${why}).`);
   };
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
+    zoneTurn(c, "end_turn");
     tick(c, "end");
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
@@ -451,6 +541,8 @@ function run(
       else if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
     }
     for (const x of e.combatants) x.riders_used = [];
+    // "Only once per turn": every creature's turn is a new one.
+    for (const z of e.zones) z.saved = [];
     // Toggles that last until the start of your next turn (Reckless Attack) end.
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
@@ -468,6 +560,7 @@ function run(
     c.legendary_used = 0;
     c.legendary_taken = [];
     tick(c, "start");
+    zoneTurn(c, "start_turn");
     if (c.monster !== null && c.expended.length) {
       const def = monsterDef(ctx, c);
       const all = [
@@ -899,8 +992,19 @@ function run(
       area?: boolean;
       /** A follow-up saving throw's other creatures (Ice Knife), when positions aren't used. */
       nearby?: readonly string[];
+      damage_type?: DamageType;
+      /** A zone's point (its area's), and the creatures it doesn't affect. */
+      point?: GridPoint;
+      unaffected?: readonly string[];
     },
   ): SpellCastResult => {
+    const zone = spell.mechanics?.zone ?? null;
+    if (options.unaffected?.length && !zone?.designate) {
+      fail(`${spell.name} doesn't let its caster designate creatures it doesn't affect`);
+    }
+    if (zone && !zone.on_cast && targetIds.length && !options.area) {
+      fail(`${spell.name}: creatures don't save when it appears; give no targets`);
+    }
     const targets = targetIds.map(find);
     if (!options.area) checkSpellRange(c, spell, targets);
     // Positions: an enemy within 5 feet hinders ranged spell attacks; Prone targets within 5 ft.
@@ -913,7 +1017,14 @@ function run(
       return d === null ? undefined : d <= 5;
     });
     const nearby = followUpNearby(spell, targets, options.nearby);
-    const { cover, area: _area, nearby: _nearby, ...cast } = options;
+    const {
+      cover,
+      area: _area,
+      nearby: _nearby,
+      point: _point,
+      unaffected: _unaffected,
+      ...cast
+    } = options;
     const views = targets.map((t) => withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]));
     const nearbyViews = nearby.map((t) =>
       withCover(encounterCombatant(e, t.id, ctx), cover?.[t.id]),
@@ -1009,6 +1120,9 @@ function run(
         applyTo(t, hit.actions);
       }
     }
+    // A hold that an action's check ends (Black Tentacles, Web).
+    const hold = spell.mechanics?.conditions.find((x) => x.escape)?.escape ?? null;
+    const escapeDc = hold ? r.save_dc : null;
     // Conditions with a duration in the spell's text end at the start or end of the caster's
     // next turn; a Concentration spell's others last while it concentrates, up to its duration.
     const timed = new Map(
@@ -1035,8 +1149,44 @@ function run(
           label: spell.name,
           concentration: true,
           ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
+          escape_dc: escapeDc,
+          escape_skill: hold,
         });
       }
+    }
+    if (zone && spell.mechanics?.save && spell.mechanics.area) {
+      const m = spell.mechanics;
+      const id = `zone-${e.next_effect++}`;
+      e.zones.push({
+        id,
+        spell: spell.id,
+        label: spell.name,
+        by: c.id,
+        area: m.area as SpellArea,
+        point: m.area?.shape === "emanation" ? null : (options.point ?? null),
+        save: { ...(m.save as NonNullable<typeof m.save>), dc: r.save_dc ?? 0 },
+        damage: [...r.damage_parts],
+        conditions: m.conditions.filter((x) => x.on === "failed_save").map((x) => x.condition),
+        escape_dc: escapeDc,
+        escape_skill: hold,
+        triggers: [...zone.triggers],
+        once_per_turn: zone.once_per_turn,
+        unaffected: [...(options.unaffected ?? [])].map((x) => find(x).id),
+        concentration: spell.concentration,
+        ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
+        // The save on casting counts as this turn's.
+        saved: r.targets.map((x) => (targets[x.target] as EncounterCombatant).id),
+      });
+      const when = zone.triggers
+        .map((t) =>
+          t === "enter"
+            ? "enter it"
+            : t === "start_turn"
+              ? "start their turn there"
+              : "end their turn there",
+        )
+        .join(" or ");
+      notes.push(`${spell.name} lasts (${id}): creatures save when they ${when}.`);
     }
     return r;
 
@@ -1082,6 +1232,13 @@ function run(
     e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
     // A spell's mark stays when its caster leaves: the light is on the target.
     e.marks = e.marks.filter((m) => present(m.on));
+    for (const z of [...e.zones]) {
+      const source = e.combatants.find((c) => c.id === z.by);
+      if (z.concentration && !source) endZone(z, "its caster left");
+      else if (z.concentration && source && concentrationOf(source) !== z.label) {
+        endZone(z, "Concentration ended");
+      }
+    }
     for (const effect of [...e.effects]) {
       const target = e.combatants.find((c) => c.id === effect.target);
       const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
@@ -1341,7 +1498,9 @@ function run(
       if (action.to) {
         // Enemies whose reach it leaves can make an Opportunity Attack (not after Disengage).
         const before = e.combatants.map((x) => [x, feetBetween(c, x)] as const);
+        const zonesBefore = zoneOccupants();
         occupy(c, action.to);
+        zoneEntries(zonesBefore);
         for (const [x, was] of before) {
           if (x.id === c.id || x.defeated || alliesOf(e, x.id, c) || was === null) continue;
           const reach = meleeReach(ctx, e, x);
@@ -1459,24 +1618,27 @@ function run(
     }
     case "escape": {
       const c = find(action.id);
-      const grapples = e.effects.filter(
-        (x) => x.target === c.id && x.condition === "grappled" && x.escape_dc !== null,
-      );
-      const grapple = action.effect
-        ? (grapples.find((x) => x.id === action.effect) ??
-          fail(`${action.effect} isn't a grapple on ${c.name}`))
-        : grapples.length === 1
-          ? (grapples[0] as EncounterEffect)
-          : grapples.length
-            ? fail(`Choose the grapple to escape: ${grapples.map((x) => x.id).join(", ")}`)
-            : fail(`${c.name} has no grapple with an escape DC`);
+      const holds = e.effects.filter((x) => x.target === c.id && x.escape_dc !== null);
+      const hold = action.effect
+        ? (holds.find((x) => x.id === action.effect) ??
+          fail(`${action.effect} isn't a grapple or hold on ${c.name}`))
+        : holds.length === 1
+          ? (holds[0] as EncounterEffect)
+          : holds.length
+            ? fail(`Choose what to escape: ${holds.map((x) => x.id).join(", ")}`)
+            : fail(`${c.name} has no grapple or hold with an escape DC`);
+      if (action.skill && hold.escape_skill && action.skill !== hold.escape_skill) {
+        fail(`Escaping ${hold.label} takes an ${skillName(hold.escape_skill)} check`);
+      }
       takeAction(c, "escape");
       const me = encounterCombatant(e, c.id, ctx);
       const bonus = (skill: "athletics" | "acrobatics") =>
         me.skills[skill] ?? me.ability_checks[skill === "athletics" ? "str" : "dex"];
       const skill =
-        action.skill ?? (bonus("acrobatics") > bonus("athletics") ? "acrobatics" : "athletics");
-      const check = rollAbilityCheck(me, { skill }, grapple.escape_dc, {
+        hold.escape_skill ??
+        action.skill ??
+        (bonus("acrobatics") > bonus("athletics") ? "acrobatics" : "athletics");
+      const check = rollAbilityCheck(me, { skill }, hold.escape_dc, {
         rng,
         decide,
         modes: helpOnCheck(c, skill),
@@ -1484,11 +1646,12 @@ function run(
       result = check;
       useInspiration(c, check.inspiration);
       const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
-      const outcome = check.success ? "escapes" : "stays Grappled";
+      const condition = lookup(ctx.catalog.conditions, hold.condition)?.name ?? hold.condition;
+      const outcome = check.success ? "escapes" : `stays ${condition}`;
       notes.push(
-        `${c.name} tries to escape (${skill} ${check.total} vs DC ${grapple.escape_dc}${why}): ${outcome}.`,
+        `${c.name} tries to escape (${skill} ${check.total} vs DC ${hold.escape_dc}${why}): ${outcome}.`,
       );
-      if (check.success) endEffect(grapple, "escaped");
+      if (check.success) endEffect(hold, "escaped");
       break;
     }
     case "stand": {
@@ -1535,6 +1698,31 @@ function run(
           escape_dc: action.escape_dc,
         });
       }
+      break;
+    }
+    case "zone_save": {
+      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
+      for (const id of action.targets) {
+        const t = find(id);
+        if (z.once_per_turn && z.saved.includes(t.id)) {
+          notes.push(`${t.name} has already saved against ${z.label} this turn.`);
+        }
+      }
+      zoneSave(z, action.targets, action.targets.length > 1 ? "save" : "saves");
+      break;
+    }
+    case "move_zone": {
+      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
+      if (!z.point) fail(`${z.label} moves with its caster`);
+      const before = zoneOccupants();
+      z.point = { ...action.point };
+      notes.push(`${z.label} moves to ${action.point.x},${action.point.y}.`);
+      zoneEntries(before);
+      break;
+    }
+    case "end_zone": {
+      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
+      endZone(z, "ended");
       break;
     }
     case "end_effect": {
@@ -1869,7 +2057,9 @@ function run(
         fail("Action Surge's additional action can't be the Magic action (casting a spell)");
       }
       if (action.area && action.targets?.length) fail("Give targets or an area, not both");
-      const area = action.area ? spellArea(c, spell, action.area) : null;
+      let area = action.area ? spellArea(c, spell, action.area) : null;
+      // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
+      if (area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast) area = [];
       result = castBy(c, spell, area ?? action.targets ?? [], {
         slot_level,
         pact: action.pact,
@@ -1878,6 +2068,9 @@ function run(
         cover: action.cover,
         area: area !== null,
         nearby: action.nearby,
+        damage_type: action.damage_type,
+        point: action.area?.point,
+        unaffected: action.unaffected,
       });
       c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.
@@ -2143,7 +2336,7 @@ function castingEconomy(spell: SpellDef): "action" | "bonus_action" | "reaction"
 
 /** "Concentration, up to 1 minute" → 10 rounds; `null` when it isn't counted in rounds. */
 function durationRounds(spell: SpellDef): number | null {
-  const m = /up to (\d+) (round|minute|hour)s?/i.exec(spell.duration);
+  const m = /(?:up to )?(\d+) (round|minute|hour)s?/i.exec(spell.duration);
   if (!m) return null;
   const n = Number(m[1]);
   return m[2] === "round" ? n : m[2] === "minute" ? n * 10 : n * 600;

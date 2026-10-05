@@ -24535,7 +24535,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -24575,7 +24577,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -24651,7 +24655,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -24710,7 +24716,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -24876,7 +24884,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -24954,7 +24964,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25014,7 +25026,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25071,7 +25085,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25147,7 +25163,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25227,7 +25245,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25286,13 +25306,16 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25386,7 +25409,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25428,13 +25453,16 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25489,7 +25517,8 @@
                     {
                         "condition": "blinded",
                         "on": "failed_save",
-                        "until": "end_of_your_next_turn"
+                        "until": "end_of_your_next_turn",
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -25499,7 +25528,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25601,7 +25632,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25736,7 +25769,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -25825,13 +25860,16 @@
                     {
                         "condition": "restrained",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26005,7 +26043,44 @@
             "components": "V, S, M (a bit of pork rind or butter)",
             "duration": "1 minute",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "prone",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null
+                    }
+                ],
+                "area": {
+                    "shape": "cube",
+                    "size": 10,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": false,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "guiding-bolt",
@@ -26053,7 +26128,9 @@
                 "follow_up": null,
                 "on_hit": [
                     "advantage_against"
-                ]
+                ],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26093,7 +26170,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26143,7 +26222,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26220,18 +26301,22 @@
                     {
                         "condition": "prone",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26307,7 +26392,9 @@
                     ],
                     "radius": 5
                 },
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26396,7 +26483,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26499,7 +26588,9 @@
                     "upcast": 1
                 },
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26589,13 +26680,16 @@
                     {
                         "condition": "poisoned",
                         "on": "hit",
-                        "until": "end_of_your_next_turn"
+                        "until": "end_of_your_next_turn",
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26725,7 +26819,8 @@
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -26735,7 +26830,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -26813,7 +26910,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -27389,13 +27488,16 @@
                     {
                         "condition": "paralyzed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -27612,7 +27714,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -27672,7 +27776,53 @@
             "components": "V, S, M (a moonseed leaf)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "2d10",
+                        "type": "radiant",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cylinder",
+                    "size": 5,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "pass-without-trace",
@@ -27829,7 +27979,9 @@
                     "upcast": 1
                 },
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -27905,7 +28057,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28037,13 +28191,16 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28082,7 +28239,44 @@
             "components": "V, S, M (a bit of spiderweb)",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "restrained",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": "athletics"
+                    }
+                ],
+                "area": {
+                    "shape": "cube",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "start_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "zone-of-truth",
@@ -28227,7 +28421,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28429,7 +28625,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28545,12 +28743,14 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -28560,7 +28760,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28615,7 +28817,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28696,7 +28900,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -28957,7 +29163,56 @@
             "components": "V, S, M (a prayer scroll)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "3d8",
+                        "type": "radiant",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "emanation",
+                    "size": 15,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [
+                    "radiant",
+                    "necrotic"
+                ],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": false,
+                    "designate": true
+                }
+            }
         },
         {
             "id": "stinking-cloud",
@@ -29121,7 +29376,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -29199,7 +29456,51 @@
             "components": "V, S, M (a tentacle)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "str",
+                    "on_success": "none"
+                },
+                "damage": [
+                    {
+                        "dice": "3d6",
+                        "type": "bludgeoning",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "restrained",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": "athletics"
+                    }
+                ],
+                "area": {
+                    "shape": "cube",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "blight",
@@ -29251,7 +29552,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -29293,13 +29596,16 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -29333,13 +29639,16 @@
                     {
                         "condition": "charmed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -29714,7 +30023,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -29788,7 +30099,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -30039,7 +30352,53 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "5d8",
+                        "type": "poison",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "poison"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "commune",
@@ -30131,7 +30490,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -30387,13 +30748,16 @@
                     {
                         "condition": "paralyzed",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -30414,7 +30778,53 @@
             "components": "V, S, M (a locust)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "4d10",
+                        "type": "piercing",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d10",
+                            "type": "piercing"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "legend-lore",
@@ -30477,7 +30887,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -30863,7 +31275,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -30970,7 +31384,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31047,13 +31463,16 @@
                     {
                         "condition": "restrained",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31126,7 +31545,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31205,7 +31626,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31420,7 +31843,8 @@
                     {
                         "condition": "blinded",
                         "on": "failed_save",
-                        "until": "start_of_your_next_turn"
+                        "until": "start_of_your_next_turn",
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -31430,7 +31854,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31681,7 +32107,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -31724,7 +32152,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -32081,7 +32511,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -32238,7 +32670,44 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "10d8",
+                        "type": "fire",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "sphere",
+                    "size": 20,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false
+                }
+            }
         },
         {
             "id": "maze",
@@ -32339,7 +32808,8 @@
                     {
                         "condition": "blinded",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -32349,7 +32819,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -32518,7 +32990,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {
@@ -32714,7 +33188,8 @@
                     {
                         "condition": "frightened",
                         "on": "failed_save",
-                        "until": null
+                        "until": null,
+                        "escape": null
                     }
                 ],
                 "area": {
@@ -32724,7 +33199,9 @@
                 },
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": []
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null
             }
         },
         {

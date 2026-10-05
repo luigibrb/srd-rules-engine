@@ -6,7 +6,7 @@
  * `caster_actions` (spend the slot, start Concentration) and each target's `actions`.
  */
 
-import type { Ability, SpellDef } from "../models/content";
+import type { Ability, DamageType, SpellDef } from "../models/content";
 import type { PlayAction } from "../models/state";
 import {
   attackMode,
@@ -53,6 +53,8 @@ export interface CastOptions {
   modesFor?: (target: number, shot: number) => readonly ModeReason[];
   /** Creatures within the follow-up's radius of the target, besides it (Ice Knife). */
   nearby?: readonly Combatant[];
+  /** The damage type picked for a spell that offers several (`mechanics.damage_types`). */
+  damage_type?: DamageType;
   /** Whether the caster is within 5 feet of each target (default: a melee spell attack is). */
   within_5ft?: readonly (boolean | undefined)[];
 }
@@ -97,6 +99,11 @@ export interface SpellCastResult {
   readonly attack_bonus: number | null;
   /** Damage rolled once for every target (a save or an automatic hit). */
   readonly damage: RolledDamage | null;
+  /**
+   * The spell's damage at this level (upcasting, Cantrip Upgrade, the damage type picked),
+   * without features' bonuses: what a zone deals again later.
+   */
+  readonly damage_parts: readonly DamagePart[];
   readonly targets: readonly SpellTargetResult[];
   /**
    * The saving throw after the spell attack (Ice Knife); each result's `target` is an index into
@@ -155,6 +162,7 @@ export function castSpell(
     modesFor,
     within_5ft,
     nearby = [],
+    damage_type,
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
@@ -199,6 +207,7 @@ export function castSpell(
       save_dc: null,
       attack_bonus: null,
       damage: null,
+      damage_parts: [],
       targets: [],
       follow_up: null,
       notes: [`${spell.name}: its effects aren't automated; see the spell's text.`],
@@ -236,6 +245,18 @@ export function castSpell(
     } else {
       parts.push({ dice: `${count * above}d${sides}`, bonus: 0, type: extra.type });
     }
+  }
+
+  // A damage type the caster picks (Spirit Guardians), for every part.
+  if (m.damage_types.length) {
+    const options = m.damage_types.join(" or ");
+    if (!damage_type) throw new RangeError(`${spell.name}: choose its damage type (${options})`);
+    if (!m.damage_types.includes(damage_type)) {
+      throw new RangeError(`${spell.name}'s damage is ${options}, not ${damage_type}`);
+    }
+    for (const [i, part] of parts.entries()) parts[i] = { ...part, type: damage_type };
+  } else if (damage_type) {
+    throw new RangeError(`${spell.name}'s damage type isn't a choice`);
   }
 
   // Spell damage bonuses from features (Potent Spellcasting): an ability modifier added to the
@@ -386,6 +407,7 @@ export function castSpell(
     save_dc: m.save || m.follow_up ? (line?.save_dc ?? null) : null,
     attack_bonus: m.attack ? (line?.attack_bonus ?? null) : null,
     damage: shared,
+    damage_parts: parts,
     targets: results,
     follow_up,
     notes: [],
@@ -467,7 +489,7 @@ function targetResult(
 }
 
 /** A saving throw effect: an ability, a DC, what happens on a success and on a failure. */
-interface SaveEffect {
+export interface SaveEffect {
   readonly ability: Ability;
   readonly dc: number;
   readonly on_success: "half" | "none";
@@ -504,6 +526,19 @@ function resolveSave(
     return targetResult(i, target, { save, instances, conditions });
   });
   return { damage, targets: results };
+}
+
+/**
+ * Targets save against an effect, the damage rolled once for all of them (`resolveSave`): a
+ * zone's save when creatures enter it or end their turn there.
+ */
+export function saveAgainst(
+  effect: SaveEffect,
+  parts: readonly DamagePart[],
+  targets: readonly Combatant[],
+  { rng = mathRng, decide = (d) => d.recommended }: { rng?: Rng; decide?: Decide } = {},
+): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
+  return resolveSave(effect, parts, targets, rng, decide);
 }
 
 export interface SaveActionResult {

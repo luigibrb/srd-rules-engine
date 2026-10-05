@@ -60,7 +60,7 @@ const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizar
 describe("golden spells (mechanics checked against the SRD text)", () => {
   it("every spell's mechanics, as reviewed (a change here needs a review against the SRD)", () => {
     const withMechanics = Object.values(catalog.spells).filter((s) => s.mechanics);
-    expect(withMechanics).toHaveLength(58);
+    expect(withMechanics).toHaveLength(66);
     expect(Object.fromEntries(withMechanics.map((s) => [s.id, s.mechanics]))).toMatchSnapshot();
   });
 
@@ -74,7 +74,11 @@ describe("golden spells (mechanics checked against the SRD text)", () => {
       const targets = Array.from({ length: count }, () => creature());
       const slots = s.level === 0 ? [undefined] : [s.level, 9];
       for (const slot_level of slots) {
-        const r = castSpell(mage(20), s, targets, { slot_level, rng: seededRng(s.level) });
+        const r = castSpell(mage(20), s, targets, {
+          slot_level,
+          rng: seededRng(s.level),
+          damage_type: m.damage_types[0],
+        });
         expect(r.targets.length, s.id).toBeGreaterThanOrEqual(count);
       }
     }

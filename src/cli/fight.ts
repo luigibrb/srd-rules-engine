@@ -8,7 +8,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
-import { ABILITIES, type Ability, SKILLS, type Skill } from "../models/content";
+import { ABILITIES, type Ability, type DamageType, SKILLS, type Skill } from "../models/content";
 import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
 import type { CharacterState } from "../models/state";
 import { monsterSpells } from "../rules/combatant";
@@ -43,7 +43,9 @@ const HELP = `Commands (the combatant whose turn it is acts; "as <who> …" acts
 Targets are ids, names or numbers from the status table.
   attack <target> [weapon] [adv|dis] [2h] [+rider] [light|cleave|granted|opp] [nomastery]
          [thrown] [half|3/4|total] (the target's cover)
-  cast <spell> [targets…] [near …] [at <level>]   use <ability> [targets…]   (a monster's save effect)
+  cast <spell> [targets…] [near …] [at <level>] [type <damage>] [spare <who…>]
+  use <ability> [targets…]   (a monster's save effect)
+  zone <id> save <who…> · zone <id> move <x> <y> · zone <id> end   (a spell's lasting area)
   areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
@@ -159,6 +161,15 @@ export class FightApp {
       const mark = i === e.turn ? this.con.style("▶", "bold", "green") : " ";
       this.con.say(`${mark} ${i + 1}. ${this.line(c)}`);
     });
+    for (const z of e.zones) {
+      const by = e.combatants.find((c) => c.id === z.by)?.name ?? z.by;
+      const where = z.point
+        ? ` at ${z.point.x},${z.point.y}`
+        : z.area.shape === "emanation"
+          ? ` around ${by}`
+          : "";
+      this.con.say(`  ${z.id}: ${z.label} (${by})${where}`);
+    }
   }
 
   private line(c: EncounterCombatant): string {
@@ -348,6 +359,24 @@ export class FightApp {
       }
       case "escape":
         return this.apply({ type: "escape", id });
+      case "zone": {
+        const [zone = "", verb, ...rest] = args;
+        if (verb === "end") return this.apply({ type: "end_zone", zone });
+        if (verb === "move") {
+          const [x, y] = rest.map(Number);
+          if (!Number.isInteger(x) || !Number.isInteger(y)) {
+            return this.con.error("Usage: zone <id> move <x> <y>");
+          }
+          return this.apply({ type: "move_zone", zone, point: { x: x as number, y: y as number } });
+        }
+        if (verb === "save") {
+          const targets = rest.map((w) => this.find(w));
+          if (!targets.length || targets.some((t) => !t)) return;
+          const ids = targets.map((t) => (t as EncounterCombatant).id);
+          return this.apply({ type: "zone_save", zone, targets: ids });
+        }
+        return this.con.error("Usage: zone <id> save <who…> | move <x> <y> | end");
+      }
       case "stand":
         return this.apply({ type: "stand", id });
       case "move": {
@@ -477,7 +506,17 @@ export class FightApp {
     const { area, rest: args } = areaOf(all);
     const at = args.indexOf("at");
     const slot_level = at >= 0 ? Number(args[at + 1]) : undefined;
-    const before = at >= 0 ? args.slice(0, at) : args;
+    // `type <damage>`: the damage type picked; `spare …`: creatures a zone doesn't affect.
+    const typed = args.indexOf("type");
+    const damage_type = typed >= 0 ? (args[typed + 1]?.toLowerCase() as DamageType) : undefined;
+    const spareAt = args.indexOf("spare");
+    const ends = (from: number) =>
+      [at, typed, spareAt].filter((i) => i > from).reduce((a, b) => Math.min(a, b), args.length);
+    const spare =
+      spareAt >= 0 ? args.slice(spareAt + 1, ends(spareAt)).map((w) => this.find(w)) : [];
+    if (spare.some((t) => !t)) return;
+    const first = [at, typed, spareAt].filter((i) => i >= 0);
+    const before = first.length ? args.slice(0, Math.min(...first)) : args;
     // `near …`: the creatures next to the target of a follow-up save (Ice Knife) without positions.
     const near = before.indexOf("near");
     const words = near >= 0 ? before.slice(0, near) : before;
@@ -497,9 +536,13 @@ export class FightApp {
         area,
         slot_level,
         nearby: nearby?.map((t) => (t as EncounterCombatant).id),
+        damage_type,
+        unaffected: spare.length ? spare.map((t) => (t as EncounterCombatant).id) : undefined,
       });
     }
-    this.con.error("Usage: cast <spell> [targets…] [near <creatures…>] [at <level>]");
+    this.con.error(
+      "Usage: cast <spell> [targets…] [near <creatures…>] [at <level>] [type <damage>] [spare <who…>]",
+    );
   }
 
   /** A catalog spell by id, name, or a prefix of its name that only one spell has. */

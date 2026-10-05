@@ -153,6 +153,71 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     upcast: { damage: [{ dice: "1d10", type: "bludgeoning" }] },
     area: { shape: "cylinder", size: 20 },
   },
+  // Areas that last (zones): their save happens again when a creature enters or ends its turn
+  // there.
+  // Level 1
+  grease: {
+    save: { ability: "dex", on_success: "none" },
+    conditions: [{ condition: "prone", on: "failed_save" }],
+    area: { shape: "cube", size: 10 }, // "a 10-foot square"
+    // No "only once per turn".
+    zone: { triggers: ["enter", "end_turn"], once_per_turn: false },
+  },
+  // Level 2
+  moonbeam: {
+    save: { ability: "con", on_success: "half" },
+    damage: [{ dice: "2d10", type: "radiant" }],
+    upcast: { damage: [{ dice: "1d10", type: "radiant" }] },
+    area: { shape: "cylinder", size: 5 },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  web: {
+    save: { ability: "dex", on_success: "none" },
+    // "while in the webs or until it breaks free": a Strength (Athletics) check, as an action.
+    conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
+    area: { shape: "cube", size: 20 },
+    zone: { triggers: ["enter", "start_turn"], on_cast: false },
+  },
+  // Level 3
+  "spirit-guardians": {
+    save: { ability: "wis", on_success: "half" },
+    damage: [{ dice: "3d8", type: "radiant" }],
+    damage_types: ["radiant", "necrotic"], // good or neutral, or evil
+    upcast: { damage: [{ dice: "1d8", type: "radiant" }] },
+    area: { shape: "emanation", size: 15 },
+    zone: { triggers: ["enter", "end_turn"], on_cast: false, designate: true },
+  },
+  // Level 4
+  "black-tentacles": {
+    save: { ability: "str", on_success: "none" },
+    damage: [{ dice: "3d6", type: "bludgeoning" }],
+    // "has the Restrained condition until the spell ends"
+    conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
+    area: { shape: "cube", size: 20 }, // "a 20-foot square"
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  // Level 5
+  cloudkill: {
+    save: { ability: "con", on_success: "half" },
+    damage: [{ dice: "5d8", type: "poison" }],
+    upcast: { damage: [{ dice: "1d8", type: "poison" }] },
+    area: { shape: "sphere", size: 20 },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  "insect-plague": {
+    save: { ability: "con", on_success: "half" },
+    damage: [{ dice: "4d10", type: "piercing" }],
+    upcast: { damage: [{ dice: "1d10", type: "piercing" }] },
+    area: { shape: "sphere", size: 20 },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  // Level 8
+  "incendiary-cloud": {
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "10d8", type: "fire" }],
+    area: { shape: "sphere", size: 20 },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
 };
 
 // --- mechanics parser -------------------------------------------------------------------------

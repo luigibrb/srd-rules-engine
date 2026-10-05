@@ -341,7 +341,7 @@ other rolls; without a DC, `success` is `null` (a contest, or the GM decides).
 
 Catalog spells can carry `mechanics` (attack or save, damage by type with a flat bonus,
 healing, targets, upcasting, Cantrip Upgrade, conditions with their duration, area, darts or
-rays, a follow-up save, hit riders). `castSpell(caster, spell, targets, { slot_level, pact,
+rays, a follow-up save, hit riders, a damage type the caster picks, a lasting area). `castSpell(caster, spell, targets, { slot_level, pact,
 spellcasting, mode, modesFor, nearby, rng })` in `rules/casting.ts` resolves them between
 combatants: a spell attack per target (per beam or ray: Eldritch Blast, Scorching Ray), or a
 save with the damage rolled once for all targets; darts that hit automatically (Magic Missile);
@@ -358,10 +358,10 @@ The spellcasting feature used is the one asked for, else the one with the best s
 spell list has the spell, else the best overall (a species' fixed spells). A spell without
 `mechanics` is still cast (slot, Concentration) with a note that its effects are in the text.
 
-58 SRD spells have mechanics: 14 hand-written golden spells with worked tests, 40 drafts from
+66 SRD spells have mechanics: 22 hand-written golden spells with worked tests, 40 drafts from
 the importer's parser reviewed against their text, and 4 corrected by hand (`tests/casting.test.ts`
-snapshots them all). The other 281 are cast with their text: 204 have nothing to model (utility
-spells), and 77 have effects the parser deliberately doesn't guess (damage after casting, several
+snapshots them all). The other 273 are cast with their text: 204 have nothing to model (utility
+spells), and 69 have effects the parser deliberately doesn't guess (damage after casting, several
 saves, tables…).
 
 ### Monsters
@@ -507,7 +507,17 @@ list of actions.
   creatures are the positioned ones within its radius of the target, or `nearby` without
   positions. Conditions with a duration in the spell's text (Ray of Sickness, Color Spray,
   Sunbeam) are timed effects that end at the start or end of the caster's next turn; a
-  Concentration spell's other conditions last while it concentrates.
+  Concentration spell's other conditions last while it concentrates. A hold that an action's
+  check ends (Black Tentacles, Web) gets an escape DC, and `escape` uses it with the skill the
+  spell names.
+- **Zones:** a spell with `mechanics.zone` (Moonbeam, Spirit Guardians, Cloudkill, Insect
+  Plague, Incendiary Cloud, Black Tentacles, Web, Grease) leaves an `encounter.zones` entry: its
+  area (at a point, or around its caster for an Emanation), save, damage at the cast level and
+  conditions. With positions, a creature saves when a move puts it in the zone (or moves the
+  zone onto it: `move_zone`, or an Emanation's caster moving), and at the start or end of its
+  turn there; without positions, `zone_save` names who saves. "Only once per turn" is tracked
+  per zone (`saved`, reset at every turn's start). A zone ends with its caster's Concentration,
+  after its duration, or with `end_zone`; the creatures its caster designates are spared.
 - **Effects by hand:** `effects` applies play actions (what `makeAttack`, `castSpell` and
   `useSaveAction` return) to a character's state or to a monster (damage with its defenses,
   healing, Temporary HP, conditions with its immunities), optionally as timed effects.
@@ -591,6 +601,16 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   a creature within 5 feet of the target includes the caster.
 - Guiding Bolt's Advantage applies to the next attack roll against the target by anyone,
   spell attacks included, and a new hit replaces the old mark.
+- A zone's later damage is rolled without features' bonuses (Empowered Evocation's "one damage
+  roll" is the casting's), once for the creatures that save at the same moment.
+- Entering a zone is judged by where a move ends: a move straight through it isn't seen, and
+  `place` (setting up or forced movement) triggers nothing. The save when the spell appears
+  counts as that turn's save.
+- Zones that drift or move (Cloudkill, Incendiary Cloud, Moonbeam's Magic action) move only by
+  `move_zone`, whose action and direction are the caller's. Spirit Guardians' halved Speed and
+  Moonbeam's effect on shape-shifters stay text.
+- Web's Restrained lasts until the creature escapes or the caster's Concentration ends ("while
+  in the webs" isn't checked).
 
 **Monsters**
 
@@ -694,7 +714,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-there's no map of walls and Difficult Terrain, 77 spells keep their effects in text, and shopping with starting gold isn't automated.
+there's no map of walls and Difficult Terrain, 69 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

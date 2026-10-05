@@ -19,6 +19,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "acid",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -29,6 +30,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "animal-friendship": {
     "area": null,
@@ -37,11 +39,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -56,6 +60,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "befuddlement": {
     "area": null,
@@ -70,6 +75,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -80,6 +86,52 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
+  },
+  "black-tentacles": {
+    "area": {
+      "shape": "cube",
+      "size": 20,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "restrained",
+        "escape": "athletics",
+        "on": "failed_save",
+        "until": null,
+      },
+    ],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "3d6",
+        "type": "bludgeoning",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "str",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "blight": {
     "area": null,
@@ -94,6 +146,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -113,6 +166,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "burning-hands": {
     "area": {
@@ -131,6 +185,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -150,6 +205,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "call-lightning": {
     "area": null,
@@ -164,6 +220,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "lightning",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -183,6 +240,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "charm-monster": {
     "area": null,
@@ -191,11 +249,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -210,6 +270,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "charm-person": {
     "area": null,
@@ -218,11 +279,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -237,6 +300,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "chill-touch": {
     "area": null,
@@ -251,6 +315,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -258,6 +323,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "circle-of-death": {
     "area": {
@@ -276,6 +342,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -295,6 +362,54 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
+  },
+  "cloudkill": {
+    "area": {
+      "shape": "sphere",
+      "size": 20,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "5d8",
+        "type": "poison",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "poison",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "color-spray": {
     "area": {
@@ -307,11 +422,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "blinded",
+        "escape": null,
         "on": "failed_save",
         "until": "end_of_your_next_turn",
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -322,6 +439,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "compulsion": {
     "area": null,
@@ -330,11 +448,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -345,6 +465,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "cone-of-cold": {
     "area": {
@@ -363,6 +484,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "cold",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -382,6 +504,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "cure-wounds": {
     "area": null,
@@ -389,6 +512,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": {
       "add_modifier": true,
@@ -403,6 +527,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "2d8",
       "targets": 0,
     },
+    "zone": null,
   },
   "disintegrate": {
     "area": null,
@@ -417,6 +542,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "force",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -436,6 +562,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "dissonant-whispers": {
     "area": null,
@@ -450,6 +577,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -469,6 +597,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "eldritch-blast": {
     "area": null,
@@ -483,6 +612,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "force",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -490,6 +620,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "entangle": {
     "area": null,
@@ -498,11 +629,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "restrained",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -513,6 +646,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "finger-of-death": {
     "area": null,
@@ -527,6 +661,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -537,6 +672,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "fire-bolt": {
     "area": null,
@@ -551,6 +687,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -558,6 +695,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "fire-storm": {
     "area": null,
@@ -572,6 +710,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -582,6 +721,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "fireball": {
     "area": {
@@ -600,6 +740,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -619,6 +760,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "flesh-to-stone": {
     "area": null,
@@ -627,11 +769,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "restrained",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -642,6 +786,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "freezing-sphere": {
     "area": {
@@ -660,6 +805,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "cold",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -679,6 +825,45 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
+  },
+  "grease": {
+    "area": {
+      "shape": "cube",
+      "size": 10,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "prone",
+        "escape": null,
+        "on": "failed_save",
+        "until": null,
+      },
+    ],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": false,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "guiding-bolt": {
     "area": null,
@@ -693,6 +878,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "radiant",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [
@@ -711,6 +897,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "harm": {
     "area": null,
@@ -725,6 +912,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -735,6 +923,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "healing-word": {
     "area": null,
@@ -742,6 +931,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": {
       "add_modifier": true,
@@ -756,6 +946,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "2d4",
       "targets": 0,
     },
+    "zone": null,
   },
   "hellish-rebuke": {
     "area": null,
@@ -770,6 +961,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -789,6 +981,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "hideous-laughter": {
     "area": null,
@@ -797,16 +990,19 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "prone",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
       {
         "condition": "incapacitated",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -821,6 +1017,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "hold-monster": {
     "area": null,
@@ -829,11 +1026,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "paralyzed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -848,6 +1047,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "hold-person": {
     "area": null,
@@ -856,11 +1056,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "paralyzed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -875,6 +1077,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "zone": null,
   },
   "hypnotic-pattern": {
     "area": {
@@ -887,16 +1090,19 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
       {
         "condition": "incapacitated",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -907,6 +1113,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "ice-knife": {
     "area": null,
@@ -921,6 +1128,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "piercing",
       },
     ],
+    "damage_types": [],
     "follow_up": {
       "damage": [
         {
@@ -946,6 +1154,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "ice-storm": {
     "area": {
@@ -970,6 +1179,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "cold",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -989,6 +1199,45 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
+  },
+  "incendiary-cloud": {
+    "area": {
+      "shape": "sphere",
+      "size": 20,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "10d8",
+        "type": "fire",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "inflict-wounds": {
     "area": null,
@@ -1003,6 +1252,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "necrotic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1022,6 +1272,54 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
+  },
+  "insect-plague": {
+    "area": {
+      "shape": "sphere",
+      "size": 20,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "4d10",
+        "type": "piercing",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "piercing",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "lightning-bolt": {
     "area": {
@@ -1040,6 +1338,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "lightning",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1059,6 +1358,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "magic-missile": {
     "area": null,
@@ -1073,6 +1373,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "force",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1083,6 +1384,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "mass-cure-wounds": {
     "area": {
@@ -1094,6 +1396,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": {
       "add_modifier": true,
@@ -1108,6 +1411,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "1d8",
       "targets": 0,
     },
+    "zone": null,
   },
   "mass-healing-word": {
     "area": null,
@@ -1115,6 +1419,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "cantrip_scaling": null,
     "conditions": [],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": {
       "add_modifier": true,
@@ -1129,6 +1434,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "1d4",
       "targets": 0,
     },
+    "zone": null,
   },
   "meteor-swarm": {
     "area": {
@@ -1153,6 +1459,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "bludgeoning",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1163,6 +1470,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "mind-spike": {
     "area": null,
@@ -1177,6 +1485,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1196,6 +1505,54 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
+  },
+  "moonbeam": {
+    "area": {
+      "shape": "cylinder",
+      "size": 5,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "2d10",
+        "type": "radiant",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "con",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d10",
+          "type": "radiant",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "zone": {
+      "designate": false,
+      "on_cast": true,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "phantasmal-killer": {
     "area": null,
@@ -1210,6 +1567,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1229,6 +1587,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "poison-spray": {
     "area": null,
@@ -1243,6 +1602,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "poison",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1250,6 +1610,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "ray-of-frost": {
     "area": null,
@@ -1264,6 +1625,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "cold",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1271,6 +1633,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "ray-of-sickness": {
     "area": null,
@@ -1279,6 +1642,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "poisoned",
+        "escape": null,
         "on": "hit",
         "until": "end_of_your_next_turn",
       },
@@ -1291,6 +1655,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "poison",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1307,6 +1672,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "sacred-flame": {
     "area": null,
@@ -1321,6 +1687,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "radiant",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1331,6 +1698,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "scorching-ray": {
     "area": null,
@@ -1345,6 +1713,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "fire",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1355,6 +1724,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "shatter": {
     "area": {
@@ -1373,6 +1743,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "thunder",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1392,6 +1763,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "shocking-grasp": {
     "area": null,
@@ -1406,6 +1778,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "lightning",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1413,6 +1786,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "sleep": {
     "area": {
@@ -1425,11 +1799,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "incapacitated",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1440,6 +1816,57 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
+  },
+  "spirit-guardians": {
+    "area": {
+      "shape": "emanation",
+      "size": 15,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "3d8",
+        "type": "radiant",
+      },
+    ],
+    "damage_types": [
+      "radiant",
+      "necrotic",
+    ],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "wis",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "radiant",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "zone": {
+      "designate": true,
+      "on_cast": false,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "starry-wisp": {
     "area": null,
@@ -1454,6 +1881,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "radiant",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1461,6 +1889,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "suggestion": {
     "area": null,
@@ -1469,11 +1898,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "charmed",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
     ],
     "damage": [],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1484,6 +1915,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
   },
   "sunbeam": {
     "area": {
@@ -1496,6 +1928,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "blinded",
+        "escape": null,
         "on": "failed_save",
         "until": "start_of_your_next_turn",
       },
@@ -1508,6 +1941,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "radiant",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1518,6 +1952,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "sunburst": {
     "area": {
@@ -1530,6 +1965,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "blinded",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
@@ -1542,6 +1978,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "radiant",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1552,6 +1989,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "thunderwave": {
     "area": {
@@ -1570,6 +2008,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "thunder",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1589,6 +2028,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "zone": null,
   },
   "vicious-mockery": {
     "area": null,
@@ -1603,6 +2043,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1613,6 +2054,45 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "zone": null,
+  },
+  "web": {
+    "area": {
+      "shape": "cube",
+      "size": 20,
+      "width": 5,
+    },
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [
+      {
+        "condition": "restrained",
+        "escape": "athletics",
+        "on": "failed_save",
+        "until": null,
+      },
+    ],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "none",
+    },
+    "targets": null,
+    "upcast": null,
+    "zone": {
+      "designate": false,
+      "on_cast": false,
+      "once_per_turn": true,
+      "triggers": [
+        "enter",
+        "start_turn",
+      ],
+    },
   },
   "weird": {
     "area": {
@@ -1625,6 +2105,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "conditions": [
       {
         "condition": "frightened",
+        "escape": null,
         "on": "failed_save",
         "until": null,
       },
@@ -1637,6 +2118,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "psychic",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1647,6 +2129,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
   "wind-wall": {
     "area": null,
@@ -1661,6 +2144,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "type": "bludgeoning",
       },
     ],
+    "damage_types": [],
     "follow_up": null,
     "heal": null,
     "on_hit": [],
@@ -1671,6 +2155,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "zone": null,
   },
 }
 `;
