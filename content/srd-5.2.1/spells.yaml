@@ -2961,6 +2961,27 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     2.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 2d6
+        type: fire
+    upcast:
+      damage:
+        - dice: 1d6
+          type: fire
+    area:
+      shape: emanation
+      size: 5
+    zone:
+      triggers:
+        - end_turn
+      once_per_turn: false
+      on_cast: false
+      anchor: point
+      ram: true
 - id: gentle-repose
   name: Gentle Repose
   level: 2
@@ -3712,6 +3733,17 @@
     area when the spell is cast must take a Search action and succeed on a Wisdom (Perception or
     Survival) check against your spell save DC to recognize the terrain as hazardous before entering
     it.
+  mechanics:
+    damage:
+      - dice: 2d4
+        type: piercing
+    area:
+      shape: sphere
+      size: 20
+    zone:
+      triggers:
+        - move
+      on_cast: false
 - id: spiritual-weapon
   name: Spiritual Weapon
   level: 2
@@ -4088,6 +4120,28 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d10 for each spell slot level above
     3.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    damage:
+      - dice: 3d10
+        type: slashing
+    upcast:
+      damage:
+        - dice: 1d10
+          type: slashing
+    area:
+      shape: emanation
+      size: 10
+    zone:
+      triggers:
+        - enter
+        - end_turn
+      on_cast: false
+      optional: true
+      anchor: point
+      space: 2
 - id: counterspell
   name: Counterspell
   level: 3
@@ -4769,6 +4823,23 @@
     Ground in the Cylinder is Difficult Terrain. When a creature enters the Cylinder for the first
     time on a turn or starts its turn there, it must succeed on a Dexterity saving throw or have the
     Prone condition and lose Concentration.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    conditions:
+      - condition: prone
+        on: failed_save
+    area:
+      shape: cylinder
+      size: 20
+    zone:
+      triggers:
+        - enter
+        - start_turn
+      on_cast: false
+      on_fail:
+        - lose_concentration
 - id: slow
   name: Slow
   level: 3
@@ -4931,6 +5002,23 @@
     Each creature that starts its turn in the Sphere must succeed on a Constitution saving throw or
     have the Poisoned condition until the end of the current turn. While Poisoned in this way, the
     creature can't take an action or a Bonus Action.
+  mechanics:
+    save:
+      ability: con
+      on_success: none
+    conditions:
+      - condition: poisoned
+        on: failed_save
+        until: end_of_its_turn
+    area:
+      shape: sphere
+      size: 20
+    zone:
+      triggers:
+        - start_turn
+      on_cast: false
+      on_fail:
+        - no_actions
 - id: tiny-hut
   name: Tiny Hut
   level: 3
@@ -5408,6 +5496,26 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     4.
+  mechanics:
+    save:
+      ability: wis
+      on_success: half
+    damage:
+      - dice: 5d8
+        type: force
+    upcast:
+      damage:
+        - dice: 1d8
+          type: force
+    area:
+      shape: emanation
+      size: 10
+    zone:
+      triggers:
+        - enter
+        - end_turn
+      on_cast: false
+      optional: true
 - id: control-water
   name: Control Water
   level: 4

@@ -7,6 +7,17 @@ migrated when it's loaded.
 
 ## [Unreleased]
 
+### Added
+- Moves follow a path square by square (`move` `to`, straight, or a new `path`): zones entered
+  on the way make their save, a creature held on the way stops, and zones with the `move`
+  trigger deal damage for every 5 feet moved in them.
+- Zone options: `optional` (the caster may force the save: a `zone_force` decision, by default
+  for enemies only), `anchor: point` and `space` (an Emanation around a placed space), `ram`
+  (`move_zone` `onto` a creature), `on_fail` (`no_actions`, `lose_concentration`), and
+  conditions `until: end_of_its_turn`. Six more SRD spells use them: Spike Growth, Stinking
+  Cloud, Sleet Storm, Flaming Sphere, Conjure Animals, Conjure Woodland Beings.
+- `srd-rules fight`: `zone <id> move <x> <y> onto <who>`.
+
 ## [0.1.0] - 2026-10-05
 
 ### Changed

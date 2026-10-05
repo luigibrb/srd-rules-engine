@@ -371,6 +371,9 @@ mechanics:
 #         conditions: [{condition: restrained, on: failed_save, escape: athletics}]
 #         zone: {triggers: [enter, end_turn], once_per_turn: true, on_cast: true, designate: false}
 #                                               # an area that lasts (needs save and area)
+#         zone: {triggers: [move]}              # damage per 5 feet moved in it, no save
+#         zone: {..., optional: true, anchor: point, space: 2, ram: false,
+#                on_fail: [no_actions, lose_concentration]}
 ```
 
 A spell has an attack roll or a save, not both; a `follow_up` save comes after an attack. Damage from a save is rolled once for every

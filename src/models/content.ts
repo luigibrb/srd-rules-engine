@@ -947,7 +947,7 @@ export const SpellMechanicsSchema = z
           condition: z.string(),
           on: z.enum(["failed_save", "hit"]),
           until: z
-            .enum(["start_of_your_next_turn", "end_of_your_next_turn"])
+            .enum(["start_of_your_next_turn", "end_of_your_next_turn", "end_of_its_turn"])
             .nullable()
             .default(null),
           /** The creature can take an action to end it with a check against the spell save DC. */
@@ -994,17 +994,30 @@ export const SpellMechanicsSchema = z
     damage_types: z.array(z.enum(DAMAGE_TYPES)).default([]),
     /**
      * An area that lasts (Moonbeam, Spirit Guardians): its save, damage and conditions happen
-     * again when a creature enters it (or it moves onto one), or starts or ends its turn there.
+     * again when a creature enters it (or it moves onto one), or starts or ends its turn there;
+     * `move`: its damage for every 5 feet a creature moves into or within it (Spike Growth).
      */
     zone: z
       .strictObject({
-        triggers: z.array(z.enum(["enter", "start_turn", "end_turn"])).min(1),
+        triggers: z.array(z.enum(["enter", "start_turn", "end_turn", "move"])).min(1),
         /** "A creature makes this save only once per turn." */
         once_per_turn: z.boolean().default(true),
         /** Creatures in the area save when it appears (Spirit Guardians and Web: no). */
         on_cast: z.boolean().default(true),
         /** The caster can designate creatures it doesn't affect (Spirit Guardians). */
         designate: z.boolean().default(false),
+        /** The caster chooses each time whether to force the save (Conjure Animals). */
+        optional: z.boolean().default(false),
+        /**
+         * Where an Emanation spreads from: the caster, or a point it's placed at (Conjure
+         * Animals' pack, Flaming Sphere) whose space is `space` squares wide.
+         */
+        anchor: z.enum(["caster", "point"]).default("caster"),
+        space: z.int().min(1).max(4).default(1),
+        /** Moving it into a creature's space makes that creature save (Flaming Sphere). */
+        ram: z.boolean().default(false),
+        /** What a failed save also does: no action or Bonus Action this turn, Concentration lost. */
+        on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
       })
       .nullable()
       .default(null),
@@ -1012,7 +1025,10 @@ export const SpellMechanicsSchema = z
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
   .refine((m) => !m.follow_up || m.attack, "a follow-up saving throw comes after a spell attack")
   .refine((m) => !m.projectiles || !m.save, "projectiles are spell attacks or automatic hits")
-  .refine((m) => !m.zone || (m.save && m.area), "a zone has an area and a saving throw")
+  .refine(
+    (m) => !m.zone || (m.area && (m.save || m.zone.triggers.every((t) => t === "move"))),
+    "a zone has an area, and a saving throw unless it only deals damage to creatures moving in it",
+  )
   .meta({ id: "SpellMechanics" });
 export type SpellMechanics = z.infer<typeof SpellMechanicsSchema>;
 

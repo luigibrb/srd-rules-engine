@@ -178,7 +178,54 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     area: { shape: "cube", size: 20 },
     zone: { triggers: ["enter", "start_turn"], on_cast: false },
   },
+  "flaming-sphere": {
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "2d6", type: "fire" }],
+    upcast: { damage: [{ dice: "1d6", type: "fire" }] },
+    // "Any creature that ends its turn within 5 feet of the sphere"; ramming it into a space.
+    area: { shape: "emanation", size: 5 },
+    zone: {
+      triggers: ["end_turn"],
+      once_per_turn: false,
+      on_cast: false,
+      anchor: "point",
+      ram: true,
+    },
+  },
+  "spike-growth": {
+    // "2d4 Piercing damage for every 5 feet it travels" in the area; no save.
+    damage: [{ dice: "2d4", type: "piercing" }],
+    area: { shape: "sphere", size: 20 },
+    zone: { triggers: ["move"], on_cast: false },
+  },
   // Level 3
+  "conjure-animals": {
+    save: { ability: "dex", on_success: "none" },
+    damage: [{ dice: "3d10", type: "slashing" }],
+    upcast: { damage: [{ dice: "1d10", type: "slashing" }] },
+    // "within 10 feet of the pack": a Large pack placed at a point; "you can force".
+    area: { shape: "emanation", size: 10 },
+    zone: {
+      triggers: ["enter", "end_turn"],
+      on_cast: false,
+      optional: true,
+      anchor: "point",
+      space: 2,
+    },
+  },
+  "sleet-storm": {
+    save: { ability: "dex", on_success: "none" },
+    conditions: [{ condition: "prone", on: "failed_save" }],
+    area: { shape: "cylinder", size: 20 },
+    zone: { triggers: ["enter", "start_turn"], on_cast: false, on_fail: ["lose_concentration"] },
+  },
+  "stinking-cloud": {
+    save: { ability: "con", on_success: "none" },
+    // "Poisoned until the end of the current turn … can't take an action or a Bonus Action"
+    conditions: [{ condition: "poisoned", on: "failed_save", until: "end_of_its_turn" }],
+    area: { shape: "sphere", size: 20 },
+    zone: { triggers: ["start_turn"], on_cast: false, on_fail: ["no_actions"] },
+  },
   "spirit-guardians": {
     save: { ability: "wis", on_success: "half" },
     damage: [{ dice: "3d8", type: "radiant" }],
@@ -195,6 +242,13 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
     area: { shape: "cube", size: 20 }, // "a 20-foot square"
     zone: { triggers: ["enter", "end_turn"] },
+  },
+  "conjure-woodland-beings": {
+    save: { ability: "wis", on_success: "half" },
+    damage: [{ dice: "5d8", type: "force" }],
+    upcast: { damage: [{ dice: "1d8", type: "force" }] },
+    area: { shape: "emanation", size: 10 },
+    zone: { triggers: ["enter", "end_turn"], on_cast: false, optional: true },
   },
   // Level 5
   cloudkill: {
