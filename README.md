@@ -263,6 +263,23 @@ breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10
 `{ until: { at: "end" } }`), Concentration saves when damaged, a Concentration spell's
 conditions ending with it, and Rage ending when it isn't extended.
 
+What a combatant can do now, for a UI's buttons: `combatantOptions(encounter, id, ctx)` lists
+every attack, spell, feature, monster ability, legendary action and standard action as an
+encounter action ready to send, with its cost, candidate targets (in reach or range when
+positioned), slot levels and uses left, and whether the engine would take it now or why not.
+`checkAction(encounter, action, ctx)` answers the same for one action by a dry run of
+`applyEncounterAction`, so the options never disagree with the engine.
+
+```ts
+import { checkAction, combatantOptions } from "srd-rules-engine";
+
+const options = combatantOptions(encounter, "aerin", ctx);
+// options.attacks[1]: { label: "Greatsword +5 · 2d6+3 slashing", cost: "attack", available: true,
+//   action: { type: "attack", id: "aerin", attack: "Greatsword", target: "goblin-warrior" }, … }
+checkAction(encounter, { type: "dodge", id: "goblin-warrior" }, ctx);
+// { ok: false, reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"] }
+```
+
 ## Command line
 
 ```bash
@@ -351,6 +368,8 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
 | `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, pending, applied }`: Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
+| `POST /v1/encounters/options` | `{ encounter, characters, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
+| `POST /v1/encounters/check` | `{ encounter, characters, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |
 | `POST /v1/combat/roll` | Roll a dice expression (`{"expression": "2d6+3"}`) |
 
 Routes that take a hand-filled `Character` snapshot (from the earlier Python version):
@@ -424,7 +443,7 @@ The engine is TypeScript, but you don't need TypeScript to use it:
 | Play | Session state: HP, death saves, rests, slots, limited uses, features switched on (Rage), conditions and Exhaustion, Concentration, inventory with 275 SRD magic items (attunement, charges, potions), coins, prepared spells for the day |
 | Combat | Attacks from the sheet's attack lines (Advantage, critical range, Versatile), damage with Resistance, Vulnerability, Immunity and Temporary HP, saving throws, ability and skill checks, damage riders (Rage Damage, Sneak Attack, Divine Strike), Advantage on saves, conditions changing rolls (Prone, Restrained, Blinded, Invisible, Poisoned; automatic Critical Hits and failed saves while Paralyzed or Unconscious) |
 | Monsters | All 330 SRD stat blocks (monsters and animals) as data: AC, HP, speed, abilities, saves, defenses, CR; attacks, Multiattack, saving throw effects (breath weapons), spellcasting (97 casting actions: spell lists, daily uses, fixed levels), "X/Day" limits, legendary actions and Legendary Resistance usable in combat; other traits as text |
-| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, spell areas that last (zones), casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration |
+| Encounters | Initiative (surprise, group rolls, ties), rounds and turns, action / Bonus Action / reaction, movement and Dash, Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove, standing up from Prone, two-weapon fighting, Weapon Mastery properties, Help, Vex, Sap and Guiding Bolt on spell attacks, spell areas that last (zones), casting times, recharges, once-per-turn riders, conditions with durations, Concentration saves and Concentration effects, Death Saving Throws at the start of the turn, Rage's duration; what a combatant can do now, with the reasons for what it can't |
 | Content packs | Manifests, patches, filtering by source, builds that record their packs, JSON Schemas for editors, a leak guard for this repository |
 | Not yet | A map of walls and terrain, most other class features' dice (shown as text), magic items' active powers, shopping with starting gold |
 

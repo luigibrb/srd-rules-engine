@@ -33,6 +33,7 @@ import {
 } from "../services/builder";
 import { isAlive, passivePerception } from "../services/combat";
 import { applyEncounterAction, type CharacterRef, EncounterError } from "../services/encounter";
+import { checkAction, combatantOptions } from "../services/options";
 import {
   applyAction,
   combatantFromCharacter,
@@ -107,6 +108,17 @@ const EncounterRequest = z.object({
   /** Characters by key (`add_character`'s `character`): their build and play state. */
   characters: z.record(z.string(), StateRequest).default({}),
   action: z.union([EncounterActionSchema, z.array(EncounterActionSchema)]),
+});
+const OptionsRequest = z.object({
+  encounter: EncounterSchema,
+  characters: z.record(z.string(), StateRequest).default({}),
+  /** The combatant whose options are listed. */
+  id: z.string(),
+});
+const CheckRequest = z.object({
+  encounter: EncounterSchema,
+  characters: z.record(z.string(), StateRequest).default({}),
+  action: EncounterActionSchema,
 });
 const SetChoiceRequest = BuildRequest.extend({ key: z.string(), values: z.array(z.string()) });
 const LevelUpRequest = BuildRequest.extend({
@@ -450,12 +462,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         // list: `pending` asks the question, `applied` counts the actions done before it.
         const req = EncounterRequest.parse(body);
         const catalog = getCatalog();
-        const characters: Record<string, CharacterRef> = Object.fromEntries(
-          Object.entries(req.characters).map(([key, c]) => [
-            key,
-            { build: parseBuild(c.build), state: c.state },
-          ]),
-        );
+        const characters = characterRefs(req.characters);
         let encounter = req.encounter;
         const states: Record<string, CharacterState> = {};
         const notes: string[] = [];
@@ -476,6 +483,30 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           notes.push(...result.notes);
         }
         return { encounter, states, notes, pending: null, applied };
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/encounters\/options$/,
+      handle: ({ body }) => {
+        // What one combatant can do now: every option with its cost, targets, and why not.
+        const req = OptionsRequest.parse(body);
+        return combatantOptions(req.encounter, req.id, {
+          catalog: getCatalog(),
+          characters: characterRefs(req.characters),
+        });
+      },
+    },
+    {
+      method: "POST",
+      pattern: /^\/v1\/encounters\/check$/,
+      handle: ({ body }) => {
+        // Would the engine take this action now? A dry run: nothing is applied.
+        const req = CheckRequest.parse(body);
+        return checkAction(req.encounter, req.action, {
+          catalog: getCatalog(),
+          characters: characterRefs(req.characters),
+        });
       },
     },
     {
@@ -558,4 +589,16 @@ function json(status: number, data: unknown, headers: Record<string, string>): R
     status,
     headers: { "content-type": "application/json", ...headers },
   });
+}
+
+/** Characters by key, their builds parsed. */
+function characterRefs(
+  characters: Readonly<Record<string, { build: unknown; state: CharacterState }>>,
+): Record<string, CharacterRef> {
+  return Object.fromEntries(
+    Object.entries(characters).map(([key, c]) => [
+      key,
+      { build: parseBuild(c.build), state: c.state },
+    ]),
+  );
 }

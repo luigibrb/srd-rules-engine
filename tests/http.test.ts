@@ -269,3 +269,62 @@ describe("HTTP play state", () => {
     expect(unknown.body.detail[0]).toMatch(/no attack 'Laser'/);
   });
 });
+
+describe("encounter options over HTTP", () => {
+  const api = client(createHandler({ rng: fixedRng(10) }));
+  const setup = async () => {
+    const build = fighterBuild();
+    const state = (await api.post("/v1/state/new", { build })).body;
+    const characters = { brakka: { build, state } };
+    const started = await api.post("/v1/encounters/apply", {
+      encounter: {},
+      characters,
+      action: [
+        { type: "add_character", character: "brakka" },
+        { type: "add_monster", monster: "goblin-warrior", side: "enemies" },
+        { type: "set_initiative", id: "brakka", value: 20 },
+        { type: "set_initiative", id: "goblin-warrior", value: 10 },
+        { type: "start" },
+      ],
+    });
+    return { encounter: started.body.encounter, characters };
+  };
+
+  it("lists a combatant's options and checks an action without applying it", async () => {
+    const { encounter, characters } = await setup();
+    const options = await api.post("/v1/encounters/options", {
+      encounter,
+      characters,
+      id: "brakka",
+    });
+    expect(options.status).toBe(200);
+    expect(options.body).toMatchObject({ id: "brakka", turn: true });
+    const sword = options.body.attacks.find((x: { label: string }) =>
+      x.label.startsWith("Greatsword"),
+    );
+    expect(sword).toMatchObject({ available: true, cost: "attack" });
+    const ok = await api.post("/v1/encounters/check", {
+      encounter,
+      characters,
+      action: sword.action,
+    });
+    expect(ok.body).toEqual({ ok: true, reasons: [] });
+    const refused = await api.post("/v1/encounters/check", {
+      encounter,
+      characters,
+      action: { type: "dodge", id: "goblin-warrior" },
+    });
+    expect(refused.body).toEqual({
+      ok: false,
+      reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"],
+    });
+    const unknown = await api.post("/v1/encounters/options", { encounter, characters, id: "x" });
+    expect(unknown.status).toBe(400);
+    const bad = await api.post("/v1/encounters/check", {
+      encounter,
+      characters,
+      action: { type: "fly" },
+    });
+    expect(bad.status).toBe(422);
+  });
+});

@@ -10,8 +10,8 @@ import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import { ABILITIES, type Ability, type DamageType, SKILLS, type Skill } from "../models/content";
 import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
+import type { OptionEntry } from "../models/options";
 import type { CharacterState } from "../models/state";
-import { monsterSpells } from "../rules/combatant";
 import { type DamagePart, formatDamage } from "../rules/damage";
 import { mathRng, type Rng } from "../rules/rng";
 import {
@@ -21,6 +21,7 @@ import {
   EncounterError,
   encounterCombatant,
 } from "../services/encounter";
+import { combatantOptions } from "../services/options";
 import { computePlaySheet, createState } from "../services/play";
 import { BackToMenu, type Console, QuitBuilder } from "./console";
 
@@ -53,7 +54,7 @@ Targets are ids, names or numbers from the status table.
   place <who> <x> <y>   put a combatant on the grid (5-foot squares)    map   show the grid
   dmg <t> <n> [type] · heal <t> <n> · cond <t> <condition> · cond <t> -<condition>
   ask on|off [<t>]   decisions after a roll: ask, or let the engine decide (auto)
-  options [<who>]    what a combatant can do: attacks, spells, features, abilities
+  options [<who>]    what a combatant can do now, and why not (dimmed)
   next · status · end · save · quit`;
 
 export function slugOf(name: string): string {
@@ -224,23 +225,47 @@ export class FightApp {
     }
   }
 
-  /** What `c` can do: attack lines, spells, features with uses left, monster abilities. */
+  /**
+   * What `c` can do now (`combatantOptions`): what it has left, then each option with its cost;
+   * the ones the engine would refuse are dimmed, with the reason.
+   */
   private options(c: EncounterCombatant): void {
-    const view = encounterCombatant(this.encounter, c.id, this.context());
+    const ctx = this.context();
+    const o = combatantOptions(this.encounter, c.id, ctx);
+    const view = encounterCombatant(this.encounter, c.id, ctx);
     const con = this.con;
-    const list = (title: string, lines: string[]) => {
-      if (!lines.length) return;
+    const left = [
+      o.economy.action ? "action" : "",
+      o.economy.bonus_action ? "bonus action" : "",
+      o.economy.reaction ? "reaction" : "",
+      `${o.economy.movement} ft`,
+      o.economy.attacks_left ? `${o.economy.attacks_left} attacks left` : "",
+      o.economy.legendary ? `legendary ${o.economy.legendary.left}/${o.economy.legendary.max}` : "",
+    ].filter(Boolean);
+    con.say(`  ${o.name}${o.turn ? " (its turn)" : ""}: ${left.join(" · ")}`);
+    const list = (
+      title: string,
+      entries: readonly OptionEntry[],
+      extra?: (x: OptionEntry) => string,
+    ) => {
+      if (!entries.length) return;
       con.say(con.style(`  ${title}`, "bold"));
-      for (const line of lines) con.say(`    ${line}`);
+      for (const x of entries) {
+        const uses = x.uses ? ` · ${x.uses.left}/${x.uses.max} left` : "";
+        const slots = x.slot_levels.length ? ` · slots ${x.slot_levels.join(", ")}` : "";
+        const pact = x.pact_slot !== null ? ` · pact slot ${x.pact_slot}` : "";
+        const note = x.note ? ` · ${x.note}` : "";
+        const line = `${x.label}${extra?.(x) ?? ""} (${x.cost.replace("_", " ")})${uses}${slots}${pact}${note}`;
+        con.say(x.available ? `    ${line}` : con.style(`    ${line} — ${x.reason}`, "dim"));
+      }
     };
-    list(
-      "Attacks",
-      view.attacks.map((a) => {
-        const riders = a.riders.length ? ` · +${a.riders.map((r) => r.id).join(" +")}` : "";
-        const mastery = a.mastery ? ` · ${a.mastery}` : "";
-        return `${a.name} ${signedBonus(a.attack_bonus)} · ${damageText(a.damage_parts)}${mastery}${riders}`;
-      }),
-    );
+    list("Attacks", o.attacks, (x) => {
+      const a = x.action.type === "attack" ? x.action : null;
+      const line = view.attacks.find((l) => l.name === a?.attack);
+      if (!line || a?.cleave || a?.light_extra || a?.opportunity) return "";
+      const riders = line.riders.length ? ` · +${line.riders.map((r) => r.id).join(" +")}` : "";
+      return `${line.mastery ? ` · ${line.mastery}` : ""}${riders}`;
+    });
     if (c.character) {
       const sheet = computePlaySheet(
         this.builds[c.character] as CharacterBuild,
@@ -250,46 +275,14 @@ export class FightApp {
       const slots = sheet.play.spell_slots
         .filter((x) => x.total > 0)
         .map((x) => `level ${x.level}: ${x.total - x.spent}/${x.total}`);
-      list("Spell slots", slots.length ? [slots.join(" · ")] : []);
-      list(
-        "Spells",
-        sheet.spells.map((x) => `${x.name}${x.level ? ` (level ${x.level})` : " (cantrip)"}`),
-      );
-      list(
-        "Features",
-        sheet.actions.map((f) => {
-          const use = sheet.play.uses.find((u) => u.key === f.uses);
-          const left = use ? ` · ${use.max - use.spent}/${use.max} left` : "";
-          return `${f.name} (${f.economy.replace("_", " ")})${left}`;
-        }),
-      );
-    } else if (c.monster) {
-      const def = lookup(this.catalog.monsters, c.monster);
-      list(
-        "Spells",
-        def
-          ? monsterSpells(def)
-              .filter((x) => x.section !== "legendary_actions")
-              .map((x) => {
-                const name = lookup(this.catalog.spells, x.spell)?.name ?? x.spell;
-                const limits = [
-                  x.level ? `level ${x.level}` : "",
-                  x.per_day ? `${x.per_day}/Day` : "",
-                  x.action === "Spellcasting" ? "" : `via ${x.action}`,
-                ].filter(Boolean);
-                return limits.length ? `${name} (${limits.join(", ")})` : name;
-              })
-          : [],
-      );
-      list(
-        "Abilities (use)",
-        view.save_actions.map((a) => `${a.name}: ${a.ability.toUpperCase()} save DC ${a.dc}`),
-      );
-      list(
-        "Legendary actions (as <id> legend …)",
-        view.legendary_actions.map((a) => a.name),
-      );
+      if (slots.length) con.say(`  ${con.style("Spell slots", "bold")} ${slots.join(" · ")}`);
     }
+    list("Spells", o.spells);
+    list("Features", o.features);
+    list("Abilities (use)", o.save_actions);
+    list("Legendary actions (as <id> legend …)", o.legendary);
+    list("Zones", o.zones);
+    list("Standard actions", o.standard);
   }
 
   // --- commands ---------------------------------------------------------------------------
