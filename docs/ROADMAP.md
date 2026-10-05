@@ -38,6 +38,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P24b | Cover and line of effect from the map: cover worked out for attacks, spells and save effects (walls, blocked squares, creatures in between), Total Cover can't be targeted, areas and zones stop at walls, Dexterity saves get cover from an area's point of origin; options leave out targets behind Total Cover | The DMG's corner-lines method (flagged); creatures give Half Cover against areas too; cover given by the caller still wins |
 | P25 | Previews for a map: `reachableSquares`, `previewMove` (path, cost, zones on the way, Opportunity Attacks), `previewArea` (squares, creatures and their cover); routes `/v1/encounters/reachable`, `/preview-move`, `/preview-area` | Built on the planning `move` and `cast` use (`planMove`, `placeArea`, moved out of the encounter's `run`), so a preview and the action agree |
 | P26 | Events (what an action changed, as data), refusal codes on every refusal, undo by replaying a history of actions with their dice; the fight CLI's `undo` | Events come from comparing documents before and after, not from each rule; codes from one table of message patterns |
+| P27 | Odds in options: chance to hit and to crit, or that the target fails its save, and the average damage; `attackOdds`, `failOdds`, `averageDamage`; shown by the fight CLI's `options` | Read from the option's dry run (its d20 is 10), so they use the modifiers the engine would; Legendary Resistance and Bardic Inspiration aren't counted |
 
 ## Decisions
 

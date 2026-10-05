@@ -334,6 +334,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -353,6 +424,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -568,6 +640,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -587,6 +730,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -802,6 +946,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -821,6 +1036,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -1036,6 +1252,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -1055,6 +1342,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -1270,6 +1558,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -1289,6 +1648,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -1504,6 +1864,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -1523,6 +1954,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false
@@ -1738,6 +2170,77 @@
                   }
                 ]
               },
+              "odds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "target": {
+                        "type": "string"
+                      },
+                      "hit": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "critical": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "fail_save": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "average_damage": {
+                        "anyOf": [
+                          {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "target",
+                      "hit",
+                      "critical",
+                      "fail_save",
+                      "average_damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "note": {
                 "default": null,
                 "type": [
@@ -1757,6 +2260,7 @@
               "slot_levels",
               "pact_slot",
               "uses",
+              "odds",
               "note"
             ],
             "additionalProperties": false

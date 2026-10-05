@@ -370,6 +370,7 @@ export {
   type Terrain,
   type Wall,
 } from "./rules/grid";
+export { attackOdds, averageDamage, failOdds } from "./rules/odds";
 export {
   fixedRng,
   mathRng,

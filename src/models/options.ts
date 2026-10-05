@@ -65,6 +65,22 @@ export const OptionEntrySchema = z.object({
   pact_slot: z.int().nullable().default(null),
   /** Limited uses left (a feature's, a monster's daily uses, legendary uses this round). */
   uses: z.object({ left: z.int(), max: z.int() }).nullable().default(null),
+  /**
+   * The odds against its first candidate target (`target`), from the same modifiers the engine
+   * would use (Advantage, cover, conditions): the chance to hit and to score a Critical Hit, or
+   * that the target fails its save, and the average damage it would take (crits, a save's half
+   * damage and its defenses included; features' extra dice left out). `null` when it has none.
+   */
+  odds: z
+    .object({
+      target: z.string(),
+      hit: z.number().min(0).max(1).nullable(),
+      critical: z.number().min(0).max(1).nullable(),
+      fail_save: z.number().min(0).max(1).nullable(),
+      average_damage: z.number().min(0).nullable(),
+    })
+    .nullable()
+    .default(null),
   /** Something to know before choosing it ("Casting it ends Concentration on Bless"). */
   note: z.string().nullable().default(null),
 });

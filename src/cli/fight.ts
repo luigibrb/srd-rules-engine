@@ -306,7 +306,17 @@ export class FightApp {
         const slots = x.slot_levels.length ? ` · slots ${x.slot_levels.join(", ")}` : "";
         const pact = x.pact_slot !== null ? ` · pact slot ${x.pact_slot}` : "";
         const note = x.note ? ` · ${x.note}` : "";
-        const line = `${x.label}${extra?.(x) ?? ""} (${x.cost.replace("_", " ")})${uses}${slots}${pact}${note}`;
+        const pct = (n: number) => `${Math.round(n * 100)}%`;
+        const odds = x.odds
+          ? ` · ${[
+              x.odds.hit !== null ? `${pct(x.odds.hit)} to hit` : "",
+              x.odds.fail_save !== null ? `${pct(x.odds.fail_save)} to fail the save` : "",
+              x.odds.average_damage ? `~${x.odds.average_damage.toFixed(1)} damage` : "",
+            ]
+              .filter(Boolean)
+              .join(", ")}`
+          : "";
+        const line = `${x.label}${extra?.(x) ?? ""} (${x.cost.replace("_", " ")})${uses}${slots}${pact}${odds}${note}`;
         con.say(x.available ? `    ${line}` : con.style(`    ${line} — ${x.reason}`, "dim"));
       }
     };

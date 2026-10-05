@@ -65,6 +65,10 @@ migrated when it's loaded.
   (`EncounterHistory`, `schemas/history.schema.json`). `POST /v1/encounters/apply` returns
   `events` and `log` (each action with its dice). `srd-rules fight`: `undo`.
 
+- Options carry `odds` against their first target: the chance to hit and to score a Critical
+  Hit, or that the target fails its save, and the average damage. `attackOdds`, `failOdds`,
+  `averageDamage`. `srd-rules fight`'s `options` shows them.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
