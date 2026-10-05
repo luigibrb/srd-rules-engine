@@ -1533,6 +1533,7 @@
         - enter
         - end_turn
       once_per_turn: false
+      difficult: true
 - id: guiding-bolt
   name: Guiding Bolt
   level: 1
@@ -3744,6 +3745,7 @@
       triggers:
         - move
       on_cast: false
+      difficult: true
 - id: spiritual-weapon
   name: Spiritual Weapon
   level: 2
@@ -3877,6 +3879,7 @@
         - enter
         - start_turn
       on_cast: false
+      difficult: true
 - id: zone-of-truth
   name: Zone of Truth
   level: 2
@@ -4840,6 +4843,7 @@
       on_cast: false
       on_fail:
         - lose_concentration
+      difficult: true
 - id: slow
   name: Slow
   level: 3
@@ -5285,6 +5289,7 @@
       triggers:
         - enter
         - end_turn
+      difficult: true
 - id: blight
   name: Blight
   level: 4
@@ -7153,6 +7158,7 @@
       triggers:
         - enter
         - end_turn
+      difficult: true
 - id: legend-lore
   name: Legend Lore
   level: 5

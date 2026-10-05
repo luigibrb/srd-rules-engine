@@ -69,6 +69,16 @@ import {
 } from "../rules/combatant";
 import { rollDamage, takeDamage } from "../rules/damage";
 import { parseDiceExpression, roll } from "../rules/dice";
+import {
+  findPath,
+  gridDistance,
+  type Occupant,
+  key as squareKey,
+  stepBlocked,
+  stepCost,
+  straightPath,
+  type Terrain,
+} from "../rules/grid";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
@@ -432,18 +442,7 @@ function run(
    * The squares' origin of a zone: its point, or for an Emanation its caster's space, or the
    * space at its point (`space` squares wide).
    */
-  const zoneOrigin = (z: Zone): GridSpace | null => {
-    if (z.area.shape === "emanation" && !z.point) {
-      const by = e.combatants.find((x) => x.id === z.by);
-      return by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
-    }
-    return z.point ? { position: z.point, size: z.space } : null;
-  };
-  /** The zone's squares, or `null` when positions don't place it. */
-  const zoneSquares = (z: Zone): Set<string> | null => {
-    const origin = zoneOrigin(z);
-    return origin ? areaSquares(z.area, origin, { point: z.point ?? undefined }) : null;
-  };
+  const zoneSquares = (z: Zone): Set<string> | null => zoneArea(e, ctx, z);
   /** Whether `x`, at its position now, is in the zone (an Emanation doesn't include its caster). */
   const inZoneNow = (z: Zone, squares: ReadonlySet<string> | null, x: EncounterCombatant) =>
     !!squares &&
@@ -655,13 +654,53 @@ function run(
   /** Put `c` on a square; another creature's space can't be the end of a move. */
   const occupy = (c: EncounterCombatant, to: { x: number; y: number }): void => {
     const size = spaceOf(ctx, c);
-    for (const x of e.combatants) {
-      if (x.id === c.id || x.defeated || !x.position) continue;
-      if (gridDistance(to, size, x.position, spaceOf(ctx, x)) === 0) {
-        fail(`${x.name} is in that space`);
+    const blocked = new Set(e.map.blocked.map(squareKey));
+    for (let dx = 0; dx < size; dx++) {
+      for (let dy = 0; dy < size; dy++) {
+        if (blocked.has(`${to.x + dx},${to.y + dy}`)) fail(`${to.x + dx},${to.y + dy} is blocked`);
       }
     }
+    const taken = spaceTaken(c, to);
+    if (taken) fail(`${taken.name} is in that space`);
     c.position = { ...to };
+  };
+  /** Another creature whose space overlaps `c`'s at `to`. */
+  const spaceTaken = (c: EncounterCombatant, to: GridPoint): EncounterCombatant | undefined => {
+    const size = spaceOf(ctx, c);
+    return e.combatants.find(
+      (x) =>
+        x.id !== c.id &&
+        !x.defeated &&
+        x.position &&
+        gridDistance(to, size, x.position, spaceOf(ctx, x)) === 0,
+    );
+  };
+  /** The grid as `c` moves on it: walls, blocked and difficult squares, other creatures. */
+  const terrainFor = (c: EncounterCombatant): Terrain => {
+    const difficult = new Set(e.map.difficult.map(squareKey));
+    for (const z of e.zones) {
+      if (z.difficult) for (const sq of zoneSquares(z) ?? []) difficult.add(sq);
+    }
+    const creatures = new Map<string, Occupant>();
+    for (const x of e.combatants) {
+      if (x.id === c.id || !x.position || x.defeated || outOfFight(ctx, x)) continue;
+      const what = occupantFor(ctx, e, c, x);
+      const size = spaceOf(ctx, x);
+      for (let dx = 0; dx < size; dx++) {
+        for (let dy = 0; dy < size; dy++) {
+          const k = `${x.position.x + dx},${x.position.y + dy}`;
+          // Overlapping creatures: the strictest says.
+          if (creatures.get(k) !== "block")
+            creatures.set(k, what === "pass" ? (creatures.get(k) ?? what) : what);
+        }
+      }
+    }
+    return {
+      walls: e.map.walls,
+      blocked: new Set(e.map.blocked.map(squareKey)),
+      difficult,
+      creatures,
+    };
   };
   const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null =>
     feetApart(ctx, a, b);
@@ -1227,6 +1266,7 @@ function run(
         optional: zone.optional,
         space: zone.space,
         ram: zone.ram,
+        difficult: zone.difficult,
         on_fail: [...zone.on_fail],
         unaffected: [...(options.unaffected ?? [])].map((x) => find(x).id),
         concentration: spell.concentration,
@@ -1544,36 +1584,93 @@ function run(
       const from = c.position;
       if ((action.to || action.path) && !from) fail(`${c.name} has no position: place it first`);
       if (action.to && action.path) fail("Give a square to move to or a path, not both");
-      const path = !from
-        ? null
-        : action.path
-          ? checkedPath(from, action.path)
-          : action.to
-            ? straightPath(from, action.to)
-            : null;
+      const budget = speedOf(ctx, c, e) + c.extra_movement;
+      const left = Math.max(0, budget - c.moved);
+      const size = spaceOf(ctx, c);
+      const terrain = from && (action.to || action.path) ? terrainFor(c) : null;
+      /** Each step's cost, or why it can't be taken. */
+      const costs = (start: GridPoint, squares: readonly GridPoint[]): number[] => {
+        const t = terrain as Terrain;
+        let at = start;
+        return squares.map((square) => {
+          const why = stepBlocked(t, at, square, size);
+          if (why) fail(`${c.name} can't move to ${square.x},${square.y}: ${why}`);
+          const cost = stepCost(t, at, square, size);
+          at = square;
+          return cost;
+        });
+      };
+      let path: GridPoint[] | null = null;
+      let steps: number[] = [];
+      if (from && action.path) {
+        path = checkedPath(from, action.path);
+        steps = costs(from, path);
+      } else if (from && action.to) {
+        const to = action.to;
+        const taken = spaceTaken(c, to);
+        if (taken) fail(`${taken.name} is in that space`);
+        const straight = straightPath(from, to);
+        let at = from;
+        const clear = straight.every((square) => {
+          const ok = !stepBlocked(terrain as Terrain, at, square, size);
+          at = square;
+          return ok;
+        });
+        if (clear) {
+          path = straight;
+          steps = costs(from, path);
+        } else {
+          // Around the obstacle: the cheapest path (looking a little past the movement left, to
+          // say how far it is).
+          const found = findPath(terrain as Terrain, from, to, { size, maxCost: left + 300 });
+          if (!found) fail(`${c.name} can't reach ${to.x},${to.y}: something blocks every path`);
+          if (found.cost > left) {
+            fail(`${c.name} can't reach ${to.x},${to.y} (needs ${found.cost} ft, ${left} left)`);
+          }
+          path = found.path;
+          steps = costs(from, path);
+        }
+      }
       const feet =
         action.feet ??
-        (path ? path.length * 5 : fail("Give the feet moved or a square to move to"));
-      const budget = speedOf(ctx, c, e) + c.extra_movement;
+        (path
+          ? steps.reduce((a, b) => a + b, 0)
+          : fail("Give the feet moved or a square to move to"));
       if (c.moved + feet > budget) {
-        fail(`${c.name} can move ${Math.max(0, budget - c.moved)} more feet this turn`);
+        fail(`${c.name} can move ${left} more feet this turn`);
       }
       if (!path) {
         c.moved += feet;
         break;
       }
-      // Square by square: zones entered on the way, and damage for moving in some (Spike Growth).
-      const before = e.combatants.map((x) => [x, feetBetween(c, x)] as const);
+      // Square by square: zones entered on the way, and damage for moving in some (Spike Growth);
+      // leaving an enemy's reach, at the step it happens.
+      const reachOf = new Map(
+        e.combatants
+          .filter((x) => x.id !== c.id && !x.defeated && !alliesOf(e, x.id, c) && x.position)
+          .map((x) => [x, meleeReach(ctx, e, x)] as const),
+      );
+      const inReach = (x: EncounterCombatant, reach: number | null) => {
+        const d = feetBetween(c, x);
+        return reach !== null && d !== null && d <= reach;
+      };
+      const wasIn = new Map([...reachOf].map(([x, reach]) => [x, inReach(x, reach)]));
+      const leftReach: EncounterCombatant[] = [];
       let zonesBefore = zoneOccupants();
-      const steps = new Map<string, number>();
+      const zoneSteps = new Map<string, number>();
       let walked = 0;
       for (const [i, square] of path.entries()) {
         if (i === path.length - 1) occupy(c, square);
         else c.position = { ...square };
-        walked += 5;
+        walked += steps[i] ?? 5;
+        for (const [x, reach] of reachOf) {
+          const now = inReach(x, reach);
+          if (wasIn.get(x) && !now && !leftReach.includes(x)) leftReach.push(x);
+          wasIn.set(x, now);
+        }
         for (const z of e.zones) {
           if (z.triggers.includes("move") && inZoneNow(z, zoneSquares(z), c)) {
-            steps.set(z.id, (steps.get(z.id) ?? 0) + 1);
+            zoneSteps.set(z.id, (zoneSteps.get(z.id) ?? 0) + 1);
           }
         }
         zoneEntries(zonesBefore);
@@ -1585,17 +1682,48 @@ function run(
         }
       }
       c.moved += walked;
-      zoneMoveDamage(c, steps);
+      zoneMoveDamage(c, zoneSteps);
       // Enemies whose reach it left can make an Opportunity Attack (not after Disengage).
-      for (const [x, was] of before) {
-        if (x.id === c.id || x.defeated || alliesOf(e, x.id, c) || was === null) continue;
-        const reach = meleeReach(ctx, e, x);
-        const now = feetBetween(c, x) as number;
-        if (reach !== null && was <= reach && now > reach && !c.disengaged && !x.used.reaction) {
+      for (const x of reachOf.keys()) {
+        if (leftReach.includes(x) && !c.disengaged && !x.used.reaction) {
           notes.push(
             `${c.name} leaves ${x.name}'s reach: ${x.name} can make an Opportunity Attack.`,
           );
         }
+      }
+      break;
+    }
+    case "set_terrain": {
+      const keys = new Set(action.squares.map(squareKey));
+      const others = (list: readonly GridPoint[]) => list.filter((p) => !keys.has(squareKey(p)));
+      e.map.difficult = others(e.map.difficult);
+      e.map.blocked = others(e.map.blocked);
+      if (action.kind !== "clear") {
+        e.map[action.kind].push(...action.squares.map((p) => ({ x: p.x, y: p.y })));
+      }
+      const what = { difficult: "Difficult Terrain", blocked: "blocked", clear: "clear" }[
+        action.kind
+      ];
+      notes.push(
+        `${action.squares.length} square${action.squares.length > 1 ? "s" : ""}: ${what}.`,
+      );
+      break;
+    }
+    case "add_wall":
+    case "remove_wall": {
+      const { from, to } = action;
+      if (from.x === to.x && from.y === to.y) fail("A wall goes from one corner to another");
+      const same = (w: { from: GridPoint; to: GridPoint }) =>
+        (squareKey(w.from) === squareKey(from) && squareKey(w.to) === squareKey(to)) ||
+        (squareKey(w.from) === squareKey(to) && squareKey(w.to) === squareKey(from));
+      if (action.type === "add_wall") {
+        if (e.map.walls.some(same)) fail("That wall is already there");
+        e.map.walls.push({ from: { ...from }, to: { ...to } });
+        notes.push(`A wall from ${from.x},${from.y} to ${to.x},${to.y}.`);
+      } else {
+        if (!e.map.walls.some(same)) fail(`No wall from ${from.x},${from.y} to ${to.x},${to.y}`);
+        e.map.walls = e.map.walls.filter((w) => !same(w));
+        notes.push(`The wall from ${from.x},${from.y} to ${to.x},${to.y} is gone.`);
       }
       break;
     }
@@ -2414,18 +2542,6 @@ function saveText(save: SaveResult): string {
   return `${save.total} vs DC ${save.dc}${mode}`;
 }
 
-/** The squares of a straight move, one step (diagonal first) at a time, `to` included. */
-export function straightPath(from: GridPoint, to: GridPoint): GridPoint[] {
-  const path: GridPoint[] = [];
-  let { x, y } = from;
-  while (x !== to.x || y !== to.y) {
-    x += Math.sign(to.x - x);
-    y += Math.sign(to.y - y);
-    path.push({ x, y });
-  }
-  return path;
-}
-
 /** A given path: each square next to the one before it (diagonals included). */
 export function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPoint[] {
   let at = from;
@@ -2530,27 +2646,51 @@ function withCover(view: Combatant, cover: Cover | undefined): Combatant {
 /** Squares on a side of a creature's space (SRD "Creature Size and Space"); Tiny counts as one. */
 const SPACE: Readonly<Record<string, number>> = { large: 2, huge: 3, gargantuan: 4 };
 export function spaceOf(ctx: EncounterContext, c: EncounterCombatant): number {
-  const size =
-    c.monster !== null
-      ? monsterDef(ctx, c).size.split(" ")[0]?.toLowerCase()
-      : computePlaySheet(characterRef(ctx, c).build, characterRef(ctx, c).state, ctx.catalog).size;
-  return SPACE[size ?? ""] ?? 1;
+  return SPACE[sizeOf(ctx, c) ?? ""] ?? 1;
 }
 
+/** Its size, lowercase (`medium`; a monster's first size when it lists two). */
+function sizeOf(ctx: EncounterContext, c: EncounterCombatant): string | null | undefined {
+  return c.monster !== null
+    ? monsterDef(ctx, c).size.split(" ")[0]?.toLowerCase()
+    : computePlaySheet(characterRef(ctx, c).build, characterRef(ctx, c).state, ctx.catalog).size;
+}
+
+const SIZES = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
+
 /**
- * Feet between two spaces on the grid: count squares from one space to the nearest square of
- * the other, diagonals like any other step (SRD "Playing on a Grid"); 5 feet when adjacent, 0
- * when they overlap.
+ * What `x`'s space is to `mover` (SRD "Moving around Other Creatures"): it can pass through an
+ * ally, an Incapacitated creature, a Tiny one or one two sizes larger or smaller; another
+ * creature's space is Difficult Terrain unless that creature is Tiny or an ally.
  */
-export function gridDistance(
-  a: { x: number; y: number },
-  sizeA: number,
-  b: { x: number; y: number },
-  sizeB: number,
-): number {
-  const gap = (from: number, sa: number, to: number, sb: number) =>
-    Math.max(0, to - (from + sa - 1), from - (to + sb - 1));
-  return Math.max(gap(a.x, sizeA, b.x, sizeB), gap(a.y, sizeA, b.y, sizeB)) * 5;
+function occupantFor(
+  ctx: EncounterContext,
+  e: Encounter,
+  mover: EncounterCombatant,
+  x: EncounterCombatant,
+): Occupant {
+  const size = sizeOf(ctx, x);
+  if (size === "tiny" || alliesOf(e, x.id, mover)) return "pass";
+  const gap = Math.abs(
+    SIZES.indexOf(size ?? "medium") - SIZES.indexOf(sizeOf(ctx, mover) ?? "medium"),
+  );
+  if (gap >= 2 || conditionsOf(ctx, x).has("incapacitated")) return "difficult";
+  return "block";
+}
+
+export { gridDistance };
+
+/**
+ * A zone's squares (`"x,y"`), or `null` when positions don't place it. Its origin is its point,
+ * or for an Emanation its caster's space, or the space at its point (`space` squares wide).
+ */
+export function zoneArea(e: Encounter, ctx: EncounterContext, z: Zone): Set<string> | null {
+  let origin: GridSpace | null;
+  if (z.area.shape === "emanation" && !z.point) {
+    const by = e.combatants.find((x) => x.id === z.by);
+    origin = by?.position ? { position: by.position, size: spaceOf(ctx, by) } : null;
+  } else origin = z.point ? { position: z.point, size: z.space } : null;
+  return origin ? areaSquares(z.area, origin, { point: z.point ?? undefined }) : null;
 }
 
 /** The longest reach of a combatant's melee attacks, or `null` without one. */

@@ -171,6 +171,8 @@ export {
   WeaponSchema,
 } from "./models/content";
 export {
+  type BattleMap,
+  BattleMapSchema,
   ECONOMY,
   type EffectEnd,
   EffectEndSchema,
@@ -340,6 +342,16 @@ export {
   roll,
 } from "./rules/dice";
 export {
+  findPath,
+  gridDistance,
+  type Occupant,
+  stepBlocked,
+  stepCost,
+  straightPath,
+  type Terrain,
+  type Wall,
+} from "./rules/grid";
+export {
   fixedRng,
   mathRng,
   type Rng,
@@ -393,7 +405,6 @@ export {
   EncounterError,
   type EncounterResult,
   encounterCombatant,
-  gridDistance,
 } from "./services/encounter";
 export {
   checkAction,

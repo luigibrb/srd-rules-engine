@@ -126,6 +126,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -409,6 +410,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": false,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -556,6 +558,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "point",
       "designate": false,
+      "difficult": false,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": true,
@@ -608,6 +611,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": false,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": true,
@@ -916,6 +920,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "point",
       "designate": false,
+      "difficult": false,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": false,
@@ -1023,6 +1028,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": false,
@@ -1402,6 +1408,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": false,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -1489,6 +1496,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -1727,6 +1735,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": false,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -2034,6 +2043,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": false,
       "on_fail": [
         "lose_concentration",
@@ -2076,6 +2086,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": true,
@@ -2130,6 +2141,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": true,
+      "difficult": false,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": true,
@@ -2196,6 +2208,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": false,
       "on_cast": false,
       "on_fail": [
         "no_actions",
@@ -2405,6 +2418,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "zone": {
       "anchor": "caster",
       "designate": false,
+      "difficult": true,
       "on_cast": false,
       "on_fail": [],
       "once_per_turn": true,

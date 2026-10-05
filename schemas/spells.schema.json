@@ -722,6 +722,10 @@
                       "lose_concentration"
                     ]
                   }
+                },
+                "difficult": {
+                  "default": false,
+                  "type": "boolean"
                 }
               },
               "required": [

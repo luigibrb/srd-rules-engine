@@ -32,7 +32,19 @@ migrated when it's loaded.
 - `createCatalog(packs, { tables })` loads only some tables (`CORE_TABLES`: what a character
   builder needs first); reading a table that wasn't loaded throws a `ContentError`; `isLoaded`.
 
+- A map for encounters (`encounter.map`): walls between grid corners, Difficult Terrain and
+  blocked squares, changed with `set_terrain`, `add_wall` and `remove_wall`. Moves pay 10 feet
+  for a square of Difficult Terrain (the map's, a zone's, or a creature's space that isn't an
+  ally's or Tiny), can't go through walls, blocked squares or creatures that can't be passed
+  through (SRD "Moving around Other Creatures"), and a move `to` a square goes around obstacles
+  by the cheapest path. Zones can be Difficult Terrain (`zone.difficult`): Web, Grease, Spike
+  Growth, Sleet Storm, Black Tentacles, Insect Plague. `rules/grid.ts`: `findPath`,
+  `stepBlocked`, `stepCost`, `straightPath`.
+- `srd-rules fight`: `terrain difficult|blocked|clear x y [x2 y2]`, `wall [remove] x1 y1 x2 y2`;
+  `map` draws walls, blocked squares, Difficult Terrain and zones.
+
 ### Changed
+- Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
   `srd-rules-engine/srd` (or `srd-rules-engine/node`), so the main entry no longer bundles the
   SRD data (about 2 MB). Migration: `import { srdCatalog } from "srd-rules-engine/srd"`.

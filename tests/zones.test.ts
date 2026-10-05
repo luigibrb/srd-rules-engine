@@ -265,10 +265,14 @@ describe("moving through zones", () => {
     const s = session({}, [{ monster: "drider" }, { monster: "goblin-warrior", side: "party" }]);
     s.act([], place("drider", 0, 0), place("goblin-warrior", 9, 1));
     s.act([], { type: "cast", id: "drider", spell: "web", area: { point: { x: 4, y: 0 } } });
-    s.act([2], next, move("goblin-warrior", 3, 1));
+    // The webs are Difficult Terrain: 5 feet to 8,1, then 10 a square (30 feet reach 6,1).
+    expect(() => s.act([], next, move("goblin-warrior", 5, 1))).toThrow(
+      "Goblin Warrior can move 30 more feet this turn",
+    );
+    s.act([2], move("goblin-warrior", 6, 1));
     expect(s.get("goblin-warrior")?.conditions).toEqual(["restrained"]);
     expect(s.notes).toContain("Goblin Warrior stops at 7,1.");
-    expect(s.get("goblin-warrior")).toMatchObject({ position: { x: 7, y: 1 }, moved: 10 });
+    expect(s.get("goblin-warrior")).toMatchObject({ position: { x: 7, y: 1 }, moved: 15 });
   });
 
   it("a path is followed square by square; a gap in it is refused", () => {

@@ -214,6 +214,8 @@ export const ZoneSchema = z.object({
   optional: z.boolean().default(false),
   /** An Emanation from `point` (not its caster): its space, in squares. */
   space: z.int().min(1).default(1),
+  /** Its squares are Difficult Terrain (Web, Spike Growth). */
+  difficult: z.boolean().default(false),
   /** `move_zone` onto a creature makes it save. */
   ram: z.boolean().default(false),
   on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
@@ -244,6 +246,20 @@ export const PendingSchema = z.object({
 });
 export type Pending = z.infer<typeof PendingSchema>;
 
+const square = z.object({ x: z.int(), y: z.int() });
+
+/**
+ * The battlefield, on the 5-foot grid: walls between squares (segments between grid corners:
+ * corner `x,y` is the top-left corner of square `x,y`), squares of Difficult Terrain, and squares
+ * that can't be entered (a pillar, solid rock).
+ */
+export const BattleMapSchema = z.object({
+  walls: z.array(z.object({ from: square, to: square })).default([]),
+  difficult: z.array(square).default([]),
+  blocked: z.array(square).default([]),
+});
+export type BattleMap = z.infer<typeof BattleMapSchema>;
+
 export const EncounterSchema = z.object({
   /** The document format (`DOCUMENT_VERSION`); missing means 1. */
   version: DocumentVersionSchema,
@@ -272,6 +288,8 @@ export const EncounterSchema = z.object({
   pending: PendingSchema.nullable().default(null),
   /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
   auto_death_saves: z.boolean().default(true),
+  /** Walls and terrain on the grid (positions only). */
+  map: BattleMapSchema.prefault({}),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
@@ -335,10 +353,13 @@ export const EncounterActionSchema = z
     z.object({ type: z.literal("end") }),
     z.object({ type: z.literal("use"), id: z.string(), what: z.enum(ECONOMY) }),
     /**
-     * Move `feet`, or to the square `to` (its position: a straight count of squares, diagonals
-     * included, 5 feet each), or along `path` (each square next to the one before, ending at the
-     * destination). Zones on the way count: entering one, and damage for moving in it. Leaving
-     * an enemy's reach is noted: it can make an Opportunity Attack (unless the mover Disengaged).
+     * Move `feet`, or to the square `to`, or along `path` (each square next to the one before,
+     * ending at the destination). Each square costs 5 feet, 10 if it's Difficult Terrain (the
+     * map's, a zone's, or a creature's space that isn't an ally's or a Tiny creature's); walls,
+     * blocked squares and creatures that can't be passed through stop a step. `to` goes straight
+     * (diagonals first) when nothing is in the way, else by the cheapest path around. Zones on
+     * the way count: entering one, and damage for moving in it. Leaving an enemy's reach is
+     * noted: it can make an Opportunity Attack (unless the mover Disengaged).
      */
     z.object({
       type: z.literal("move"),
@@ -352,6 +373,23 @@ export const EncounterActionSchema = z
     }),
     /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
     z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
+    /** Make squares Difficult Terrain, blocked (can't be entered) or clear again (the GM's). */
+    z.object({
+      type: z.literal("set_terrain"),
+      squares: z.array(z.object({ x: n, y: n })).min(1),
+      kind: z.enum(["difficult", "blocked", "clear"]),
+    }),
+    /** Put up or take down a wall between grid corners `from` and `to` (the GM's). */
+    z.object({
+      type: z.literal("add_wall"),
+      from: z.object({ x: n, y: n }),
+      to: z.object({ x: n, y: n }),
+    }),
+    z.object({
+      type: z.literal("remove_wall"),
+      from: z.object({ x: n, y: n }),
+      to: z.object({ x: n, y: n }),
+    }),
     /**
      * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
      * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
