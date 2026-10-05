@@ -1,9 +1,13 @@
 # Changelog
 
 All notable changes are documented here. This project follows
-[Semantic Versioning](https://semver.org/); until 1.0, minor versions may contain breaking changes.
+[Semantic Versioning](https://semver.org/); until 1.0, minor versions may contain breaking API
+changes. Saved documents (builds, play states, encounters) are never broken: an older format is
+migrated when it's loaded.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-10-05
 
 ### Changed
 - Encounter notes: a monster's damage no longer notes Massive Damage or Death Saving Throw
@@ -279,3 +283,6 @@ All notable changes are documented here. This project follows
 - `GET /v1/content/magic_items` (and `magic-items`) returned 404: table names with `_` didn't match.
 - The Blowgun's fixed damage no longer adds the ability modifier (SRD "Damage Rolls").
 - While Petrified, untyped damage is halved too (Resistance to all damage).
+
+[Unreleased]: https://github.com/luigibrb/srd-rules-engine/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/luigibrb/srd-rules-engine/releases/tag/v0.1.0
