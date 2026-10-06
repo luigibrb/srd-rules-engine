@@ -11,6 +11,7 @@ import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import {
   ABILITY_NAMES,
+  type Ability,
   type DamageType,
   type MonsterDef,
   type Skill,
@@ -328,6 +329,18 @@ function run(
   const e = structuredClone(encounter) as Encounter;
   const notes: string[] = [];
   const states: Record<string, CharacterState> = {};
+  // `release`: the readied action, taken with the reaction (checked here, spent at the end).
+  let releasing: { id: string; held: boolean } | null = null;
+  if (action.type === "release") {
+    const id = action.id;
+    const c =
+      e.combatants.find((x) => x.id === id) ?? fail(`No combatant '${id}' in the encounter`);
+    const readied = c.readied ?? fail(`${c.name} has nothing readied`);
+    if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+    releasing = { id: c.id, held: readied.held };
+    notes.push(`${c.name} takes its readied action (${readied.trigger}).`);
+    action = readied.action as EncounterAction;
+  }
   // A working copy of the characters: several can change in one action (attacker and target).
   const chars: Record<string, CharacterRef> = { ...(outer.characters ?? {}) };
   const ctx: EncounterContext = { ...outer, characters: chars };
@@ -644,6 +657,19 @@ function run(
         if (t.active && t.ends_at_turn_start) {
           notes.push(`${t.name} ends: it lasts until the start of ${c.name}'s next turn.`);
           play(c, { type: "deactivate", key: t.key });
+        }
+      }
+    }
+    // A readied action lasts until the start of its next turn; a held spell is lost.
+    if (c.readied) {
+      const spell = c.readied.held ? c.readied.action : null;
+      notes.push(`${c.name}'s readied action is lost (its turn started).`);
+      c.readied = null;
+      if (spell?.type === "cast") {
+        const name = lookup(ctx.catalog.spells, spell.spell)?.name ?? spell.spell;
+        if (concentrationOf(c) === name) {
+          if (c.monster !== null) c.concentration = null;
+          else play(c, { type: "set_concentration", spell: null });
         }
       }
     }
@@ -965,6 +991,7 @@ function run(
       throw error;
     }
     c.extended = true; // an attack roll extends Rage
+    unhide(c, "it made an attack roll");
     useInspiration(c, hit.inspiration);
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
@@ -1107,6 +1134,8 @@ function run(
       /** A zone's point (its area's), and the creatures it doesn't affect. */
       point?: GridPoint;
       unaffected?: readonly string[];
+      /** A readied spell, its slot spent when it was readied. */
+      held?: boolean;
     },
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
@@ -1134,6 +1163,7 @@ function run(
       nearby: _nearby,
       point: _point,
       unaffected: _unaffected,
+      held,
       ...cast
     } = options;
     const relevant = !!spell.mechanics?.attack || spell.mechanics?.save?.ability === "dex";
@@ -1205,7 +1235,15 @@ function run(
     const level =
       r.slot_level !== null && r.slot_level > spell.level ? ` at level ${r.slot_level}` : "";
     notes.push(`${c.name} casts ${spell.name}${level}.`, ...r.notes);
-    applyTo(c, r.caster_actions);
+    // A held spell's slot was spent when it was readied.
+    applyTo(
+      c,
+      r.caster_actions.filter(
+        (a) => !held || (a.type !== "spend_slot" && a.type !== "spend_pact_slot"),
+      ),
+    );
+    // "you make … or you cast a spell with a Verbal component": no longer hidden.
+    if (/\bV\b/.test(spell.components)) unhide(c, `it cast ${spell.name}`);
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
       useInspiration(c, hit.attack?.inspiration);
@@ -1357,6 +1395,21 @@ function run(
   /** After every action: Concentration effects whose source stopped concentrating end. */
   const sweep = (): void => {
     const present = (id: string) => e.combatants.some((c) => c.id === id);
+    for (const c of e.combatants) {
+      // Its Invisible condition from hiding was removed some other way: not hidden any more.
+      if (c.hidden !== null && !e.effects.some((x) => x.target === c.id && x.label === "Hidden")) {
+        c.hidden = null;
+      }
+      // "If your Concentration is broken, the spell dissipates without taking effect."
+      const held = c.readied?.held && c.readied.action.type === "cast" ? c.readied.action : null;
+      if (held?.type === "cast") {
+        const name = lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell;
+        if (concentrationOf(c) !== name) {
+          c.readied = null;
+          notes.push(`${c.name}'s readied ${name} dissipates (Concentration ended).`);
+        }
+      }
+    }
     e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
     // A spell's mark stays when its caster leaves: the light is on the target.
     e.marks = e.marks.filter((m) => present(m.on));
@@ -1397,6 +1450,7 @@ function run(
   const current = () => currentCombatant(e);
   const onTurn = (c: EncounterCombatant, what: string) => {
     if (e.round === 0) fail("The fight hasn't started");
+    if (releasing?.id === c.id) return; // a readied action, with the reaction
     if (current()?.id !== c.id) fail(`It isn't ${c.name}'s turn: only a reaction can ${what}`);
   };
   const canAct = (c: EncounterCombatant) => {
@@ -1405,6 +1459,7 @@ function run(
   };
   /** One attack's place in the economy: the Attack action (and its extra attacks) or a reaction. */
   const spendAttack = (c: EncounterCombatant, reaction: boolean | undefined): void => {
+    if (releasing?.id === c.id) return; // the reaction, spent at the end
     if (reaction) {
       if (e.round === 0) fail("The fight hasn't started");
       if (c.used.reaction) fail(`${c.name} has already used its reaction`);
@@ -1424,10 +1479,42 @@ function run(
   const takeAction = (c: EncounterCombatant, name: string, bonus?: boolean): void => {
     onTurn(c, name);
     canAct(c);
+    if (releasing?.id === c.id) return; // the reaction, spent at the end
     const what = bonus ? "bonus_action" : "action";
     if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")} this turn`);
     c.used[what] = true;
     if (bonus) c.extended = true; // a Bonus Action extends Rage
+  };
+  /** It stops being hidden (SRD "Hide"): its Invisible condition from hiding ends. */
+  const unhide = (c: EncounterCombatant, why: string): void => {
+    if (c.hidden === null) return;
+    c.hidden = null;
+    const effect = e.effects.find((x) => x.target === c.id && x.label === "Hidden");
+    if (effect) endEffect(effect, why);
+    else notes.push(`${c.name} is no longer hidden (${why}).`);
+  };
+  /** An ability check, noted: `check`, and the actions that are checks (Search, Study…). */
+  const checkRoll = (
+    c: EncounterCombatant,
+    what: { skill: Skill } | { ability: Ability },
+    dc: number | null,
+    mode?: RollMode,
+  ): CheckResult => {
+    const skill = "skill" in what ? what.skill : null;
+    const check = rollAbilityCheck(encounterCombatant(e, c.id, ctx), what, dc, {
+      rng,
+      decide,
+      mode,
+      modes: helpOnCheck(c, skill),
+    });
+    result = check;
+    useInspiration(c, check.inspiration);
+    const label = check.skill ? skillName(check.skill as Skill) : ABILITY_NAMES[check.ability];
+    const against = check.dc === null ? "" : ` vs DC ${check.dc}`;
+    const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
+    const outcome = check.success === null ? "" : check.success ? ": success" : ": failure";
+    notes.push(`${c.name}'s ${label} check: ${check.total}${against}${why}${outcome}.`);
+    return check;
   };
   /** Help on `c`'s next check with `skill`, used up by it. */
   const helpOnCheck = (c: EncounterCombatant, skill: string | null): ModeReason[] => {
@@ -1614,9 +1701,15 @@ function run(
       const from = c.position;
       if ((action.to || action.path) && !from) fail(`${c.name} has no position: place it first`);
       if (action.to && action.path) fail("Give a square to move to or a path, not both");
-      const budget = speedOf(ctx, c, e) + c.extra_movement;
-      const left = Math.max(0, budget - c.moved);
-      const planned = from && (action.to || action.path) ? planMove(e, ctx, c, action) : null;
+      // A readied move: up to its Speed, apart from its own turn's movement.
+      const released = releasing?.id === c.id;
+      const budget = released ? speedOf(ctx, c, e) : speedOf(ctx, c, e) + c.extra_movement;
+      const spent = released ? 0 : c.moved;
+      const left = Math.max(0, budget - spent);
+      const planned =
+        from && (action.to || action.path)
+          ? planMove(e, ctx, c, action, released ? { left } : {})
+          : null;
       const path = planned?.path ?? null;
       const steps = planned?.steps ?? [];
       const feet =
@@ -1624,11 +1717,11 @@ function run(
         (path
           ? steps.reduce((a, b) => a + b, 0)
           : fail("Give the feet moved or a square to move to"));
-      if (c.moved + feet > budget) {
+      if (spent + feet > budget) {
         fail(`${c.name} can move ${left} more feet this turn`);
       }
       if (!path) {
-        c.moved += feet;
+        if (!released) c.moved += feet;
         break;
       }
       // Square by square: zones entered on the way, and damage for moving in some (Spike Growth);
@@ -1669,7 +1762,7 @@ function run(
           break;
         }
       }
-      c.moved += walked;
+      if (!released) c.moved += walked;
       zoneMoveDamage(c, zoneSteps);
       // Enemies whose reach it left can make an Opportunity Attack (not after Disengage).
       for (const x of reachOf.keys()) {
@@ -1872,6 +1965,142 @@ function run(
       notes.push(`${c.name} stands up (${cost} feet of movement).`);
       break;
     }
+    case "hide": {
+      const c = find(action.id);
+      if (c.hidden !== null) fail(`${c.name} is already hidden`);
+      // "behind Three-Quarters Cover or Total Cover … out of any enemy's line of sight"
+      if (c.position && !action.obscured) {
+        for (const x of e.combatants) {
+          if (x.id === c.id || x.defeated || outOfFight(ctx, x) || alliesOf(e, x.id, c)) continue;
+          if (!x.position || conditionsOf(ctx, x).has("incapacitated")) continue;
+          const corners = spaceCorners({ position: x.position, size: spaceOf(ctx, x) });
+          const cover = mapCover(e, ctx, corners, c, [x.id]).degree;
+          if (cover !== "three_quarters" && cover !== "total") {
+            fail(
+              `${x.name} can see ${c.name}: hiding needs Three-Quarters or Total Cover from every enemy, or being Heavily Obscured (obscured: true)`,
+            );
+          }
+        }
+      }
+      takeAction(c, "Hide", action.bonus_action);
+      const check = checkRoll(c, { skill: "stealth" }, 15);
+      if (!check.success) break;
+      applyTo(c, [{ type: "add_condition", condition: "invisible" }]);
+      addEffects(c, ["invisible"], {
+        source: c.id,
+        label: "Hidden",
+        concentration: false,
+        ends: null,
+      });
+      c.hidden = check.total;
+      notes.push(`${c.name} is hidden (Invisible; Perception DC ${check.total} to find it).`);
+      break;
+    }
+    case "reveal": {
+      const c = find(action.id);
+      if (c.hidden === null) fail(`${c.name} isn't hidden`);
+      unhide(c, "it was revealed");
+      break;
+    }
+    case "search": {
+      const c = find(action.id);
+      takeAction(c, "Search");
+      const skill = action.skill ?? "perception";
+      const target = action.target ? find(action.target) : null;
+      const check = checkRoll(c, { skill }, action.dc ?? target?.hidden ?? null);
+      if (skill !== "perception") break;
+      const hidden = e.combatants.filter(
+        (x) =>
+          x.hidden !== null &&
+          x.id !== c.id &&
+          (target ? x.id === target.id : !alliesOf(e, x.id, c)),
+      );
+      for (const x of hidden) {
+        if (check.total >= (x.hidden as number)) unhide(x, `${c.name} finds it`);
+        else notes.push(`${c.name} doesn't find ${x.name}.`);
+      }
+      break;
+    }
+    case "study":
+    case "influence": {
+      const c = find(action.id);
+      takeAction(c, action.type === "study" ? "Study" : "Influence");
+      let dc = action.dc ?? null;
+      if (action.type === "influence" && dc === null && action.target) {
+        // "a default DC equal to 15 or the monster's Intelligence score, whichever is higher"
+        const t = find(action.target);
+        dc = Math.max(15, t.monster !== null ? monsterDef(ctx, t).abilities.int : 0);
+      }
+      checkRoll(c, action.skill ? { skill: action.skill } : { ability: "int" }, dc);
+      break;
+    }
+    case "utilize": {
+      const c = find(action.id);
+      takeAction(c, "Utilize");
+      notes.push(`${c.name} takes the Utilize action${action.what ? `: ${action.what}` : ""}.`);
+      break;
+    }
+    case "ready": {
+      const c = find(action.id);
+      const then = action.action;
+      if (then.id !== c.id) fail("The readied action is the combatant's own");
+      if (then.type === "attack" && (then.reaction || then.opportunity || then.light_extra)) {
+        fail("The readied attack is taken with the reaction: give a plain attack");
+      }
+      if (c.readied) fail(`${c.name} has already readied an action`);
+      let held = false;
+      if (then.type === "cast") {
+        // "you cast it as normal (expending any resources used to cast it) but hold its energy
+        // … To be readied, a spell must have a casting time of an action … Concentration".
+        const spell =
+          lookup(ctx.catalog.spells, then.spell) ?? fail(`Unknown spell '${then.spell}'`);
+        if (!/^Action/i.test(spell.casting_time)) {
+          fail(
+            `${spell.name} takes ${spell.casting_time}: only a spell cast with an action can be readied`,
+          );
+        }
+        takeAction(c, "Ready");
+        if (c.character !== null) {
+          const ref = characterRef(ctx, c);
+          const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
+          if (!known.some((x) => x.id === spell.id)) fail(`${c.name} can't cast ${spell.name}`);
+          if (spell.level > 0) {
+            play(
+              c,
+              then.pact
+                ? { type: "spend_pact_slot" }
+                : { type: "spend_slot", level: then.slot_level ?? spell.level },
+            );
+          }
+          play(c, { type: "set_concentration", spell: spell.name });
+        } else {
+          const line =
+            monsterSpells(monsterDef(ctx, c)).find(
+              (x) =>
+                x.spell === spell.id &&
+                x.section === "actions" &&
+                (then.via === undefined || x.action === then.via),
+            ) ?? fail(`${c.name} can't cast ${spell.name} with an action`);
+          spendDaily(c, line.action, line.action_per_day, line.action);
+          spendDaily(c, `${line.action}#${line.spell}`, line.per_day, spell.name);
+          if (line.recharge) c.expended.push(line.action);
+          c.concentration = spell.name;
+        }
+        held = true;
+        notes.push(
+          `${c.name} readies ${spell.name}, holding it with Concentration: ${action.trigger}.`,
+        );
+      } else {
+        takeAction(c, "Ready");
+        notes.push(
+          `${c.name} readies ${then.type === "move" ? "a move" : `a ${then.type}`}: ${action.trigger}.`,
+        );
+      }
+      c.readied = { trigger: action.trigger, action: then, held };
+      break;
+    }
+    case "release":
+      return fail("Nothing to release");
     case "effects": {
       const c = find(action.id);
       applyTo(c, action.actions);
@@ -1940,19 +2169,7 @@ function run(
       const what = action.skill
         ? { skill: action.skill }
         : { ability: action.ability ?? fail("A check needs a skill or an ability") };
-      const check = rollAbilityCheck(encounterCombatant(e, c.id, ctx), what, action.dc ?? null, {
-        rng,
-        decide,
-        mode: action.mode,
-        modes: helpOnCheck(c, action.skill ?? null),
-      });
-      result = check;
-      useInspiration(c, check.inspiration);
-      const label = check.skill ? skillName(check.skill as Skill) : ABILITY_NAMES[check.ability];
-      const dc = check.dc === null ? "" : ` vs DC ${check.dc}`;
-      const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
-      const outcome = check.success === null ? "" : check.success ? ": success" : ": failure";
-      notes.push(`${c.name}'s ${label} check: ${check.total}${dc}${why}${outcome}.`);
+      checkRoll(c, what, action.dc ?? null, action.mode);
       break;
     }
     case "extend": {
@@ -2256,10 +2473,13 @@ function run(
           fail(`${c.name}'s ${line.action} hasn't recharged`);
         }
       }
+      const released = releasing?.id === c.id;
       if (what === "reaction") {
         if (e.round === 0) fail("The fight hasn't started");
       } else onTurn(c, "cast");
-      if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")}`);
+      if (!released && c.used[what]) {
+        fail(`${c.name} has already used its ${what.replace("_", " ")}`);
+      }
       if (what === "action" && c.surged) {
         fail("Action Surge's additional action can't be the Magic action (casting a spell)");
       }
@@ -2279,16 +2499,22 @@ function run(
         damage_type: action.damage_type,
         point: action.area?.point,
         unaffected: action.unaffected,
+        held: released && releasing?.held,
       });
-      c.used[what] = true;
+      if (!released) c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.
-      if (line) {
+      if (line && !(released && releasing?.held)) {
         spendDaily(c, line.action, line.action_per_day, line.action);
         spendDaily(c, `${line.action}#${line.spell}`, line.per_day, spell.name);
         if (line.recharge) c.expended.push(line.action);
       }
       break;
     }
+  }
+  if (releasing) {
+    const c = find(releasing.id);
+    c.used.reaction = true;
+    c.readied = null;
   }
   sweep();
   return { encounter: EncounterSchema.parse(e), states, notes, result };
@@ -2727,10 +2953,11 @@ export function planMove(
   ctx: EncounterContext,
   c: EncounterCombatant,
   move: { to?: GridPoint; path?: readonly GridPoint[] },
+  /** The movement it has (default: what's left this turn). */
+  { left = Math.max(0, speedOf(ctx, c, e) + c.extra_movement - c.moved) }: { left?: number } = {},
 ): { path: GridPoint[]; steps: number[] } {
   const from = c.position ?? fail(`${c.name} has no position: place it first`);
   if (move.to && move.path) fail("Give a square to move to or a path, not both");
-  const left = Math.max(0, speedOf(ctx, c, e) + c.extra_movement - c.moved);
   const size = spaceOf(ctx, c);
   const terrain = terrainOf(e, ctx, c);
   const costs = (squares: readonly GridPoint[]): number[] => {

@@ -54,6 +54,7 @@ Targets are ids, names or numbers from the status table.
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
   escape · stand · move <feet> · move <x> <y> · check <skill|ability> [dc]
+  hide [bonus] [obscured] · reveal · search [target] · utilize [what] · release (a readied action)
   place <who> <x> <y>   put a combatant on the grid (5-foot squares)    map   show the grid
   terrain difficult|blocked|clear <x> <y> [<x2> <y2>]   (a square or a rectangle)
   wall [remove] <x1> <y1> <x2> <y2>   a wall between grid corners (corner x,y: square x,y's top left)
@@ -415,6 +416,24 @@ export class FightApp {
       }
       case "escape":
         return this.apply({ type: "escape", id });
+      case "hide":
+        return this.apply({
+          type: "hide",
+          id,
+          bonus_action: args.includes("bonus") || undefined,
+          obscured: args.includes("obscured") || undefined,
+        });
+      case "reveal":
+        return this.apply({ type: "reveal", id });
+      case "search": {
+        const t = args[0] ? this.find(args[0]) : null;
+        if (args[0] && !t) return;
+        return this.apply({ type: "search", id, target: t?.id });
+      }
+      case "utilize":
+        return this.apply({ type: "utilize", id, what: args.join(" ") || undefined });
+      case "release":
+        return this.apply({ type: "release", id });
       case "zone": {
         const [zone = "", verb, ...rest] = args;
         if (verb === "end") return this.apply({ type: "end_zone", zone });

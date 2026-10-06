@@ -550,6 +550,46 @@ export function combatantOptions(
       ),
     );
   }
+  standard.push(
+    entry({ type: "hide", id: c.id }, "Hide", "action", null),
+    entry({ type: "search", id: c.id }, "Search", "action", null),
+    entry({ type: "study", id: c.id }, "Study", "action", null),
+    entry(
+      { type: "influence", id: c.id, skill: "persuasion", target: enemiesNear[0] },
+      "Influence",
+      "action",
+      null,
+    ),
+    entry({ type: "utilize", id: c.id }, "Utilize", "action", null),
+  );
+  // Ready: a template with its first attack (any action it lists can be readied instead).
+  const readyAttack = attacks.find((x) => x.action.type === "attack" && x.cost === "attack");
+  standard.push(
+    entry(
+      {
+        type: "ready",
+        id: c.id,
+        trigger: "",
+        action:
+          readyAttack?.action.type === "attack"
+            ? { ...readyAttack.action }
+            : { type: "move", id: c.id, ...(c.position ? { to: { ...c.position } } : { feet: 0 }) },
+      },
+      "Ready (an attack, a spell, a move or Help, on a trigger)",
+      "action",
+      null,
+    ),
+  );
+  if (c.readied) {
+    standard.push(
+      entry({ type: "release", id: c.id }, `Readied: ${c.readied.trigger}`, "reaction", null),
+    );
+  }
+  if (c.hidden !== null) {
+    standard.push(
+      entry({ type: "reveal", id: c.id }, `Stop hiding (DC ${c.hidden})`, "free", null),
+    );
+  }
   if (conditionsOf(ctx, c).has("prone")) {
     standard.push(entry({ type: "stand", id: c.id }, "Stand up", "movement", null));
   }

@@ -459,6 +459,21 @@ list of actions.
   a Bonus Action after attacking with a Light weapon in the Attack action, with a different
   Light weapon, using the line's `light_extra_damage_parts` (no positive ability modifier unless
   the Two-Weapon Fighting feat).
+- **Hide, Search, Ready and the other actions.** `hide` (the action, or `bonus_action`) is a
+  DC 15 Dexterity (Stealth) check; with positions it needs Three-Quarters or Total Cover from
+  every enemy that isn't Incapacitated, unless the caller says it's Heavily Obscured
+  (`obscured: true`). On a success the combatant has the Invisible condition (an effect labeled
+  `Hidden`) and `hidden` holds its total; it stops being hidden when it makes an attack roll,
+  casts a spell with a Verbal component, is found, or with `reveal`. `search` is a Wisdom check
+  (Perception by default) that finds the hidden enemies (or the `target`) whose total it equals
+  or beats. `ready` takes the action and stores the trigger and the action to take (`readied`:
+  an attack, an Unarmed Strike, a spell with a casting time of an action, a move, Help) until the
+  start of the combatant's next turn; a readied spell is cast at once (slot or daily use spent)
+  and held with Concentration, and dissipates if Concentration ends. `release` takes the readied
+  action with the reaction, outside the combatant's turn (a readied move up to its Speed, not
+  counted in its turn's movement). `study` (Intelligence), `influence` (Charisma or Wisdom; a
+  monster's DC is 15 or its Intelligence score, whichever is higher) and `utilize` take the
+  action.
 - **Features used in turns:** `feature` uses a character's `sheet.actions` entry: its economy
   (action, Bonus Action, reaction, or free on your turn) and resource are spent (through the play
   action `use_feature`), then it heals (Second Wind; Lay On Hands from its pool, on any creature),
@@ -819,6 +834,15 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   (the SRD: when not all lines to it are blocked).
 - Cover isn't worked out for a zone's later saves, nor for a follow-up save's creatures (Ice
   Knife); "a creature you can see" (vision, light, Invisible) stays the caller's.
+
+**Hide, Search and Ready**
+
+- "Out of any enemy's line of sight" is read as Three-Quarters or Total Cover from each enemy that
+  isn't Incapacitated (there's no vision model); Heavy Obscurement is the caller's to say.
+- A Search with Perception finds every hidden enemy whose Stealth total it equals or beats,
+  wherever they are; the other Search skills are plain checks.
+- A readied action's trigger is the caller's to watch; the engine checks only that the reaction
+  is free and the readied action is still legal when it's released.
 
 **Areas of effect**
 

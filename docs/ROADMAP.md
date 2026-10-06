@@ -39,6 +39,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P25 | Previews for a map: `reachableSquares`, `previewMove` (path, cost, zones on the way, Opportunity Attacks), `previewArea` (squares, creatures and their cover); routes `/v1/encounters/reachable`, `/preview-move`, `/preview-area` | Built on the planning `move` and `cast` use (`planMove`, `placeArea`, moved out of the encounter's `run`), so a preview and the action agree |
 | P26 | Events (what an action changed, as data), refusal codes on every refusal, undo by replaying a history of actions with their dice; the fight CLI's `undo` | Events come from comparing documents before and after, not from each rule; codes from one table of message patterns |
 | P27 | Odds in options: chance to hit and to crit, or that the target fails its save, and the average damage; `attackOdds`, `failOdds`, `averageDamage`; shown by the fight CLI's `options` | Read from the option's dry run (its d20 is 10), so they use the modifiers the engine would; Legendary Resistance and Bardic Inspiration aren't counted |
+| P28 | The other actions: Hide (Invisible while hidden, ended by attacks, Verbal spells, being found), Search, Ready (a held spell with Concentration, a readied move) and `release`, Study, Influence, Utilize; in options and the fight CLI | Line of sight for Hide is read as Three-Quarters Cover from every enemy (flagged); triggers are the caller's |
 
 ## Decisions
 
@@ -69,8 +70,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Combat rules
 
-- **The other actions (S).** Hide (the Invisible condition while hidden, found by Search),
-  Ready (a trigger and a reaction), Influence, Study and Utilize are left to the GM.
 - **Walls (M).** Blade Barrier, Wall of Fire, Wall of Ice, Wall of Thorns: a wall placed from
   point to point or as a ring, its damaging side; on the map, wall segments or blocked squares
   plus a zone along them.

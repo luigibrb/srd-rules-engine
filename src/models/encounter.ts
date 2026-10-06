@@ -101,6 +101,24 @@ export const EncounterCombatantSchema = z.object({
    * when positions aren't used: then the caller says what's within 5 feet or in range.
    */
   position: z.object({ x: z.int(), y: z.int() }).nullable().default(null),
+  /**
+   * Hidden (the Hide action): its Stealth check's total, the DC to find it with Perception; it has
+   * the Invisible condition while hidden. `null`: not hidden.
+   */
+  hidden: z.int().nullable().default(null),
+  /**
+   * The Ready action: what triggers its reaction (the caller's to watch) and the action it takes
+   * then (`release`), until the start of its next turn. `held`: a readied spell, cast already
+   * (slot spent) and held with Concentration.
+   */
+  readied: z
+    .object({
+      trigger: z.string(),
+      action: z.lazy(() => ReadiedActionSchema),
+      held: z.boolean().default(false),
+    })
+    .nullable()
+    .default(null),
   /** A Bardic Inspiration die it holds, and who gave it; used on its next failed D20 Test. */
   inspiration: z
     .object({ die: z.int().min(2), by: z.string() })
@@ -300,6 +318,98 @@ export function parseEncounter(input: unknown): Encounter {
 const n = z.int();
 export const ECONOMY = ["action", "bonus_action", "reaction"] as const;
 
+const AttackActionSchema = z.object({
+  type: z.literal("attack"),
+  id: z.string(),
+  target: z.string(),
+  attack: z.string(),
+  mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+  two_handed: z.boolean().optional(),
+  riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
+  ally_adjacent: z.boolean().optional(),
+  /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
+  within_5ft: z.boolean().optional(),
+  reaction: z.boolean().optional(),
+  opportunity: z.boolean().optional(),
+  light_extra: z.boolean().optional(),
+  cleave: z.boolean().optional(),
+  mastery: z.boolean().optional(),
+  /** One of the attacks a feature granted this turn (Flurry of Blows). */
+  granted: z.boolean().optional(),
+  /** Throw a melee weapon with the Thrown property: a ranged attack at its range. */
+  thrown: z.boolean().optional(),
+  /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
+  cover: z.enum(["half", "three_quarters", "total"]).optional(),
+});
+
+const UnarmedActionSchema = z.object({
+  type: z.literal("unarmed"),
+  id: z.string(),
+  target: z.string(),
+  option: z.enum(["grapple", "shove"]),
+  shove: z.enum(["push", "prone"]).optional(),
+  save: z.enum(["str", "dex"]).optional(),
+  reaction: z.boolean().optional(),
+});
+
+const CastActionSchema = z.object({
+  type: z.literal("cast"),
+  id: z.string(),
+  spell: z.string(),
+  via: z.string().optional(),
+  targets: z.array(z.string()).optional(),
+  /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
+   * Line); its targets are the positioned creatures in it. */
+  area: z
+    .object({
+      point: z.object({ x: n, y: n }).optional(),
+      toward: z.object({ x: n, y: n }).optional(),
+    })
+    .optional(),
+  /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
+  cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
+  slot_level: n.min(1).max(9).optional(),
+  pact: z.boolean().optional(),
+  mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+  /**
+   * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),
+   * when positions aren't used; with positions they're found on the grid.
+   */
+  nearby: z.array(z.string()).optional(),
+  /** The damage type, for a spell that offers a choice (Spirit Guardians). */
+  damage_type: z.enum(DAMAGE_TYPES).optional(),
+  /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
+  unaffected: z.array(z.string()).optional(),
+});
+
+const MoveActionSchema = z.object({
+  type: z.literal("move"),
+  id: z.string(),
+  feet: n.min(0).optional(),
+  to: z.object({ x: n, y: n }).optional(),
+  path: z
+    .array(z.object({ x: n, y: n }))
+    .min(1)
+    .optional(),
+});
+
+const HelpActionSchema = z.object({
+  type: z.literal("help"),
+  id: z.string(),
+  target: z.string(),
+  skill: z.enum(SKILLS).optional(),
+});
+
+/** What the Ready action can hold for the reaction. */
+export const ReadiedActionSchema = z.discriminatedUnion("type", [
+  AttackActionSchema,
+  UnarmedActionSchema,
+  CastActionSchema,
+  MoveActionSchema,
+  HelpActionSchema,
+]);
+export type ReadiedAction = z.infer<typeof ReadiedActionSchema>;
+
 /** Everything that can happen in an encounter, as plain JSON. */
 export const EncounterActionSchema = z
   .discriminatedUnion("type", [
@@ -361,16 +471,7 @@ export const EncounterActionSchema = z
      * the way count: entering one, and damage for moving in it. Leaving an enemy's reach is
      * noted: it can make an Opportunity Attack (unless the mover Disengaged).
      */
-    z.object({
-      type: z.literal("move"),
-      id: z.string(),
-      feet: n.min(0).optional(),
-      to: z.object({ x: n, y: n }).optional(),
-      path: z
-        .array(z.object({ x: n, y: n }))
-        .min(1)
-        .optional(),
-    }),
+    MoveActionSchema,
     /** Put a combatant on a square without spending movement (setup, a shove, a teleport). */
     z.object({ type: z.literal("place"), id: z.string(), x: n, y: n }),
     /** Make squares Difficult Terrain, blocked (can't be entered) or clear again (the GM's). */
@@ -413,26 +514,13 @@ export const EncounterActionSchema = z
      * with `skill` (one the helper is proficient in), on `target`'s (an ally's) next check with
      * it. Either expires at the start of the helper's next turn.
      */
-    z.object({
-      type: z.literal("help"),
-      id: z.string(),
-      target: z.string(),
-      skill: z.enum(SKILLS).optional(),
-    }),
+    HelpActionSchema,
     /**
      * An Unarmed Strike to grapple or shove (in place of one attack, like `attack`): the target
      * saves (Strength or Dexterity: default the better) against 8 + Strength modifier + Proficiency
      * Bonus, or is Grappled (escape DC the same) or shoved (`push` 5 feet, or `prone`).
      */
-    z.object({
-      type: z.literal("unarmed"),
-      id: z.string(),
-      target: z.string(),
-      option: z.enum(["grapple", "shove"]),
-      shove: z.enum(["push", "prone"]).optional(),
-      save: z.enum(["str", "dex"]).optional(),
-      reaction: z.boolean().optional(),
-    }),
+    UnarmedActionSchema,
     /**
      * Escape a grapple or a spell's hold (Black Tentacles, Web): the action, a Strength (Athletics)
      * or Dexterity (Acrobatics) check (default the better; some allow only Athletics) against its
@@ -446,6 +534,66 @@ export const EncounterActionSchema = z
     }),
     /** Right itself from Prone: half its Speed in movement. */
     z.object({ type: z.literal("stand"), id: z.string() }),
+    /**
+     * The Hide action: a DC 15 Dexterity (Stealth) check; on a success it's hidden (Invisible,
+     * `hidden` holds the total). With positions it needs Three-Quarters or Total Cover from every
+     * enemy, unless it's Heavily Obscured (`obscured: true`, the caller's to judge). It stops
+     * being hidden when it makes an attack roll, casts a spell with a Verbal component, or is
+     * found (`search`); `reveal` ends it for anything else (a sound).
+     */
+    z.object({
+      type: z.literal("hide"),
+      id: z.string(),
+      bonus_action: z.boolean().optional(),
+      obscured: z.boolean().optional(),
+    }),
+    z.object({ type: z.literal("reveal"), id: z.string() }),
+    /**
+     * The Search action: a Wisdom check (Perception by default); with Perception it finds the
+     * hidden enemies (or the `target`) whose Stealth total it equals or beats.
+     */
+    z.object({
+      type: z.literal("search"),
+      id: z.string(),
+      skill: z.enum(["perception", "insight", "medicine", "survival"]).optional(),
+      target: z.string().optional(),
+      dc: n.optional(),
+    }),
+    /** The Study action: an Intelligence check (Arcana, History, Investigation, Nature, Religion). */
+    z.object({
+      type: z.literal("study"),
+      id: z.string(),
+      skill: z.enum(["arcana", "history", "investigation", "nature", "religion"]).optional(),
+      dc: n.optional(),
+    }),
+    /**
+     * The Influence action: a Charisma (Deception, Intimidation, Performance, Persuasion) or Wisdom
+     * (Animal Handling) check; against a monster `target`, the DC defaults to 15 or its
+     * Intelligence score, whichever is higher.
+     */
+    z.object({
+      type: z.literal("influence"),
+      id: z.string(),
+      skill: z.enum(["deception", "intimidation", "performance", "persuasion", "animal-handling"]),
+      target: z.string().optional(),
+      dc: n.optional(),
+    }),
+    /** The Utilize action: use an object that needs an action (`what`, for the notes). */
+    z.object({ type: z.literal("utilize"), id: z.string(), what: z.string().optional() }),
+    /**
+     * The Ready action: `trigger` (the caller watches for it) and the action to take then with the
+     * reaction (`action`: an attack, an Unarmed Strike, a spell with a casting time of an action, a
+     * move up to its Speed, Help). A readied spell is cast now (slot spent) and held with
+     * Concentration; it's lost if Concentration ends. Lasts until the start of its next turn.
+     */
+    z.object({
+      type: z.literal("ready"),
+      id: z.string(),
+      trigger: z.string(),
+      action: ReadiedActionSchema,
+    }),
+    /** Take the readied action now, with the reaction (the trigger happened). */
+    z.object({ type: z.literal("release"), id: z.string() }),
     /**
      * Apply play actions to a combatant (what `makeAttack`, `castSpell` and `useSaveAction` return):
      * a character's go to its state; a monster supports damage, heal, set_temp_hp and conditions.
@@ -478,29 +626,7 @@ export const EncounterActionSchema = z
      * The weapon's mastery property applies unless `mastery: false`. Once-per-turn riders are
      * enforced; an attack roll extends Rage; Help against the target is used up.
      */
-    z.object({
-      type: z.literal("attack"),
-      id: z.string(),
-      target: z.string(),
-      attack: z.string(),
-      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-      two_handed: z.boolean().optional(),
-      riders: z.array(z.object({ rider: z.string(), type: z.string().optional() })).optional(),
-      ally_adjacent: z.boolean().optional(),
-      /** Within 5 feet of the target (default: a melee attack is, a ranged one isn't). */
-      within_5ft: z.boolean().optional(),
-      reaction: z.boolean().optional(),
-      opportunity: z.boolean().optional(),
-      light_extra: z.boolean().optional(),
-      cleave: z.boolean().optional(),
-      mastery: z.boolean().optional(),
-      /** One of the attacks a feature granted this turn (Flurry of Blows). */
-      granted: z.boolean().optional(),
-      /** Throw a melee weapon with the Thrown property: a ranged attack at its range. */
-      thrown: z.boolean().optional(),
-      /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
-      cover: z.enum(["half", "three_quarters", "total"]).optional(),
-    }),
+    AttackActionSchema,
     /**
      * A character's feature used in a turn (`sheet.actions`, by key or name): its economy and
      * resource are spent, then it heals, gives an additional action (Action Surge), takes
@@ -538,35 +664,7 @@ export const EncounterActionSchema = z
      * that lists it (`via` when several do): that action's section decides the economy, its level
      * is fixed, and daily uses and Recharge are counted.
      */
-    z.object({
-      type: z.literal("cast"),
-      id: z.string(),
-      spell: z.string(),
-      via: z.string().optional(),
-      targets: z.array(z.string()).optional(),
-      /** An area spell or effect: its point (Sphere, Cube) or the square it's aimed toward (Cone,
-       * Line); its targets are the positioned creatures in it. */
-      area: z
-        .object({
-          point: z.object({ x: n, y: n }).optional(),
-          toward: z.object({ x: n, y: n }).optional(),
-        })
-        .optional(),
-      /** Targets' cover, by id: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
-      cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
-      slot_level: n.min(1).max(9).optional(),
-      pact: z.boolean().optional(),
-      mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-      /**
-       * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),
-       * when positions aren't used; with positions they're found on the grid.
-       */
-      nearby: z.array(z.string()).optional(),
-      /** The damage type, for a spell that offers a choice (Spirit Guardians). */
-      damage_type: z.enum(DAMAGE_TYPES).optional(),
-      /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
-      unaffected: z.array(z.string()).optional(),
-    }),
+    CastActionSchema,
     /**
      * Creatures save against a zone (when positions don't tell who enters it or ends its turn
      * there); each saves once per turn when the spell says so.

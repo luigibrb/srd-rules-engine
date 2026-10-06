@@ -272,7 +272,9 @@ const { states, notes } = applyEncounterAction(encounter,
 
 The encounter enforces the turn rules: one action and one Bonus Action on your turn, a reaction
 once a round, movement up to your Speed (Dash doubles it), Extra Attack and Multiattack,
-Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a grapple), the
+Opportunity Attacks, Dodge, Disengage, Help, Grapple and Shove (and escaping a grapple), Hide and
+Search, Ready (an attack, a spell held with Concentration, a move or Help, taken with `release`),
+Study, Influence and Utilize, the
 Light property's extra attack (two-weapon fighting), Weapon Mastery properties (Graze, Vex, Sap,
 Slow, Topple, Push, Cleave, Nick), positions on a 5-foot grid (optional: reach, range, close
 combat, spell range, cover, Opportunity Attacks when leaving reach, areas of effect choosing their
