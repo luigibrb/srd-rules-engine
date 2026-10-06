@@ -4290,6 +4290,30 @@
           "properties": {
             "type": {
               "type": "string",
+              "const": "move_mark"
+            },
+            "id": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            },
+            "spell": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
               "const": "check"
             },
             "id": {

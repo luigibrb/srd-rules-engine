@@ -370,11 +370,16 @@ The spellcasting feature used is the one asked for, else the one with the best s
 spell list has the spell, else the best overall (a species' fixed spells). A spell without
 `mechanics` is still cast (slot, Concentration) with a note that its effects are in the text.
 
-72 SRD spells have mechanics: 28 hand-written golden spells with worked tests, 40 drafts from
-the importer's parser reviewed against their text, and 4 corrected by hand (`tests/casting.test.ts`
-snapshots them all). The other 267 are cast with their text: 204 have nothing to model (utility
-spells), and 63 have effects the parser deliberately doesn't guess (damage after casting, several
-saves, tables…).
+84 SRD spells have mechanics: hand-written entries (golden spells with worked tests, zones,
+walls, marks and smites) and drafts from the importer's parser reviewed against their text, a
+few corrected by hand (`tests/casting.test.ts` snapshots them all). The other 255 are cast with
+their text: 204 have nothing to model (utility spells), and 51 have effects the parser
+deliberately doesn't guess (damage after casting, several saves, tables…). Marks (`mark`:
+Hunter's Mark, Hex) are encounter marks that add their dice to the caster's attack hits on the
+target while it concentrates, moved with `move_mark` once the target drops; a smite (`after_hit`:
+Divine Smite) is cast right after a melee hit this turn, on the creature hit, its dice doubled if
+the hit was a Critical Hit, with `bonus_vs` dice against some creature types; a condition with
+`ends_on_damage` ends when its creature takes damage (Mass Suggestion).
 
 ### Monsters
 
@@ -882,6 +887,13 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.
 
+**Spells**
+
+- Chain Lightning's other targets "within 30 feet of the first target" aren't checked; Mass
+  Suggestion's Charmed ends when the creature takes any damage (the SRD: from the caster or its
+  allies); Hex's Disadvantage on the chosen ability's checks and Hunter's Mark's edge to find its
+  quarry are text; Divine Smite follows the caster's last hit this turn.
+
 **Wall spells**
 
 - Walls are straight, from point to point: rings, Wall of Force's and Wall of Ice's domes, globes
@@ -944,7 +956,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-63 spells keep their effects in text, and shopping with starting gold isn't automated.
+51 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

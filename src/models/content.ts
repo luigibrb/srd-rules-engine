@@ -1014,6 +1014,8 @@ export const SpellMechanicsSchema = z
             .default(null),
           /** The creature can take an action to end it with a check against the spell save DC. */
           escape: z.enum(["athletics"]).nullable().default(null),
+          /** The condition ends when the target takes damage (Mass Suggestion). */
+          ends_on_damage: z.boolean().default(false),
         }),
       )
       .default([]),
@@ -1094,6 +1096,21 @@ export const SpellMechanicsSchema = z
      * creatures in it save when it appears (`save`, `damage`), and with a `zone` they save again
      * (`later: save`, with `later_type` if it differs) or just take damage (`later: damage`).
      */
+    /** Cast right after hitting the target with a melee attack this turn (Divine Smite). */
+    after_hit: z.boolean().default(false),
+    /** More dice against these creature types (Divine Smite: Fiends and Undead). */
+    bonus_vs: z
+      .strictObject({ creature_types: z.array(z.string()).min(1), dice: Dice })
+      .nullable()
+      .default(null),
+    /**
+     * A mark on the target while the caster concentrates: extra damage when the caster hits it
+     * with an attack roll (Hunter's Mark, Hex), moved with `move_mark` once the target drops.
+     */
+    mark: z
+      .strictObject({ dice: Dice, type: z.enum(DAMAGE_TYPES) })
+      .nullable()
+      .default(null),
     wall: z
       .strictObject({
         length: z.int().min(5),

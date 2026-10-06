@@ -33,6 +33,8 @@ import { parseDiceExpression } from "./dice";
 import { mathRng, type Rng } from "./rng";
 
 export interface CastOptions {
+  /** Damage that rides an attack's Critical Hit: its dice are doubled (Divine Smite). */
+  critical?: boolean;
   /** The spell slot's level (default: the spell's level). Cantrips take none. */
   slot_level?: number;
   /** Spend a Pact Magic slot instead of a spell slot. */
@@ -163,6 +165,7 @@ export function castSpell(
     within_5ft,
     nearby = [],
     damage_type,
+    critical = false,
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
@@ -352,9 +355,14 @@ export function castSpell(
       results.push(targetResult(index, targets[index] as Combatant, { instances }));
     }
   } else {
+    if (critical && parts.length && targets.length) {
+      shared = rollDamage(partsFor(true), { critical: true, rng });
+    }
     const rolled = sharedDamage();
     for (const [i, target] of targets.entries()) {
-      results.push(targetResult(i, target, { instances: rolled ? toInstances(rolled) : [] }));
+      results.push(
+        targetResult(i, target, { instances: rolled ? toInstances(rolled) : [], critical }),
+      );
     }
   }
 

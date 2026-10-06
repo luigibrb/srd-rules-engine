@@ -412,6 +412,10 @@ mechanics:
 #                on_fail: [no_actions, lose_concentration],
 #                difficult: true,               # its area is Difficult Terrain (Web)
 #                speed_halved: true}            # others' Speed is halved in it (Spirit Guardians)
+#         mark: {dice: 1d6, type: force}        # extra damage on the caster's hits (Hunter's Mark)
+#         after_hit: true                       # cast right after a melee hit (Divine Smite)
+#         bonus_vs: {creature_types: [fiend, undead], dice: 1d8}
+#         conditions: [{condition: charmed, on: failed_save, ends_on_damage: true}]
 #         wall: {length: 100, between: true}    # a wall on grid lines (Wall of Force); or squares:
 #         wall: {length: 100, cover: three_quarters, difficult: true}   # Blade Barrier
 #         wall: {length: 60, cost: 4, later_type: slashing}             # Wall of Thorns
