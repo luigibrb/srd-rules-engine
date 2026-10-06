@@ -106,6 +106,11 @@ migrated when it's loaded.
   have `cost` and `weight` (gear also `bundle`), from `scripts/import-srd-gear.ts`, which adds
   the SRD's Adventuring Gear (100 items). `srd-rules play`: `buy`, `sell`.
 
+- Monster traits in encounters: damage auras at the end of the monster's turn, Death Burst and
+  Death Throes when it dies, Regeneration (and dying at 0 HP only when it can't regenerate),
+  Aura of Authority's Advantage; trait fields `trigger`, `aura`, `regeneration`,
+  `advantage_aura`, read by `import-srd-monsters.ts`.
+
 ### Changed
 - Carried weight counts gear and tools.
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.

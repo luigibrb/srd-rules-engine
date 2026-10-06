@@ -46,6 +46,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P31 | Smaller rules: toggles with a duration (Rage's 10 minutes, Innate Sorcery, Sacred Weapon), Divine Strike only on your own turns, Spirit Guardians' halved Speed | Durations count the character's turn starts in an encounter |
 | P32 | More spells as data: Hunter's Mark and Hex (marks on the caster's hits, `move_mark`), Divine Smite (after a hit, doubled on a crit, more against Fiends and Undead), Flame Strike, Chain Lightning, Mass Suggestion (Charmed until damaged) | 84 spells with mechanics; the rest of each spell's text (Hex's ability, Chain Lightning's 30 feet) stays the GM's (flagged) |
 | P33 | Shopping: SRD prices and weights for 100 items of gear and every tool (`scripts/import-srd-gear.ts`), the play actions `buy` and `sell` with change, carried weight for gear; `buy`/`sell` in `srd-rules play` | Paid with the smallest coins first; sold for half (SRD); magic items need a price |
+| P34 | Monster traits in turns: damage auras, Death Burst and Death Throes, Regeneration, Aura of Authority (14 traits, read from their sentences by the importer) | A regenerating monster at 0 HP is Unconscious until it dies or regenerates (flagged) |
 
 ## Decisions
 
@@ -78,7 +79,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 - **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
   Ice's frigid air, walls that cut through a creature's space.
-- **Monster traits that work like zones (M).** Auras and areas in stat blocks.
+- **Monster traits, what's left (M).** Swallow (Behir, Purple Worm, Remorhaz, Tarrasque), the
+  copper and gold dragons' slowing and weakening breaths, and the other saves the importer
+  reports as text; traits worded differently from the four read so far.
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
   some of them.

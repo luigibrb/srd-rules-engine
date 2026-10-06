@@ -1345,6 +1345,36 @@ export const MonsterActionSchema = z.strictObject({
     })
     .nullable()
     .default(null),
+  /** A trait's `save` happens when the monster dies (Death Burst), in its area. */
+  trigger: z.enum(["death"]).nullable().default(null),
+  /**
+   * Damage at the end of each of its turns to each creature in an Emanation of `size` feet (Fire
+   * Aura); `choice`: the creatures of its choice (its enemies, by default); `not_incapacitated`:
+   * not while it's Incapacitated.
+   */
+  aura: z
+    .strictObject({
+      size: z.int().min(5),
+      damage: z.array(MonsterDamageSchema).min(1),
+      choice: z.boolean().default(false),
+      not_incapacitated: z.boolean().default(false),
+    })
+    .nullable()
+    .default(null),
+  /** Advantage on attack rolls and saves for it and its allies within `size` feet (Aura of Authority). */
+  advantage_aura: z
+    .strictObject({ size: z.int().min(5) })
+    .nullable()
+    .default(null),
+  /**
+   * It regains `amount` Hit Points at the start of each of its turns unless it took damage of a
+   * `stopped_by` type since its last turn, and dies only if it starts its turn at 0 Hit Points
+   * and doesn't regenerate (Troll).
+   */
+  regeneration: z
+    .strictObject({ amount: z.int().min(1), stopped_by: z.array(z.enum(DAMAGE_TYPES)) })
+    .nullable()
+    .default(null),
 });
 export type MonsterAction = z.infer<typeof MonsterActionSchema>;
 

@@ -69,7 +69,7 @@ import {
   type SaveActionLine,
   type SaveResult,
 } from "../rules/combatant";
-import { rollDamage, takeDamage } from "../rules/damage";
+import { formatDamage, rollDamage, takeDamage } from "../rules/damage";
 import { parseDiceExpression, roll } from "../rules/dice";
 import {
   type CoverDegree,
@@ -201,12 +201,44 @@ export function encounterCombatant(
  * The Dodge action's benefits (SRD "Dodge"): attack rolls against it have Disadvantage, and it
  * makes Dexterity saves with Advantage; lost while Incapacitated or at Speed 0.
  */
+/**
+ * The monster whose Aura of Authority covers `c` (it or an ally on its side within the aura, not
+ * Incapacitated), by name, or `null`; positions only.
+ */
+export function authorityOver(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+): string | null {
+  if (!c.position) return null;
+  for (const x of e.combatants) {
+    if (x.monster === null || x.defeated || !x.position || x.side !== c.side) continue;
+    const aura = monsterDef(ctx, x).traits.find((t) => t.advantage_aura)?.advantage_aura;
+    if (!aura) continue;
+    const d = x.id === c.id ? 0 : feetApart(ctx, x, c);
+    if (d === null || d > aura.size) continue;
+    if (conditionsOf(ctx, x).has("incapacitated")) continue;
+    return x.name;
+  }
+  return null;
+}
+
 function withDodge(
   ctx: EncounterContext,
   encounter: Encounter,
   c: EncounterCombatant,
-  view: Combatant,
+  original: Combatant,
 ): Combatant {
+  // Aura of Authority: Advantage on saving throws (attack rolls: in the encounter's modes).
+  const view = authorityOver(encounter, ctx, c)
+    ? {
+        ...original,
+        advantages: [
+          ...original.advantages,
+          ...(["str", "dex", "con", "int", "wis", "cha"] as const).map((a) => `save.${a}` as const),
+        ],
+      }
+    : original;
   // Staggering Blow: Disadvantage on its next saving throw.
   const base = encounter.marks.some((m) => m.kind === "staggered" && m.on === c.id)
     ? {
@@ -398,8 +430,11 @@ function run(
         dc = taken.concentration_dc;
         dealt = taken.dealt;
       }
-      if (c.monster !== null) notes.push(...monsterEffect(ctx, c, a));
-      else {
+      if (c.monster !== null) {
+        const alive = !c.defeated;
+        notes.push(...monsterEffect(ctx, c, a));
+        if (alive && c.defeated) deathBurst(c);
+      } else {
         const relentless = a.type === "damage" ? relentlessRage(c, a) : null;
         if (relentless === null) play(c, a);
         else {
@@ -718,8 +753,108 @@ function run(
     e.zones = e.zones.filter((x) => x.id !== z.id);
     notes.push(`${z.label} ends (${why}).`);
   };
+  /** The creatures in an Emanation of `size` feet around `c` (not `c`), by position. */
+  const emanationAround = (c: EncounterCombatant, size: number): EncounterCombatant[] | null => {
+    if (!c.position) return null;
+    const squares = areaSquares(
+      { shape: "emanation", size, width: 5 },
+      { position: c.position, size: spaceOf(ctx, c) },
+      {},
+    );
+    return e.combatants.filter(
+      (x) =>
+        x.id !== c.id &&
+        x.position &&
+        !outOfFight(ctx, x) &&
+        inArea(squares, { position: x.position, size: spaceOf(ctx, x) }),
+    );
+  };
+  /** A monster's trait that saves when it dies (Death Burst, Death Throes), around its space. */
+  const deathBurst = (c: EncounterCombatant): void => {
+    const trait = monsterDef(ctx, c).traits.find((t) => t.trigger === "death" && t.save?.area);
+    const save = trait?.save;
+    if (!trait || !save?.area) return;
+    const around = emanationAround(c, save.area.size);
+    const what = `${ABILITY_NAMES[save.ability]} DC ${save.dc}`;
+    if (!around) {
+      notes.push(
+        `${trait.name}: each creature within ${save.area.size} feet of ${c.name} saves (${what}).`,
+      );
+      return;
+    }
+    notes.push(`${trait.name}: ${c.name} explodes (${what}).`);
+    if (!around.length) return;
+    const parts = save.damage.map((d) => ({ dice: d.dice, bonus: d.bonus, type: d.type }));
+    const views = around.map((x) => encounterCombatant(e, x.id, ctx));
+    const r = saveAgainst(
+      {
+        ability: save.ability,
+        dc: save.dc,
+        on_success: save.on_success,
+        conditions: save.conditions,
+      },
+      parts,
+      views,
+      { rng, decide },
+    );
+    for (const hit of r.targets) {
+      const t = around[hit.target] as EncounterCombatant;
+      spendLegendaryResistance(t, hit.save);
+      notes.push(targetNote(t.name, hit));
+      applyTo(t, hit.actions);
+    }
+  };
+  /** A monster's damage aura at the end of its turn (Fire Aura), to the creatures around it. */
+  const auraDamage = (c: EncounterCombatant): void => {
+    if (c.monster === null || c.defeated) return;
+    for (const trait of monsterDef(ctx, c).traits) {
+      const aura = trait.aura;
+      if (!aura) continue;
+      if (aura.not_incapacitated && conditionsOf(ctx, c).has("incapacitated")) continue;
+      const around = emanationAround(c, aura.size);
+      const dice = aura.damage.map((d) => ({ dice: d.dice, bonus: d.bonus, type: d.type }));
+      if (!around) {
+        notes.push(
+          `${trait.name}: each creature within ${aura.size} feet of ${c.name} takes ${formatDamage(dice)} ${aura.damage[0]?.type} damage.`,
+        );
+        continue;
+      }
+      // "each creature of the azer's choice": its enemies, unless the caller says otherwise.
+      const who = aura.choice ? around.filter((x) => !alliesOf(e, x.id, c)) : around;
+      if (!who.length) continue;
+      const rolled = rollDamage(dice, { rng });
+      const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
+      const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+      for (const t of who) {
+        notes.push(`${trait.name}: ${t.name} takes ${dealt}.`);
+        applyTo(t, [{ type: "damage", instances }]);
+      }
+    }
+  };
+  /** Regeneration at the start of its turn: Hit Points back, or death at 0 if it can't. */
+  const regenerate = (c: EncounterCombatant): void => {
+    if (c.monster === null || c.defeated) return;
+    const def = monsterDef(ctx, c);
+    const regen = def.traits.find((t) => t.regeneration);
+    if (!regen?.regeneration) return;
+    const hp = c.hp ?? def.hit_points;
+    if (c.regeneration_blocked) {
+      c.regeneration_blocked = false;
+      if (hp === 0) {
+        c.defeated = true;
+        notes.push(`${c.name} starts its turn at 0 Hit Points and can't regenerate: it dies.`);
+        deathBurst(c);
+      } else notes.push(`${c.name}'s ${regen.name} doesn't work this turn.`);
+      return;
+    }
+    if (hp >= def.hit_points) return;
+    c.hp = Math.min(def.hit_points, hp + regen.regeneration.amount);
+    if (hp === 0) c.conditions = c.conditions.filter((x) => x !== "unconscious");
+    notes.push(`${c.name} regains ${c.hp - hp} Hit Points (${regen.name}).`);
+  };
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
+    auraDamage(c);
     zoneTurn(c, "end_turn");
     // "At the end of each of its turns … repeats the save, ending the effect on itself on a success."
     for (const effect of e.effects.filter((x) => x.target === c.id && x.repeat_save)) {
@@ -758,6 +893,7 @@ function run(
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
   const startTurn = (c: EncounterCombatant): void => {
+    regenerate(c);
     // A dying character makes a Death Saving Throw at the start of its turn (SRD).
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
@@ -1127,6 +1263,9 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
+    // Aura of Authority: Advantage on attack rolls.
+    const authority = authorityOver(e, ctx, c);
+    if (authority) modes.push({ mode: "advantage", reason: `${authority}'s Aura of Authority` });
     // Hunter's Mark, Hex: extra damage when its caster hits the marked creature.
     const quarry = e.marks.filter(
       (m) => m.kind === "quarry" && m.by === c.id && m.on === t.id && m.damage,
@@ -3370,8 +3509,23 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       c.temp_hp = result.temp;
       // Massive Damage and Death Saving Throws are for characters: a monster just dies at 0 HP.
       const notes = result.notes.filter((n) => !/^(Massive damage|Damage at 0 HP)/.test(n));
-      // SRD "Monster Death": a monster dies the instant it drops to 0 Hit Points.
-      if (result.hp === 0) {
+      const regen = def.traits.find((t) => t.regeneration)?.regeneration;
+      const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
+      if (
+        regen &&
+        result.dealt > 0 &&
+        instances.some((d) => d.amount > 0 && regen.stopped_by.includes(d.type as never))
+      ) {
+        c.regeneration_blocked = true;
+      }
+      if (result.hp === 0 && regen) {
+        // Regeneration: "dies only if it starts its turn with 0 Hit Points and doesn't regenerate".
+        if (!c.conditions.includes("unconscious")) c.conditions.push("unconscious");
+        notes.push(
+          `${c.name} drops to 0 Hit Points (it dies if it starts its turn there and doesn't regenerate).`,
+        );
+      } else if (result.hp === 0) {
+        // SRD "Monster Death": a monster dies the instant it drops to 0 Hit Points.
         c.defeated = true;
         notes.push(`${c.name} drops to 0 Hit Points and dies.`);
       }

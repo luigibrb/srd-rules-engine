@@ -541,6 +541,15 @@ list of actions.
   same way), refused with its cost when it's too far ("can't reach 4,7 (needs 40 ft, 30
   left)"). An enemy whose reach the mover leaves at any step is noted for its Opportunity
   Attack. A move can't end in a blocked square, nor can `place`.
+- **Monster traits in turns.** Traits the importer reads from their exact sentences act in
+  encounters: a damage aura (`aura`: Fire Aura, Heat Aura) hits the creatures in its Emanation at
+  the end of the monster's turn (only its enemies when the trait says "of its choice"; not while
+  Incapacitated when it says so); a Death Burst (`trigger: death`, with its `save`) makes the
+  creatures around it save when it dies; Regeneration (`regeneration`) gives Hit Points back at
+  the start of its turns unless it took the damage types that stop it, and a regenerating
+  monster at 0 Hit Points is Unconscious, not dead, until it starts a turn there unable to
+  regenerate; Aura of Authority (`advantage_aura`) gives the monster and its allies within it
+  Advantage on attack rolls and saving throws. Without positions, auras and bursts are noted.
 - **Wall spells.** A spell with `mechanics.wall` is placed with `cast` `wall: { from, to }`
   (straight, up to its length, both ends within range) and leaves a zone for its duration
   (Concentration). Wall of Force, Stone and Ice stand on grid lines between squares
@@ -753,6 +762,12 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - A roll in an extended critical range (19 with Improved Critical) is a Critical Hit and so hits
   regardless of AC, like a natural 20 (SRD "Critical Hit"). A natural 1 misses even inside such
   a range. Natural 20s and 1s mean nothing special on saving throws.
+
+**Monster traits**
+
+- An aura "of its choice" hits the monster's enemies (its side's opponents); Fire Aura's
+  "start burning" and auras' effects on objects are text. A regenerating monster at 0 Hit Points
+  has the Unconscious condition until it regenerates (the SRD says only when it dies).
 
 **Spells**
 
