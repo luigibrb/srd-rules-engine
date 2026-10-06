@@ -69,6 +69,10 @@ migrated when it's loaded.
   Hit, or that the target fails its save, and the average damage. `attackOdds`, `failOdds`,
   `averageDamage`. `srd-rules fight`'s `options` shows them.
 
+- Encounter actions `hide` (and `reveal`), `search`, `ready` and `release`, `study`, `influence`,
+  `utilize` (SRD actions); combatants record `hidden` and `readied`. `srd-rules fight`: `hide`,
+  `reveal`, `search`, `utilize`, `release`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
