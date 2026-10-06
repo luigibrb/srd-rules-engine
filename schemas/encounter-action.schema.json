@@ -961,6 +961,29 @@
                         "three_quarters",
                         "total"
                       ]
+                    },
+                    "cunning": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "poison",
+                          "trip",
+                          "withdraw"
+                        ]
+                      }
+                    },
+                    "brutal": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "forceful",
+                          "hamstring",
+                          "staggering",
+                          "sundering"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -1433,6 +1456,29 @@
                 "three_quarters",
                 "total"
               ]
+            },
+            "cunning": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "poison",
+                  "trip",
+                  "withdraw"
+                ]
+              }
+            },
+            "brutal": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "forceful",
+                  "hamstring",
+                  "staggering",
+                  "sundering"
+                ]
+              }
             }
           },
           "required": [

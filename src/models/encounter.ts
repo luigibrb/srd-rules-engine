@@ -157,6 +157,11 @@ export const EncounterEffectSchema = z.object({
   escape_skill: z.enum(["athletics", "acrobatics"]).nullable().default(null),
   /** It also ends when the target takes damage, or when its source is Incapacitated. */
   ends_on: z.array(z.enum(["damage", "source_incapacitated"])).default([]),
+  /** The target repeats this save at the end of each of its turns, ending it on a success. */
+  repeat_save: z
+    .object({ ability: z.enum(ABILITIES), dc: z.int() })
+    .nullable()
+    .default(null),
 });
 export type EncounterEffect = z.infer<typeof EncounterEffectSchema>;
 
@@ -189,8 +194,13 @@ export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
  * attack roll against it Advantage, whoever makes it (Guiding Bolt).
  */
 export const SpellMarkSchema = z.object({
-  /** `speed_halved`: `on`'s Speed is halved (Stunning Strike's successful save). */
-  kind: z.enum(["advantage_against", "speed_halved"]),
+  /**
+   * `speed_halved`: `on`'s Speed is halved (Stunning Strike's successful save); `hamstrung`: −15
+   * feet (Hamstring Blow); `staggered`: Disadvantage on its next save, no Opportunity Attacks
+   * (Staggering Blow); `sundered`: +5 to the next attack roll against it by someone else than
+   * `by` (Sundering Blow).
+   */
+  kind: z.enum(["advantage_against", "speed_halved", "hamstrung", "staggered", "sundered"]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),
   by: z.string(),
@@ -267,6 +277,7 @@ export const PendingSchema = z.object({
     "zone_force",
     "indomitable",
     "deflect_attacks",
+    "relentless_rage",
   ]),
   question: z.string(),
   /** What `auto` would answer (only when it can turn the failure into a success). */
@@ -350,6 +361,10 @@ const AttackActionSchema = z.object({
   thrown: z.boolean().optional(),
   /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
   cover: z.enum(["half", "three_quarters", "total"]).optional(),
+  /** Cunning Strike effects, paid with Sneak Attack dice (needs the `sneak-attack` rider). */
+  cunning: z.array(z.enum(["poison", "trip", "withdraw"])).optional(),
+  /** Brutal Strike effects: Advantage forgone while Reckless, for 1d10 and an effect. */
+  brutal: z.array(z.enum(["forceful", "hamstring", "staggering", "sundering"])).optional(),
 });
 
 const UnarmedActionSchema = z.object({

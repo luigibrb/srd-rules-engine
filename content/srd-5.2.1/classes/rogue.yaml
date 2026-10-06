@@ -148,6 +148,7 @@ features:
         halve the attack's damage against you (round down).
     actions:
     - {id: uncanny-dodge, name: Uncanny Dodge, economy: reaction, halves_attack_damage: true}
+    rules: [cunning_strike]
   '6':
     choices:
     - {id: expertise, label: Rogue Expertise, kind: expertise, count: 2}
@@ -179,6 +180,7 @@ features:
     - name: Improved Cunning Strike
       text: You can use up to two Cunning Strike effects when you deal Sneak Attack damage, paying the
         die cost for each effect.
+    rules: [improved_cunning_strike]
   '12':
     choices:
     - id: feat

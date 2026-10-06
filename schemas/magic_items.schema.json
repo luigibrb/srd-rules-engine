@@ -902,6 +902,7 @@
                   "skill.unproficient",
                   "speed",
                   "spell.save_dc",
+                  "attack.weapon",
                   "skill.acrobatics",
                   "skill.animal-handling",
                   "skill.arcana",
@@ -1252,7 +1253,12 @@
               "evasion",
               "reliable_talent",
               "potent_cantrip",
-              "indomitable"
+              "indomitable",
+              "cunning_strike",
+              "improved_cunning_strike",
+              "brutal_strike",
+              "improved_brutal_strike",
+              "relentless_rage"
             ]
           }
         },
@@ -1323,6 +1329,13 @@
               "one_roll": {
                 "default": false,
                 "type": "boolean"
+              },
+              "spell": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [

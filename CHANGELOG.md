@@ -82,6 +82,11 @@ migrated when it's loaded.
   target `attack.spell`, rule `indomitable`. The encounter action `feature` takes `targets` and
   `damage_type`.
 
+- Cunning Strike and Brutal Strike (`attack` options `cunning` and `brutal`), Relentless Rage (a
+  decision), Agonizing Blast, Sacred Weapon. `makeAttack` options `forgo`, `extra_damage`,
+  `forgo_advantage`, `bonus`; effects with `repeat_save`; effect target `attack.weapon`;
+  `spell_damage` `spell`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to

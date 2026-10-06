@@ -488,7 +488,18 @@ list of actions.
   (half on a success, a damage type chosen with `damage_type`: Divine Spark), last some rounds
   and end on damage or when its user is Incapacitated, mark the target on a successful save
   (Stunning Strike: Speed halved and Advantage against it), or remove conditions (Lay On Hands:
-  Poisoned). Indomitable is a decision on a failed save.
+  Poisoned). Indomitable is a decision on a failed save. An `attack` can add Cunning Strike
+  effects (`cunning`: Poison, Trip, Withdraw; one, two with Improved Cunning Strike), paid with
+  Sneak Attack dice taken off before the roll (`makeAttack`'s `forgo`), with saves against 8 +
+  Dexterity modifier + Proficiency Bonus after the damage; or Brutal Strike effects (`brutal`:
+  Forceful, Hamstring, and at level 13 Staggering and Sundering; two at 17), which need Reckless
+  Attack, forgo the roll's Advantage (`forgo_advantage`; refused with Disadvantage) and add 1d10
+  (2d10 at 17) of the weapon's type. Hamstring, Staggering and Sundering Blows are encounter
+  marks until the start of the barbarian's next turn. Relentless Rage is a decision when a
+  raging barbarian would drop to 0 Hit Points without dying: a Constitution save, DC 10 + 5 per
+  use since its last rest (a resource that recharges on a Short Rest); on a success its Hit
+  Points become twice its Barbarian level instead. An effect can repeat its save at the end of
+  each of the target's turns (`repeat_save`: Cunning Strike's Poison).
 - **Positions (optional).** A combatant's `position` is its square on a 5-foot grid (`place`,
   or `move` with `to`), top-left for a creature larger than Medium (Large 2×2, Huge 3×3,
   Gargantuan 4×4). `gridDistance` counts squares to the nearest square of the other space,
@@ -846,6 +857,12 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Innate Sorcery is a toggle switched off by hand (its minute isn't counted), and its +1 to the
   save DC and Advantage on spell attacks apply to all the character's spells, not only Sorcerer
   ones.
+- Cunning Strike's Withdraw gives half the rogue's Speed as extra movement and Disengage for the
+  rest of the turn (the SRD: that move "immediately after the attack"); Forceful Blow's push and
+  the barbarian's move toward the target are noted, not made. Devious Strikes (rogue 14) are text.
+- Sacred Weapon's bonus applies to every weapon attack while it's on (the SRD: the one Melee
+  weapon imbued), and its 10 minutes and Radiant damage option aren't tracked. Agonizing Blast's
+  Charisma goes to the chosen cantrip's damage like Potent Spellcasting (once per damage roll).
 - Deflect Attacks reduces the damage; redirecting it (a Focus Point when it reaches 0) and Deflect
   Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
   can" is the GM's to play.
@@ -920,7 +937,10 @@ Most rules are data; these are code, by name:
 - Feature `rules` (a closed list, `FEATURE_RULES`): `evasion` in `resolveSave`
   (`rules/casting.ts`), `reliable_talent` in `rollAbilityCheck`, `potent_cantrip` in
   `castSpell`, `indomitable` in `rollSavingThrow` (its bonus and uses from
-  `combatantFromCharacter`). A monster's trait named "Evasion" (the Assassin) sets `evasion`.
+  `combatantFromCharacter`); in `services/encounter.ts`, `cunning_strike` and
+  `improved_cunning_strike` (the `attack` option `cunning`), `brutal_strike` and
+  `improved_brutal_strike` (`brutal`), and `relentless_rage` (when raging damage would drop the
+  character to 0 Hit Points). A monster's trait named "Evasion" (the Assassin) sets `evasion`.
 - `attackMode` reads the `attack.str` and `attacked` Advantages (Reckless Attack).
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to
   all damage), `unconscious` is added at 0 HP and removed when you regain Hit Points, and

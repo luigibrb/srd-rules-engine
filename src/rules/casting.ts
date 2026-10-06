@@ -268,7 +268,8 @@ export function castSpell(
       (!d.cantrip || cantrip) &&
       (d.list === null || spell.lists.includes(d.list)) &&
       (d.school === null || spell.school.toLowerCase() === d.school) &&
-      (d.damage_type === null || types.has(d.damage_type)),
+      (d.damage_type === null || types.has(d.damage_type)) &&
+      (d.spell == null || d.spell === spell.id),
   );
   const extra = (first: boolean) =>
     matching.reduce((sum, d) => sum + (!d.one_roll || first ? d.bonus : 0), 0);
