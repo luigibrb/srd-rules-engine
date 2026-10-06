@@ -21,6 +21,14 @@
         },
         "category": {
           "type": "string"
+        },
+        "cost": {
+          "default": "",
+          "type": "string"
+        },
+        "weight": {
+          "default": "",
+          "type": "string"
         }
       },
       "required": [
@@ -51,6 +59,14 @@
             "type": "string"
           },
           "category": {
+            "type": "string"
+          },
+          "cost": {
+            "default": "",
+            "type": "string"
+          },
+          "weight": {
+            "default": "",
             "type": "string"
           }
         },

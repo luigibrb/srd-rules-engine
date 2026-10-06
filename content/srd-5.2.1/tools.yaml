@@ -1,39 +1,173 @@
 # yaml-language-server: $schema=../../schemas/tools.schema.json
 # SRD 5.2.1 — "Equipment" > "Tools". Gaming sets and instruments: one proficiency per variant.
-- {id: alchemists-supplies, name: "Alchemist's Supplies", category: artisan}
-- {id: brewers-supplies, name: "Brewer's Supplies", category: artisan}
-- {id: calligraphers-supplies, name: "Calligrapher's Supplies", category: artisan}
-- {id: carpenters-tools, name: "Carpenter's Tools", category: artisan}
-- {id: cartographers-tools, name: "Cartographer's Tools", category: artisan}
-- {id: cobblers-tools, name: "Cobbler's Tools", category: artisan}
-- {id: cooks-utensils, name: "Cook's Utensils", category: artisan}
-- {id: glassblowers-tools, name: "Glassblower's Tools", category: artisan}
-- {id: jewelers-tools, name: "Jeweler's Tools", category: artisan}
-- {id: leatherworkers-tools, name: "Leatherworker's Tools", category: artisan}
-- {id: masons-tools, name: "Mason's Tools", category: artisan}
-- {id: painters-supplies, name: "Painter's Supplies", category: artisan}
-- {id: potters-tools, name: "Potter's Tools", category: artisan}
-- {id: smiths-tools, name: "Smith's Tools", category: artisan}
-- {id: tinkers-tools, name: "Tinker's Tools", category: artisan}
-- {id: weavers-tools, name: "Weaver's Tools", category: artisan}
-- {id: woodcarvers-tools, name: "Woodcarver's Tools", category: artisan}
-- {id: disguise-kit, name: Disguise Kit, category: other}
-- {id: forgery-kit, name: Forgery Kit, category: other}
-- {id: dice-set, name: Dice Set, category: gaming-set}
-- {id: dragonchess-set, name: Dragonchess Set, category: gaming-set}
-- {id: playing-card-set, name: Playing Card Set, category: gaming-set}
-- {id: three-dragon-ante-set, name: Three-Dragon Ante Set, category: gaming-set}
-- {id: herbalism-kit, name: Herbalism Kit, category: other}
-- {id: bagpipes, name: Bagpipes, category: musical-instrument}
-- {id: drum, name: Drum, category: musical-instrument}
-- {id: dulcimer, name: Dulcimer, category: musical-instrument}
-- {id: flute, name: Flute, category: musical-instrument}
-- {id: horn, name: Horn, category: musical-instrument}
-- {id: lute, name: Lute, category: musical-instrument}
-- {id: lyre, name: Lyre, category: musical-instrument}
-- {id: pan-flute, name: Pan Flute, category: musical-instrument}
-- {id: shawm, name: Shawm, category: musical-instrument}
-- {id: viol, name: Viol, category: musical-instrument}
-- {id: navigators-tools, name: "Navigator's Tools", category: other}
-- {id: poisoners-kit, name: "Poisoner's Kit", category: other}
-- {id: thieves-tools, name: "Thieves' Tools", category: other}
+- id: alchemists-supplies
+  name: Alchemist's Supplies
+  category: artisan
+  cost: 50 GP
+  weight: 8 lb.
+- id: brewers-supplies
+  name: Brewer's Supplies
+  category: artisan
+  cost: 20 GP
+  weight: 9 lb.
+- id: calligraphers-supplies
+  name: Calligrapher's Supplies
+  category: artisan
+  cost: 10 GP
+  weight: 5 lb.
+- id: carpenters-tools
+  name: Carpenter's Tools
+  category: artisan
+  cost: 8 GP
+  weight: 6 lb.
+- id: cartographers-tools
+  name: Cartographer's Tools
+  category: artisan
+  cost: 15 GP
+  weight: 6 lb.
+- id: cobblers-tools
+  name: Cobbler's Tools
+  category: artisan
+  cost: 5 GP
+  weight: 5 lb.
+- id: cooks-utensils
+  name: Cook's Utensils
+  category: artisan
+  cost: 1 GP
+  weight: 8 lb.
+- id: glassblowers-tools
+  name: Glassblower's Tools
+  category: artisan
+  cost: 30 GP
+  weight: 5 lb.
+- id: jewelers-tools
+  name: Jeweler's Tools
+  category: artisan
+  cost: 25 GP
+  weight: 2 lb.
+- id: leatherworkers-tools
+  name: Leatherworker's Tools
+  category: artisan
+  cost: 5 GP
+  weight: 5 lb.
+- id: masons-tools
+  name: Mason's Tools
+  category: artisan
+  cost: 10 GP
+  weight: 8 lb.
+- id: painters-supplies
+  name: Painter's Supplies
+  category: artisan
+  cost: 10 GP
+  weight: 5 lb.
+- id: potters-tools
+  name: Potter's Tools
+  category: artisan
+  cost: 10 GP
+  weight: 3 lb.
+- id: smiths-tools
+  name: Smith's Tools
+  category: artisan
+  cost: 20 GP
+  weight: 8 lb.
+- id: tinkers-tools
+  name: Tinker's Tools
+  category: artisan
+  cost: 50 GP
+  weight: 10 lb.
+- id: weavers-tools
+  name: Weaver's Tools
+  category: artisan
+  cost: 1 GP
+  weight: 5 lb.
+- id: woodcarvers-tools
+  name: Woodcarver's Tools
+  category: artisan
+  cost: 1 GP
+  weight: 5 lb.
+- id: disguise-kit
+  name: Disguise Kit
+  category: other
+  cost: 25 GP
+  weight: 3 lb.
+- id: forgery-kit
+  name: Forgery Kit
+  category: other
+  cost: 15 GP
+  weight: 5 lb.
+- id: dice-set
+  name: Dice Set
+  category: gaming-set
+  cost: 1 SP
+- id: dragonchess-set
+  name: Dragonchess Set
+  category: gaming-set
+  cost: 1 GP
+- id: playing-card-set
+  name: Playing Card Set
+  category: gaming-set
+  cost: 5 SP
+- id: three-dragon-ante-set
+  name: Three-Dragon Ante Set
+  category: gaming-set
+  cost: 1 GP
+- id: herbalism-kit
+  name: Herbalism Kit
+  category: other
+  cost: 5 GP
+  weight: 3 lb.
+- id: bagpipes
+  name: Bagpipes
+  category: musical-instrument
+  cost: 30 GP, 6 lb.
+- id: drum
+  name: Drum
+  category: musical-instrument
+  cost: 6 GP, 3 lb.
+- id: dulcimer
+  name: Dulcimer
+  category: musical-instrument
+  cost: 25 GP, 10 lb.
+- id: flute
+  name: Flute
+  category: musical-instrument
+  cost: 2 GP, 1 lb.
+- id: horn
+  name: Horn
+  category: musical-instrument
+  cost: 3 GP, 2 lb.
+- id: lute
+  name: Lute
+  category: musical-instrument
+  cost: 35 GP, 2 lb.
+- id: lyre
+  name: Lyre
+  category: musical-instrument
+  cost: 30 GP, 2 lb.
+- id: pan-flute
+  name: Pan Flute
+  category: musical-instrument
+  cost: 12 GP, 2 lb.
+- id: shawm
+  name: Shawm
+  category: musical-instrument
+  cost: 2 GP, 1 lb.
+- id: viol
+  name: Viol
+  category: musical-instrument
+  cost: 30 GP, 1 lb.
+- id: navigators-tools
+  name: Navigator's Tools
+  category: other
+  cost: 25 GP
+  weight: 2 lb.
+- id: poisoners-kit
+  name: Poisoner's Kit
+  category: other
+  cost: 50 GP
+  weight: 2 lb.
+- id: thieves-tools
+  name: Thieves' Tools
+  category: other
+  cost: 25 GP
+  weight: 1 lb.

@@ -22,6 +22,7 @@ import {
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
 import { type Combatant, conditionRolls } from "../rules/combatant";
+import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currency";
 import { type Defenses, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
@@ -206,11 +207,16 @@ export function computePlaySheet(
   const max = sheet.max_hp?.total ?? 0;
   const current = Math.min(state.hp.current ?? max, max);
   const weightOf = (id: string | null) => {
-    const w = id
-      ? (lookup(catalog.weapons, id)?.weight ?? lookup(catalog.armor, id)?.weight)
-      : undefined;
-    const n = w ? Number.parseFloat(w) : Number.NaN;
-    return Number.isFinite(n) ? n : null;
+    if (!id) return null;
+    const gear = lookup(catalog.gear, id);
+    const w =
+      lookup(catalog.weapons, id)?.weight ??
+      lookup(catalog.armor, id)?.weight ??
+      gear?.weight ??
+      lookup(catalog.tools, id)?.weight;
+    const n = w ? pounds(w) : null;
+    // A bundle's weight (20 Arrows: 1 lb.) is shared by its items.
+    return n === null ? null : n / (gear?.bundle ?? 1);
   };
   const inventory = state.inventory.map((i, n) => {
     const carried = items[n] as CarriedItem;
@@ -1009,6 +1015,52 @@ export function applyAction(
       item.charges_spent = action.spent;
       break;
     }
+    case "buy": {
+      const qty = action.qty ?? 1;
+      const def = itemPrice(catalog, action.item);
+      const each = action.price !== undefined ? priceInCp(action.price) : def.cp;
+      if (each === null) {
+        fail(`${def.name} has no listed price: give one (\`price\`, like "10 GP")`);
+      }
+      const paid = pay(s.currency, (each as number) * qty);
+      if (!paid) {
+        fail(
+          `${def.name} costs ${formatCp((each as number) * qty)}: not enough coins (${formatCp(purseValue(s.currency))})`,
+        );
+      }
+      s.currency = paid as typeof s.currency;
+      const bought = applyAction(build, parseState(s), catalog, {
+        type: "add_item",
+        item: action.item,
+        qty: qty * def.bundle,
+        base: action.base,
+        variant: action.variant,
+      });
+      notes.push(
+        `Bought ${qty * def.bundle} × ${def.name} for ${formatCp((each as number) * qty)}.`,
+      );
+      return { state: bought.state, notes: [...notes, ...bought.notes] };
+    }
+    case "sell": {
+      const entry = s.inventory.find((i) => i.id === action.id) ?? fail(`No item '${action.id}'`);
+      const qty = action.qty ?? entry.qty;
+      if (qty > entry.qty) fail(`Only ${entry.qty} to sell`);
+      const def = itemPrice(catalog, entry.item);
+      // "Equipment fetches half its cost when sold."
+      const listed = action.price !== undefined ? priceInCp(action.price) : def.cp;
+      if (listed === null) fail(`${def.name} has no listed price: give one (\`price\`)`);
+      const worth =
+        action.price !== undefined
+          ? (listed as number)
+          : Math.floor(((listed as number) * qty) / def.bundle / 2);
+      const total = action.price !== undefined ? worth * qty : worth;
+      const coins = coinsFor(total);
+      for (const c of CURRENCIES) s.currency[c] += coins[c];
+      entry.qty -= qty;
+      if (entry.qty <= 0) s.inventory = s.inventory.filter((i) => i !== entry);
+      notes.push(`Sold ${qty} × ${def.name} for ${formatCp(total)}.`);
+      break;
+    }
     case "adjust_currency": {
       for (const c of CURRENCIES) {
         const next = s.currency[c] + (action.changes[c] ?? 0);
@@ -1048,4 +1100,26 @@ function indomitableBonus(sheet: PlaySheet): number | null {
   const use = sheet.play.uses.find((u) => u.key.endsWith(":indomitable"));
   if (!use || use.spent >= use.max) return null;
   return sheet.classes.find((c) => c.class_id === "fighter")?.level ?? null;
+}
+
+/** An item's listed price (copper, per bundle) and its bundle size. */
+function itemPrice(
+  catalog: Catalog,
+  id: string,
+): { name: string; cp: number | null; bundle: number } {
+  const gear = lookup(catalog.gear, id);
+  if (gear) return { name: gear.name, cp: priceInCp(gear.cost), bundle: gear.bundle };
+  const priced =
+    lookup(catalog.weapons, id) ?? lookup(catalog.armor, id) ?? lookup(catalog.tools, id);
+  if (priced) return { name: priced.name, cp: priceInCp(priced.cost), bundle: 1 };
+  const magic = lookup(catalog.magic_items, id);
+  if (magic) return { name: magic.name, cp: null, bundle: 1 };
+  throw new PlayError([`Unknown item '${id}'`]);
+}
+
+/** Pounds in a listed weight: `8 lb.`, `1/2 lb.`, `58½ lb.`, `5 lb. (full)`; `null` if none. */
+function pounds(weight: string): number | null {
+  const m = /^(\d+)?(½|\s*1\/2)?(?:\s*lb)?/.exec(weight.trim());
+  if (!m || (!m[1] && !m[2])) return null;
+  return Number(m[1] ?? 0) + (m[2] ? 0.5 : 0);
 }

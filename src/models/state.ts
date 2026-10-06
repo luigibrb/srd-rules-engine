@@ -160,6 +160,25 @@ export const PlayActionSchema = z
     /** Drink a potion, spend a charge… `roll` overrides the healing roll. */
     z.object({ type: z.literal("use_item"), id, roll: n.min(0).optional() }),
     z.object({ type: z.literal("set_charges"), id, spent: n.min(0) }),
+    /**
+     * Buy an item at its price (`qty` times its bundle: 20 Arrows for 1 GP), paying from the coins
+     * with change; `price` overrides it (`"40 GP"`: a deal, or an item without a listed price).
+     */
+    z.object({
+      type: z.literal("buy"),
+      item: id,
+      qty: n.min(1).optional(),
+      price: z.string().optional(),
+      base: id.optional(),
+      variant: id.optional(),
+    }),
+    /** Sell an inventory entry (or `qty` of it) for half its price (SRD "Selling Equipment"). */
+    z.object({
+      type: z.literal("sell"),
+      id,
+      qty: n.min(1).optional(),
+      price: z.string().optional(),
+    }),
     z.object({
       type: z.literal("adjust_currency"),
       changes: z.partialRecord(z.enum(CURRENCIES), n),

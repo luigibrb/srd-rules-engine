@@ -334,6 +334,16 @@ export {
   type SpellDamageBonus,
 } from "./rules/combatant";
 export {
+  COIN_VALUES,
+  type Coin,
+  coinsFor,
+  formatCp,
+  type Purse,
+  pay,
+  priceInCp,
+  purseValue,
+} from "./rules/currency";
+export {
   adjustDamage,
   type DamageInstance,
   type DamagePart,
