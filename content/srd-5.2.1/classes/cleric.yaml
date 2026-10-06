@@ -120,6 +120,51 @@ features:
         You roll an additional d8 when you reach Cleric levels 7 (2d8), 13 (3d8), and 18 (4d8).
 
         _Turn Undead._ As a Magic action, you present your Holy Symbol and censure Undead creatures. Each Undead of your choice within 30 feet of you must make a Wisdom saving throw. If the creature fails its save, it has the Frightened and Incapacitated conditions for 1 minute. For that duration, it tries to move as far from you as it can on its turns. This effect ends early on the creature if it takes any damage, if you have the Incapacitated condition, or if you die.
+    actions:
+    - id: divine-spark-heal
+      name: Divine Spark (heal)
+      economy: action
+      uses: channel-divinity
+      target: other
+      range: 30
+      heal:
+        dice: 1d8
+        bonus: wis
+        scaling:
+        - {level: 7, dice: 2d8}
+        - {level: 13, dice: 3d8}
+        - {level: 18, dice: 4d8}
+    - id: divine-spark
+      name: Divine Spark (harm)
+      economy: action
+      uses: channel-divinity
+      target: other
+      range: 30
+      save:
+        ability: con
+        dc_ability: spell
+        damage:
+          dice: 1d8
+          bonus: wis
+          scaling:
+          - {level: 7, dice: 2d8}
+          - {level: 13, dice: 3d8}
+          - {level: 18, dice: 4d8}
+          types: [necrotic, radiant]
+          half: true
+    - id: turn-undead
+      name: Turn Undead
+      economy: action
+      uses: channel-divinity
+      many: true
+      range: 30
+      creature_types: [undead]
+      save:
+        ability: wis
+        dc_ability: spell
+        conditions: [frightened, incapacitated]
+        rounds: 10
+        ends_on: [damage, source_incapacitated]
     resources:
     - id: channel-divinity
       name: Channel Divinity

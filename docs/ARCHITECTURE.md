@@ -482,7 +482,13 @@ list of actions.
   used with `attack` `granted: true` (Flurry of Blows), forces a save after a hit this turn
   (Stunning Strike: Stunned until the start of the monk's next turn), or gives a Bardic
   Inspiration die (`inspiration`), which its holder can add to a failed attack roll, saving throw
-  or check (a decision, below). A target with Uncanny Dodge is offered it when an attack hits it.
+  or check (a decision, below). A target with Uncanny Dodge or Deflect Attacks is offered it when
+  an attack hits it. A feature can take several `targets` of some creature types within a range
+  (Turn Undead), use the class's spell save DC (Channel Divinity), deal damage on a failed save
+  (half on a success, a damage type chosen with `damage_type`: Divine Spark), last some rounds
+  and end on damage or when its user is Incapacitated, mark the target on a successful save
+  (Stunning Strike: Speed halved and Advantage against it), or remove conditions (Lay On Hands:
+  Poisoned). Indomitable is a decision on a failed save.
 - **Positions (optional).** A combatant's `position` is its square on a 5-foot grid (`place`,
   or `move` with `to`), top-left for a creature larger than Medium (Large 2×2, Huge 3×3,
   Gargantuan 4×4). `gridDistance` counts squares to the nearest square of the other space,
@@ -835,6 +841,17 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Cover isn't worked out for a zone's later saves, nor for a follow-up save's creatures (Ice
   Knife); "a creature you can see" (vision, light, Invisible) stays the caller's.
 
+**Class features**
+
+- Innate Sorcery is a toggle switched off by hand (its minute isn't counted), and its +1 to the
+  save DC and Advantage on spell attacks apply to all the character's spells, not only Sorcerer
+  ones.
+- Deflect Attacks reduces the damage; redirecting it (a Focus Point when it reaches 0) and Deflect
+  Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
+  can" is the GM's to play.
+- Indomitable is offered on any failed save while a use is left (recommended only when the
+  reroll can succeed); a Bardic Inspiration die can still be added after it.
+
 **Hide, Search and Ready**
 
 - "Out of any enemy's line of sight" is read as Three-Quarters or Total Cover from each enemy that
@@ -902,7 +919,8 @@ Most rules are data; these are code, by name:
   modifier in a Light weapon's `light_extra_damage_parts`.
 - Feature `rules` (a closed list, `FEATURE_RULES`): `evasion` in `resolveSave`
   (`rules/casting.ts`), `reliable_talent` in `rollAbilityCheck`, `potent_cantrip` in
-  `castSpell`. A monster's trait named "Evasion" (the Assassin) sets `evasion`.
+  `castSpell`, `indomitable` in `rollSavingThrow` (its bonus and uses from
+  `combatantFromCharacter`). A monster's trait named "Evasion" (the Assassin) sets `evasion`.
 - `attackMode` reads the `attack.str` and `attacked` Advantages (Reckless Attack).
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to
   all damage), `unconscious` is added at 0 HP and removed when you regain Hit Points, and

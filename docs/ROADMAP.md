@@ -40,6 +40,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P26 | Events (what an action changed, as data), refusal codes on every refusal, undo by replaying a history of actions with their dice; the fight CLI's `undo` | Events come from comparing documents before and after, not from each rule; codes from one table of message patterns |
 | P27 | Odds in options: chance to hit and to crit, or that the target fails its save, and the average damage; `attackOdds`, `failOdds`, `averageDamage`; shown by the fight CLI's `options` | Read from the option's dry run (its d20 is 10), so they use the modifiers the engine would; Legendary Resistance and Bardic Inspiration aren't counted |
 | P28 | The other actions: Hide (Invisible while hidden, ended by attacks, Verbal spells, being found), Search, Ready (a held spell with Concentration, a readied move) and `release`, Study, Influence, Utilize; in options and the fight CLI | Line of sight for Hide is read as Three-Quarters Cover from every enemy (flagged); triggers are the caller's |
+| P29a | Class features used in turns: Indomitable (a decision), Deflect Attacks, Stunning Strike's successful-save effects, Lay On Hands' cure, Innate Sorcery, Channel Divinity's Divine Spark and Turn Undead | Data first: new `actions` fields (several targets, range, creature types, the spell save DC, save damage, effects on a success, conditions removed); one named rule (`indomitable`) |
 
 ## Decisions
 
@@ -97,10 +98,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   (Starry Wisp); a damage type chosen when casting and the leap on doubles (Chromatic Orb).
 - **Monster save effects left as text (M).** 19 effects without plain damage or conditions
   (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
-- **Class features used in turns, what's left (M).** Indomitable (a reroll of a failed save),
-  Channel Divinity options (Divine Spark, Turn Undead, Sacred Weapon), Cunning Strike, Relentless
-  Rage, Brutal Strike, Innate Sorcery, Deflect Attacks, Agonizing Blast (a choice of cantrip),
-  Stunning Strike's successful-save effects, Lay On Hands' cure for Poisoned.
+- **Class features used in turns, what's left (M).** Cunning Strike, Relentless Rage, Brutal
+  Strike, Agonizing Blast (a choice of cantrip), Sacred Weapon, Deflect Attacks' redirect,
+  Innate Sorcery's minute.
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
 - **Starting gold and shopping (S).** Fighter option C and background option B.

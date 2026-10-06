@@ -328,6 +328,8 @@ export function combatantFromCharacter(
     proficient_skills: sheet.skills.flatMap((line) => (line.proficient_from ? [line.skill] : [])),
     spell_damage: sheet.spell_damage,
     inspiration_die: null,
+    // Indomitable (a named rule): the Fighter level, while a use is left.
+    indomitable: sheet.rules.includes("indomitable") ? indomitableBonus(sheet) : null,
     spellcasting: sheet.spellcasting.flatMap((line) =>
       line.ability === null || line.save_dc === null || line.attack_bonus === null
         ? []
@@ -1039,4 +1041,11 @@ function regainConsciousness(s: CharacterState, notes: string[]): void {
     if (!s.conditions.includes("prone")) s.conditions.push("prone");
     notes.push("Conscious again (still Prone).");
   }
+}
+
+/** Indomitable's reroll bonus (the Fighter level) while a use is left, else `null`. */
+function indomitableBonus(sheet: PlaySheet): number | null {
+  const use = sheet.play.uses.find((u) => u.key.endsWith(":indomitable"));
+  if (!use || use.spent >= use.max) return null;
+  return sheet.classes.find((c) => c.class_id === "fighter")?.level ?? null;
 }

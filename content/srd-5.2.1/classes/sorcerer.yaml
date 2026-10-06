@@ -75,6 +75,14 @@ features:
       hint: Burning Hands and Detect Magic are recommended.
       tag: sorcerer-prepared
       swap: class_level
+    toggles:
+    - id: innate-sorcery
+      name: Innate Sorcery
+      uses: innate-sorcery
+      grants:
+        effects:
+        - {target: spell.save_dc, value: 1}
+        advantages: [attack.spell]
     resources:
     - id: innate-sorcery
       name: Innate Sorcery

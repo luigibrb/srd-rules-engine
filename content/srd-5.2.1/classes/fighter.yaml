@@ -180,6 +180,7 @@ features:
     - name: Tactical Master
       text: When you attack with a weapon whose mastery property you can use, you can replace that property
         with the Push, Sap, or Slow property for that attack.
+    rules: [indomitable]
     resources:
     - id: indomitable
       name: Indomitable

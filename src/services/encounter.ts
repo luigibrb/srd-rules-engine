@@ -376,16 +376,27 @@ function run(
   const applyTo = (c: EncounterCombatant, actions: readonly PlayAction[]): void => {
     for (const a of actions) {
       let dc: number | null = null;
+      let dealt = 0;
       if (a.type === "damage") {
         const t = encounterCombatant(e, c.id, ctx);
         const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
         const vitals = { hp: t.hp, temp: t.temp_hp, max: t.max_hp };
-        dc = takeDamage(vitals, instances, t.defenses, { critical: a.critical }).concentration_dc;
+        const taken = takeDamage(vitals, instances, t.defenses, { critical: a.critical });
+        dc = taken.concentration_dc;
+        dealt = taken.dealt;
       }
       if (c.monster !== null) notes.push(...monsterEffect(ctx, c, a));
       else {
         play(c, a);
         if (a.type === "activate") c.toggled_on.push(a.key);
+      }
+      // "This effect ends early on the creature if it takes any damage" (Turn Undead).
+      if (dealt > 0) {
+        for (const effect of e.effects.filter(
+          (x) => x.target === c.id && x.ends_on.includes("damage"),
+        )) {
+          endEffect(effect, "it took damage");
+        }
       }
       const spell = concentrationOf(c);
       if (dc !== null && spell) {
@@ -428,6 +439,7 @@ function run(
       ends: EffectEnd | null;
       escape_dc?: number | null;
       escape_skill?: "athletics" | "acrobatics" | null;
+      ends_on?: ("damage" | "source_incapacitated")[];
     },
   ): void => {
     const has = conditionsOf(ctx, target);
@@ -440,6 +452,7 @@ function run(
         ...opts,
         escape_dc: opts.escape_dc ?? null,
         escape_skill: opts.escape_skill ?? null,
+        ends_on: opts.ends_on ?? [],
       });
     }
   };
@@ -709,6 +722,14 @@ function run(
     c.inspiration = null;
   };
   const spendLegendaryResistance = (c: EncounterCombatant, save: SaveResult | null): void => {
+    if (save?.indomitable && c.character !== null) {
+      const ref = characterRef(ctx, c);
+      const use = computePlaySheet(ref.build, ref.state, ctx.catalog).play.uses.find((u) =>
+        u.key.endsWith(":indomitable"),
+      );
+      if (use) play(c, { type: "use", key: use.key });
+      notes.push(`${c.name} rerolls the save with Indomitable.`);
+    }
     useInspiration(c, save?.inspiration);
     if (!save?.legendary_resistance || c.monster === null) return;
     c.legendary_resistance_used += 1;
@@ -914,6 +935,16 @@ function run(
     const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
     return sheet.actions.find((a) => a.halves_attack_damage)?.name ?? null;
   };
+  /** `t`'s feature that reduces an attack's damage as its reaction (Deflect Attacks), if usable. */
+  const reactionThatReduces = (t: EncounterCombatant) => {
+    if (t.character === null || t.used.reaction) return null;
+    if (conditionsOf(ctx, t).has("incapacitated")) return null;
+    const ref = characterRef(ctx, t);
+    const f = computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
+      (a) => a.reduces_attack_damage,
+    );
+    return f?.reduces_attack_damage ? { name: f.name, ...f.reduces_attack_damage } : null;
+  };
   /** One attack by `c` on `t`, applied: riders once per turn, notes, damage. */
   const attackOn = (
     c: EncounterCombatant,
@@ -965,7 +996,7 @@ function run(
     if (vex) modes.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
     if (sap) modes.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
-    const mark = e.marks.find((m) => m.on === t.id);
+    const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
     let hit: AttackResult;
     try {
@@ -1016,6 +1047,30 @@ function run(
         t.used.reaction = true;
         instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
         notes.push(`${t.name} uses ${dodge}: the damage is halved.`);
+      }
+      // Deflect Attacks: the target's reaction takes 1d10 + modifiers off the attack's damage.
+      const deflect = reactionThatReduces(t);
+      if (
+        deflect &&
+        (!deflect.types.length || instances.some((d) => deflect.types.includes(d.type ?? "")))
+      ) {
+        const ask = `${c.name} hits ${t.name} with ${hit.attack} (${roll}). ${t.name}: use ${deflect.name} to reduce the damage?`;
+        const view = encounterCombatant(e, t.id, ctx);
+        if (
+          decide({ kind: "deflect_attacks", combatant: view, question: ask, recommended: true })
+        ) {
+          t.used.reaction = true;
+          let cut = rollDamage([{ dice: deflect.dice, bonus: deflect.bonus, type: "none" }], {
+            rng,
+          }).total;
+          const total = instances.reduce((a, d) => a + d.amount, 0);
+          notes.push(`${t.name} uses ${deflect.name}: ${Math.min(cut, total)} damage less.`);
+          instances = instances.map((d) => {
+            const off = Math.min(d.amount, cut);
+            cut -= off;
+            return { ...d, amount: d.amount - off };
+          });
+        }
       }
       applyTo(t, [{ type: "damage", instances, critical: hit.critical_hit }]);
     }
@@ -1206,7 +1261,9 @@ function run(
         used.masteries.push(sap);
         out.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
       }
-      const mark = e.marks.find((m) => m.on === t.id && !used.marks.includes(m));
+      const mark = e.marks.find(
+        (m) => m.on === t.id && m.kind === "advantage_against" && !used.marks.includes(m),
+      );
       if (mark) {
         used.marks.push(mark);
         out.push({ mode: "advantage", reason: markReason(mark) });
@@ -1434,6 +1491,12 @@ function run(
         conditionsOf(ctx, source).has("incapacitated")
       ) {
         // SRD "Grappling": the condition ends if the grappler has the Incapacitated condition.
+        endEffect(effect, `${source.name} is Incapacitated`);
+      } else if (
+        effect.ends_on.includes("source_incapacitated") &&
+        source &&
+        (conditionsOf(ctx, source).has("incapacitated") || outOfFight(ctx, source))
+      ) {
         endEffect(effect, `${source.name} is Incapacitated`);
       } else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
         endEffect(effect, "Concentration ended");
@@ -2349,12 +2412,46 @@ function run(
         computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
           (a) => a.key === action.feature || a.name === action.feature,
         ) ?? fail(`${c.name} has no feature '${action.feature}'`);
-      if (f.halves_attack_damage) {
+      if (f.halves_attack_damage || f.reduces_attack_damage) {
         fail(`${f.name} is offered when an attack hits ${c.name}`);
       }
       const t = action.target ? find(action.target) : c;
       if (f.target === "self" && t !== c) fail(`${f.name} is used on yourself`);
       if (f.target === "other" && t === c) fail(`${f.name} is used on another creature`);
+      // A feature that affects several creatures (Turn Undead) takes `targets`.
+      const targets = f.many
+        ? (action.targets ?? fail(`${f.name} affects several creatures: give \`targets\``)).map(
+            find,
+          )
+        : [t];
+      for (const x of targets) {
+        if (f.many && x === c) fail(`${f.name} doesn't affect ${c.name}`);
+        const d = x === c ? 0 : feetBetween(c, x);
+        if (f.range !== null && d !== null && d > f.range) {
+          fail(`${x.name} is ${d} feet away: out of ${f.name}'s range (${f.range} ft)`);
+        }
+        if (f.creature_types.length) {
+          const type = creatureTypeOf(ctx, x).toLowerCase();
+          if (!f.creature_types.some((y) => y.toLowerCase() === type)) {
+            fail(`${x.name} isn't ${f.creature_types.join(" or ")}`);
+          }
+        }
+        for (const condition of f.removes) {
+          if (!conditionsOf(ctx, x).has(condition)) {
+            const name = lookup(ctx.catalog.conditions, condition)?.name ?? condition;
+            fail(`${x.name} isn't ${name}`);
+          }
+        }
+      }
+      const damageType =
+        f.save?.damage &&
+        (action.damage_type ??
+          (f.save.damage.types.length === 1
+            ? f.save.damage.types[0]
+            : fail(`${f.name}: choose the damage type (${f.save.damage.types.join(" or ")})`)));
+      if (damageType && f.save?.damage && !f.save.damage.types.includes(damageType)) {
+        fail(`${f.name} deals ${f.save.damage.types.join(" or ")} damage`);
+      }
       if (f.economy === "reaction") {
         if (e.round === 0) fail("The fight hasn't started");
         canAct(c);
@@ -2371,7 +2468,8 @@ function run(
       if (f.extra_action && !c.used.action) {
         fail(`Take your action first: ${f.name} gives one additional action`);
       }
-      notes.push(`${c.name} uses ${f.name}${t === c ? "" : ` on ${t.name}`}.`);
+      const on = f.many ? targets.map((x) => x.name).join(", ") : t === c ? "" : t.name;
+      notes.push(`${c.name} uses ${f.name}${on ? ` on ${on}` : ""}.`);
       play(c, { type: "use_feature", key: f.key, amount: action.amount });
       if (f.once_per_turn) c.features_used.push(f.key);
       if (f.heal && f.target !== "self") {
@@ -2381,6 +2479,11 @@ function run(
               .total;
         applyTo(t, [{ type: "heal", amount }]);
         notes.push(`${t.name} regains ${amount} Hit Points.`);
+      }
+      for (const condition of f.removes) {
+        applyTo(t, [{ type: "remove_condition", condition }]);
+        const name = lookup(ctx.catalog.conditions, condition)?.name ?? condition;
+        notes.push(`${t.name} is no longer ${name}.`);
       }
       if (f.extra_action) {
         c.used.action = false;
@@ -2394,24 +2497,76 @@ function run(
       }
       if (f.attacks) c.granted_attacks = { ...f.attacks };
       if (f.save) {
-        const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), f.save.ability, f.save.dc, {
-          rng,
-          decide,
-        });
-        result = save;
-        notes.push(`${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);
-        spendLegendaryResistance(t, save);
-        if (!save.success && f.save.conditions.length) {
-          applyTo(
-            t,
-            f.save.conditions.map((condition) => ({ type: "add_condition", condition }) as const),
-          );
-          addEffects(t, f.save.conditions, {
-            source: c.id,
-            label: f.name,
-            concentration: false,
-            ends: { at: "start", of: c.id, count: 1, skip_current: false },
+        const fs = f.save;
+        // Damage is rolled once for every creature (SRD "Damage against Multiple Targets").
+        const rolled =
+          fs.damage && damageType
+            ? rollDamage([{ dice: fs.damage.dice, bonus: fs.damage.bonus, type: damageType }], {
+                rng,
+              }).total
+            : null;
+        const ends: EffectEnd = fs.rounds
+          ? { at: "start", of: c.id, count: fs.rounds, skip_current: false }
+          : { at: "start", of: c.id, count: 1, skip_current: false };
+        for (const x of targets) {
+          const save = rollSavingThrow(encounterCombatant(e, x.id, ctx), fs.ability, fs.dc, {
+            rng,
+            decide,
           });
+          result = save;
+          const amount =
+            rolled === null
+              ? 0
+              : save.success
+                ? fs.damage?.half
+                  ? Math.floor(rolled / 2)
+                  : 0
+                : rolled;
+          const dealt = rolled === null ? "" : `: ${amount} ${damageType}`;
+          notes.push(
+            `${x.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)})${dealt}.`,
+          );
+          spendLegendaryResistance(x, save);
+          if (amount > 0)
+            applyTo(x, [{ type: "damage", instances: [{ amount, type: damageType }] }]);
+          if (!save.success && fs.conditions.length && !outOfFight(ctx, x)) {
+            applyTo(
+              x,
+              fs.conditions.map((condition) => ({ type: "add_condition", condition }) as const),
+            );
+            addEffects(x, fs.conditions, {
+              source: c.id,
+              label: f.name,
+              concentration: false,
+              ends: { ...ends },
+              ends_on: [...fs.ends_on],
+            });
+          }
+          if (save.success) {
+            const until = { at: "start" as const, of: c.id, count: 1, skip_current: false };
+            if (fs.on_success.includes("speed_halved")) {
+              e.marks.push({
+                kind: "speed_halved",
+                label: f.name,
+                by: c.id,
+                on: x.id,
+                ends: { ...until },
+              });
+              notes.push(
+                `${f.name}: ${x.name}'s Speed is halved until the start of ${c.name}'s next turn.`,
+              );
+            }
+            if (fs.on_success.includes("advantage_against")) {
+              e.marks.push({
+                kind: "advantage_against",
+                label: f.name,
+                by: c.id,
+                on: x.id,
+                ends: { ...until },
+              });
+              notes.push(`${f.name}: the next attack roll against ${x.name} has Advantage.`);
+            }
+          }
         }
       }
       if (f.inspiration_die) {
@@ -2600,7 +2755,10 @@ export function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encount
   }
   // Slow: −10 feet, however many times it was hit by Slow weapons.
   const slowed = e.masteries.some((m) => m.mastery === "slow" && m.on === c.id);
-  return slowed ? Math.max(0, speed - 10) : speed;
+  const after = slowed ? Math.max(0, speed - 10) : speed;
+  // Halved (Stunning Strike's successful save), however many times.
+  const halved = e.marks.some((m) => m.kind === "speed_halved" && m.on === c.id);
+  return halved ? Math.floor(after / 2) : after;
 }
 
 /** Out of the fight: a defeated monster, or a dead character. */
@@ -2875,6 +3033,13 @@ function sizeOf(ctx: EncounterContext, c: EncounterCombatant): string | null | u
 }
 
 const SIZES = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
+
+/** Its creature type (`Undead`): a monster's stat block, a character's species. */
+function creatureTypeOf(ctx: EncounterContext, c: EncounterCombatant): string {
+  if (c.monster !== null) return monsterDef(ctx, c).creature_type;
+  const species = characterRef(ctx, c).build.species_id;
+  return lookup(ctx.catalog.species, species)?.creature_type ?? "Humanoid";
+}
 
 /**
  * What `x`'s space is to `mover` (SRD "Moving around Other Creatures"): it can pass through an

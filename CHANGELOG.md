@@ -73,6 +73,15 @@ migrated when it's loaded.
   `utilize` (SRD actions); combatants record `hidden` and `readied`. `srd-rules fight`: `hide`,
   `reveal`, `search`, `utilize`, `release`.
 
+- Class features used in turns: Indomitable (a decision on a failed save), Deflect Attacks (a
+  reaction when hit), Stunning Strike's effects on a successful save, Lay On Hands' cure for
+  Poisoned, Innate Sorcery (a toggle: +1 spell save DC, Advantage on spell attacks), Divine Spark
+  and Turn Undead. Feature `actions` gain `many`, `range`, `creature_types`, `removes`,
+  `reduces_attack_damage`, `save.dc_ability: spell`, `save.damage`, `save.rounds`,
+  `save.ends_on`, `save.on_success`, `heal.scaling`; effect target `spell.save_dc`, Advantage
+  target `attack.spell`, rule `indomitable`. The encounter action `feature` takes `targets` and
+  `damage_type`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to

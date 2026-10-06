@@ -151,6 +151,7 @@ const EFFECT_TARGET_NAMES = [
   "saves",
   "skill.unproficient",
   "speed",
+  "spell.save_dc",
 ] as const;
 export type EffectTarget =
   | (typeof EFFECT_TARGET_NAMES)[number]
@@ -228,10 +229,12 @@ export type AdvantageTarget =
   | `check.${Ability}`
   | "initiative"
   | "attack.str"
+  | "attack.spell"
   | "attacked";
 export const ADVANTAGE_TARGETS: readonly AdvantageTarget[] = [
   "initiative",
   "attack.str",
+  "attack.spell",
   "attacked",
   ...ABILITIES.map((a) => `save.${a}` as const),
   ...ABILITIES.map((a) => `check.${a}` as const),
@@ -288,7 +291,12 @@ export type DamageRider = z.infer<typeof DamageRiderSchema>;
  * proficient in), `potent_cantrip` (a cantrip that misses, or is saved against, still deals half
  * damage).
  */
-export const FEATURE_RULES = ["evasion", "reliable_talent", "potent_cantrip"] as const;
+export const FEATURE_RULES = [
+  "evasion",
+  "reliable_talent",
+  "potent_cantrip",
+  "indomitable",
+] as const;
 export type FeatureRule = (typeof FEATURE_RULES)[number];
 
 /**
@@ -340,6 +348,8 @@ export const FeatureActionSchema = z.strictObject({
   heal: z
     .strictObject({
       dice: Dice.nullable().default(null),
+      /** More dice at higher class levels: `[{level: 7, dice: 2d8}]`. */
+      scaling: z.array(z.strictObject({ level: z.int(), dice: Dice })).default([]),
       bonus: z.union([z.int(), z.enum(ABILITIES), z.literal("class_level")]).default(0),
       pooled: z.boolean().default(false),
     })
@@ -358,14 +368,53 @@ export const FeatureActionSchema = z.strictObject({
   after_hit: z.boolean().default(false),
   once_per_turn: z.boolean().default(false),
   /**
-   * The target's saving throw, DC 8 + `dc_ability` modifier + Proficiency Bonus: on a failure,
-   * the conditions until the start of your next turn.
+   * The target's saving throw, DC 8 + `dc_ability` modifier + Proficiency Bonus (`spell`: the
+   * spell save DC of the source class's Spellcasting, Channel Divinity's): on a failure, the
+   * conditions until the start of your next turn (or for `rounds`) and `damage` (half on a
+   * success with `half`); on a success, `on_success` (Stunning Strike: Speed halved, Advantage
+   * on the next attack roll against it, until the start of your next turn).
    */
   save: z
     .strictObject({
       ability: z.enum(ABILITIES),
-      dc_ability: z.enum(ABILITIES),
+      dc_ability: z.union([z.enum(ABILITIES), z.literal("spell")]),
       conditions: z.array(z.string()).default([]),
+      rounds: z.int().min(1).nullable().default(null),
+      /** The conditions also end when the target takes damage, or you're Incapacitated (Turn Undead). */
+      ends_on: z.array(z.enum(["damage", "source_incapacitated"])).default([]),
+      damage: z
+        .strictObject({
+          dice: Dice,
+          /** More dice at higher class levels: `[{level: 7, dice: 2d8}]`. */
+          scaling: z.array(z.strictObject({ level: z.int(), dice: Dice })).default([]),
+          bonus: z.union([z.int(), z.enum(ABILITIES)]).default(0),
+          /** The damage type, or the user's choice among several. */
+          types: z.array(z.enum(DAMAGE_TYPES)).min(1),
+          half: z.boolean().default(true),
+        })
+        .nullable()
+        .default(null),
+      on_success: z.array(z.enum(["speed_halved", "advantage_against"])).default([]),
+    })
+    .nullable()
+    .default(null),
+  /** How far its target can be, in feet (checked with positions). */
+  range: z.int().min(0).nullable().default(null),
+  /** It affects several creatures at once (`targets`), of these creature types if any. */
+  many: z.boolean().default(false),
+  creature_types: z.array(z.string()).default([]),
+  /** Conditions it ends on the target (Lay On Hands: Poisoned). */
+  removes: z.array(z.string()).default([]),
+  /**
+   * Your reaction when an attack hits you: reduce its damage by `dice` + the abilities'
+   * modifiers (+ the class level), if it deals one of `types` (Deflect Attacks).
+   */
+  reduces_attack_damage: z
+    .strictObject({
+      dice: Dice,
+      abilities: z.array(z.enum(ABILITIES)).default([]),
+      class_level: z.boolean().default(false),
+      types: z.array(z.enum(DAMAGE_TYPES)).default([]),
     })
     .nullable()
     .default(null),

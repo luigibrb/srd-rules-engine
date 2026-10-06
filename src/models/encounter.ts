@@ -155,6 +155,8 @@ export const EncounterEffectSchema = z.object({
   escape_dc: z.int().nullable().default(null),
   /** The only skill the `escape` check can use (Black Tentacles: Athletics); `null`: either. */
   escape_skill: z.enum(["athletics", "acrobatics"]).nullable().default(null),
+  /** It also ends when the target takes damage, or when its source is Incapacitated. */
+  ends_on: z.array(z.enum(["damage", "source_incapacitated"])).default([]),
 });
 export type EncounterEffect = z.infer<typeof EncounterEffectSchema>;
 
@@ -187,7 +189,8 @@ export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
  * attack roll against it Advantage, whoever makes it (Guiding Bolt).
  */
 export const SpellMarkSchema = z.object({
-  kind: z.enum(["advantage_against"]),
+  /** `speed_halved`: `on`'s Speed is halved (Stunning Strike's successful save). */
+  kind: z.enum(["advantage_against", "speed_halved"]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),
   by: z.string(),
@@ -257,7 +260,14 @@ export const PendingSchema = z.object({
   answers: z.array(z.boolean()),
   /** Who decides, and what. */
   combatant: z.string(),
-  kind: z.enum(["inspiration", "legendary_resistance", "uncanny_dodge", "zone_force"]),
+  kind: z.enum([
+    "inspiration",
+    "legendary_resistance",
+    "uncanny_dodge",
+    "zone_force",
+    "indomitable",
+    "deflect_attacks",
+  ]),
   question: z.string(),
   /** What `auto` would answer (only when it can turn the failure into a success). */
   recommended: z.boolean().default(true),
@@ -638,7 +648,11 @@ export const EncounterActionSchema = z
       id: z.string(),
       feature: z.string(),
       target: z.string().optional(),
+      /** The creatures a feature that affects several takes (Turn Undead). */
+      targets: z.array(z.string()).optional(),
       amount: n.min(1).optional(),
+      /** The damage type, for a feature that offers a choice (Divine Spark). */
+      damage_type: z.enum(DAMAGE_TYPES).optional(),
     }),
     /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
     z.object({

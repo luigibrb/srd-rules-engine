@@ -212,17 +212,47 @@ actions:
   target: other                # self (default) | creature | other
   after_hit: true              # needs a hit on the target this turn
   once_per_turn: true
-  save: {ability: con, dc_ability: wis, conditions: [stunned]}   # until the start of your next turn
+  save: {ability: con, dc_ability: wis, conditions: [stunned],   # until the start of your next turn
+         on_success: [speed_halved, advantage_against]}
+- id: turn-undead
+  name: Turn Undead
+  economy: action
+  uses: channel-divinity
+  many: true                   # several creatures: the encounter action's `targets`
+  range: 30                    # feet, checked with positions
+  creature_types: [undead]
+  save: {ability: wis, dc_ability: spell,      # spell: the class's spell save DC
+         conditions: [frightened, incapacitated], rounds: 10,
+         ends_on: [damage, source_incapacitated]}
+- id: divine-spark
+  name: Divine Spark (harm)
+  economy: action
+  uses: channel-divinity
+  target: other
+  save: {ability: con, dc_ability: spell,
+         damage: {dice: 1d8, bonus: wis, types: [necrotic, radiant], half: true,
+                  scaling: [{level: 7, dice: 2d8}]}}   # heal takes `scaling` too
+- id: lay-on-hands-cure
+  name: Lay On Hands (cure Poisoned)
+  economy: bonus_action
+  uses: lay-on-hands
+  cost: 5
+  target: creature
+  removes: [poisoned]
 ```
 
 `inspiration: {progression: Bardic Die}` gives the target a die for its next failed D20 Test, and
 `halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, offered when an attack
-hits). Both are decisions the encounter asks for or takes automatically (`decisions`).
+hits), as is `reduces_attack_damage: {dice: 1d10, abilities: [dex], class_level: true, types:
+[bludgeoning, piercing, slashing]}` (Deflect Attacks). They're decisions the encounter asks for or
+takes automatically (`decisions`). The effect target `spell.save_dc` and the Advantage target
+`attack.spell` change spells (Innate Sorcery, a toggle).
 
 `rules` switches on a rule written in code, from a closed list: `evasion` (Dexterity saves that
 halve damage: none on a success, half on a failure, not while Incapacitated), `reliable_talent`
 (a d20 of 9 or lower counts as 10 on checks with a proficient skill), `potent_cantrip` (a cantrip
-that misses or is saved against deals half damage).
+that misses or is saved against deals half damage), `indomitable` (a failed save can be rerolled
+with the Fighter level, a decision, spending the `indomitable` resource).
 
 Anything effects, riders, Advantage and toggles can't express goes in a trait's text, or in a
 feat's `unsupported` note, which the builder shows to the player.

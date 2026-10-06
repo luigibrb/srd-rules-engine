@@ -128,6 +128,26 @@ export interface FeatureActionLine {
     readonly ability: Ability;
     readonly dc: number;
     readonly conditions: readonly string[];
+    readonly rounds: number | null;
+    readonly ends_on: readonly ("damage" | "source_incapacitated")[];
+    /** Damage on a failed save, at the class level: dice + bonus, of one of `types`. */
+    readonly damage: {
+      readonly dice: string;
+      readonly bonus: number;
+      readonly types: readonly string[];
+      readonly half: boolean;
+    } | null;
+    readonly on_success: readonly ("speed_halved" | "advantage_against")[];
+  } | null;
+  readonly range: number | null;
+  readonly many: boolean;
+  readonly creature_types: readonly string[];
+  readonly removes: readonly string[];
+  /** The damage its reaction takes off an attack that hits (Deflect Attacks). */
+  readonly reduces_attack_damage: {
+    readonly dice: string;
+    readonly bonus: number;
+    readonly types: readonly string[];
   } | null;
   /** The die it gives (8 for a d8). */
   readonly inspiration_die: number | null;
@@ -636,7 +656,25 @@ export function computeSheet(
       (total, i) => total + (i.active && i.magic ? i.magic.bonus.spell_attack : 0),
       0,
     ) + d20Penalty;
-  const magic = spellcastingSummary(res, catalog, mod, pb, classLevels, spellAttackBonus);
+  // Spell save DC bonuses (Innate Sorcery while active).
+  const spellSaveBonus = effects("spell.save_dc").reduce(
+    (total, [op, value]) => total + (op === "add" ? value : 0),
+    0,
+  );
+  const magic = spellcastingSummary(
+    res,
+    catalog,
+    mod,
+    pb,
+    classLevels,
+    spellAttackBonus,
+    spellSaveBonus,
+  );
+
+  /** The spell save DC of a class's Spellcasting (Channel Divinity's DC). */
+  const casting = res.sources.filter((src) => src.grants.spellcasting);
+  const spellDc = (classId: string | null): number =>
+    magic.spellcasting[casting.findIndex((src) => src.class_id === classId)]?.save_dc ?? 8 + pb;
 
   // Class table columns (Rages, Sneak Attack…) at the character's level in each class.
   const resources: ResourceLine[] = [];
@@ -702,8 +740,11 @@ export function computeSheet(
         const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : level;
         const column = (name: string) =>
           lookup(catalog.classes, src.class_id ?? "")?.progression[name]?.[classLevel - 1];
+        /** Dice at this class level: the last `scaling` step reached. */
+        const scaled = (dice: string, steps: readonly { level: number; dice: string }[]) =>
+          steps.filter((x) => x.level <= classLevel).at(-1)?.dice ?? dice;
         const heal = a.heal && {
-          dice: a.heal.dice,
+          dice: a.heal.dice === null ? null : scaled(a.heal.dice, a.heal.scaling),
           bonus:
             a.heal.bonus === "class_level"
               ? classLevel
@@ -731,8 +772,34 @@ export function computeSheet(
           once_per_turn: a.once_per_turn,
           save: a.save && {
             ability: a.save.ability,
-            dc: 8 + mod[a.save.dc_ability] + pb,
+            dc:
+              a.save.dc_ability === "spell"
+                ? spellDc(src.class_id)
+                : 8 + mod[a.save.dc_ability] + pb,
             conditions: a.save.conditions,
+            rounds: a.save.rounds,
+            ends_on: a.save.ends_on,
+            damage: a.save.damage && {
+              dice: scaled(a.save.damage.dice, a.save.damage.scaling),
+              bonus:
+                typeof a.save.damage.bonus === "number"
+                  ? a.save.damage.bonus
+                  : mod[a.save.damage.bonus],
+              types: a.save.damage.types,
+              half: a.save.damage.half,
+            },
+            on_success: a.save.on_success,
+          },
+          range: a.range,
+          many: a.many,
+          creature_types: a.creature_types,
+          removes: a.removes,
+          reduces_attack_damage: a.reduces_attack_damage && {
+            dice: a.reduces_attack_damage.dice,
+            bonus:
+              a.reduces_attack_damage.abilities.reduce((t, ab) => t + mod[ab], 0) +
+              (a.reduces_attack_damage.class_level ? classLevel : 0),
+            types: a.reduces_attack_damage.types,
           },
           inspiration_die: die ? Number(die) : null,
           halves_attack_damage: a.halves_attack_damage,
@@ -1011,6 +1078,7 @@ function spellcastingSummary(
   pb: number,
   classLevels: ReadonlyMap<string, number>,
   spellAttackBonus = 0,
+  spellSaveBonus = 0,
 ): {
   spellcasting: SpellcastingLine[];
   slots: number[];
@@ -1029,7 +1097,7 @@ function spellcastingSummary(
       source: src.name,
       list: sc.list === null ? null : res.resolveRef(src, sc.list),
       ability,
-      save_dc: ability ? 8 + pb + mod[ability] : null,
+      save_dc: ability ? 8 + pb + mod[ability] + spellSaveBonus : null,
       attack_bonus: ability ? pb + mod[ability] + spellAttackBonus : null,
       progression: sc.progression,
     });
