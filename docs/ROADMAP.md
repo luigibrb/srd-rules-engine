@@ -79,9 +79,8 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 - **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
   Ice's frigid air, walls that cut through a creature's space.
-- **Monster traits, what's left (M).** Swallow (Behir, Purple Worm, Remorhaz, Tarrasque), the
-  copper and gold dragons' slowing and weakening breaths, and the other saves the importer
-  reports as text; traits worded differently from the four read so far.
+- **Monster traits, what's left (M).** Traits worded differently from the four read so far
+  (Sunlight Sensitivity, Engulf, Magic Resistance…).
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
   some of them.
@@ -101,11 +100,10 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
   reactions (Shocking Grasp), less Speed (Ray of Frost), no healing (Chill Touch), Dim Light
   (Starry Wisp); a damage type chosen when casting and the leap on doubles (Chromatic Orb).
-- **Monster save effects left as text (M).** 19 effects without plain damage or conditions
-  (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
+- **Monster save effects left as text (M).** 23 effects without plain damage or conditions
+  (swallowing, slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
 - **Class features used in turns, what's left (M).** Devious Strikes, Deflect Attacks'
-  redirect, the other subclass features (Wild
-  Shape, Metamagic and Sorcery Points in turns).
+  redirect, Wild Shape, Metamagic and Sorcery Points in turns, the other subclass features.
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
 
