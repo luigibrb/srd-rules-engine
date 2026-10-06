@@ -33,6 +33,7 @@ schemas/           # GENERATED JSON Schemas for content files and builds
 scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homebrew only);
                    #   import-srd-spells.ts (SRD Markdown → spells.yaml);
                    #   import-srd-items.ts (→ magic-items.yaml, conditions.yaml);
+                   #   import-srd-gear.ts (→ gear.yaml, prices in tools.yaml);
                    #   import-srd-monsters.ts (→ monsters.yaml; FIXES for garbled values);
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)

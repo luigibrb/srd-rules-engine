@@ -101,7 +101,13 @@ migrated when it's loaded.
   Suggestion: `mark` (encounter marks of kind `quarry`, moved with the encounter action
   `move_mark`), `after_hit`, `bonus_vs`, conditions' `ends_on_damage`; `castSpell`'s `critical`.
 
+- Shopping: the play actions `buy` and `sell` (coins with change, half the price when selling;
+  `rules/currency.ts`: `pay`, `priceInCp`, `coinsFor`, `formatCp`, `purseValue`); gear and tools
+  have `cost` and `weight` (gear also `bundle`), from `scripts/import-srd-gear.ts`, which adds
+  the SRD's Adventuring Gear (100 items). `srd-rules play`: `buy`, `sell`.
+
 ### Changed
+- Carried weight counts gear and tools.
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
   `srd-rules-engine/srd` (or `srd-rules-engine/node`), so the main entry no longer bundles the

@@ -42,6 +42,7 @@ const HELP = `Commands (ids are shown in brackets; numbers work for uses, items 
   items                 inventory        add weapon-1 base=longsword · add potion-of-healing 2
   equip 3 · unequip 3 · attune 3 · unattune 3 · useitem 3 [roll] · drop 3 [n] · charges 3 2
   money +5gp -3sp       adjust coins
+  buy rope [2] [price=8gp] · sell 3 [n]   at the listed price, with change (sold for half)
   sheet · help · save · quit`;
 
 export class PlayApp {
@@ -211,6 +212,25 @@ export class PlayApp {
           ...(opts.variant ? { variant: opts.variant } : {}),
         });
       }
+      case "buy": {
+        const opts = Object.fromEntries(
+          args.filter((a) => a.includes("=")).map((a) => a.split("=", 2)),
+        );
+        const qty = args.slice(1).find((a) => /^\d+$/.test(a));
+        return this.act({
+          type: "buy",
+          item: (args[0] ?? "").toLowerCase(),
+          ...(qty ? { qty: Number(qty) } : {}),
+          ...(opts.price ? { price: opts.price.replace(/(\d)(cp|sp|ep|gp|pp)$/i, "$1 $2") } : {}),
+          ...(opts.base ? { base: opts.base } : {}),
+        });
+      }
+      case "sell":
+        return this.act({
+          type: "sell",
+          id: itemRef(0),
+          ...(num(1) ? { qty: num(1) } : {}),
+        });
       case "drop":
         return this.act({
           type: "remove_item",

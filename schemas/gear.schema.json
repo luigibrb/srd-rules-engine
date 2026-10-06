@@ -18,6 +18,20 @@
         "description": {
           "default": "",
           "type": "string"
+        },
+        "cost": {
+          "default": "",
+          "type": "string"
+        },
+        "weight": {
+          "default": "",
+          "type": "string"
+        },
+        "bundle": {
+          "default": 1,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
         }
       },
       "required": [
@@ -45,6 +59,20 @@
           "description": {
             "default": "",
             "type": "string"
+          },
+          "cost": {
+            "default": "",
+            "type": "string"
+          },
+          "weight": {
+            "default": "",
+            "type": "string"
+          },
+          "bundle": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
           }
         },
         "required": [

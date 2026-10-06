@@ -269,6 +269,12 @@ marked `rest_change` (prepared spells, Weapon Mastery…). The state stores only
   (carried items, active conditions, Exhaustion, active toggles), then adds the live `play`
   block. A rest-change pick is validated by running the builder's `setChoice` on the played
   build, so it follows exactly the same rules as a build pick.
+- **Buying and selling.** Gear, tools, weapons and armor have their SRD price (`cost`, gear
+  per `bundle`: 20 Arrows for 1 GP) and weight. The play action `buy` pays the price from the
+  coins (`rules/currency.ts` `pay`: the smallest coins first, one larger coin broken for change
+  in gold, silver and copper) and adds the items; `sell` gives half the price (SRD "Selling
+  Equipment") in gold, silver and copper; `price` sets another (a deal, a magic item). Carried
+  weight counts gear and tools too (a bundle's weight shared by its items).
 - **Items.** An inventory entry points at a catalog item; magic items made from a mundane one
   store its `base` (Weapon, +1 → `longsword`) and kinds a `variant`. A magic item is *active*
   when worn/held (or carried, per `active_when`) and attuned if required; active items become
@@ -956,7 +962,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-51 spells keep their effects in text, and shopping with starting gold isn't automated.
+51 spells keep their effects in text.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

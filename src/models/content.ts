@@ -914,13 +914,21 @@ export const ArmorSchema = z.strictObject({
 });
 export type ArmorDef = z.infer<typeof ArmorSchema>;
 
-export const GearSchema = z.strictObject({ ...entity });
+export const GearSchema = z.strictObject({
+  ...entity,
+  /** Its price (`2 GP`, `5 SP`), for a `bundle` of this many (Arrows: 20). */
+  cost: z.string().default(""),
+  weight: z.string().default(""),
+  bundle: z.int().min(1).default(1),
+});
 export type GearDef = z.infer<typeof GearSchema>;
 
 export const ToolSchema = z.strictObject({
   ...entity,
   /** artisan | gaming-set | musical-instrument | other */
   category: z.string(),
+  cost: z.string().default(""),
+  weight: z.string().default(""),
 });
 export type ToolDef = z.infer<typeof ToolSchema>;
 

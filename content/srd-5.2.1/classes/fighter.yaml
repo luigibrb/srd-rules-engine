@@ -62,7 +62,7 @@ grants:
         gp: 11
     - id: c
       name: Gold
-      description: 155 GP to buy your own gear (shopping is not automated yet)
+      description: 155 GP to buy your own gear (the play action `buy`)
       grants: {gp: 155}
 multiclass:
   weapon_proficiencies: [martial]

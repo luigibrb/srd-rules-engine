@@ -45,6 +45,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P30 | Wall spells on the map: Wall of Force, Stone and Ice between squares; Blade Barrier, Wall of Thorns and Wall of Fire as zones of squares (cover, movement cost, Difficult Terrain, a damaging side, damage without a save) | Straight walls only; rings, domes, breaking walls are text (flagged) |
 | P31 | Smaller rules: toggles with a duration (Rage's 10 minutes, Innate Sorcery, Sacred Weapon), Divine Strike only on your own turns, Spirit Guardians' halved Speed | Durations count the character's turn starts in an encounter |
 | P32 | More spells as data: Hunter's Mark and Hex (marks on the caster's hits, `move_mark`), Divine Smite (after a hit, doubled on a crit, more against Fiends and Undead), Flame Strike, Chain Lightning, Mass Suggestion (Charmed until damaged) | 84 spells with mechanics; the rest of each spell's text (Hex's ability, Chain Lightning's 30 feet) stays the GM's (flagged) |
+| P33 | Shopping: SRD prices and weights for 100 items of gear and every tool (`scripts/import-srd-gear.ts`), the play actions `buy` and `sell` with change, carried weight for gear; `buy`/`sell` in `srd-rules play` | Paid with the smallest coins first; sold for half (SRD); magic items need a price |
 
 ## Decisions
 
@@ -104,7 +105,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Shape, Metamagic and Sorcery Points in turns).
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
-- **Starting gold and shopping (S).** Fighter option C and background option B.
 
 ### Tools
 
