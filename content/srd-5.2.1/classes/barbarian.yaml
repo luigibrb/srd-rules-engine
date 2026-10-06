@@ -87,6 +87,7 @@ features:
       ends_on: [incapacitated]
       no_spells: true
       extends_each_turn: true
+      rounds: 100
       grants:
         resistances: [bludgeoning, piercing, slashing]
         advantages: [check.str, save.str]

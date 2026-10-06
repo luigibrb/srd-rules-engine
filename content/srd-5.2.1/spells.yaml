@@ -4983,6 +4983,7 @@
         - end_turn
       on_cast: false
       designate: true
+      speed_halved: true
 - id: stinking-cloud
   name: Stinking Cloud
   level: 3

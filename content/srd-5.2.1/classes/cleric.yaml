@@ -229,6 +229,7 @@ features:
             type: [necrotic, radiant]
             applies_to: {weapon: true}
             once_per_turn: true
+            own_turn: true
           at_class_level:
           - level: 14
             grants:
@@ -239,6 +240,7 @@ features:
                 type: [necrotic, radiant]
                 applies_to: {weapon: true}
                 once_per_turn: true
+                own_turn: true
       - id: potent-spellcasting
         name: Potent Spellcasting
         description: Add your Wisdom modifier to the damage of your Cleric cantrips.

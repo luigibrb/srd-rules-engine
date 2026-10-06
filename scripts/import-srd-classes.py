@@ -259,7 +259,7 @@ def POTENT_SPELLCASTING(cls):
 
 def DIVINE_STRIKE(dice):
     return {"id": "divine-strike", "name": "Divine Strike", "damage": dice, "type": ["necrotic", "radiant"],
-            "applies_to": {"weapon": True}, "once_per_turn": True}
+            "applies_to": {"weapon": True}, "once_per_turn": True, "own_turn": True}
 
 
 # Divine Spark: "an additional d8 when you reach Cleric levels 7 (2d8), 13 (3d8), and 18 (4d8)".
@@ -486,10 +486,10 @@ SUBCLASS_OVERLAY = {
         15: {"effects": [{"target": "attack.critical", "op": "min", "value": 18}]},
     },
     "warrior-of-the-open-hand": {},
-    # Sacred Weapon: Channel Divinity, Charisma (min +1) to weapon attack rolls while on (its
-    # 10 minutes and the one weapon it imbues aren't tracked).
+    # Sacred Weapon: Channel Divinity, Charisma (min +1) to weapon attack rolls for 10 minutes
+    # (the one weapon it imbues isn't tracked).
     "oath-of-devotion": {3: {**spell_grants(DEVOTION),
-                             "toggles": [{"id": "sacred-weapon", "name": "Sacred Weapon", "uses": "channel-divinity",
+                             "toggles": [{"id": "sacred-weapon", "name": "Sacred Weapon", "uses": "channel-divinity", "rounds": 100,
                                           "grants": {"effects": [{"target": "attack.weapon", "value": "cha", "min": 1}]}}]}},
     "hunter": {
         3: {"choices": [{"id": "hunters_prey", "label": "Hunter's Prey", "kind": "option", "rest_change": "short", "options": [

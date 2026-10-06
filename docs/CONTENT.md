@@ -160,6 +160,7 @@ toggles:
   no_spells: true               # no Concentration or spellcasting while active
   extends_each_turn: true       # in an encounter: ends at the end of a turn it wasn't extended in
                                 # (ends_at_turn_start: true ends it at your next turn: Reckless Attack)
+  rounds: 100                   # in an encounter: lasts at most this many rounds (10 minutes)
   grants:
     resistances: [bludgeoning, piercing, slashing]
     advantages: [check.str, save.str]
@@ -175,7 +176,8 @@ A rider that isn't `automatic` (Sneak Attack, Divine Strike) is listed on matchi
 and added when `makeAttack` is asked to; `type` is `weapon` (the default), a damage type, or a
 list to choose from. `requires` (`advantage_or_ally`: Sneak Attack; `target_damaged`: Colossus
 Slayer) is checked by `makeAttack`; `once_per_turn` is enforced in encounters (outside one, the
-caller tracks it). `while_active: [rage, reckless-attack]` offers it only while those toggles are
+caller tracks it), and `own_turn` only on the attacker's turns (Divine Strike).
+`while_active: [rage, reckless-attack]` offers it only while those toggles are
 on (Frenzy), and `damage: {progression: Rage Damage, die: 6}` rolls that many dice. A later rider
 with the same `id` replaces an earlier one (Divine Strike at Cleric 14: `at_class_level` gives the
 2d8 version).
@@ -408,7 +410,8 @@ mechanics:
 #         zone: {triggers: [move]}              # damage per 5 feet moved in it, no save
 #         zone: {..., optional: true, anchor: point, space: 2, ram: false,
 #                on_fail: [no_actions, lose_concentration],
-#                difficult: true}               # its area is Difficult Terrain (Web)
+#                difficult: true,               # its area is Difficult Terrain (Web)
+#                speed_halved: true}            # others' Speed is halved in it (Spirit Guardians)
 #         wall: {length: 100, between: true}    # a wall on grid lines (Wall of Force); or squares:
 #         wall: {length: 100, cover: three_quarters, difficult: true}   # Blade Barrier
 #         wall: {length: 60, cost: 4, later_type: slashing}             # Wall of Thorns

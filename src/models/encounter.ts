@@ -58,6 +58,8 @@ export const EncounterCombatantSchema = z.object({
   concentration: z.string().nullable().default(null),
   /** Toggles (Rage) switched on this turn, and whether one was extended this turn. */
   toggled_on: z.array(z.string()).default([]),
+  /** Rounds left of toggles with a duration (Rage: 100), counted at the start of its turns. */
+  toggle_rounds: z.record(z.string(), z.int().min(0)).default({}),
   extended: z.boolean().default(false),
   /** Monsters only: in its lair (more legendary uses, when the stat block says so). */
   in_lair: z.boolean().default(false),
@@ -266,6 +268,8 @@ export const ZoneSchema = z.object({
   cover: z.enum(["three_quarters", "total"]).nullable().default(null),
   /** Feet of movement per foot moved in its squares (Wall of Thorns: 4). */
   cost: z.int().min(1).default(1),
+  /** Other creatures' Speed is halved in it (Spirit Guardians). */
+  speed_halved: z.boolean().default(false),
   /** Its later triggers deal `damage` without a save (Wall of Fire). */
   no_save: z.boolean().default(false),
   /** `move_zone` onto a creature makes it save. */

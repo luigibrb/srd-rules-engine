@@ -137,6 +137,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -187,6 +188,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -479,6 +481,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -631,6 +634,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": true,
       "ram": false,
       "space": 2,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -685,6 +689,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": true,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -1004,6 +1009,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": true,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "end_turn",
       ],
@@ -1115,6 +1121,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -1506,6 +1513,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -1596,6 +1604,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -1842,6 +1851,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -2162,6 +2172,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "start_turn",
@@ -2204,6 +2215,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "move",
       ],
@@ -2260,6 +2272,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": true,
       "triggers": [
         "enter",
         "end_turn",
@@ -2331,6 +2344,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "start_turn",
       ],
@@ -2559,6 +2573,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -2696,6 +2711,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "end_turn",
@@ -2741,6 +2757,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "optional": false,
       "ram": false,
       "space": 1,
+      "speed_halved": false,
       "triggers": [
         "enter",
         "start_turn",

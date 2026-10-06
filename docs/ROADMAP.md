@@ -43,6 +43,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P29a | Class features used in turns: Indomitable (a decision), Deflect Attacks, Stunning Strike's successful-save effects, Lay On Hands' cure, Innate Sorcery, Channel Divinity's Divine Spark and Turn Undead | Data first: new `actions` fields (several targets, range, creature types, the spell save DC, save damage, effects on a success, conditions removed); one named rule (`indomitable`) |
 | P29b | Cunning Strike (Poison, Trip, Withdraw), Brutal Strike (Forceful, Hamstring, Staggering, Sundering), Relentless Rage, Agonizing Blast, Sacred Weapon; saves repeated at the end of each turn | Strikes are `attack` options checked before the roll; four named rules; Withdraw, Forceful Blow and Sacred Weapon simplified (flagged) |
 | P30 | Wall spells on the map: Wall of Force, Stone and Ice between squares; Blade Barrier, Wall of Thorns and Wall of Fire as zones of squares (cover, movement cost, Difficult Terrain, a damaging side, damage without a save) | Straight walls only; rings, domes, breaking walls are text (flagged) |
+| P31 | Smaller rules: toggles with a duration (Rage's 10 minutes, Innate Sorcery, Sacred Weapon), Divine Strike only on your own turns, Spirit Guardians' halved Speed | Durations count the character's turn starts in an encounter |
 
 ## Decisions
 
@@ -75,8 +76,6 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 - **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
   Ice's frigid air, walls that cut through a creature's space.
-- **Spirit Guardians' halved Speed (S).** "Any other creature's Speed is halved in the
-  Emanation": a budget that changes along a move.
 - **Monster traits that work like zones (M).** Auras and areas in stat blocks.
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
@@ -85,8 +84,8 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Spellcasting"; spells with a casting time of a minute or more (the Magic action on each turn,
   with Concentration); the two casting actions left as text (Pit Fiend, Unicorn); restrictions
   such as "self only".
-- **Smaller flagged items (S each).** Divine Strike only on your own turns; which attacks a
-  Multiattack allows; Rage's 10-minute cap; Dash with a Fly or Swim Speed.
+- **Smaller flagged items (S each).** Which attacks a Multiattack allows; Dash with a Fly or Swim
+  Speed (movement modes).
 
 ### Content coverage
 
@@ -100,7 +99,7 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 - **Monster save effects left as text (M).** 19 effects without plain damage or conditions
   (slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
 - **Class features used in turns, what's left (M).** Devious Strikes, Deflect Attacks'
-  redirect, Innate Sorcery's and Sacred Weapon's durations, the other subclass features (Wild
+  redirect, the other subclass features (Wild
   Shape, Metamagic and Sorcery Points in turns).
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.

@@ -414,7 +414,14 @@ function run(
           }
           notes.push(`Relentless Rage: ${c.name}'s Hit Points become ${relentless} instead.`);
         }
-        if (a.type === "activate") c.toggled_on.push(a.key);
+        if (a.type === "activate") {
+          c.toggled_on.push(a.key);
+          const ref = characterRef(ctx, c);
+          const t = computePlaySheet(ref.build, ref.state, ctx.catalog).toggles.find(
+            (x) => x.key === a.key,
+          );
+          if (t?.rounds) c.toggle_rounds[a.key] = t.rounds;
+        }
       }
       // "This effect ends early on the creature if it takes any damage" (Turn Undead).
       if (dealt > 0) {
@@ -760,14 +767,27 @@ function run(
     for (const x of e.combatants) x.riders_used = [];
     // "Only once per turn": every creature's turn is a new one.
     for (const z of e.zones) z.saved = [];
-    // Toggles that last until the start of your next turn (Reckless Attack) end.
+    // Toggles that last until the start of your next turn (Reckless Attack) end; those with a
+    // duration (Rage's 10 minutes) count it down.
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
       for (const t of computePlaySheet(ref.build, ref.state, ctx.catalog).toggles) {
-        if (t.active && t.ends_at_turn_start) {
+        if (!t.active) {
+          delete c.toggle_rounds[t.key];
+          continue;
+        }
+        if (t.ends_at_turn_start) {
           notes.push(`${t.name} ends: it lasts until the start of ${c.name}'s next turn.`);
           play(c, { type: "deactivate", key: t.key });
+          continue;
         }
+        const left = c.toggle_rounds[t.key];
+        if (left === undefined || c.toggled_on.includes(t.key)) continue;
+        if (left <= 1) {
+          delete c.toggle_rounds[t.key];
+          notes.push(`${t.name} ends: its duration is over.`);
+          play(c, { type: "deactivate", key: t.key });
+        } else c.toggle_rounds[t.key] = left - 1;
       }
     }
     // A readied action lasts until the start of its next turn; a held spell is lost.
@@ -1083,6 +1103,12 @@ function run(
     });
     const again = onceIds.find((id) => c.riders_used.includes(id));
     if (again) fail(`${c.name} has already used ${again} this turn`);
+    for (const r of riders) {
+      const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
+      if (rider?.own_turn && current()?.id !== c.id) {
+        fail(`${rider.name} is used on ${c.name}'s own turns`);
+      }
+    }
     const target = withCover(encounterCombatant(e, t.id, ctx), coverFor(c, t, options.cover));
     // Help: Advantage on the next attack roll by one of the helper's allies against the target.
     const help = e.helps.find(
@@ -1732,6 +1758,7 @@ function run(
         cover: wallSpec?.cover ?? null,
         cost: wallSpec?.cost ?? 1,
         no_save: wallSpec?.later === "damage",
+        speed_halved: zone?.speed_halved ?? false,
         on_fail: [...(zone?.on_fail ?? [])],
         unaffected: [...(options.unaffected ?? [])].map((x) => find(x).id),
         concentration: spell.concentration,
@@ -3118,8 +3145,21 @@ export function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encount
   // Hamstring Blow: −15 feet (only the most recent counts).
   const hamstrung = e.marks.some((m) => m.kind === "hamstrung" && m.on === c.id);
   const slower = hamstrung ? Math.max(0, after - 15) : after;
-  const halved = e.marks.some((m) => m.kind === "speed_halved" && m.on === c.id);
+  const halved =
+    e.marks.some((m) => m.kind === "speed_halved" && m.on === c.id) || inSlowingZone(e, ctx, c);
   return halved ? Math.floor(slower / 2) : slower;
+}
+
+/** In a zone that halves others' Speed (Spirit Guardians), not its caster or one it spares. */
+function inSlowingZone(e: Encounter, ctx: EncounterContext, c: EncounterCombatant): boolean {
+  if (!c.position) return false;
+  return e.zones.some((z) => {
+    if (!z.speed_halved || z.by === c.id || z.unaffected.includes(c.id)) return false;
+    const squares = zoneArea(e, ctx, z);
+    return (
+      !!squares && inArea(squares, { position: c.position as GridPoint, size: spaceOf(ctx, c) })
+    );
+  });
 }
 
 /** Out of the fight: a defeated monster, or a dead character. */

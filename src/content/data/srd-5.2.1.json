@@ -578,7 +578,8 @@
                                         "automatic": true,
                                         "once_per_turn": false,
                                         "requires": null,
-                                        "while_active": []
+                                        "while_active": [],
+                                        "own_turn": false
                                     }
                                 ],
                                 "advantages": [
@@ -603,7 +604,8 @@
                             ],
                             "no_spells": true,
                             "extends_each_turn": true,
-                            "ends_at_turn_start": false
+                            "ends_at_turn_start": false,
+                            "rounds": 100
                         }
                     ],
                     "items": [],
@@ -748,7 +750,8 @@
                             "ends_on": [],
                             "no_spells": false,
                             "extends_each_turn": false,
-                            "ends_at_turn_start": true
+                            "ends_at_turn_start": true,
+                            "rounds": null
                         }
                     ],
                     "items": [],
@@ -4444,7 +4447,8 @@
                                                 "automatic": false,
                                                 "once_per_turn": true,
                                                 "requires": null,
-                                                "while_active": []
+                                                "while_active": [],
+                                                "own_turn": true
                                             }
                                         ],
                                         "advantages": [],
@@ -4494,7 +4498,8 @@
                                                             "automatic": false,
                                                             "once_per_turn": true,
                                                             "requires": null,
-                                                            "while_active": []
+                                                            "while_active": [],
+                                                            "own_turn": true
                                                         }
                                                     ],
                                                     "advantages": [],
@@ -5909,7 +5914,8 @@
                                                 "automatic": false,
                                                 "once_per_turn": true,
                                                 "requires": null,
-                                                "while_active": []
+                                                "while_active": [],
+                                                "own_turn": false
                                             }
                                         ],
                                         "advantages": [],
@@ -5961,7 +5967,8 @@
                                                             "automatic": false,
                                                             "once_per_turn": true,
                                                             "requires": null,
-                                                            "while_active": []
+                                                            "while_active": [],
+                                                            "own_turn": false
                                                         }
                                                     ],
                                                     "advantages": [],
@@ -12466,7 +12473,8 @@
                             "automatic": false,
                             "once_per_turn": true,
                             "requires": "advantage_or_ally",
-                            "while_active": []
+                            "while_active": [],
+                            "own_turn": false
                         }
                     ],
                     "advantages": [],
@@ -13745,7 +13753,8 @@
                             "ends_on": [],
                             "no_spells": false,
                             "extends_each_turn": false,
-                            "ends_at_turn_start": false
+                            "ends_at_turn_start": false,
+                            "rounds": 10
                         }
                     ],
                     "items": [],
@@ -26429,7 +26438,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -27797,7 +27807,8 @@
                     "space": 1,
                     "ram": true,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -28242,7 +28253,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -28599,7 +28611,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -28746,7 +28759,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -28988,7 +29002,8 @@
                     "space": 2,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -29659,7 +29674,8 @@
                     "on_fail": [
                         "lose_concentration"
                     ],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -29793,7 +29809,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": true
                 },
                 "wall": null
             }
@@ -29858,7 +29875,8 @@
                     "on_fail": [
                         "no_actions"
                     ],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -30134,7 +30152,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -30398,7 +30417,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -30998,7 +31018,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": {
                     "length": 60,
@@ -31155,7 +31176,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -31590,7 +31612,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": true
+                    "difficult": true,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -32058,7 +32081,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": {
                     "length": 100,
@@ -32879,7 +32903,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": {
                     "length": 60,
@@ -33672,7 +33697,8 @@
                     "space": 1,
                     "ram": false,
                     "on_fail": [],
-                    "difficult": false
+                    "difficult": false,
+                    "speed_halved": false
                 },
                 "wall": null
             }
@@ -34241,7 +34267,8 @@
                             "while_active": [
                                 "rage",
                                 "reckless-attack"
-                            ]
+                            ],
+                            "own_turn": false
                         }
                     ],
                     "advantages": [],
@@ -36172,7 +36199,8 @@
                             "ends_on": [],
                             "no_spells": false,
                             "extends_each_turn": false,
-                            "ends_at_turn_start": false
+                            "ends_at_turn_start": false,
+                            "rounds": 100
                         }
                     ],
                     "items": [],
@@ -36528,7 +36556,8 @@
                                                 "automatic": false,
                                                 "once_per_turn": true,
                                                 "requires": "target_damaged",
-                                                "while_active": []
+                                                "while_active": [],
+                                                "own_turn": false
                                             }
                                         ],
                                         "advantages": [],

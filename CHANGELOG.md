@@ -93,6 +93,10 @@ migrated when it's loaded.
   `wall_squares`, `cover`, `cost` and `no_save`; terrain can cost more per foot (`costs`).
   `srd-rules fight`: `cast <spell> from x,y to x,y [left|right]`.
 
+- Toggles can last `rounds` in an encounter (Rage: 10 minutes, Innate Sorcery: 1 minute, Sacred
+  Weapon: 10 minutes); damage riders can be `own_turn` (Divine Strike); zones can halve other
+  creatures' Speed (`speed_halved`: Spirit Guardians).
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
