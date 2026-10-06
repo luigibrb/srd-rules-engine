@@ -97,6 +97,10 @@ migrated when it's loaded.
   Weapon: 10 minutes); damage riders can be `own_turn` (Divine Strike); zones can halve other
   creatures' Speed (`speed_halved`: Spirit Guardians).
 
+- Spell mechanics for Hunter's Mark, Hex, Divine Smite, Flame Strike, Chain Lightning and Mass
+  Suggestion: `mark` (encounter marks of kind `quarry`, moved with the encounter action
+  `move_mark`), `after_hit`, `bonus_vs`, conditions' `ends_on_damage`; `castSpell`'s `critical`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to

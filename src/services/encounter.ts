@@ -567,7 +567,7 @@ function run(
     }
     for (const mark of [...e.marks]) {
       const ends = mark.ends;
-      if (ends.at !== at || ends.of !== c.id) continue;
+      if (!ends || ends.at !== at || ends.of !== c.id) continue;
       if (ends.skip_current) ends.skip_current = false;
       else if (--ends.count <= 0) e.marks = e.marks.filter((m) => m !== mark);
     }
@@ -753,6 +753,7 @@ function run(
     c.surged = false;
     c.granted_attacks = null;
     c.hits = [];
+    c.last_hit = null;
     c.features_used = [];
   };
   /** The start of `c`'s turn: effects, recharges; once-per-turn riders reset for everyone. */
@@ -1126,6 +1127,10 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
+    // Hunter's Mark, Hex: extra damage when its caster hits the marked creature.
+    const quarry = e.marks.filter(
+      (m) => m.kind === "quarry" && m.by === c.id && m.on === t.id && m.damage,
+    );
     // Sundering Blow: +5 to the next attack roll against it by another creature.
     const sundered = e.marks.find((m) => m.on === t.id && m.kind === "sundered" && m.by !== c.id);
     if (sundered) notes.push(`Sundering Blow: +5 to ${c.name}'s attack roll against ${t.name}.`);
@@ -1148,7 +1153,10 @@ function run(
         light_extra: options.light_extra,
         cleave: options.cleave,
         forgo: strikes.forgo,
-        extra_damage: strikes.extra_damage,
+        extra_damage: [
+          ...strikes.extra_damage,
+          ...quarry.map((m) => m.damage as { dice: string; type: string }),
+        ],
         forgo_advantage: strikes.forgo_advantage,
         bonus: sundered ? 5 : 0,
       });
@@ -1168,6 +1176,11 @@ function run(
     else {
       c.riders_used.push(...onceIds);
       c.hits.push(t.id);
+      c.last_hit = {
+        target: t.id,
+        melee: line?.kind === "melee" && !options.thrown,
+        critical: hit.critical_hit,
+      };
       const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
       const crit = hit.critical_hit ? "Critical Hit! " : "";
       notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
@@ -1334,7 +1347,14 @@ function run(
     }
     const mark = (kind: "hamstrung" | "staggered" | "sundered", text: string) => {
       e.marks = e.marks.filter((m) => !(m.on === t.id && m.kind === kind));
-      e.marks.push({ kind, label: "Brutal Strike", by: c.id, on: t.id, ends: { ...until } });
+      e.marks.push({
+        kind,
+        label: "Brutal Strike",
+        by: c.id,
+        on: t.id,
+        ends: { ...until },
+        damage: null,
+      });
       notes.push(text);
     };
     for (const effect of options.brutal ?? []) {
@@ -1548,6 +1568,8 @@ function run(
       held?: boolean;
       /** A wall's placement (`placeWall`). */
       wall?: PlacedWall;
+      /** A smite riding a Critical Hit: its dice are doubled. */
+      critical?: boolean;
     },
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
@@ -1673,8 +1695,48 @@ function run(
           by: c.id,
           on: t.id,
           ends: until("end"),
+          damage: null,
         });
         notes.push(`${spell.name}: the next attack roll against ${t.name} has Advantage.`);
+      }
+    }
+    // Divine Smite's extra die against a Fiend or an Undead (doubled on a Critical Hit).
+    const versus = spell.mechanics?.bonus_vs;
+    if (versus) {
+      for (const hit of r.targets) {
+        const t = targets[hit.target] as EncounterCombatant;
+        const type = creatureTypeOf(ctx, t).toLowerCase();
+        if (!versus.creature_types.some((x) => x.toLowerCase() === type) || outOfFight(ctx, t)) {
+          continue;
+        }
+        const kind = spell.mechanics?.damage[0]?.type ?? "radiant";
+        const more = rollDamage([{ dice: versus.dice, bonus: 0, type: kind }], {
+          rng,
+          critical: options.critical,
+        }).total;
+        notes.push(`${spell.name}: ${more} ${kind} more against a ${creatureTypeOf(ctx, t)}.`);
+        applyTo(t, [{ type: "damage", instances: [{ amount: more, type: kind }] }]);
+      }
+    }
+    // Hunter's Mark, Hex: the target is marked while the caster concentrates.
+    const marking = spell.mechanics?.mark;
+    if (marking) {
+      e.marks = e.marks.filter(
+        (m) => !(m.kind === "quarry" && m.by === c.id && m.label === spell.name),
+      );
+      for (const hit of r.targets) {
+        const t = targets[hit.target] as EncounterCombatant;
+        e.marks.push({
+          kind: "quarry",
+          label: spell.name,
+          by: c.id,
+          on: t.id,
+          ends: null,
+          damage: { ...marking },
+        });
+        notes.push(
+          `${spell.name}: ${c.name}'s attack hits on ${t.name} deal ${marking.dice} ${marking.type} more.`,
+        );
       }
     }
     if (r.follow_up) {
@@ -1713,6 +1775,23 @@ function run(
         }
       }
       const lasting = hit.conditions.filter((x) => !timed.has(x));
+      // Conditions that end when the creature takes damage (Mass Suggestion).
+      const fragile = new Set(
+        (spell.mechanics?.conditions ?? []).filter((x) => x.ends_on_damage).map((x) => x.condition),
+      );
+      if (!spell.concentration && lasting.some((x) => fragile.has(x))) {
+        addEffects(
+          t,
+          lasting.filter((x) => fragile.has(x)),
+          {
+            source: c.id,
+            label: spell.name,
+            concentration: false,
+            ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
+            ends_on: ["damage"],
+          },
+        );
+      }
       if (spell.concentration && lasting.length) {
         addEffects(t, lasting, {
           source: c.id,
@@ -1837,8 +1916,14 @@ function run(
       }
     }
     e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
-    // A spell's mark stays when its caster leaves: the light is on the target.
-    e.marks = e.marks.filter((m) => present(m.on));
+    // A spell's mark stays when its caster leaves: the light is on the target. A mark tied to
+    // Concentration (Hunter's Mark) ends with it.
+    e.marks = e.marks.filter((m) => {
+      if (!present(m.on)) return false;
+      if (m.kind !== "quarry") return true;
+      const by = e.combatants.find((x) => x.id === m.by);
+      return !!by && concentrationOf(by) === m.label;
+    });
     for (const z of [...e.zones]) {
       const source = e.combatants.find((c) => c.id === z.by);
       if (z.concentration && !source) endZone(z, "its caster left");
@@ -2584,6 +2669,27 @@ function run(
       if (action.onto) zoneSave(z, [action.onto], "is in its way");
       break;
     }
+    case "move_mark": {
+      const c = find(action.id);
+      const t = find(action.target);
+      const marks = e.marks.filter(
+        (m) =>
+          m.kind === "quarry" &&
+          m.by === c.id &&
+          (!action.spell ||
+            m.label.toLowerCase() === action.spell.toLowerCase().replace(/-/g, " ")),
+      );
+      const mark = marks[0] ?? fail(`${c.name} has no Hunter's Mark or Hex to move`);
+      const old = find(mark.on);
+      // "If the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action".
+      if (!outOfFight(ctx, old) && encounterCombatant(e, old.id, ctx).hp > 0) {
+        fail(`${mark.label} moves only once ${old.name} drops to 0 Hit Points`);
+      }
+      takeAction(c, `move ${mark.label}`, true);
+      mark.on = t.id;
+      notes.push(`${c.name} moves ${mark.label} to ${t.name}.`);
+      break;
+    }
     case "end_zone": {
       const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
       endZone(z, "ended");
@@ -2923,6 +3029,7 @@ function run(
                 by: c.id,
                 on: x.id,
                 ends: { ...until },
+                damage: null,
               });
               notes.push(
                 `${f.name}: ${x.name}'s Speed is halved until the start of ${c.name}'s next turn.`,
@@ -2935,6 +3042,7 @@ function run(
                 by: c.id,
                 on: x.id,
                 ends: { ...until },
+                damage: null,
               });
               notes.push(`${f.name}: the next attack roll against ${x.name} has Advantage.`);
             }
@@ -3017,18 +3125,32 @@ function run(
         fail(`${spell.name} is a wall: place it with \`wall: {from, to}\``);
       if (!wallSpec && action.wall) fail(`${spell.name} isn't a wall`);
       const wall = wallSpec && action.wall ? placeWall(c, spell, action.wall) : null;
+      // A smite (Divine Smite): "immediately after hitting a target with a Melee weapon or an
+      // Unarmed Strike"; the target is the one hit, and a Critical Hit doubles its dice.
+      const smite = spell.mechanics?.after_hit
+        ? (c.last_hit ?? fail(`${spell.name} is cast right after ${c.name} hits a creature`))
+        : null;
+      if (smite && !smite.melee) fail(`${spell.name} follows a hit with a melee attack`);
+      if (smite && action.targets?.length && action.targets[0] !== smite.target) {
+        fail(
+          `${spell.name}'s target is the creature ${c.name} just hit (${find(smite.target).name})`,
+        );
+      }
       // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
       const placeOnly = action.area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast;
       if (placeOnly) checkZonePoint(c, spell, action.area?.point);
-      const area = wall
-        ? wall.targets
-        : placeOnly
-          ? []
-          : action.area
-            ? spellArea(c, spell, action.area)
-            : null;
+      const area = smite
+        ? [smite.target]
+        : wall
+          ? wall.targets
+          : placeOnly
+            ? []
+            : action.area
+              ? spellArea(c, spell, action.area)
+              : null;
       result = castBy(c, spell, area ?? action.targets ?? [], {
         wall: wall ?? undefined,
+        critical: smite?.critical,
         slot_level,
         pact: action.pact,
         mode: action.mode,

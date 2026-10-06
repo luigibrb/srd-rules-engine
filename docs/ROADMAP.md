@@ -44,6 +44,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P29b | Cunning Strike (Poison, Trip, Withdraw), Brutal Strike (Forceful, Hamstring, Staggering, Sundering), Relentless Rage, Agonizing Blast, Sacred Weapon; saves repeated at the end of each turn | Strikes are `attack` options checked before the roll; four named rules; Withdraw, Forceful Blow and Sacred Weapon simplified (flagged) |
 | P30 | Wall spells on the map: Wall of Force, Stone and Ice between squares; Blade Barrier, Wall of Thorns and Wall of Fire as zones of squares (cover, movement cost, Difficult Terrain, a damaging side, damage without a save) | Straight walls only; rings, domes, breaking walls are text (flagged) |
 | P31 | Smaller rules: toggles with a duration (Rage's 10 minutes, Innate Sorcery, Sacred Weapon), Divine Strike only on your own turns, Spirit Guardians' halved Speed | Durations count the character's turn starts in an encounter |
+| P32 | More spells as data: Hunter's Mark and Hex (marks on the caster's hits, `move_mark`), Divine Smite (after a hit, doubled on a crit, more against Fiends and Undead), Flame Strike, Chain Lightning, Mass Suggestion (Charmed until damaged) | 84 spells with mechanics; the rest of each spell's text (Hex's ability, Chain Lightning's 30 feet) stays the GM's (flagged) |
 
 ## Decisions
 
@@ -89,7 +90,7 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Content coverage
 
-- **Spells left as text (L, ongoing).** 63 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 51 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
   first.

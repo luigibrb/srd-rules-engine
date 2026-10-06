@@ -117,6 +117,7 @@ describe("Guiding Bolt", () => {
         by: "mira",
         on: "goblin-warrior",
         ends: { at: "end", of: "mira", count: 1, skip_current: true },
+        damage: null,
       },
     ]);
     s.act([5, 16, 1, 1], next, {

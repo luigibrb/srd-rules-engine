@@ -24875,6 +24875,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -24918,6 +24921,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -24997,6 +25003,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25059,6 +25068,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25228,6 +25240,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25309,6 +25324,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25372,6 +25390,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25432,6 +25453,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25511,6 +25535,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25594,6 +25621,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25654,7 +25684,8 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -25663,6 +25694,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25760,6 +25794,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25803,7 +25840,8 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -25812,6 +25850,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25868,7 +25909,8 @@
                         "condition": "blinded",
                         "on": "failed_save",
                         "until": "end_of_your_next_turn",
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -25881,6 +25923,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -25986,6 +26031,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26124,6 +26172,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26161,7 +26212,48 @@
             "components": "",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "2d8",
+                        "type": "radiant",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": true,
+                "bonus_vs": {
+                    "creature_types": [
+                        "fiend",
+                        "undead"
+                    ],
+                    "dice": "1d8"
+                },
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "ensnaring-strike",
@@ -26214,7 +26306,8 @@
                         "condition": "restrained",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -26223,6 +26316,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26413,7 +26509,8 @@
                         "condition": "prone",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -26441,6 +26538,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26493,6 +26593,9 @@
                 ],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26536,6 +26639,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26589,6 +26695,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26627,7 +26736,29 @@
             "components": "V, S, M (the petrified eye of a newt)",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": {
+                    "dice": "1d6",
+                    "type": "necrotic"
+                },
+                "wall": null
+            }
         },
         {
             "id": "hideous-laughter",
@@ -26667,13 +26798,15 @@
                         "condition": "prone",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -26682,6 +26815,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26701,7 +26837,29 @@
             "components": "V",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": {
+                    "dice": "1d6",
+                    "type": "force"
+                },
+                "wall": null
+            }
         },
         {
             "id": "ice-knife",
@@ -26761,6 +26919,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26853,6 +27014,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -26959,6 +27123,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -27050,7 +27217,8 @@
                         "condition": "poisoned",
                         "on": "hit",
                         "until": "end_of_your_next_turn",
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -27059,6 +27227,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -27190,7 +27361,8 @@
                         "condition": "incapacitated",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -27203,6 +27375,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -27284,6 +27459,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -27810,6 +27988,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -27914,7 +28095,8 @@
                         "condition": "paralyzed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -27923,6 +28105,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28143,6 +28328,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28256,6 +28444,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28417,6 +28608,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28496,6 +28690,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28614,6 +28811,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28670,7 +28870,8 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -28679,6 +28880,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28734,7 +28938,8 @@
                         "condition": "restrained",
                         "on": "failed_save",
                         "until": null,
-                        "escape": "athletics"
+                        "escape": "athletics",
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -28762,6 +28967,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -28911,6 +29119,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29005,6 +29216,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29170,6 +29384,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29287,13 +29504,15 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -29306,6 +29525,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29364,6 +29586,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29448,6 +29673,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29647,7 +29875,8 @@
                         "condition": "prone",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -29677,6 +29906,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29812,6 +30044,9 @@
                     "difficult": false,
                     "speed_halved": true
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -29849,7 +30084,8 @@
                         "condition": "poisoned",
                         "on": "failed_save",
                         "until": "end_of_its_turn",
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -29878,6 +30114,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30026,6 +30265,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30127,7 +30369,8 @@
                         "condition": "restrained",
                         "on": "failed_save",
                         "until": null,
-                        "escape": "athletics"
+                        "escape": "athletics",
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -30155,6 +30398,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30211,6 +30457,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30254,7 +30503,8 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -30263,6 +30513,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30298,7 +30551,8 @@
                         "condition": "charmed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -30307,6 +30561,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30420,6 +30677,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30739,6 +30999,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -30816,6 +31079,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31021,6 +31287,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 60,
                     "between": false,
@@ -31179,6 +31448,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31275,6 +31547,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31429,7 +31704,59 @@
             "components": "V, S, M (a pinch of sulfur)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "5d6",
+                        "type": "fire",
+                        "add_modifier": false,
+                        "bonus": 0
+                    },
+                    {
+                        "dice": "5d6",
+                        "type": "radiant",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "fire"
+                        },
+                        {
+                            "dice": "1d6",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": {
+                    "shape": "cylinder",
+                    "size": 10,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "geas",
@@ -31532,7 +31859,8 @@
                         "condition": "paralyzed",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -31541,6 +31869,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31615,6 +31946,9 @@
                     "difficult": true,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31682,6 +32016,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -31971,6 +32308,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 100,
                     "between": true,
@@ -32016,6 +32356,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 100,
                     "between": true,
@@ -32084,6 +32427,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 100,
                     "between": false,
@@ -32113,7 +32459,40 @@
             "components": "V, S, M (three silver pins)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "10d8",
+                        "type": "lightning",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": 4,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "circle-of-death",
@@ -32171,6 +32550,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32281,6 +32663,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32359,7 +32744,8 @@
                         "condition": "restrained",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": null,
@@ -32368,6 +32754,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32444,6 +32833,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32526,6 +32918,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32641,7 +33036,37 @@
             "components": "V, M (a snake's tongue)",
             "duration": "24 hours",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 12,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": true
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "move-earth",
@@ -32742,7 +33167,8 @@
                         "condition": "blinded",
                         "on": "failed_save",
                         "until": "start_of_your_next_turn",
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -32755,6 +33181,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -32829,6 +33258,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 100,
                     "between": true,
@@ -32906,6 +33338,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": {
                     "length": 60,
                     "between": false,
@@ -33093,6 +33528,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -33139,6 +33577,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -33499,6 +33940,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -33700,6 +34144,9 @@
                     "difficult": false,
                     "speed_halved": false
                 },
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -33803,7 +34250,8 @@
                         "condition": "blinded",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -33816,6 +34264,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -33988,6 +34439,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },
@@ -34185,7 +34639,8 @@
                         "condition": "frightened",
                         "on": "failed_save",
                         "until": null,
-                        "escape": null
+                        "escape": null,
+                        "ends_on_damage": false
                     }
                 ],
                 "area": {
@@ -34198,6 +34653,9 @@
                 "on_hit": [],
                 "damage_types": [],
                 "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
                 "wall": null
             }
         },

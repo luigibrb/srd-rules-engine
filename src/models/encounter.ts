@@ -90,6 +90,11 @@ export const EncounterCombatantSchema = z.object({
     .default(null),
   /** Creatures it hit this turn (Stunning Strike needs a hit). */
   hits: z.array(z.string()).default([]),
+  /** Its last hit this turn: a melee attack, a Critical Hit (Divine Smite rides it). */
+  last_hit: z
+    .object({ target: z.string(), melee: z.boolean(), critical: z.boolean() })
+    .nullable()
+    .default(null),
   /** Once-per-turn features used this turn. */
   features_used: z.array(z.string()).default([]),
   /**
@@ -196,18 +201,29 @@ export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
  * attack roll against it Advantage, whoever makes it (Guiding Bolt).
  */
 export const SpellMarkSchema = z.object({
+  // `quarry`: `by`'s attack hits on `on` deal `damage` more, while `by` concentrates on `label`
+  // (Hunter's Mark, Hex).
   /**
    * `speed_halved`: `on`'s Speed is halved (Stunning Strike's successful save); `hamstrung`: −15
    * feet (Hamstring Blow); `staggered`: Disadvantage on its next save, no Opportunity Attacks
    * (Staggering Blow); `sundered`: +5 to the next attack roll against it by someone else than
    * `by` (Sundering Blow).
    */
-  kind: z.enum(["advantage_against", "speed_halved", "hamstrung", "staggered", "sundered"]),
+  kind: z.enum([
+    "advantage_against",
+    "speed_halved",
+    "hamstrung",
+    "staggered",
+    "sundered",
+    "quarry",
+  ]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),
   by: z.string(),
   on: z.string(),
-  ends: EffectEndSchema,
+  /** `null` for a mark that lasts while `by` concentrates on `label`. */
+  ends: EffectEndSchema.nullable(),
+  damage: z.object({ dice: z.string(), type: z.string() }).nullable().default(null),
 });
 export type SpellMark = z.infer<typeof SpellMarkSchema>;
 
@@ -752,6 +768,16 @@ export const EncounterActionSchema = z
       onto: z.string().optional(),
     }),
     z.object({ type: z.literal("end_zone"), zone: z.string() }),
+    /**
+     * Move a Hunter's Mark or Hex to a new creature (a Bonus Action), once its target dropped to 0
+     * Hit Points; `spell` picks the mark when the caster has several.
+     */
+    z.object({
+      type: z.literal("move_mark"),
+      id: z.string(),
+      target: z.string(),
+      spell: z.string().optional(),
+    }),
     /** An ability check, with a skill or not, against a DC or not. Uses no action by itself. */
     z.object({
       type: z.literal("check"),

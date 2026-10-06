@@ -1253,6 +1253,21 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     1.
+  mechanics:
+    damage:
+      - dice: 2d8
+        type: radiant
+    targets: 1
+    after_hit: true
+    bonus_vs:
+      creature_types:
+        - fiend
+        - undead
+      dice: 1d8
+    upcast:
+      damage:
+        - dice: 1d8
+          type: radiant
 - id: ensnaring-strike
   name: Ensnaring Strike
   level: 1
@@ -1672,6 +1687,11 @@
 
     _Using a Higher-Level Spell Slot._ Your Concentration can last longer with a spell slot of level
     2 (up to 4 hours), 3–4 (up to 8 hours), or 5+ (24 hours).
+  mechanics:
+    mark:
+      dice: 1d6
+      type: necrotic
+    targets: 1
 - id: hideous-laughter
   name: Hideous Laughter
   level: 1
@@ -1736,6 +1756,11 @@
 
     _Using a Higher-Level Spell Slot._ Your Concentration can last longer with a spell slot of level
     3–4 (up to 8 hours) or 5+ (up to 24 hours).
+  mechanics:
+    mark:
+      dice: 1d6
+      type: force
+    targets: 1
 - id: ice-knife
   name: Ice Knife
   level: 1
@@ -6978,6 +7003,24 @@
 
     _Using a Higher-Level Spell Slot._ The Fire damage and the Radiant damage increase by 1d6 for
     each spell slot level above 5.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 5d6
+        type: fire
+      - dice: 5d6
+        type: radiant
+    area:
+      shape: cylinder
+      size: 10
+    upcast:
+      damage:
+        - dice: 1d6
+          type: fire
+        - dice: 1d6
+          type: radiant
 - id: geas
   name: Geas
   level: 5
@@ -7962,6 +8005,16 @@
 
     _Using a Higher-Level Spell Slot._ One additional bolt leaps from the first target to another
     target for each spell slot level above 6.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 10d8
+        type: lightning
+    targets: 4
+    upcast:
+      targets: 1
 - id: circle-of-death
   name: Circle of Death
   level: 6
@@ -8609,6 +8662,15 @@
 
     _Using a Higher-Level Spell Slot._ The duration is longer with a spell slot of level 7 (10
     days), 8 (30 days), or 9 (366 days).
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: charmed
+        on: failed_save
+        ends_on_damage: true
+    targets: 12
 - id: move-earth
   name: Move Earth
   level: 6

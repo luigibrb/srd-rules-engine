@@ -26,6 +26,47 @@ const maxLevel = maxLevelArg >= 0 ? Number(process.argv[maxLevelArg + 1]) : 9;
 // Each entry is checked by hand against the spell's SRD text (golden spells: tests/casting.test.ts).
 
 const MECHANICS: Record<string, Record<string, unknown>> = {
+  // Marks and smites: extra damage on the caster's attacks.
+  "hunters-mark": { mark: { dice: "1d6", type: "force" }, targets: 1 }, // the Perception edge is text
+  hex: { mark: { dice: "1d6", type: "necrotic" }, targets: 1 }, // the chosen ability's checks: text
+  "divine-smite": {
+    // "The target takes an extra 2d8 Radiant damage from the attack … 1d8 if … a Fiend or an Undead."
+    damage: [{ dice: "2d8", type: "radiant" }],
+    targets: 1,
+    after_hit: true,
+    bonus_vs: { creature_types: ["fiend", "undead"], dice: "1d8" },
+    upcast: { damage: [{ dice: "1d8", type: "radiant" }] },
+  },
+  // Level 5
+  "flame-strike": {
+    save: { ability: "dex", on_success: "half" },
+    damage: [
+      { dice: "5d6", type: "fire" },
+      { dice: "5d6", type: "radiant" },
+    ],
+    area: { shape: "cylinder", size: 10 },
+    upcast: {
+      damage: [
+        { dice: "1d6", type: "fire" },
+        { dice: "1d6", type: "radiant" },
+      ],
+    },
+  },
+  // Level 6
+  "chain-lightning": {
+    // The first target and up to three others (within 30 feet of it: the caller's to check); one
+    // more bolt per slot level above 6.
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "10d8", type: "lightning" }],
+    targets: 4,
+    upcast: { targets: 1 },
+  },
+  "mass-suggestion": {
+    // "Charmed condition for the duration or until you or your allies deal damage to the target".
+    save: { ability: "wis", on_success: "none" },
+    conditions: [{ condition: "charmed", on: "failed_save", ends_on_damage: true }],
+    targets: 12,
+  },
   // Cantrips
   "acid-splash": {
     save: { ability: "dex", on_success: "none" },
