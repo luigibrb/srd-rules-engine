@@ -1080,13 +1080,40 @@ export const SpellMechanicsSchema = z
       })
       .nullable()
       .default(null),
+    /**
+     * A wall placed from point to point (`cast` `wall: {from, to}`), up to `length` feet. `between`:
+     * it stands on grid lines between squares and nothing passes it (Wall of Force, Stone, Ice);
+     * otherwise it fills a line of 5-foot squares (Blade Barrier, Wall of Thorns, Wall of Fire):
+     * creatures in it save when it appears (`save`, `damage`), and with a `zone` they save again
+     * (`later: save`, with `later_type` if it differs) or just take damage (`later: damage`).
+     */
+    wall: z
+      .strictObject({
+        length: z.int().min(5),
+        between: z.boolean().default(false),
+        /** What lines through its squares get: Three-Quarters (Blade Barrier) or Total Cover. */
+        cover: z.enum(["three_quarters", "total"]).nullable().default(null),
+        difficult: z.boolean().default(false),
+        /** Feet of movement per foot moved through it (Wall of Thorns: 4). */
+        cost: z.int().min(1).default(1),
+        /** Feet beyond its chosen side that its zone reaches (Wall of Fire: 10). */
+        side: z.int().min(0).nullable().default(null),
+        later: z.enum(["save", "damage"]).default("save"),
+        /** The later damage's type, when it differs (Wall of Thorns: Slashing). */
+        later_type: z.enum(DAMAGE_TYPES).nullable().default(null),
+      })
+      .nullable()
+      .default(null),
   })
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
   .refine((m) => !m.follow_up || m.attack, "a follow-up saving throw comes after a spell attack")
   .refine((m) => !m.projectiles || !m.save, "projectiles are spell attacks or automatic hits")
   .refine(
-    (m) => !m.zone || (m.area && (m.save || m.zone.triggers.every((t) => t === "move"))),
-    "a zone has an area, and a saving throw unless it only deals damage to creatures moving in it",
+    (m) =>
+      !m.zone ||
+      ((m.area || m.wall) &&
+        (m.save || m.wall?.later === "damage" || m.zone.triggers.every((t) => t === "move"))),
+    "a zone has an area or a wall, and a saving throw unless it only deals damage",
   )
   .meta({ id: "SpellMechanics" });
 export type SpellMechanics = z.infer<typeof SpellMechanicsSchema>;

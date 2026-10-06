@@ -30,6 +30,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "animal-friendship": {
@@ -60,6 +61,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "befuddlement": {
@@ -86,6 +88,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "black-tentacles": {
@@ -123,10 +126,61 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
       "difficult": true,
+      "on_cast": true,
+      "on_fail": [],
+      "once_per_turn": true,
+      "optional": false,
+      "ram": false,
+      "space": 1,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
+  },
+  "blade-barrier": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "6d10",
+        "type": "force",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": null,
+    "wall": {
+      "between": false,
+      "cost": 1,
+      "cover": "three_quarters",
+      "difficult": true,
+      "later": "save",
+      "later_type": null,
+      "length": 100,
+      "side": null,
+    },
+    "zone": {
+      "anchor": "caster",
+      "designate": false,
+      "difficult": false,
       "on_cast": true,
       "on_fail": [],
       "once_per_turn": true,
@@ -172,6 +226,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "burning-hands": {
@@ -211,6 +266,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "call-lightning": {
@@ -246,6 +302,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "charm-monster": {
@@ -276,6 +333,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "charm-person": {
@@ -306,6 +364,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "chill-touch": {
@@ -329,6 +388,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "circle-of-death": {
@@ -368,6 +428,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "cloudkill": {
@@ -407,6 +468,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -451,6 +513,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "compulsion": {
@@ -477,6 +540,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "cone-of-cold": {
@@ -516,6 +580,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "conjure-animals": {
@@ -555,6 +620,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "point",
       "designate": false,
@@ -608,6 +674,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -645,6 +712,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "2d8",
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "disintegrate": {
@@ -680,6 +748,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "dissonant-whispers": {
@@ -715,6 +784,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "eldritch-blast": {
@@ -738,6 +808,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "entangle": {
@@ -764,6 +835,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "finger-of-death": {
@@ -790,6 +862,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "fire-bolt": {
@@ -813,6 +886,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "fire-storm": {
@@ -839,6 +913,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "fireball": {
@@ -878,6 +953,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "flaming-sphere": {
@@ -917,6 +993,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "point",
       "designate": false,
@@ -956,6 +1033,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "freezing-sphere": {
@@ -995,6 +1073,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "grease": {
@@ -1025,6 +1104,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -1073,6 +1153,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "harm": {
@@ -1099,6 +1180,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "healing-word": {
@@ -1122,6 +1204,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "2d4",
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "hellish-rebuke": {
@@ -1157,6 +1240,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "hideous-laughter": {
@@ -1193,6 +1277,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "hold-monster": {
@@ -1223,6 +1308,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "hold-person": {
@@ -1253,6 +1339,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 1,
     },
+    "wall": null,
     "zone": null,
   },
   "hypnotic-pattern": {
@@ -1289,6 +1376,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "ice-knife": {
@@ -1330,6 +1418,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "ice-storm": {
@@ -1375,6 +1464,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "incendiary-cloud": {
@@ -1405,6 +1495,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -1454,6 +1545,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "insect-plague": {
@@ -1493,6 +1585,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -1546,6 +1639,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "magic-missile": {
@@ -1572,6 +1666,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "mass-cure-wounds": {
@@ -1599,6 +1694,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "1d8",
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "mass-healing-word": {
@@ -1622,6 +1718,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": "1d4",
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "meteor-swarm": {
@@ -1658,6 +1755,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "mind-spike": {
@@ -1693,6 +1791,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "moonbeam": {
@@ -1732,6 +1831,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -1781,6 +1881,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "poison-spray": {
@@ -1804,6 +1905,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "ray-of-frost": {
@@ -1827,6 +1929,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "ray-of-sickness": {
@@ -1866,6 +1969,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "sacred-flame": {
@@ -1892,6 +1996,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "scorching-ray": {
@@ -1918,6 +2023,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "shatter": {
@@ -1957,6 +2063,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "shocking-grasp": {
@@ -1980,6 +2087,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "sleep": {
@@ -2010,6 +2118,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "sleet-storm": {
@@ -2040,6 +2149,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -2083,6 +2193,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -2138,6 +2249,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": true,
@@ -2175,6 +2287,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "save": null,
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "stinking-cloud": {
@@ -2205,6 +2318,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -2246,6 +2360,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "sunbeam": {
@@ -2283,6 +2398,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "sunburst": {
@@ -2320,6 +2436,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "thunderwave": {
@@ -2359,6 +2476,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "heal": null,
       "targets": 0,
     },
+    "wall": null,
     "zone": null,
   },
   "vicious-mockery": {
@@ -2385,7 +2503,204 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": 1,
     "upcast": null,
+    "wall": null,
     "zone": null,
+  },
+  "wall-of-fire": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "5d8",
+        "type": "fire",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "fire",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "wall": {
+      "between": false,
+      "cost": 1,
+      "cover": null,
+      "difficult": false,
+      "later": "damage",
+      "later_type": null,
+      "length": 60,
+      "side": 10,
+    },
+    "zone": {
+      "anchor": "caster",
+      "designate": false,
+      "difficult": false,
+      "on_cast": true,
+      "on_fail": [],
+      "once_per_turn": true,
+      "optional": false,
+      "ram": false,
+      "space": 1,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
+  },
+  "wall-of-force": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": null,
+    "upcast": null,
+    "wall": {
+      "between": true,
+      "cost": 1,
+      "cover": null,
+      "difficult": false,
+      "later": "save",
+      "later_type": null,
+      "length": 100,
+      "side": null,
+    },
+    "zone": null,
+  },
+  "wall-of-ice": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": null,
+    "upcast": null,
+    "wall": {
+      "between": true,
+      "cost": 1,
+      "cover": null,
+      "difficult": false,
+      "later": "save",
+      "later_type": null,
+      "length": 100,
+      "side": null,
+    },
+    "zone": null,
+  },
+  "wall-of-stone": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": null,
+    "upcast": null,
+    "wall": {
+      "between": true,
+      "cost": 1,
+      "cover": null,
+      "difficult": false,
+      "later": "save",
+      "later_type": null,
+      "length": 100,
+      "side": null,
+    },
+    "zone": null,
+  },
+  "wall-of-thorns": {
+    "area": null,
+    "attack": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "7d8",
+        "type": "piercing",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
+      "on_success": "half",
+    },
+    "targets": null,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d8",
+          "type": "piercing",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "wall": {
+      "between": false,
+      "cost": 4,
+      "cover": null,
+      "difficult": false,
+      "later": "save",
+      "later_type": "slashing",
+      "length": 60,
+      "side": null,
+    },
+    "zone": {
+      "anchor": "caster",
+      "designate": false,
+      "difficult": false,
+      "on_cast": true,
+      "on_fail": [],
+      "once_per_turn": true,
+      "optional": false,
+      "ram": false,
+      "space": 1,
+      "triggers": [
+        "enter",
+        "end_turn",
+      ],
+    },
   },
   "web": {
     "area": {
@@ -2415,6 +2730,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": {
       "anchor": "caster",
       "designate": false,
@@ -2466,6 +2782,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
   "wind-wall": {
@@ -2492,6 +2809,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "targets": null,
     "upcast": null,
+    "wall": null,
     "zone": null,
   },
 }

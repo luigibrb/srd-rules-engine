@@ -530,6 +530,16 @@ list of actions.
   same way), refused with its cost when it's too far ("can't reach 4,7 (needs 40 ft, 30
   left)"). An enemy whose reach the mover leaves at any step is noted for its Opportunity
   Attack. A move can't end in a blocked square, nor can `place`.
+- **Wall spells.** A spell with `mechanics.wall` is placed with `cast` `wall: { from, to }`
+  (straight, up to its length, both ends within range) and leaves a zone for its duration
+  (Concentration). Wall of Force, Stone and Ice stand on grid lines between squares
+  (`segments`): nothing moves through them and they block lines (Total Cover, areas). Blade
+  Barrier, Wall of Thorns and Wall of Fire fill the squares of the line (`wall_squares`): the
+  creatures in them save when it appears, then on entering or ending a turn there; Blade Barrier
+  gives Three-Quarters Cover to lines through it and is Difficult Terrain, Wall of Thorns costs 4
+  feet per foot moved (20 feet a square) and its later damage is Slashing, Wall of Fire's zone
+  also covers 10 feet on its chosen `side` and deals its damage there without a save. The fight
+  CLI casts one with `from x,y to x,y [left|right]` and draws it.
 - **Cover and line of effect.** With positions, a target's cover is worked out from the map
   unless the caller gives `cover` (which wins): from the attacker's space for attacks, spells
   and save effects aimed at creatures, from an area's point of origin for creatures in an area
@@ -869,6 +879,16 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.
 
+**Wall spells**
+
+- Walls are straight, from point to point: rings, Wall of Force's and Wall of Ice's domes, globes
+  and panels at angles, and walls that cut through a creature's space (pushed aside, Wall of
+  Ice's save) are text; so are breaking a wall (AC and Hit Points per section), Wall of Ice's
+  frigid air, Wall of Stone's enclosure save and its permanence.
+- Wall of Fire's "when it enters the wall" and Blade Barrier's and Wall of Thorns' saves use the
+  whole zone (for Wall of Fire, its side too); Wall of Fire's opacity and Wall of Thorns' "blocks
+  line of sight" are vision, which isn't modeled.
+
 **Hide, Search and Ready**
 
 - "Out of any enemy's line of sight" is read as Three-Quarters or Total Cover from each enemy that
@@ -922,7 +942,7 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 ## Known gaps
 
 What the engine doesn't do yet is listed with sizes in [ROADMAP.md](ROADMAP.md). The main ones:
-spell walls (Wall of Fire, Blade Barrier) aren't on the map, 63 spells keep their effects in text, and shopping with starting gold isn't automated.
+63 spells keep their effects in text, and shopping with starting gold isn't automated.
 Starting-equipment items "of your choice" (a Bard's instrument, a Monk's tool) are placeholders,
 like the Soldier's gaming set.
 

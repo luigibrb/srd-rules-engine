@@ -270,6 +270,38 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     area: { shape: "sphere", size: 20 },
     zone: { triggers: ["enter", "end_turn"], difficult: true },
   },
+  // Walls, placed from point to point (`cast` `wall`). Level 4
+  "wall-of-fire": {
+    // "each creature in its area makes a Dexterity saving throw … 5d8 Fire"; then 5d8 to each
+    // creature that ends its turn within 10 feet of the chosen side or inside the wall, or enters
+    // it: no save.
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "5d8", type: "fire" }],
+    upcast: { damage: [{ dice: "1d8", type: "fire" }] },
+    wall: { length: 60, side: 10, later: "damage" },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  // Level 5 (walls)
+  "wall-of-force": { wall: { length: 100, between: true } }, // ten 10-foot panels
+  "wall-of-stone": { wall: { length: 100, between: true } },
+  // Level 6 (walls)
+  "blade-barrier": {
+    // "The wall provides Three-Quarters Cover, and its space is Difficult Terrain."
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "6d10", type: "force" }],
+    wall: { length: 100, cover: "three_quarters", difficult: true },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
+  "wall-of-ice": { wall: { length: 100, between: true } },
+  "wall-of-thorns": {
+    // 7d8 Piercing when it appears; "For every 1 foot a creature moves through the wall, it must
+    // spend 4 feet of movement"; 7d8 Slashing on entering or ending a turn there.
+    save: { ability: "dex", on_success: "half" },
+    damage: [{ dice: "7d8", type: "piercing" }],
+    upcast: { damage: [{ dice: "1d8", type: "piercing" }] },
+    wall: { length: 60, cost: 4, later_type: "slashing" },
+    zone: { triggers: ["enter", "end_turn"] },
+  },
   // Level 8
   "incendiary-cloud": {
     save: { ability: "dex", on_success: "half" },

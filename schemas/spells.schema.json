@@ -737,6 +737,104 @@
               "type": "null"
             }
           ]
+        },
+        "wall": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "length": {
+                  "type": "integer",
+                  "minimum": 5,
+                  "maximum": 9007199254740991
+                },
+                "between": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "cover": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "three_quarters",
+                        "total"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "difficult": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "cost": {
+                  "default": 1,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "side": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "later": {
+                  "default": "save",
+                  "type": "string",
+                  "enum": [
+                    "save",
+                    "damage"
+                  ]
+                },
+                "later_type": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "length"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "additionalProperties": false

@@ -75,6 +75,7 @@ import {
   type CoverDegree,
   coverDegree,
   findPath,
+  type Wall as GridWall,
   gridDistance,
   lineClear,
   type Occupant,
@@ -594,7 +595,10 @@ function run(
    */
   const zoneSave = (z: Zone, ids: readonly string[], why: string): void => {
     const save = z.save;
-    if (!save) return;
+    if (!save) {
+      if (z.no_save && z.damage.length) zoneDamage(z, ids, why);
+      return;
+    }
     const caster = e.combatants.find((x) => x.id === z.by);
     const who = ids.map(find).filter((t) => {
       if (z.unaffected.includes(t.id) || outOfFight(ctx, t)) return false;
@@ -645,6 +649,26 @@ function run(
         if (t.monster !== null) t.concentration = null;
         else play(t, { type: "set_concentration", spell: null });
       }
+    }
+  };
+  /** A zone's damage without a save (Wall of Fire), rolled once, each creature once per turn. */
+  const zoneDamage = (z: Zone, ids: readonly string[], why: string): void => {
+    const who = ids
+      .map(find)
+      .filter(
+        (t) =>
+          !z.unaffected.includes(t.id) &&
+          !outOfFight(ctx, t) &&
+          !(z.once_per_turn && z.saved.includes(t.id)),
+      );
+    if (!who.length) return;
+    const rolled = rollDamage(z.damage, { rng });
+    const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
+    const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
+    for (const t of who) {
+      z.saved.push(t.id);
+      notes.push(`${z.label}: ${t.name} ${why}: ${dealt}.`);
+      applyTo(t, [{ type: "damage", instances }]);
     }
   };
   /** Damage for every 5 feet moved into or within zones that deal it (Spike Growth). */
@@ -1399,6 +1423,80 @@ function run(
     return r;
   };
   /**
+   * A wall spell placed from `from` to `to` (SRD wall spells): within the spell's range and its
+   * length. Between squares, a segment from corner to corner; otherwise the squares of the line
+   * (and, for Wall of Fire, those within its reach on the chosen side), with the creatures in the
+   * wall's squares as the targets of its first save.
+   */
+  const placeWall = (
+    c: EncounterCombatant,
+    spell: SpellDef,
+    at: { from: GridPoint; to: GridPoint; side?: "left" | "right" },
+  ): PlacedWall => {
+    const spec = spell.mechanics?.wall ?? fail(`${spell.name} isn't a wall`);
+    if (!c.position) fail(`${c.name} has no position: a wall needs positions`);
+    const me = { position: c.position, size: spaceOf(ctx, c) };
+    const range = spellRangeFeet(spell);
+    const steps = Math.max(Math.abs(at.to.x - at.from.x), Math.abs(at.to.y - at.from.y));
+    if (spec.between) {
+      if (steps * 5 > spec.length) {
+        fail(`${spell.name} is at most ${spec.length} feet long (this one: ${steps * 5})`);
+      }
+      for (const p of [at.from, at.to]) {
+        const d = distanceToPoint(me, p);
+        if (range !== null && d > range)
+          fail(`That point is ${d} feet away: out of ${spell.name}'s range`);
+      }
+      return {
+        squares: [],
+        zone: [],
+        segments: [{ from: { ...at.from }, to: { ...at.to } }],
+        targets: [],
+      };
+    }
+    const line = [at.from, ...straightPath(at.from, at.to)];
+    if (line.length * 5 > spec.length) {
+      fail(`${spell.name} is at most ${spec.length} feet long (this one: ${line.length * 5})`);
+    }
+    for (const p of [at.from, at.to]) {
+      const d = gridDistance(p, 1, me.position, me.size);
+      if (range !== null && d > range)
+        fail(`${p.x},${p.y} is ${d} feet away: out of ${spell.name}'s range`);
+    }
+    const keys = new Set(line.map(squareKey));
+    const zone = [...line];
+    if (spec.side) {
+      if (!at.side) fail(`${spell.name}: choose its damaging side (\`side\`: left or right)`);
+      const dx = Math.sign(at.to.x - at.from.x);
+      const dy = Math.sign(at.to.y - at.from.y);
+      if (!dx && !dy) fail(`${spell.name}: a one-square wall has no side`);
+      // Left of the direction from `from` to `to` (y grows downward).
+      const [nx, ny] = at.side === "left" ? [dy, -dx] : [-dy, dx];
+      for (const p of line) {
+        for (let k = 1; k <= spec.side / 5; k++) {
+          const q = { x: p.x + nx * k, y: p.y + ny * k };
+          if (!keys.has(squareKey(q))) {
+            keys.add(squareKey(q));
+            zone.push(q);
+          }
+        }
+      }
+    }
+    const own = new Set(line.map(squareKey));
+    const targets = spell.mechanics?.save
+      ? e.combatants
+          .filter((x) => x.position && !outOfFight(ctx, x))
+          .filter((x) => inArea(own, { position: x.position as GridPoint, size: spaceOf(ctx, x) }))
+          .map((x) => x.id)
+      : [];
+    return {
+      squares: line.map((p) => ({ x: p.x, y: p.y })),
+      zone: zone.map((p) => ({ x: p.x, y: p.y })),
+      segments: [],
+      targets,
+    };
+  };
+  /**
    * `c` casts a spell at targets (`castSpell`) and the results are applied; a Concentration
    * spell's conditions become effects for its duration. Economy and limits are the caller's.
    */
@@ -1422,6 +1520,8 @@ function run(
       unaffected?: readonly string[];
       /** A readied spell, its slot spent when it was readied. */
       held?: boolean;
+      /** A wall's placement (`placeWall`). */
+      wall?: PlacedWall;
     },
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
@@ -1450,6 +1550,7 @@ function run(
       point: _point,
       unaffected: _unaffected,
       held,
+      wall: placedWall,
       ...cast
     } = options;
     const relevant = !!spell.mechanics?.attack || spell.mechanics?.save?.ability === "dex";
@@ -1597,10 +1698,12 @@ function run(
         });
       }
     }
-    if (zone && spell.mechanics?.area) {
-      const m = spell.mechanics;
+    if ((zone && spell.mechanics?.area) || placedWall) {
+      const m = spell.mechanics as NonNullable<SpellDef["mechanics"]>;
+      const wallSpec = m.wall;
+      const triggers = zone?.triggers ?? [];
       const id = `zone-${e.next_effect++}`;
-      const followsCaster = m.area?.shape === "emanation" && zone.anchor === "caster";
+      const followsCaster = m.area?.shape === "emanation" && zone?.anchor === "caster";
       const until = m.conditions.find((x) => x.until === "end_of_its_turn")
         ? "end_of_its_turn"
         : null;
@@ -1609,21 +1712,27 @@ function run(
         spell: spell.id,
         label: spell.name,
         by: c.id,
-        area: m.area as SpellArea,
+        area: (m.area ?? { shape: "line", size: wallSpec?.length ?? 5, width: 5 }) as SpellArea,
         point: followsCaster ? null : (options.point ?? null),
-        save: m.save ? { ...m.save, dc: r.save_dc ?? 0 } : null,
-        damage: [...r.damage_parts],
+        save: m.save && wallSpec?.later !== "damage" ? { ...m.save, dc: r.save_dc ?? 0 } : null,
+        damage: r.damage_parts.map((d) => ({ ...d, type: wallSpec?.later_type ?? d.type })),
         conditions: m.conditions.filter((x) => x.on === "failed_save").map((x) => x.condition),
         escape_dc: escapeDc,
         escape_skill: hold,
         until,
-        triggers: [...zone.triggers],
-        once_per_turn: zone.once_per_turn,
-        optional: zone.optional,
-        space: zone.space,
-        ram: zone.ram,
-        difficult: zone.difficult,
-        on_fail: [...zone.on_fail],
+        triggers: [...triggers],
+        once_per_turn: zone?.once_per_turn ?? true,
+        optional: zone?.optional ?? false,
+        space: zone?.space ?? 1,
+        ram: zone?.ram ?? false,
+        difficult: (zone?.difficult ?? false) || (wallSpec?.difficult ?? false),
+        squares: placedWall ? placedWall.zone : null,
+        segments: placedWall ? placedWall.segments : [],
+        wall_squares: placedWall ? placedWall.squares : [],
+        cover: wallSpec?.cover ?? null,
+        cost: wallSpec?.cost ?? 1,
+        no_save: wallSpec?.later === "damage",
+        on_fail: [...(zone?.on_fail ?? [])],
         unaffected: [...(options.unaffected ?? [])].map((x) => find(x).id),
         concentration: spell.concentration,
         ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
@@ -1635,10 +1744,12 @@ function run(
         start_turn: "start their turn there",
         end_turn: "end their turn there",
       } as const;
-      const when = zone.triggers.flatMap((t) => (t === "move" ? [] : [WHEN[t]])).join(" or ");
+      const when = triggers.flatMap((t) => (t === "move" ? [] : [WHEN[t]])).join(" or ");
       const lasts = `${spell.name} lasts (${id})`;
-      if (when) notes.push(`${lasts}: creatures save when they ${when}.`);
-      if (zone.triggers.includes("move")) {
+      const what = wallSpec?.later === "damage" ? "take its damage" : "save";
+      if (when) notes.push(`${lasts}: creatures ${what} when they ${when}.`);
+      else notes.push(`${lasts}.`);
+      if (triggers.includes("move")) {
         notes.push(`${lasts}: creatures take its damage for every 5 feet they move in it.`);
       }
     }
@@ -2873,11 +2984,24 @@ function run(
         fail("Action Surge's additional action can't be the Magic action (casting a spell)");
       }
       if (action.area && action.targets?.length) fail("Give targets or an area, not both");
+      // A wall: placed from point to point; the creatures in its squares are its targets.
+      const wallSpec = spell.mechanics?.wall ?? null;
+      if (wallSpec && !action.wall)
+        fail(`${spell.name} is a wall: place it with \`wall: {from, to}\``);
+      if (!wallSpec && action.wall) fail(`${spell.name} isn't a wall`);
+      const wall = wallSpec && action.wall ? placeWall(c, spell, action.wall) : null;
       // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
       const placeOnly = action.area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast;
       if (placeOnly) checkZonePoint(c, spell, action.area?.point);
-      const area = placeOnly ? [] : action.area ? spellArea(c, spell, action.area) : null;
+      const area = wall
+        ? wall.targets
+        : placeOnly
+          ? []
+          : action.area
+            ? spellArea(c, spell, action.area)
+            : null;
       result = castBy(c, spell, area ?? action.targets ?? [], {
+        wall: wall ?? undefined,
         slot_level,
         pact: action.pact,
         mode: action.mode,
@@ -3244,6 +3368,16 @@ export function dailyUses(
 
 export type Cover = "half" | "three_quarters" | "total";
 
+/** A wall spell's placement (`placeWall`). */
+interface PlacedWall {
+  /** The wall's squares; the zone's (with Wall of Fire's side); segments between squares. */
+  squares: GridPoint[];
+  zone: GridPoint[];
+  segments: { from: GridPoint; to: GridPoint }[];
+  /** Creatures in its squares when it appears. */
+  targets: string[];
+}
+
 /** A target behind cover: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
 function withCover(view: Combatant, cover: Cover | undefined): Combatant {
   if (!cover) return view;
@@ -3320,8 +3454,14 @@ export function spaceTakenBy(
 /** The grid as `c` moves on it: walls, blocked and difficult squares, other creatures. */
 export function terrainOf(e: Encounter, ctx: EncounterContext, c: EncounterCombatant): Terrain {
   const difficult = new Set(e.map.difficult.map(squareKey));
+  const costs = new Map<string, number>();
   for (const z of e.zones) {
-    if (z.difficult) for (const sq of zoneArea(e, ctx, z) ?? []) difficult.add(sq);
+    // A wall's own squares, not the side its zone reaches (Wall of Fire).
+    const own = z.wall_squares.length
+      ? new Set(z.wall_squares.map(squareKey))
+      : zoneArea(e, ctx, z);
+    if (z.difficult) for (const sq of own ?? []) difficult.add(sq);
+    if (z.cost > 1) for (const sq of own ?? []) costs.set(sq, Math.max(z.cost, costs.get(sq) ?? 1));
   }
   const creatures = new Map<string, Occupant>();
   for (const x of e.combatants) {
@@ -3338,11 +3478,17 @@ export function terrainOf(e: Encounter, ctx: EncounterContext, c: EncounterComba
     }
   }
   return {
-    walls: e.map.walls,
+    walls: mapWalls(e),
     blocked: new Set(e.map.blocked.map(squareKey)),
     difficult,
     creatures,
+    costs,
   };
+}
+
+/** The map's walls and the walls spells put up between squares (Wall of Force, Stone, Ice). */
+export function mapWalls(e: Encounter): GridWall[] {
+  return [...e.map.walls, ...e.zones.flatMap((z) => z.segments)];
 }
 
 /**
@@ -3465,6 +3611,8 @@ export function placeArea(
  * Squares the point of origin has no clear line to aren't in it.
  */
 export function zoneArea(e: Encounter, ctx: EncounterContext, z: Zone): Set<string> | null {
+  // A wall spell's zone: its squares, given when it was placed.
+  if (z.squares) return new Set(z.squares.map(squareKey));
   let origin: GridSpace | null;
   if (z.area.shape === "emanation" && !z.point) {
     const by = e.combatants.find((x) => x.id === z.by);
@@ -3536,12 +3684,19 @@ export function mapCover(
     (x) =>
       x.id !== t.id && !exclude.includes(x.id) && x.position && !x.defeated && !outOfFight(ctx, x),
   );
-  const lines = obstacles(e.map.walls, e.map.blocked.map(squareKey));
+  const lines = obstacles(mapWalls(e), e.map.blocked.map(squareKey));
+  // Spell walls that give cover to lines through their squares (Blade Barrier).
+  const screens = e.zones.flatMap((z) =>
+    z.cover
+      ? z.wall_squares.map((p) => ({ position: p, size: 1, degree: z.cover as CoverDegree }))
+      : [],
+  );
   const r = coverDegree(
     origins,
     { position: t.position, size: spaceOf(ctx, t) },
     lines,
     others.map((x) => ({ position: x.position as GridPoint, size: spaceOf(ctx, x) })),
+    screens,
   );
   return { degree: r.degree, by: r.by === null ? null : (others[r.by]?.name ?? null) };
 }
