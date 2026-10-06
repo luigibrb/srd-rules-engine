@@ -204,8 +204,20 @@ function withDodge(
   ctx: EncounterContext,
   encounter: Encounter,
   c: EncounterCombatant,
-  base: Combatant,
+  view: Combatant,
 ): Combatant {
+  // Staggering Blow: Disadvantage on its next saving throw.
+  const base = encounter.marks.some((m) => m.kind === "staggered" && m.on === c.id)
+    ? {
+        ...view,
+        condition_rolls: {
+          ...view.condition_rolls,
+          save_disadvantage: Object.fromEntries(
+            (["str", "dex", "con", "int", "wis", "cha"] as const).map((a) => [a, "staggered"]),
+          ),
+        },
+      }
+    : view;
   if (!c.dodging || base.conditions.includes("incapacitated") || speedOf(ctx, c, encounter) === 0) {
     return base;
   }
@@ -387,7 +399,20 @@ function run(
       }
       if (c.monster !== null) notes.push(...monsterEffect(ctx, c, a));
       else {
-        play(c, a);
+        const relentless = a.type === "damage" ? relentlessRage(c, a) : null;
+        if (relentless === null) play(c, a);
+        else {
+          // "your Hit Points instead change to a number equal to twice your Barbarian level":
+          // the damage takes its Temporary Hit Points, then its Hit Points become that number.
+          const view = encounterCombatant(e, c.id, ctx);
+          if (view.hp + view.temp_hp > relentless) {
+            play(c, { type: "damage", amount: view.hp + view.temp_hp - relentless });
+          } else {
+            if (view.temp_hp) play(c, { type: "set_temp_hp", amount: 0 });
+            if (relentless > view.hp) play(c, { type: "heal", amount: relentless - view.hp });
+          }
+          notes.push(`Relentless Rage: ${c.name}'s Hit Points become ${relentless} instead.`);
+        }
         if (a.type === "activate") c.toggled_on.push(a.key);
       }
       // "This effect ends early on the creature if it takes any damage" (Turn Undead).
@@ -411,6 +436,41 @@ function run(
         }
       }
     }
+  };
+  /**
+   * Relentless Rage (SRD): damage that would drop a raging Barbarian to 0 Hit Points without
+   * killing it outright allows a Constitution save, DC 10 + 5 per use since its last rest; on a
+   * success its Hit Points become twice its Barbarian level (returned), else `null`.
+   */
+  const relentlessRage = (
+    c: EncounterCombatant,
+    a: Extract<PlayAction, { type: "damage" }>,
+  ): number | null => {
+    const ref = characterRef(ctx, c);
+    const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+    if (!sheet.rules.includes("relentless_rage")) return null;
+    if (!sheet.toggles.some((t) => t.active && t.key.endsWith(":rage"))) return null;
+    const view = encounterCombatant(e, c.id, ctx);
+    const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
+    const taken = takeDamage(
+      { hp: view.hp, temp: view.temp_hp, max: view.max_hp },
+      instances,
+      view.defenses,
+      { critical: a.critical },
+    );
+    if (!taken.dropped_to_zero || taken.died) return null;
+    const use = sheet.play.uses.find((u) => u.key.endsWith(":relentless-rage"));
+    const dc = 10 + 5 * (use?.spent ?? 0);
+    const question = `${c.name} drops to 0 Hit Points while raging. Make a DC ${dc} Constitution saving throw (Relentless Rage)?`;
+    if (!decide({ kind: "relentless_rage", combatant: view, question, recommended: true }))
+      return null;
+    if (use) play(c, { type: "use", key: use.key });
+    const save = rollSavingThrow(view, "con", dc, { rng, decide });
+    notes.push(
+      `Relentless Rage: ${c.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`,
+    );
+    if (!save.success) return null;
+    return 2 * (sheet.classes.find((x) => x.class_id === "barbarian")?.level ?? 0);
   };
   /** End an effect; its condition goes unless another effect still gives it. */
   const endEffect = (effect: EncounterEffect, why: string): void => {
@@ -440,6 +500,7 @@ function run(
       escape_dc?: number | null;
       escape_skill?: "athletics" | "acrobatics" | null;
       ends_on?: ("damage" | "source_incapacitated")[];
+      repeat_save?: { ability: Ability; dc: number } | null;
     },
   ): void => {
     const has = conditionsOf(ctx, target);
@@ -453,6 +514,7 @@ function run(
         escape_dc: opts.escape_dc ?? null,
         escape_skill: opts.escape_skill ?? null,
         ends_on: opts.ends_on ?? [],
+        repeat_save: opts.repeat_save ?? null,
       });
     }
   };
@@ -628,6 +690,17 @@ function run(
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
     zoneTurn(c, "end_turn");
+    // "At the end of each of its turns … repeats the save, ending the effect on itself on a success."
+    for (const effect of e.effects.filter((x) => x.target === c.id && x.repeat_save)) {
+      const again = effect.repeat_save as { ability: Ability; dc: number };
+      const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), again.ability, again.dc, {
+        rng,
+        decide,
+      });
+      spendLegendaryResistance(c, save);
+      notes.push(`${c.name} repeats the save against ${effect.label} (${saveText(save)}).`);
+      if (save.success) endEffect(effect, "it succeeded on the save");
+    }
     tick(c, "end");
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
@@ -722,6 +795,8 @@ function run(
     c.inspiration = null;
   };
   const spendLegendaryResistance = (c: EncounterCombatant, save: SaveResult | null): void => {
+    // Staggering Blow's Disadvantage is on the next saving throw only.
+    if (save) e.marks = e.marks.filter((m) => !(m.kind === "staggered" && m.on === c.id));
     if (save?.indomitable && c.character !== null) {
       const ref = characterRef(ctx, c);
       const use = computePlaySheet(ref.build, ref.state, ctx.catalog).play.uses.find((u) =>
@@ -962,9 +1037,12 @@ function run(
       thrown?: boolean;
       cover?: Cover;
       opportunity?: boolean;
+      cunning?: readonly ("poison" | "trip" | "withdraw")[];
+      brutal?: readonly ("forceful" | "hamstring" | "staggering" | "sundering")[];
     },
   ): AttackResult => {
     const attacker = encounterCombatant(e, c.id, ctx);
+    const strikes = strikeOptions(c, attacker, attackName, options);
     const line = attacker.attacks.find((a) => a.name === attackName);
     // Positions: reach, range, close combat, within 5 feet and an ally next to the target.
     const spatial = line
@@ -998,6 +1076,9 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
+    // Sundering Blow: +5 to the next attack roll against it by another creature.
+    const sundered = e.marks.find((m) => m.on === t.id && m.kind === "sundered" && m.by !== c.id);
+    if (sundered) notes.push(`Sundering Blow: +5 to ${c.name}'s attack roll against ${t.name}.`);
     let hit: AttackResult;
     try {
       // The attacker's conditions caused by this target (Grappled by it), from the effects.
@@ -1016,6 +1097,10 @@ function run(
         modes,
         light_extra: options.light_extra,
         cleave: options.cleave,
+        forgo: strikes.forgo,
+        extra_damage: strikes.extra_damage,
+        forgo_advantage: strikes.forgo_advantage,
+        bonus: sundered ? 5 : 0,
       });
     } catch (error) {
       if (error instanceof RangeError) fail(error.message);
@@ -1026,7 +1111,7 @@ function run(
     useInspiration(c, hit.inspiration);
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
-    e.marks = e.marks.filter((m) => m !== mark);
+    e.marks = e.marks.filter((m) => m !== mark && m !== sundered);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
     const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
     if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
@@ -1077,7 +1162,153 @@ function run(
     if (line?.mastery && options.mastery !== false) {
       applyMastery(c, t, attacker, line, hit, options.cleave ?? false);
     }
+    if (hit.hit) applyStrikes(c, t, attacker, options);
     return hit;
+  };
+  /**
+   * Cunning Strike and Brutal Strike on an attack: checked before it's rolled (the features, the
+   * Sneak Attack dice to forgo, Reckless Attack), and what changes in the roll.
+   */
+  const strikeOptions = (
+    c: EncounterCombatant,
+    attacker: Combatant,
+    attackName: string,
+    options: {
+      riders?: readonly { rider: string }[];
+      cunning?: readonly string[];
+      brutal?: readonly string[];
+      opportunity?: boolean;
+    },
+  ) => {
+    const cunning = options.cunning ?? [];
+    const brutal = options.brutal ?? [];
+    const out = {
+      forgo: [] as { rider: string; dice: number }[],
+      extra_damage: [] as { dice: string; type: string }[],
+      forgo_advantage: false,
+    };
+    if (!cunning.length && !brutal.length) return out;
+    if (c.character === null) fail(`${c.name} has no class features`);
+    const ref = characterRef(ctx, c);
+    const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+    const levelIn = (id: string) => sheet.classes.find((x) => x.class_id === id)?.level ?? 0;
+    if (new Set(cunning).size < cunning.length || new Set(brutal).size < brutal.length) {
+      fail("Each effect can be used once per attack");
+    }
+    if (cunning.length) {
+      if (!sheet.rules.includes("cunning_strike")) fail(`${c.name} doesn't have Cunning Strike`);
+      const most = sheet.rules.includes("improved_cunning_strike") ? 2 : 1;
+      if (cunning.length > most)
+        fail(`${c.name} can use ${most} Cunning Strike effect${most > 1 ? "s" : ""}`);
+      if (
+        !(options.riders ?? []).some(
+          (r) => r.rider === "sneak-attack" || r.rider === "Sneak Attack",
+        )
+      ) {
+        fail(
+          "Cunning Strike is used when you deal Sneak Attack damage: add the sneak-attack rider",
+        );
+      }
+      if (
+        cunning.includes("poison") &&
+        !ref.state.inventory.some((i) => i.item === "poisoners-kit")
+      ) {
+        fail(`Cunning Strike's Poison needs a Poisoner's Kit on ${c.name}'s person`);
+      }
+      out.forgo.push({ rider: "sneak-attack", dice: cunning.length });
+    }
+    if (brutal.length) {
+      if (!sheet.rules.includes("brutal_strike")) fail(`${c.name} doesn't have Brutal Strike`);
+      const reckless = sheet.toggles.some((x) => x.active && x.key.endsWith(":reckless-attack"));
+      if (!reckless) fail("Brutal Strike needs Reckless Attack this turn");
+      if (options.opportunity || current()?.id !== c.id) fail("Brutal Strike is used on your turn");
+      const line = attacker.attacks.find((a) => a.name === attackName);
+      if (line?.ability !== "str") fail("Brutal Strike is a Strength-based attack roll");
+      const improved = sheet.rules.includes("improved_brutal_strike");
+      if (!improved && brutal.some((x) => x === "staggering" || x === "sundering")) {
+        fail("Staggering Blow and Sundering Blow come with Improved Brutal Strike (level 13)");
+      }
+      const most = levelIn("barbarian") >= 17 ? 2 : 1;
+      if (brutal.length > most)
+        fail(`${c.name} can use ${most} Brutal Strike effect${most > 1 ? "s" : ""}`);
+      out.forgo_advantage = true;
+      out.extra_damage.push({ dice: levelIn("barbarian") >= 17 ? "2d10" : "1d10", type: "weapon" });
+    }
+    return out;
+  };
+  /** The Cunning Strike and Brutal Strike effects of a hit (SRD "Cunning Strike", "Brutal Strike"). */
+  const applyStrikes = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    attacker: Combatant,
+    options: { cunning?: readonly string[]; brutal?: readonly string[] },
+  ): void => {
+    if (outOfFight(ctx, t) || t.defeated) return;
+    const until = { at: "start" as const, of: c.id, count: 1, skip_current: false };
+    // "the DC equals 8 plus your Dexterity modifier and Proficiency Bonus"
+    const dc = 8 + attacker.modifiers.dex + attacker.proficiency_bonus;
+    for (const effect of options.cunning ?? []) {
+      if (effect === "withdraw") {
+        const half = Math.floor(speedOf(ctx, c, e) / 2);
+        c.extra_movement += half;
+        c.disengaged = true;
+        notes.push(
+          `Cunning Strike (Withdraw): ${c.name} can move ${half} feet without provoking Opportunity Attacks.`,
+        );
+        continue;
+      }
+      if (effect === "trip" && ["huge", "gargantuan"].includes(sizeOf(ctx, t) ?? "")) {
+        notes.push(`Cunning Strike (Trip): ${t.name} is too large to trip.`);
+        continue;
+      }
+      const ability = effect === "poison" ? "con" : "dex";
+      const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), ability, dc, { rng, decide });
+      const name = effect === "poison" ? "Poison" : "Trip";
+      notes.push(
+        `Cunning Strike (${name}): ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`,
+      );
+      spendLegendaryResistance(t, save);
+      if (save.success) continue;
+      if (effect === "trip") applyTo(t, [{ type: "add_condition", condition: "prone" }]);
+      else {
+        applyTo(t, [{ type: "add_condition", condition: "poisoned" }]);
+        // "for 1 minute. At the end of each of its turns, the Poisoned target repeats the save"
+        addEffects(t, ["poisoned"], {
+          source: c.id,
+          label: "Cunning Strike",
+          concentration: false,
+          ends: { at: "start", of: c.id, count: 10, skip_current: false },
+          repeat_save: { ability: "con", dc },
+        });
+      }
+    }
+    const mark = (kind: "hamstrung" | "staggered" | "sundered", text: string) => {
+      e.marks = e.marks.filter((m) => !(m.on === t.id && m.kind === kind));
+      e.marks.push({ kind, label: "Brutal Strike", by: c.id, on: t.id, ends: { ...until } });
+      notes.push(text);
+    };
+    for (const effect of options.brutal ?? []) {
+      if (effect === "forceful") {
+        notes.push(
+          `Forceful Blow: ${t.name} is pushed 15 feet straight away; ${c.name} can move up to half its Speed toward it without provoking Opportunity Attacks.`,
+        );
+      } else if (effect === "hamstring") {
+        mark(
+          "hamstrung",
+          `Hamstring Blow: ${t.name}'s Speed is 15 feet lower until the start of ${c.name}'s next turn.`,
+        );
+      } else if (effect === "staggering") {
+        mark(
+          "staggered",
+          `Staggering Blow: ${t.name} has Disadvantage on its next saving throw and can't make Opportunity Attacks until the start of ${c.name}'s next turn.`,
+        );
+      } else {
+        mark(
+          "sundered",
+          `Sundering Blow: the next attack roll by another creature against ${t.name} gets +5.`,
+        );
+      }
+    }
   };
   /** The attack's weapon mastery property (SRD "Mastery Properties"), after the attack. */
   const applyMastery = (
@@ -2289,6 +2520,9 @@ function run(
         const reaction = action.reaction || action.opportunity;
         if (action.opportunity) {
           if (line && line.kind !== "melee") fail("An Opportunity Attack is a melee attack");
+          if (e.marks.some((m) => m.kind === "staggered" && m.on === c.id)) {
+            fail(`${c.name} can't make Opportunity Attacks (Staggering Blow)`);
+          }
           if (t.disengaged)
             fail(`${t.name} Disengaged: its movement doesn't provoke Opportunity Attacks`);
         }
@@ -2757,8 +2991,11 @@ export function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encount
   const slowed = e.masteries.some((m) => m.mastery === "slow" && m.on === c.id);
   const after = slowed ? Math.max(0, speed - 10) : speed;
   // Halved (Stunning Strike's successful save), however many times.
+  // Hamstring Blow: −15 feet (only the most recent counts).
+  const hamstrung = e.marks.some((m) => m.kind === "hamstrung" && m.on === c.id);
+  const slower = hamstrung ? Math.max(0, after - 15) : after;
   const halved = e.marks.some((m) => m.kind === "speed_halved" && m.on === c.id);
-  return halved ? Math.floor(after / 2) : after;
+  return halved ? Math.floor(slower / 2) : slower;
 }
 
 /** Out of the fight: a defeated monster, or a dead character. */

@@ -587,6 +587,13 @@
       - level: 17
         grants:
           spells: [commune, flame-strike]
+      toggles:
+      - id: sacred-weapon
+        name: Sacred Weapon
+        uses: channel-divinity
+        grants:
+          effects:
+          - {target: attack.weapon, value: cha, min: 1}
     '7':
       traits:
       - name: Aura of Devotion

@@ -23,6 +23,8 @@
       spell_level: 0
       known_only: true
       allowed: [chill-touch, eldritch-blast, poison-spray]
+    spell_damage:
+    - {name: Agonizing Blast, ability: cha, cantrip: true, spell: $cantrip}
   repeat_requires_different: cantrip
 - id: armor-of-shadows
   name: Armor of Shadows

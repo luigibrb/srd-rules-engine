@@ -152,6 +152,7 @@ const EFFECT_TARGET_NAMES = [
   "skill.unproficient",
   "speed",
   "spell.save_dc",
+  "attack.weapon",
 ] as const;
 export type EffectTarget =
   | (typeof EFFECT_TARGET_NAMES)[number]
@@ -296,6 +297,11 @@ export const FEATURE_RULES = [
   "reliable_talent",
   "potent_cantrip",
   "indomitable",
+  "cunning_strike",
+  "improved_cunning_strike",
+  "brutal_strike",
+  "improved_brutal_strike",
+  "relentless_rage",
 ] as const;
 export type FeatureRule = (typeof FEATURE_RULES)[number];
 
@@ -314,6 +320,8 @@ export const SpellDamageSchema = z.strictObject({
   damage_type: z.enum(DAMAGE_TYPES).nullable().default(null),
   /** To "one damage roll of that spell" (the first beam), not to each. */
   one_roll: z.boolean().default(false),
+  /** Only this spell (an id, or `$<choice id>`: Agonizing Blast's cantrip). */
+  spell: z.string().nullable().default(null),
 });
 export type SpellDamage = z.infer<typeof SpellDamageSchema>;
 

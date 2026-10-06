@@ -456,6 +456,29 @@
                                           "three_quarters",
                                           "total"
                                         ]
+                                      },
+                                      "cunning": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "enum": [
+                                            "poison",
+                                            "trip",
+                                            "withdraw"
+                                          ]
+                                        }
+                                      },
+                                      "brutal": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string",
+                                          "enum": [
+                                            "forceful",
+                                            "hamstring",
+                                            "staggering",
+                                            "sundering"
+                                          ]
+                                        }
                                       }
                                     },
                                     "required": [
@@ -901,6 +924,39 @@
                             "source_incapacitated"
                           ]
                         }
+                      },
+                      "repeat_save": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "ability": {
+                                "type": "string",
+                                "enum": [
+                                  "str",
+                                  "dex",
+                                  "con",
+                                  "int",
+                                  "wis",
+                                  "cha"
+                                ]
+                              },
+                              "dc": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "ability",
+                              "dc"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -1035,7 +1091,10 @@
                         "type": "string",
                         "enum": [
                           "advantage_against",
-                          "speed_halved"
+                          "speed_halved",
+                          "hamstrung",
+                          "staggered",
+                          "sundered"
                         ]
                       },
                       "label": {
@@ -1434,7 +1493,8 @@
                             "uncanny_dodge",
                             "zone_force",
                             "indomitable",
-                            "deflect_attacks"
+                            "deflect_attacks",
+                            "relentless_rage"
                           ]
                         },
                         "question": {
@@ -2802,6 +2862,29 @@
                         "three_quarters",
                         "total"
                       ]
+                    },
+                    "cunning": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "poison",
+                          "trip",
+                          "withdraw"
+                        ]
+                      }
+                    },
+                    "brutal": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "forceful",
+                          "hamstring",
+                          "staggering",
+                          "sundering"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -3274,6 +3357,29 @@
                 "three_quarters",
                 "total"
               ]
+            },
+            "cunning": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "poison",
+                  "trip",
+                  "withdraw"
+                ]
+              }
+            },
+            "brutal": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "forceful",
+                  "hamstring",
+                  "staggering",
+                  "sundering"
+                ]
+              }
             }
           },
           "required": [

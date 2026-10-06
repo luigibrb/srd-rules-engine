@@ -127,6 +127,8 @@ export interface SpellDamageBonus {
   readonly school: string | null;
   readonly damage_type: string | null;
   readonly one_roll: boolean;
+  /** Only this spell's damage (Agonizing Blast's cantrip), or any matching one. */
+  readonly spell?: string | null;
 }
 
 /**
@@ -142,7 +144,8 @@ export interface Decision {
     | "uncanny_dodge"
     | "zone_force"
     | "indomitable"
-    | "deflect_attacks";
+    | "deflect_attacks"
+    | "relentless_rage";
   /** Who decides. */
   readonly combatant: Combatant;
   /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */
@@ -457,6 +460,14 @@ export interface AttackOptions {
   cleave?: boolean;
   /** Answers the attacker's decisions (Bardic Inspiration on a miss). */
   decide?: Decide;
+  /** Dice taken off a requested rider before rolling (Cunning Strike: Sneak Attack dice). */
+  forgo?: readonly { rider: string; dice: number }[];
+  /** Extra damage on a hit, of the weapon's type when `type` is `weapon` (Brutal Strike). */
+  extra_damage?: readonly { dice: string; type: "weapon" | string }[];
+  /** No Advantage on this roll (Brutal Strike); refused if it has Disadvantage. */
+  forgo_advantage?: boolean;
+  /** A flat bonus to the attack roll (Sundering Blow: +5). */
+  bonus?: number;
 }
 
 /**
@@ -483,6 +494,10 @@ export function makeAttack(
     light_extra = false,
     cleave = false,
     decide = recommend,
+    forgo = [],
+    extra_damage = [],
+    forgo_advantage = false,
+    bonus = 0,
   }: AttackOptions = {},
 ): AttackResult {
   const line =
@@ -491,13 +506,20 @@ export function makeAttack(
     const known = attacker.attacks.map((a) => a.name).join(", ");
     throw new RangeError(`${attacker.name} has no attack '${String(attack)}' (${known})`);
   }
-  const effective = attackMode(attacker, target, {
+  const moded = attackMode(attacker, target, {
     mode,
     within_5ft: within_5ft ?? line.kind === "melee",
     against_source_of,
     modes,
     ability: line.ability,
   });
+  if (forgo_advantage && moded.mode === "disadvantage") {
+    throw new RangeError("The attack roll has Disadvantage: its Advantage can't be forgone");
+  }
+  const effective =
+    forgo_advantage && moded.mode === "advantage"
+      ? { ...moded, mode: "normal" as const, reasons: [...moded.reasons, "Advantage forgone"] }
+      : moded;
   if (light_extra && !line.light_extra_damage_parts) {
     throw new RangeError(`${line.name} isn't a Light weapon`);
   }
@@ -534,11 +556,22 @@ export function makeAttack(
     if (!(DAMAGE_TYPES as readonly string[]).includes(type)) {
       throw new RangeError(`${rider.name}: unknown damage type '${type}'`);
     }
-    extra.push({ dice: rider.dice, bonus: rider.bonus, type });
+    let dice = rider.dice;
+    const taken = forgo.filter((f) => f.rider === rider.id).reduce((n, f) => n + f.dice, 0);
+    if (taken && dice) {
+      const m = /^(\d+)d(\d+)$/.exec(dice);
+      const count = Number(m?.[1] ?? 0);
+      if (taken > count) throw new RangeError(`${rider.name} has only ${count} dice to forgo`);
+      dice = count - taken > 0 ? `${count - taken}d${m?.[2]}` : null;
+    }
+    if (dice !== null || rider.bonus) extra.push({ dice, bonus: rider.bonus, type });
     riderNames.push(rider.name);
   }
+  for (const x of extra_damage) {
+    extra.push({ dice: x.dice, bonus: 0, type: x.type === "weapon" ? line.damage_type : x.type });
+  }
   const roll = rollD20({ mode: effective.mode, rng });
-  let total = roll.d20 + line.attack_bonus;
+  let total = roll.d20 + line.attack_bonus + bonus;
   const critical_miss = roll.d20 === 1;
   const criticalRoll = !critical_miss && roll.d20 >= Math.min(20, attacker.critical_hit_on);
   // Bardic Inspiration on a miss (not a natural 1, which misses whatever the total).

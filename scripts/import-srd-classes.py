@@ -275,6 +275,9 @@ OVERLAY = {
         3: {"choices": [{"id": "primal_knowledge", "label": "Primal Knowledge skill", "kind": "skill",
                          "allowed": ["animal-handling", "athletics", "intimidation", "nature", "perception", "survival"]}]},
         5: {"effects": [extra_attack(2), {"target": "speed", "value": 10, "when": "not_wearing_heavy_armor"}]},
+        9: {"rules": ["brutal_strike"]},
+        11: {"rules": ["relentless_rage"]},
+        13: {"rules": ["improved_brutal_strike"]},
         20: {"ability_bonuses": [{"ability": "str", "value": 4, "max": 25}, {"ability": "con", "value": 4, "max": 25}]},
     },
     "bard": {
@@ -388,7 +391,9 @@ OVERLAY = {
     },
     "rogue": {
         5: {"actions": [{"id": "uncanny-dodge", "name": "Uncanny Dodge", "economy": "reaction",
-                         "halves_attack_damage": True}]},
+                         "halves_attack_damage": True}],
+            "rules": ["cunning_strike"]},
+        11: {"rules": ["improved_cunning_strike"]},
         6: {"choices": [expertise(2, "Rogue Expertise")]},
         7: {"rules": ["evasion", "reliable_talent"]},
         15: {"saving_throws": ["wis", "cha"]},
@@ -481,7 +486,11 @@ SUBCLASS_OVERLAY = {
         15: {"effects": [{"target": "attack.critical", "op": "min", "value": 18}]},
     },
     "warrior-of-the-open-hand": {},
-    "oath-of-devotion": {3: spell_grants(DEVOTION)},
+    # Sacred Weapon: Channel Divinity, Charisma (min +1) to weapon attack rolls while on (its
+    # 10 minutes and the one weapon it imbues aren't tracked).
+    "oath-of-devotion": {3: {**spell_grants(DEVOTION),
+                             "toggles": [{"id": "sacred-weapon", "name": "Sacred Weapon", "uses": "channel-divinity",
+                                          "grants": {"effects": [{"target": "attack.weapon", "value": "cha", "min": 1}]}}]}},
     "hunter": {
         3: {"choices": [{"id": "hunters_prey", "label": "Hunter's Prey", "kind": "option", "rest_change": "short", "options": [
             {"id": "colossus-slayer", "name": "Colossus Slayer",
@@ -585,7 +594,9 @@ def res(id, name, recharge, short=None, **max_spec):
 
 CHANNEL = res("channel-divinity", "Channel Divinity", "long", short=1, progression="Channel Divinity")
 RESOURCES = {
-    "barbarian": {1: [res("rage", "Rage", "long", short=1, progression="Rages")]},
+    "barbarian": {1: [res("rage", "Rage", "long", short=1, progression="Rages")],
+                  # Relentless Rage's uses since a rest (its DC is 10 + 5 for each).
+                  11: [res("relentless-rage", "Relentless Rage (uses since a rest)", "short", value=10)]},
     "bard": {1: [res("bardic-inspiration", "Bardic Inspiration", "long", ability="cha", min=1)],
              5: [res("bardic-inspiration", "Bardic Inspiration", "short", ability="cha", min=1)]},
     "cleric": {2: [CHANNEL], 10: [res("divine-intervention", "Divine Intervention", "long", value=1)]},
@@ -821,6 +832,8 @@ def invocations(section):
                                             "spell_level": 0, "known_only": True,
                                             "allowed": ["chill-touch", "eldritch-blast", "poison-spray"]}]
         by_id[iid]["repeat_requires_different"] = "cantrip"
+    by_id["agonizing-blast"]["grants"]["spell_damage"] = [
+        {"name": "Agonizing Blast", "ability": "cha", "cantrip": True, "spell": "$cantrip"}]
     by_id["lessons-of-the-first-ones"]["grants"]["choices"] = [{"id": "feat", "label": "Lessons of the First Ones: Origin feat",
                                                                 "kind": "feat", "category": "origin"}]
     by_id["pact-of-the-chain"]["grants"]["spells"] = ["find-familiar"]

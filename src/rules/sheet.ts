@@ -592,6 +592,7 @@ export function computeSheet(
     weaponProfs,
     masteries,
     rangedBonus: effects("attack.ranged"),
+    weaponBonus: effects("attack.weapon"),
     featIds: new Set(res.featSources().map((s) => s.feat.id)),
     // Martial Arts works only while you aren't wearing armor or wielding a Shield.
     martialArtsDie: armor === null && shield === null ? martialArtsDie : 0,
@@ -807,7 +808,12 @@ export function computeSheet(
       }),
     ),
     spell_damage: [...res.sources, ...itemSources].flatMap((src) =>
-      src.grants.spell_damage.map((d) => ({ ...d, bonus: mod[d.ability] })),
+      src.grants.spell_damage.map((d) => ({
+        ...d,
+        bonus: mod[d.ability],
+        // `$cantrip`: the spell picked in the source's choice (Agonizing Blast).
+        spell: d.spell === null ? null : (res.resolveRef(src, d.spell) ?? d.spell),
+      })),
     ),
     toggles: toggleDefs.map(({ key, toggle, src }) => {
       const armorBlock = toggle.blocked_when.find((c) => conditions.get(c));
@@ -1145,6 +1151,8 @@ interface AttackContext {
   weaponProfs: readonly string[];
   masteries: readonly string[];
   rangedBonus: readonly ResolvedEffect[];
+  /** Bonuses to every weapon attack roll (Sacred Weapon). */
+  weaponBonus: readonly ResolvedEffect[];
   featIds: ReadonlySet<string>;
   /** Martial Arts die size (6 = d6) while it applies, else 0. */
   martialArtsDie: number;
@@ -1203,6 +1211,7 @@ function attackLine(
   let bonus = abilityMod + (proficient ? ctx.pb : 0);
   const notes: string[] = [];
   if (w.kind === "ranged") bonus += ctx.rangedBonus.reduce((sum, [, v]) => sum + v, 0);
+  bonus += ctx.weaponBonus.reduce((sum, [, v]) => sum + v, 0);
   if (!proficient) notes.push("not proficient");
   if (w.properties.includes("heavy")) {
     const needed: Ability = w.kind === "melee" ? "str" : "dex";

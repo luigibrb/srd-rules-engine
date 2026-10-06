@@ -1099,7 +1099,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "brutal_strike"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],
@@ -1129,12 +1131,29 @@
                     "spellcasting": null,
                     "ac_calculations": [],
                     "ability_bonuses": [],
-                    "resources": [],
+                    "resources": [
+                        {
+                            "id": "relentless-rage",
+                            "name": "Relentless Rage (uses since a rest)",
+                            "max": {
+                                "value": 10,
+                                "progression": null,
+                                "ability": null,
+                                "proficiency": false,
+                                "per_class_level": null,
+                                "min": 0
+                            },
+                            "recharge": "short",
+                            "short_rest_regain": null
+                        }
+                    ],
                     "on_long_rest": [],
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "relentless_rage"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],
@@ -1226,7 +1245,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "improved_brutal_strike"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],
@@ -4524,7 +4545,8 @@
                                                 "list": "cleric",
                                                 "school": null,
                                                 "damage_type": null,
-                                                "one_roll": false
+                                                "one_roll": false,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -5833,7 +5855,8 @@
                                                 "list": "druid",
                                                 "school": null,
                                                 "damage_type": null,
-                                                "one_roll": false
+                                                "one_roll": false,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -12736,7 +12759,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "cunning_strike"
+                    ],
                     "spell_damage": [],
                     "actions": [
                         {
@@ -13012,7 +13037,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "improved_cunning_strike"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],
@@ -35786,7 +35813,56 @@
                     "rules": [],
                     "spell_damage": [],
                     "actions": [],
-                    "toggles": [],
+                    "toggles": [
+                        {
+                            "id": "sacred-weapon",
+                            "name": "Sacred Weapon",
+                            "uses": "channel-divinity",
+                            "grants": {
+                                "size": null,
+                                "skills": [],
+                                "tools": [],
+                                "languages": [],
+                                "saving_throws": [],
+                                "armor_training": [],
+                                "weapon_proficiencies": [],
+                                "feats": [],
+                                "resistances": [],
+                                "cantrips": [],
+                                "spells": [],
+                                "spellcasting": null,
+                                "ac_calculations": [],
+                                "ability_bonuses": [],
+                                "resources": [],
+                                "on_long_rest": [],
+                                "effects": [
+                                    {
+                                        "target": "attack.weapon",
+                                        "op": "add",
+                                        "value": "cha",
+                                        "min": 1,
+                                        "when": null
+                                    }
+                                ],
+                                "damage_riders": [],
+                                "advantages": [],
+                                "rules": [],
+                                "spell_damage": [],
+                                "actions": [],
+                                "toggles": [],
+                                "items": [],
+                                "gp": 0,
+                                "traits": [],
+                                "choices": [],
+                                "at_class_level": []
+                            },
+                            "blocked_when": [],
+                            "ends_on": [],
+                            "no_spells": false,
+                            "extends_each_turn": false,
+                            "ends_at_turn_start": false
+                        }
+                    ],
                     "items": [],
                     "gp": 0,
                     "traits": [
@@ -36824,7 +36900,8 @@
                                                 "list": null,
                                                 "school": null,
                                                 "damage_type": "acid",
-                                                "one_roll": true
+                                                "one_roll": true,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -36871,7 +36948,8 @@
                                                 "list": null,
                                                 "school": null,
                                                 "damage_type": "cold",
-                                                "one_roll": true
+                                                "one_roll": true,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -36918,7 +36996,8 @@
                                                 "list": null,
                                                 "school": null,
                                                 "damage_type": "fire",
-                                                "one_roll": true
+                                                "one_roll": true,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -36965,7 +37044,8 @@
                                                 "list": null,
                                                 "school": null,
                                                 "damage_type": "lightning",
-                                                "one_roll": true
+                                                "one_roll": true,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -37012,7 +37092,8 @@
                                                 "list": null,
                                                 "school": null,
                                                 "damage_type": "poison",
-                                                "one_roll": true
+                                                "one_roll": true,
+                                                "spell": null
                                             }
                                         ],
                                         "actions": [],
@@ -37750,7 +37831,8 @@
                             "list": "wizard",
                             "school": "evocation",
                             "damage_type": null,
-                            "one_roll": true
+                            "one_roll": true,
+                            "spell": null
                         }
                     ],
                     "actions": [],
@@ -38086,7 +38168,18 @@
                 "damage_riders": [],
                 "advantages": [],
                 "rules": [],
-                "spell_damage": [],
+                "spell_damage": [
+                    {
+                        "name": "Agonizing Blast",
+                        "ability": "cha",
+                        "cantrip": true,
+                        "list": null,
+                        "school": null,
+                        "damage_type": null,
+                        "one_roll": false,
+                        "spell": "$cantrip"
+                    }
+                ],
                 "actions": [],
                 "toggles": [],
                 "items": [],
