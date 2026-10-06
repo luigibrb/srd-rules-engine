@@ -116,6 +116,10 @@
                         "default": false,
                         "type": "boolean"
                       },
+                      "regeneration_blocked": {
+                        "default": false,
+                        "type": "boolean"
+                      },
                       "used": {
                         "default": {},
                         "type": "object",

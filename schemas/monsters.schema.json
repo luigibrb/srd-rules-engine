@@ -708,6 +708,172 @@
                     "type": "null"
                   }
                 ]
+              },
+              "trigger": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "death"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      },
+                      "damage": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "average": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+d\\d+$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "bonus": {
+                              "default": 0,
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "acid",
+                                "bludgeoning",
+                                "cold",
+                                "fire",
+                                "force",
+                                "lightning",
+                                "necrotic",
+                                "piercing",
+                                "poison",
+                                "psychic",
+                                "radiant",
+                                "slashing",
+                                "thunder"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "average",
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "choice": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "not_incapacitated": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "advantage_aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regeneration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "stopped_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "stopped_by"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -1122,6 +1288,172 @@
                     "required": [
                       "ability",
                       "dc"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "trigger": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "death"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      },
+                      "damage": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "average": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+d\\d+$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "bonus": {
+                              "default": 0,
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "acid",
+                                "bludgeoning",
+                                "cold",
+                                "fire",
+                                "force",
+                                "lightning",
+                                "necrotic",
+                                "piercing",
+                                "poison",
+                                "psychic",
+                                "radiant",
+                                "slashing",
+                                "thunder"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "average",
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "choice": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "not_incapacitated": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "advantage_aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regeneration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "stopped_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "stopped_by"
                     ],
                     "additionalProperties": false
                   },
@@ -1550,6 +1882,172 @@
                     "type": "null"
                   }
                 ]
+              },
+              "trigger": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "death"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      },
+                      "damage": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "average": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+d\\d+$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "bonus": {
+                              "default": 0,
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "acid",
+                                "bludgeoning",
+                                "cold",
+                                "fire",
+                                "force",
+                                "lightning",
+                                "necrotic",
+                                "piercing",
+                                "poison",
+                                "psychic",
+                                "radiant",
+                                "slashing",
+                                "thunder"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "average",
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "choice": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "not_incapacitated": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "advantage_aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regeneration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "stopped_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "stopped_by"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -1964,6 +2462,172 @@
                     "required": [
                       "ability",
                       "dc"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "trigger": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "death"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      },
+                      "damage": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "average": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+d\\d+$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "bonus": {
+                              "default": 0,
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "acid",
+                                "bludgeoning",
+                                "cold",
+                                "fire",
+                                "force",
+                                "lightning",
+                                "necrotic",
+                                "piercing",
+                                "poison",
+                                "psychic",
+                                "radiant",
+                                "slashing",
+                                "thunder"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "average",
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "choice": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "not_incapacitated": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "advantage_aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regeneration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "stopped_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "stopped_by"
                     ],
                     "additionalProperties": false
                   },
@@ -2459,6 +3123,172 @@
                     "required": [
                       "ability",
                       "dc"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "trigger": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "death"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      },
+                      "damage": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "average": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+d\\d+$"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "bonus": {
+                              "default": 0,
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "acid",
+                                "bludgeoning",
+                                "cold",
+                                "fire",
+                                "force",
+                                "lightning",
+                                "necrotic",
+                                "piercing",
+                                "poison",
+                                "psychic",
+                                "radiant",
+                                "slashing",
+                                "thunder"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "average",
+                            "type"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "choice": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "not_incapacitated": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "damage"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "advantage_aura": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "size": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "regeneration": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "stopped_by": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "stopped_by"
                     ],
                     "additionalProperties": false
                   },
@@ -3204,6 +4034,172 @@
                       "type": "null"
                     }
                   ]
+                },
+                "trigger": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "death"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        },
+                        "damage": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "average": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "dice": {
+                                "default": null,
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^\\d+d\\d+$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "acid",
+                                  "bludgeoning",
+                                  "cold",
+                                  "fire",
+                                  "force",
+                                  "lightning",
+                                  "necrotic",
+                                  "piercing",
+                                  "poison",
+                                  "psychic",
+                                  "radiant",
+                                  "slashing",
+                                  "thunder"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "average",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "choice": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "not_incapacitated": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "damage"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "advantage_aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "regeneration": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "stopped_by": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "acid",
+                              "bludgeoning",
+                              "cold",
+                              "fire",
+                              "force",
+                              "lightning",
+                              "necrotic",
+                              "piercing",
+                              "poison",
+                              "psychic",
+                              "radiant",
+                              "slashing",
+                              "thunder"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "amount",
+                        "stopped_by"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -3618,6 +4614,172 @@
                       "required": [
                         "ability",
                         "dc"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "trigger": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "death"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        },
+                        "damage": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "average": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "dice": {
+                                "default": null,
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^\\d+d\\d+$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "acid",
+                                  "bludgeoning",
+                                  "cold",
+                                  "fire",
+                                  "force",
+                                  "lightning",
+                                  "necrotic",
+                                  "piercing",
+                                  "poison",
+                                  "psychic",
+                                  "radiant",
+                                  "slashing",
+                                  "thunder"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "average",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "choice": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "not_incapacitated": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "damage"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "advantage_aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "regeneration": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "stopped_by": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "acid",
+                              "bludgeoning",
+                              "cold",
+                              "fire",
+                              "force",
+                              "lightning",
+                              "necrotic",
+                              "piercing",
+                              "poison",
+                              "psychic",
+                              "radiant",
+                              "slashing",
+                              "thunder"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "amount",
+                        "stopped_by"
                       ],
                       "additionalProperties": false
                     },
@@ -4046,6 +5208,172 @@
                       "type": "null"
                     }
                   ]
+                },
+                "trigger": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "death"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        },
+                        "damage": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "average": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "dice": {
+                                "default": null,
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^\\d+d\\d+$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "acid",
+                                  "bludgeoning",
+                                  "cold",
+                                  "fire",
+                                  "force",
+                                  "lightning",
+                                  "necrotic",
+                                  "piercing",
+                                  "poison",
+                                  "psychic",
+                                  "radiant",
+                                  "slashing",
+                                  "thunder"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "average",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "choice": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "not_incapacitated": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "damage"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "advantage_aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "regeneration": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "stopped_by": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "acid",
+                              "bludgeoning",
+                              "cold",
+                              "fire",
+                              "force",
+                              "lightning",
+                              "necrotic",
+                              "piercing",
+                              "poison",
+                              "psychic",
+                              "radiant",
+                              "slashing",
+                              "thunder"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "amount",
+                        "stopped_by"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -4460,6 +5788,172 @@
                       "required": [
                         "ability",
                         "dc"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "trigger": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "death"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        },
+                        "damage": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "average": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "dice": {
+                                "default": null,
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^\\d+d\\d+$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "acid",
+                                  "bludgeoning",
+                                  "cold",
+                                  "fire",
+                                  "force",
+                                  "lightning",
+                                  "necrotic",
+                                  "piercing",
+                                  "poison",
+                                  "psychic",
+                                  "radiant",
+                                  "slashing",
+                                  "thunder"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "average",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "choice": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "not_incapacitated": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "damage"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "advantage_aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "regeneration": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "stopped_by": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "acid",
+                              "bludgeoning",
+                              "cold",
+                              "fire",
+                              "force",
+                              "lightning",
+                              "necrotic",
+                              "piercing",
+                              "poison",
+                              "psychic",
+                              "radiant",
+                              "slashing",
+                              "thunder"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "amount",
+                        "stopped_by"
                       ],
                       "additionalProperties": false
                     },
@@ -4955,6 +6449,172 @@
                       "required": [
                         "ability",
                         "dc"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "trigger": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "death"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        },
+                        "damage": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "average": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "dice": {
+                                "default": null,
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "pattern": "^\\d+d\\d+$"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "acid",
+                                  "bludgeoning",
+                                  "cold",
+                                  "fire",
+                                  "force",
+                                  "lightning",
+                                  "necrotic",
+                                  "piercing",
+                                  "poison",
+                                  "psychic",
+                                  "radiant",
+                                  "slashing",
+                                  "thunder"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "average",
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "choice": {
+                          "default": false,
+                          "type": "boolean"
+                        },
+                        "not_incapacitated": {
+                          "default": false,
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "damage"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "advantage_aura": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "minimum": 5,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "regeneration": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "amount": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "stopped_by": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "acid",
+                              "bludgeoning",
+                              "cold",
+                              "fire",
+                              "force",
+                              "lightning",
+                              "necrotic",
+                              "piercing",
+                              "poison",
+                              "psychic",
+                              "radiant",
+                              "slashing",
+                              "thunder"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "amount",
+                        "stopped_by"
                       ],
                       "additionalProperties": false
                     },

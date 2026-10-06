@@ -31,6 +31,8 @@ export const EncounterCombatantSchema = z.object({
   conditions: z.array(z.string()).default([]),
   /** A monster at 0 Hit Points (SRD "Monster Death"): skipped in the turn order. */
   defeated: z.boolean().default(false),
+  /** Regeneration doesn't work at the start of its next turn (it took Acid or Fire damage). */
+  regeneration_blocked: z.boolean().default(false),
   /** Spent this turn (the reaction until the start of its next turn). */
   used: z
     .object({
