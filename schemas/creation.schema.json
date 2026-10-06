@@ -784,6 +784,10 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "own_turn": {
+                "default": false,
+                "type": "boolean"
               }
             },
             "required": [
@@ -1497,6 +1501,19 @@
               "ends_at_turn_start": {
                 "default": false,
                 "type": "boolean"
+              },
+              "rounds": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [

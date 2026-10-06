@@ -838,7 +838,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   movement left before the move starts, even if something stops the creature on the way.
 - **Leaving reach on the way.** An enemy whose reach the mover leaves at any step of its path can
   make an Opportunity Attack (noted once per enemy, after the move).
-- Spirit Guardians' "Speed is halved in the Emanation" isn't applied.
+- Spirit Guardians' "Speed is halved in the Emanation" is judged where the creature is when its
+  movement is checked (the start of a move): entering the Emanation partway through doesn't
+  shorten that move.
 - A Tiny creature takes one square; several Tiny creatures can't share it.
 - Close combat's "an enemy who can see you" is the caller's to judge; so is cover without
   positions.
@@ -864,14 +866,15 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Class features**
 
-- Innate Sorcery is a toggle switched off by hand (its minute isn't counted), and its +1 to the
-  save DC and Advantage on spell attacks apply to all the character's spells, not only Sorcerer
-  ones.
+- Innate Sorcery's +1 to the save DC and Advantage on spell attacks apply to all the
+  character's spells, not only Sorcerer ones. A toggle's duration (`rounds`: Rage's 10 minutes,
+  Innate Sorcery's minute, Sacred Weapon's 10 minutes) counts the character's turn starts in an
+  encounter; outside one it lasts until switched off.
 - Cunning Strike's Withdraw gives half the rogue's Speed as extra movement and Disengage for the
   rest of the turn (the SRD: that move "immediately after the attack"); Forceful Blow's push and
   the barbarian's move toward the target are noted, not made. Devious Strikes (rogue 14) are text.
 - Sacred Weapon's bonus applies to every weapon attack while it's on (the SRD: the one Melee
-  weapon imbued), and its 10 minutes and Radiant damage option aren't tracked. Agonizing Blast's
+  weapon imbued), and its Radiant damage option isn't tracked. Agonizing Blast's
   Charisma goes to the chosen cantrip's damage like Potent Spellcasting (once per damage roll).
 - Deflect Attacks reduces the damage; redirecting it (a Focus Point when it reaches 0) and Deflect
   Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
@@ -916,8 +919,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Dash uses the walking Speed.
 - A monster's Multiattack is a number of attacks for the action (summed from its text; the
   Hydra's is `null`), without checking which attacks.
-- "Once per turn" resets on every creature's turn; Divine Strike's "once on each of your turns"
-  is treated the same.
+- "Once per turn" resets on every creature's turn; Divine Strike can only be added on the
+  cleric's own turns (`own_turn`).
 - A monster's spell slots aren't tracked.
 - Allies are combatants on the same `side`; combatants without a side are all allies (Help needs
   sides to tell an ally from an enemy).
@@ -937,7 +940,6 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - A legendary action that makes an attack or uses another action resolves just that roll; what
   else it does (moving, teleporting, regaining Hit Points) is in its text.
 - Ending the fight keeps active effects; they stop counting down.
-- Rage's 10-minute cap isn't enforced.
 
 ## Known gaps
 

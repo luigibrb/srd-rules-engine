@@ -237,7 +237,8 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     damage_types: ["radiant", "necrotic"], // good or neutral, or evil
     upcast: { damage: [{ dice: "1d8", type: "radiant" }] },
     area: { shape: "emanation", size: 15 },
-    zone: { triggers: ["enter", "end_turn"], on_cast: false, designate: true },
+    // "Any other creature's Speed is halved in the Emanation."
+    zone: { triggers: ["enter", "end_turn"], on_cast: false, designate: true, speed_halved: true },
   },
   // Level 4
   "black-tentacles": {

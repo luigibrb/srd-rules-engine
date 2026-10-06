@@ -68,6 +68,8 @@ export interface AttackRider {
   /** The damage type, or the types to choose from. */
   readonly type: string | readonly string[];
   readonly once_per_turn: boolean;
+  /** Only on the attacker's own turns (Divine Strike). */
+  readonly own_turn?: boolean;
   readonly requires: "advantage_or_ally" | "target_damaged" | null;
 }
 
@@ -220,6 +222,8 @@ export interface ToggleLine {
   readonly extends_each_turn: boolean;
   /** In an encounter, it ends at the start of your next turn (Reckless Attack). */
   readonly ends_at_turn_start: boolean;
+  /** In an encounter, it lasts at most this many rounds. */
+  readonly rounds: number | null;
 }
 
 export interface PlayContext {
@@ -828,6 +832,7 @@ export function computeSheet(
         no_spells: toggle.no_spells,
         extends_each_turn: toggle.extends_each_turn,
         ends_at_turn_start: toggle.ends_at_turn_start,
+        rounds: toggle.rounds,
       };
     }),
     cantrips: magic.spells.filter((s) => s.level === 0).map((s) => s.id),
@@ -1347,6 +1352,7 @@ function withRiders(line: AttackLine, riders: readonly ResolvedRider[]): AttackL
         bonus: r.bonus,
         type,
         once_per_turn: r.def.once_per_turn,
+        own_turn: r.def.own_turn,
         requires: r.def.requires,
       });
     }

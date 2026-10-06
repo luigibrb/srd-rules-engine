@@ -282,6 +282,8 @@ export const DamageRiderSchema = z.strictObject({
   requires: z.enum(["advantage_or_ally", "target_damaged"]).nullable().default(null),
   /** Only while all these toggles (by id) are active: Frenzy needs `rage` and `reckless-attack`. */
   while_active: z.array(z.string()).default([]),
+  /** Only on your own turns (Divine Strike: "once on each of your turns"). */
+  own_turn: z.boolean().default(false),
 });
 export type DamageRider = z.infer<typeof DamageRiderSchema>;
 
@@ -605,6 +607,8 @@ export interface ToggleDef {
   extends_each_turn: boolean;
   /** In an encounter, it ends at the start of your next turn (Reckless Attack). */
   ends_at_turn_start: boolean;
+  /** In an encounter, it lasts at most this many rounds (Rage: 100, ten minutes). */
+  rounds: number | null;
 }
 
 export interface Grants {
@@ -736,6 +740,7 @@ const ToggleSchema: z.ZodType<ToggleDef, unknown> = z.lazy(() =>
     no_spells: z.boolean().default(false),
     extends_each_turn: z.boolean().default(false),
     ends_at_turn_start: z.boolean().default(false),
+    rounds: z.int().min(1).nullable().default(null),
   }),
 );
 
@@ -1077,6 +1082,8 @@ export const SpellMechanicsSchema = z
         on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
         /** Its area is Difficult Terrain while it lasts (Web, Spike Growth). */
         difficult: z.boolean().default(false),
+        /** Other creatures' Speed is halved in it (Spirit Guardians). */
+        speed_halved: z.boolean().default(false),
       })
       .nullable()
       .default(null),

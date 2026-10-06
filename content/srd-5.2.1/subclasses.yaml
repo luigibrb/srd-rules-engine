@@ -591,6 +591,7 @@
       - id: sacred-weapon
         name: Sacred Weapon
         uses: channel-divinity
+        rounds: 100
         grants:
           effects:
           - {target: attack.weapon, value: cha, min: 1}

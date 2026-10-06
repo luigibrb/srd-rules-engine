@@ -726,6 +726,10 @@
                 "difficult": {
                   "default": false,
                   "type": "boolean"
+                },
+                "speed_halved": {
+                  "default": false,
+                  "type": "boolean"
                 }
               },
               "required": [

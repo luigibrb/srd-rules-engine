@@ -79,6 +79,7 @@ features:
     - id: innate-sorcery
       name: Innate Sorcery
       uses: innate-sorcery
+      rounds: 10
       grants:
         effects:
         - {target: spell.save_dc, value: 1}
