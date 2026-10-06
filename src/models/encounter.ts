@@ -247,6 +247,27 @@ export const ZoneSchema = z.object({
   space: z.int().min(1).default(1),
   /** Its squares are Difficult Terrain (Web, Spike Growth). */
   difficult: z.boolean().default(false),
+  /** A wall spell's squares (instead of its area), or the grid-line segments it stands on. */
+  squares: z
+    .array(z.object({ x: z.int(), y: z.int() }))
+    .nullable()
+    .default(null),
+  segments: z
+    .array(
+      z.object({
+        from: z.object({ x: z.int(), y: z.int() }),
+        to: z.object({ x: z.int(), y: z.int() }),
+      }),
+    )
+    .default([]),
+  /** The wall's own squares, when the zone also reaches beyond them (Wall of Fire's side). */
+  wall_squares: z.array(z.object({ x: z.int(), y: z.int() })).default([]),
+  /** Lines through `wall_squares` get this cover (Blade Barrier: Three-Quarters). */
+  cover: z.enum(["three_quarters", "total"]).nullable().default(null),
+  /** Feet of movement per foot moved in its squares (Wall of Thorns: 4). */
+  cost: z.int().min(1).default(1),
+  /** Its later triggers deal `damage` without a save (Wall of Fire). */
+  no_save: z.boolean().default(false),
   /** `move_zone` onto a creature makes it save. */
   ram: z.boolean().default(false),
   on_fail: z.array(z.enum(["no_actions", "lose_concentration"])).default([]),
@@ -395,6 +416,18 @@ const CastActionSchema = z.object({
   cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
   slot_level: n.min(1).max(9).optional(),
   pact: z.boolean().optional(),
+  /**
+   * A wall spell's placement: from square `from` to square `to` (its squares), or from grid corner
+   * to grid corner for a wall between squares; `side` is Wall of Fire's damaging side, left or
+   * right of the line from `from` to `to`.
+   */
+  wall: z
+    .object({
+      from: z.object({ x: n, y: n }),
+      to: z.object({ x: n, y: n }),
+      side: z.enum(["left", "right"]).optional(),
+    })
+    .optional(),
   mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
   /**
    * A follow-up saving throw's other creatures, within its radius of the target (Ice Knife),

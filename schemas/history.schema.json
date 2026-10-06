@@ -620,6 +620,60 @@
                                       "pact": {
                                         "type": "boolean"
                                       },
+                                      "wall": {
+                                        "type": "object",
+                                        "properties": {
+                                          "from": {
+                                            "type": "object",
+                                            "properties": {
+                                              "x": {
+                                                "type": "integer",
+                                                "minimum": -9007199254740991,
+                                                "maximum": 9007199254740991
+                                              },
+                                              "y": {
+                                                "type": "integer",
+                                                "minimum": -9007199254740991,
+                                                "maximum": 9007199254740991
+                                              }
+                                            },
+                                            "required": [
+                                              "x",
+                                              "y"
+                                            ]
+                                          },
+                                          "to": {
+                                            "type": "object",
+                                            "properties": {
+                                              "x": {
+                                                "type": "integer",
+                                                "minimum": -9007199254740991,
+                                                "maximum": 9007199254740991
+                                              },
+                                              "y": {
+                                                "type": "integer",
+                                                "minimum": -9007199254740991,
+                                                "maximum": 9007199254740991
+                                              }
+                                            },
+                                            "required": [
+                                              "x",
+                                              "y"
+                                            ]
+                                          },
+                                          "side": {
+                                            "type": "string",
+                                            "enum": [
+                                              "left",
+                                              "right"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "from",
+                                          "to"
+                                        ]
+                                      },
                                       "mode": {
                                         "type": "string",
                                         "enum": [
@@ -1366,6 +1420,135 @@
                         "maximum": 9007199254740991
                       },
                       "difficult": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "squares": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "y": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ]
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "segments": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "y": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ]
+                            },
+                            "to": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                },
+                                "y": {
+                                  "type": "integer",
+                                  "minimum": -9007199254740991,
+                                  "maximum": 9007199254740991
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "from",
+                            "to"
+                          ]
+                        }
+                      },
+                      "wall_squares": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "y": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "x",
+                            "y"
+                          ]
+                        }
+                      },
+                      "cover": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "three_quarters",
+                              "total"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "cost": {
+                        "default": 1,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "no_save": {
                         "default": false,
                         "type": "boolean"
                       },
@@ -3026,6 +3209,60 @@
                     "pact": {
                       "type": "boolean"
                     },
+                    "wall": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "y": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "x",
+                            "y"
+                          ]
+                        },
+                        "to": {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "y": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "x",
+                            "y"
+                          ]
+                        },
+                        "side": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "from",
+                        "to"
+                      ]
+                    },
                     "mode": {
                       "type": "string",
                       "enum": [
@@ -3610,6 +3847,60 @@
             },
             "pact": {
               "type": "boolean"
+            },
+            "wall": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "to": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "side": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "right"
+                  ]
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ]
             },
             "mode": {
               "type": "string",

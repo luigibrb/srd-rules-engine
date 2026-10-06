@@ -21,6 +21,7 @@ import {
   currentCombatant,
   EncounterError,
   encounterCombatant,
+  mapWalls,
   zoneArea,
 } from "../services/encounter";
 import { createHistory, recordAction, undoAction } from "../services/history";
@@ -50,7 +51,8 @@ Targets are ids, names or numbers from the status table.
   cast <spell> [targets…] [near …] [at <level>] [type <damage>] [spare <who…>]
   use <ability> [targets…]   (a monster's save effect)
   zone <id> save <who…> · zone <id> move <x> <y> [onto <who>] · zone <id> end   (lasting areas)
-  areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square
+  areas: instead of targets, @x,y places a Sphere or Cube, >x,y aims a Cone or Line at a square;
+         a wall spell: cast <spell> from x,y to x,y [left|right] (squares, or grid corners)
   feature <name> [target] [amount]           legend <action> [target…]  (as <monster> legend …)
   dash · disengage · dodge [bonus]   help <target> [skill]   grapple <t> · shove <t> prone|push
   escape · stand · move <feet> · move <x> <y> · check <skill|ability> [dc]
@@ -207,7 +209,8 @@ export class FightApp {
     const placed = e.order
       .map((id, i) => [e.combatants.find((c) => c.id === id) as EncounterCombatant, i + 1] as const)
       .filter(([c]) => c.position && !c.defeated);
-    const { walls, difficult, blocked } = e.map;
+    const { difficult, blocked } = e.map;
+    const walls = mapWalls(e);
     if (!placed.length && !walls.length && !difficult.length && !blocked.length) {
       this.con.info("Nobody is on the grid: 'place <who> <x> <y>'.");
       return;
@@ -616,7 +619,26 @@ export class FightApp {
   }
 
   private async cast(id: string, all: string[]): Promise<void> {
-    const { area, rest: args } = areaOf(all);
+    const { area, rest: placed } = areaOf(all);
+    // A wall: `from x,y to x,y [left|right]`.
+    const fromAt = placed.indexOf("from");
+    const square = (w?: string) => {
+      const m = /^(-?\d+),(-?\d+)$/.exec(w ?? "");
+      return m ? { x: Number(m[1]), y: Number(m[2]) } : null;
+    };
+    let wall:
+      | { from: { x: number; y: number }; to: { x: number; y: number }; side?: "left" | "right" }
+      | undefined;
+    let args = placed;
+    if (fromAt >= 0) {
+      const from = square(placed[fromAt + 1]);
+      const to = placed[fromAt + 2] === "to" ? square(placed[fromAt + 3]) : null;
+      if (!from || !to)
+        return this.con.error("Usage: cast <wall spell> from x,y to x,y [left|right]");
+      const side = placed[fromAt + 4];
+      wall = { from, to, ...(side === "left" || side === "right" ? { side } : {}) };
+      args = [...placed.slice(0, fromAt), ...placed.slice(fromAt + (wall.side ? 5 : 4))];
+    }
     const at = args.indexOf("at");
     const slot_level = at >= 0 ? Number(args[at + 1]) : undefined;
     // `type <damage>`: the damage type picked; `spare …`: creatures a zone doesn't affect.
@@ -645,8 +667,9 @@ export class FightApp {
         type: "cast",
         id,
         spell,
-        targets: area ? undefined : targets.map((t) => (t as EncounterCombatant).id),
+        targets: area || wall ? undefined : targets.map((t) => (t as EncounterCombatant).id),
         area,
+        wall,
         slot_level,
         nearby: nearby?.map((t) => (t as EncounterCombatant).id),
         damage_type,

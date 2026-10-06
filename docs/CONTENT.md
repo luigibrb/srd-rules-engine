@@ -409,6 +409,10 @@ mechanics:
 #         zone: {..., optional: true, anchor: point, space: 2, ram: false,
 #                on_fail: [no_actions, lose_concentration],
 #                difficult: true}               # its area is Difficult Terrain (Web)
+#         wall: {length: 100, between: true}    # a wall on grid lines (Wall of Force); or squares:
+#         wall: {length: 100, cover: three_quarters, difficult: true}   # Blade Barrier
+#         wall: {length: 60, cost: 4, later_type: slashing}             # Wall of Thorns
+#         wall: {length: 60, side: 10, later: damage}                   # Wall of Fire
 ```
 
 A spell has an attack roll or a save, not both; a `follow_up` save comes after an attack. Damage from a save is rolled once for every

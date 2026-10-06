@@ -60,7 +60,7 @@ const mage = (level = 1) => creature({ name: "Mage", level, spellcasting: [wizar
 describe("golden spells (mechanics checked against the SRD text)", () => {
   it("every spell's mechanics, as reviewed (a change here needs a review against the SRD)", () => {
     const withMechanics = Object.values(catalog.spells).filter((s) => s.mechanics);
-    expect(withMechanics).toHaveLength(72);
+    expect(withMechanics).toHaveLength(78);
     expect(Object.fromEntries(withMechanics.map((s) => [s.id, s.mechanics]))).toMatchSnapshot();
   });
 

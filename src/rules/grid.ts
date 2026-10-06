@@ -37,6 +37,8 @@ export interface Terrain {
   readonly difficult: ReadonlySet<string>;
   /** Other creatures' squares (`"x,y"`): pass through, pass as Difficult Terrain, or not. */
   readonly creatures?: ReadonlyMap<string, Occupant>;
+  /** Squares where each foot of movement costs this many feet (Wall of Thorns: 4). */
+  readonly costs?: ReadonlyMap<string, number>;
 }
 
 export const key = (p: GridPoint): string => `${p.x},${p.y}`;
@@ -143,6 +145,9 @@ export function stepCost(terrain: Terrain, from: GridPoint, to: GridPoint, size 
   const difficult = entered.some(
     (s) => terrain.difficult.has(key(s)) || terrain.creatures?.get(key(s)) === "difficult",
   );
+  // A square that costs more per foot (Wall of Thorns) replaces Difficult Terrain's doubling.
+  const times = Math.max(1, ...entered.map((s) => terrain.costs?.get(key(s)) ?? 1));
+  if (times > 1) return 5 * Math.max(times, difficult ? 2 : 1);
   return difficult ? 10 : 5;
 }
 
@@ -365,6 +370,8 @@ export function coverDegree(
   target: { position: GridPoint; size: number },
   walls: readonly Wall[],
   creatures: readonly { position: GridPoint; size: number }[] = [],
+  /** Squares that give at least this cover to lines through them (Blade Barrier). */
+  screens: readonly { position: GridPoint; size: number; degree: CoverDegree }[] = [],
 ): { degree: CoverDegree; by: number | null } {
   let best: { degree: CoverDegree; by: number | null } = { degree: "total", by: null };
   const squares: GridPoint[] = [];
@@ -380,6 +387,10 @@ export function coverDegree(
       let degree: CoverDegree =
         blocked === 0 ? "none" : blocked <= 2 ? "half" : blocked === 3 ? "three_quarters" : "total";
       let by: number | null = null;
+      for (const screen of screens) {
+        if (DEGREES.indexOf(screen.degree) <= DEGREES.indexOf(degree)) continue;
+        if (clear.some((c) => throughSpace(a, c, screen))) degree = screen.degree;
+      }
       if (degree === "none") {
         const i = creatures.findIndex((space) => clear.some((c) => throughSpace(a, c, space)));
         if (i >= 0) {

@@ -6316,6 +6316,25 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     4.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 5d8
+        type: fire
+    upcast:
+      damage:
+        - dice: 1d8
+          type: fire
+    wall:
+      length: 60
+      side: 10
+      later: damage
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: animate-objects
   name: Animate Objects
   level: 5
@@ -7825,6 +7844,10 @@
     Nothing can physically pass through the wall. It is immune to all damage and can't be dispelled
     by _Dispel Magic_. A _Disintegrate_ spell destroys the wall instantly, however. The wall also
     extends into the Ethereal Plane and blocks ethereal travel through the wall.
+  mechanics:
+    wall:
+      length: 100
+      between: true
 - id: wall-of-stone
   name: Wall of Stone
   level: 5
@@ -7871,6 +7894,10 @@
 
     If you maintain your Concentration on this spell for its full duration, the wall becomes
     permanent and can't be dispelled. Otherwise, the wall disappears when the spell ends.
+  mechanics:
+    wall:
+      length: 100
+      between: true
 - id: blade-barrier
   name: Blade Barrier
   level: 6
@@ -7893,6 +7920,21 @@
     Any creature in the wall's space makes a Dexterity saving throw, taking 6d10 Force damage on a
     failed save or half as much damage on a successful one. A creature also makes that save if it
     enters the wall's space or ends it turn there. A creature makes that save only once per turn.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 6d10
+        type: force
+    wall:
+      length: 100
+      cover: three_quarters
+      difficult: true
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: chain-lightning
   name: Chain Lightning
   level: 6
@@ -8792,6 +8834,10 @@
     _Using a Higher-Level Spell Slot._ The damage the wall deals when it appears increases by 2d6
     and the damage from passing through the sheet of frigid air increases by 1d6 for each spell slot
     level above 6.
+  mechanics:
+    wall:
+      length: 100
+      between: true
 - id: wall-of-thorns
   name: Wall of Thorns
   level: 6
@@ -8824,6 +8870,25 @@
 
     _Using a Higher-Level Spell Slot._ Both types of damage increase by 1d8 for each spell slot
     level above 6.
+  mechanics:
+    save:
+      ability: dex
+      on_success: half
+    damage:
+      - dice: 7d8
+        type: piercing
+    upcast:
+      damage:
+        - dice: 1d8
+          type: piercing
+    wall:
+      length: 60
+      cost: 4
+      later_type: slashing
+    zone:
+      triggers:
+        - enter
+        - end_turn
 - id: wind-walk
   name: Wind Walk
   level: 6

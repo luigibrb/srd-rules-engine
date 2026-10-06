@@ -42,6 +42,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P28 | The other actions: Hide (Invisible while hidden, ended by attacks, Verbal spells, being found), Search, Ready (a held spell with Concentration, a readied move) and `release`, Study, Influence, Utilize; in options and the fight CLI | Line of sight for Hide is read as Three-Quarters Cover from every enemy (flagged); triggers are the caller's |
 | P29a | Class features used in turns: Indomitable (a decision), Deflect Attacks, Stunning Strike's successful-save effects, Lay On Hands' cure, Innate Sorcery, Channel Divinity's Divine Spark and Turn Undead | Data first: new `actions` fields (several targets, range, creature types, the spell save DC, save damage, effects on a success, conditions removed); one named rule (`indomitable`) |
 | P29b | Cunning Strike (Poison, Trip, Withdraw), Brutal Strike (Forceful, Hamstring, Staggering, Sundering), Relentless Rage, Agonizing Blast, Sacred Weapon; saves repeated at the end of each turn | Strikes are `attack` options checked before the roll; four named rules; Withdraw, Forceful Blow and Sacred Weapon simplified (flagged) |
+| P30 | Wall spells on the map: Wall of Force, Stone and Ice between squares; Blade Barrier, Wall of Thorns and Wall of Fire as zones of squares (cover, movement cost, Difficult Terrain, a damaging side, damage without a save) | Straight walls only; rings, domes, breaking walls are text (flagged) |
 
 ## Decisions
 
@@ -72,9 +73,8 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Combat rules
 
-- **Walls (M).** Blade Barrier, Wall of Fire, Wall of Ice, Wall of Thorns: a wall placed from
-  point to point or as a ring, its damaging side; on the map, wall segments or blocked squares
-  plus a zone along them.
+- **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
+  Ice's frigid air, walls that cut through a creature's space.
 - **Spirit Guardians' halved Speed (S).** "Any other creature's Speed is halved in the
   Emanation": a budget that changes along a move.
 - **Monster traits that work like zones (M).** Auras and areas in stat blocks.

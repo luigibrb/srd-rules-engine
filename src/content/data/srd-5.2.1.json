@@ -24865,7 +24865,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -24907,7 +24908,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -24985,7 +24987,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25046,7 +25049,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25214,7 +25218,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25294,7 +25299,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25356,7 +25362,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25415,7 +25422,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25493,7 +25501,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25575,7 +25584,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25643,7 +25653,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25739,7 +25750,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25790,7 +25802,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25858,7 +25871,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -25962,7 +25976,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26099,7 +26114,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26197,7 +26213,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26413,7 +26430,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -26464,7 +26482,8 @@
                     "advantage_against"
                 ],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26506,7 +26525,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26558,7 +26578,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26650,7 +26671,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26728,7 +26750,8 @@
                 },
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26819,7 +26842,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -26924,7 +26948,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -27023,7 +27048,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -27166,7 +27192,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -27246,7 +27273,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -27770,7 +27798,8 @@
                     "ram": true,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -27882,7 +27911,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28101,7 +28131,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28212,7 +28243,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -28372,7 +28404,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28450,7 +28483,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28566,7 +28600,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -28630,7 +28665,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28711,7 +28747,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -28859,7 +28896,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -28951,7 +28989,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -29115,7 +29154,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -29250,7 +29290,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -29307,7 +29348,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -29390,7 +29432,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -29617,7 +29660,8 @@
                         "lose_concentration"
                     ],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -29750,7 +29794,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -29814,7 +29859,8 @@
                         "no_actions"
                     ],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -29961,7 +30007,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30088,7 +30135,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -30143,7 +30191,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30194,7 +30243,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30237,7 +30287,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30348,7 +30399,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -30666,7 +30718,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30742,7 +30795,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -30898,7 +30952,65 @@
             "components": "V, S, M (a piece of charcoal)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "5d8",
+                        "type": "fire",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": [],
+                    "difficult": false
+                },
+                "wall": {
+                    "length": 60,
+                    "between": false,
+                    "cover": null,
+                    "difficult": false,
+                    "cost": 1,
+                    "side": 10,
+                    "later": "damage",
+                    "later_type": null
+                }
+            }
         },
         {
             "id": "animate-objects",
@@ -31044,7 +31156,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -31139,7 +31252,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -31404,7 +31518,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -31476,7 +31591,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": true
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -31542,7 +31658,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -31816,7 +31933,32 @@
             "components": "V, S, M (a shard of glass)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "wall": {
+                    "length": 100,
+                    "between": true,
+                    "cover": null,
+                    "difficult": false,
+                    "cost": 1,
+                    "side": null,
+                    "later": "save",
+                    "later_type": null
+                }
+            }
         },
         {
             "id": "wall-of-stone",
@@ -31836,7 +31978,32 @@
             "components": "V, S, M (a cube of granite)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "wall": {
+                    "length": 100,
+                    "between": true,
+                    "cover": null,
+                    "difficult": false,
+                    "cost": 1,
+                    "side": null,
+                    "later": "save",
+                    "later_type": null
+                }
+            }
         },
         {
             "id": "blade-barrier",
@@ -31854,7 +32021,56 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "6d10",
+                        "type": "force",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": [],
+                    "difficult": false
+                },
+                "wall": {
+                    "length": 100,
+                    "between": false,
+                    "cover": "three_quarters",
+                    "difficult": true,
+                    "cost": 1,
+                    "side": null,
+                    "later": "save",
+                    "later_type": null
+                }
+            }
         },
         {
             "id": "chain-lightning",
@@ -31930,7 +32146,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32039,7 +32256,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32125,7 +32343,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32200,7 +32419,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32281,7 +32501,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32509,7 +32730,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32568,7 +32790,32 @@
             "components": "V, S, M (a piece of quartz)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "wall": {
+                    "length": 100,
+                    "between": true,
+                    "cover": null,
+                    "difficult": false,
+                    "cost": 1,
+                    "side": null,
+                    "later": "save",
+                    "later_type": null
+                }
+            }
         },
         {
             "id": "wall-of-thorns",
@@ -32586,7 +32833,65 @@
             "components": "V, S, M (a handful of thorns)",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "dex",
+                    "on_success": "half"
+                },
+                "damage": [
+                    {
+                        "dice": "7d8",
+                        "type": "piercing",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": null,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "piercing"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": {
+                    "triggers": [
+                        "enter",
+                        "end_turn"
+                    ],
+                    "once_per_turn": true,
+                    "on_cast": true,
+                    "designate": false,
+                    "optional": false,
+                    "anchor": "caster",
+                    "space": 1,
+                    "ram": false,
+                    "on_fail": [],
+                    "difficult": false
+                },
+                "wall": {
+                    "length": 60,
+                    "between": false,
+                    "cover": null,
+                    "difficult": false,
+                    "cost": 4,
+                    "side": null,
+                    "later": "save",
+                    "later_type": "slashing"
+                }
+            }
         },
         {
             "id": "wind-walk",
@@ -32762,7 +33067,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -32807,7 +33113,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -33166,7 +33473,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -33365,7 +33673,8 @@
                     "ram": false,
                     "on_fail": [],
                     "difficult": false
-                }
+                },
+                "wall": null
             }
         },
         {
@@ -33480,7 +33789,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -33651,7 +33961,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {
@@ -33860,7 +34171,8 @@
                 "follow_up": null,
                 "on_hit": [],
                 "damage_types": [],
-                "zone": null
+                "zone": null,
+                "wall": null
             }
         },
         {

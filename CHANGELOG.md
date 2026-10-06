@@ -87,6 +87,12 @@ migrated when it's loaded.
   `forgo_advantage`, `bonus`; effects with `repeat_save`; effect target `attack.weapon`;
   `spell_damage` `spell`.
 
+- Wall spells: `mechanics.wall`, placed with `cast` `wall: { from, to, side }`: Wall of Force,
+  Wall of Stone and Wall of Ice (between squares: they block movement and lines), Blade Barrier,
+  Wall of Thorns and Wall of Fire (zones of squares). Zones gain `squares`, `segments`,
+  `wall_squares`, `cover`, `cost` and `no_save`; terrain can cost more per foot (`costs`).
+  `srd-rules fight`: `cast <spell> from x,y to x,y [left|right]`.
+
 ### Changed
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
