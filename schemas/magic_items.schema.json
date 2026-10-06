@@ -901,6 +901,7 @@
                   "saves",
                   "skill.unproficient",
                   "speed",
+                  "spell.save_dc",
                   "skill.acrobatics",
                   "skill.animal-handling",
                   "skill.arcana",
@@ -1186,6 +1187,7 @@
                 "enum": [
                   "initiative",
                   "attack.str",
+                  "attack.spell",
                   "attacked",
                   "save.str",
                   "save.dex",
@@ -1209,6 +1211,7 @@
                     "enum": [
                       "initiative",
                       "attack.str",
+                      "attack.spell",
                       "attacked",
                       "save.str",
                       "save.dex",
@@ -1248,7 +1251,8 @@
             "enum": [
               "evasion",
               "reliable_talent",
-              "potent_cantrip"
+              "potent_cantrip",
+              "indomitable"
             ]
           }
         },
@@ -1393,6 +1397,29 @@
                           }
                         ]
                       },
+                      "scaling": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "level": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dice": {
+                              "type": "string",
+                              "pattern": "^\\d+d\\d+$"
+                            }
+                          },
+                          "required": [
+                            "level",
+                            "dice"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
                       "bonus": {
                         "default": 0,
                         "anyOf": [
@@ -1498,14 +1525,22 @@
                         ]
                       },
                       "dc_ability": {
-                        "type": "string",
-                        "enum": [
-                          "str",
-                          "dex",
-                          "con",
-                          "int",
-                          "wis",
-                          "cha"
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "str",
+                              "dex",
+                              "con",
+                              "int",
+                              "wis",
+                              "cha"
+                            ]
+                          },
+                          {
+                            "type": "string",
+                            "const": "spell"
+                          }
                         ]
                       },
                       "conditions": {
@@ -1514,11 +1549,231 @@
                         "items": {
                           "type": "string"
                         }
+                      },
+                      "rounds": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 9007199254740991
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "ends_on": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "damage",
+                            "source_incapacitated"
+                          ]
+                        }
+                      },
+                      "damage": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "dice": {
+                                "type": "string",
+                                "pattern": "^\\d+d\\d+$"
+                              },
+                              "scaling": {
+                                "default": [],
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "level": {
+                                      "type": "integer",
+                                      "minimum": -9007199254740991,
+                                      "maximum": 9007199254740991
+                                    },
+                                    "dice": {
+                                      "type": "string",
+                                      "pattern": "^\\d+d\\d+$"
+                                    }
+                                  },
+                                  "required": [
+                                    "level",
+                                    "dice"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "bonus": {
+                                "default": 0,
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "str",
+                                      "dex",
+                                      "con",
+                                      "int",
+                                      "wis",
+                                      "cha"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "types": {
+                                "minItems": 1,
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "acid",
+                                    "bludgeoning",
+                                    "cold",
+                                    "fire",
+                                    "force",
+                                    "lightning",
+                                    "necrotic",
+                                    "piercing",
+                                    "poison",
+                                    "psychic",
+                                    "radiant",
+                                    "slashing",
+                                    "thunder"
+                                  ]
+                                }
+                              },
+                              "half": {
+                                "default": true,
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "dice",
+                              "types"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "on_success": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "speed_halved",
+                            "advantage_against"
+                          ]
+                        }
                       }
                     },
                     "required": [
                       "ability",
                       "dc_ability"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "range": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "many": {
+                "default": false,
+                "type": "boolean"
+              },
+              "creature_types": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "removes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reduces_attack_damage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "dice": {
+                        "type": "string",
+                        "pattern": "^\\d+d\\d+$"
+                      },
+                      "abilities": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "str",
+                            "dex",
+                            "con",
+                            "int",
+                            "wis",
+                            "cha"
+                          ]
+                        }
+                      },
+                      "class_level": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "types": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "dice"
                     ],
                     "additionalProperties": false
                   },

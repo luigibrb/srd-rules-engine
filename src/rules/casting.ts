@@ -300,6 +300,7 @@ export function castSpell(
       shots.set(index, shot + 1);
       // Conditions change the roll like a weapon attack's; a melee spell attack is within 5 ft.
       const effective = attackMode(caster, target, {
+        spell: true,
         mode,
         within_5ft: within_5ft?.[index] ?? m.attack === "melee",
         modes: [...(m.attack === "ranged" ? modes : []), ...(modesFor?.(index, shot) ?? [])],

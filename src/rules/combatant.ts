@@ -111,6 +111,11 @@ export interface Combatant {
    * that a die can change (not a natural 1 attack roll, not an automatic failure).
    */
   readonly inspiration_die: number | null;
+  /**
+   * Indomitable: the bonus a reroll of a failed save gets (the Fighter level), while a use is
+   * left; `null` without it.
+   */
+  readonly indomitable?: number | null;
 }
 
 /** An ability modifier added to the damage of matching spells, worked out (`bonus`). */
@@ -131,7 +136,13 @@ export interface SpellDamageBonus {
  * (always, for the last two).
  */
 export interface Decision {
-  readonly kind: "inspiration" | "legendary_resistance" | "uncanny_dodge" | "zone_force";
+  readonly kind:
+    | "inspiration"
+    | "legendary_resistance"
+    | "uncanny_dodge"
+    | "zone_force"
+    | "indomitable"
+    | "deflect_attacks";
   /** Who decides. */
   readonly combatant: Combatant;
   /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */
@@ -300,6 +311,8 @@ export interface AttackModeOptions {
   modes?: readonly ModeReason[];
   /** The attack's ability (`attack.str` Advantage: Reckless Attack); `null` for a spell. */
   ability?: Ability | null;
+  /** A spell attack (`attack.spell` Advantage: Innate Sorcery). */
+  spell?: boolean;
 }
 
 /**
@@ -315,9 +328,14 @@ export function attackMode(
     against_source_of = [],
     modes = [],
     ability = null,
+    spell = false,
   }: AttackModeOptions,
 ): { mode: RollMode; reasons: string[]; critical_on_hit: boolean } {
   const reasons: ModeReason[] = [...modes];
+  // Innate Sorcery: Advantage on the attack rolls of spells.
+  if (spell && attacker.advantages.includes("attack.spell")) {
+    reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
+  }
   // Reckless Attack: Advantage on attack rolls using Strength, and on attack rolls against you.
   if (ability === "str" && attacker.advantages.includes("attack.str")) {
     reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
@@ -578,6 +596,8 @@ export interface SaveResult {
   readonly reasons: readonly string[];
   /** The Bardic Inspiration die rolled and added (it failed without it), if any. */
   readonly inspiration: number | null;
+  /** It failed and was rerolled with Indomitable (one use spent): `roll` is the new roll. */
+  readonly indomitable?: boolean;
 }
 
 /**
@@ -627,9 +647,23 @@ export function rollSavingThrow(
   const hindered = combatant.condition_rolls.save_disadvantage[ability];
   if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
   const resolved = resolveMode(mode, reasons);
-  const roll = rollD20({ mode: resolved.mode, rng });
+  let roll = rollD20({ mode: resolved.mode, rng });
   let total = roll.d20 + bonus;
   const what = `${ABILITY_NAMES[ability]} saving throw`;
+  // Indomitable: "If you fail a saving throw, you can reroll it with a bonus equal to your
+  // Fighter level. You must use the new roll."
+  let indomitable = false;
+  const reroll = combatant.indomitable ?? null;
+  if (total < dc && reroll !== null) {
+    const question = `${combatant.name} fails a ${what} (${total} vs DC ${dc}). Reroll it with Indomitable (+${reroll})?`;
+    if (
+      decide({ kind: "indomitable", combatant, question, recommended: dc - bonus - reroll <= 20 })
+    ) {
+      indomitable = true;
+      roll = rollD20({ mode: resolved.mode, rng });
+      total = roll.d20 + bonus + reroll;
+    }
+  }
   const inspiration = inspire(combatant, total, dc, what, decide, rng);
   total += inspiration ?? 0;
   const legendary = total < dc && resist(total);
@@ -637,6 +671,7 @@ export function rollSavingThrow(
     ...base,
     roll,
     total,
+    indomitable,
     success: total >= dc || legendary,
     automatic_failure: null,
     legendary_resistance: legendary,

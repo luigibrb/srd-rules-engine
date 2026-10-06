@@ -139,6 +139,15 @@ features:
         your Monk level or lower.
     choices:
     - {id: subclass, label: Monk subclass, kind: subclass}
+    actions:
+    - id: deflect-attacks
+      name: Deflect Attacks
+      economy: reaction
+      reduces_attack_damage:
+        dice: 1d10
+        abilities: [dex]
+        class_level: true
+        types: [bludgeoning, piercing, slashing]
   '4':
     traits:
     - name: Ability Score Improvement
@@ -177,6 +186,7 @@ features:
         ability: con
         dc_ability: wis
         conditions: [stunned]
+        on_success: [speed_halved, advantage_against]
   '6':
     traits:
     - name: Empowered Strikes

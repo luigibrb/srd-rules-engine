@@ -262,6 +262,9 @@ def DIVINE_STRIKE(dice):
             "applies_to": {"weapon": True}, "once_per_turn": True}
 
 
+# Divine Spark: "an additional d8 when you reach Cleric levels 7 (2d8), 13 (3d8), and 18 (4d8)".
+DIVINE_SPARK = [{"level": 7, "dice": "2d8"}, {"level": 13, "dice": "3d8"}, {"level": 18, "dice": "4d8"}]
+
 OVERLAY = {
     "barbarian": {
         2: {"advantages": [{"target": "save.dex", "unless": ["incapacitated"]}],  # Danger Sense
@@ -281,6 +284,20 @@ OVERLAY = {
         20: {"spells": ["power-word-heal", "power-word-kill"]},
     },
     "cleric": {
+        # Channel Divinity's two effects, each spending a use; the DC is the spell save DC.
+        2: {"actions": [
+            {"id": "divine-spark-heal", "name": "Divine Spark (heal)", "economy": "action",
+             "uses": "channel-divinity", "target": "other", "range": 30,
+             "heal": {"dice": "1d8", "bonus": "wis", "scaling": DIVINE_SPARK}},
+            {"id": "divine-spark", "name": "Divine Spark (harm)", "economy": "action",
+             "uses": "channel-divinity", "target": "other", "range": 30,
+             "save": {"ability": "con", "dc_ability": "spell",
+                      "damage": {"dice": "1d8", "bonus": "wis", "scaling": DIVINE_SPARK,
+                                 "types": ["necrotic", "radiant"], "half": True}}},
+            {"id": "turn-undead", "name": "Turn Undead", "economy": "action", "uses": "channel-divinity",
+             "many": True, "range": 30, "creature_types": ["undead"],
+             "save": {"ability": "wis", "dc_ability": "spell", "conditions": ["frightened", "incapacitated"],
+                      "rounds": 10, "ends_on": ["damage", "source_incapacitated"]}}]},
         7: {"choices": [{"id": "blessed_strikes", "label": "Blessed Strikes", "kind": "option", "options": [
             {"id": "divine-strike", "name": "Divine Strike",
              "description": "Once per turn, a weapon hit deals an extra 1d8 Necrotic or Radiant damage.",
@@ -306,6 +323,7 @@ OVERLAY = {
         2: {"actions": [{"id": "action-surge", "name": "Action Surge", "economy": "free", "uses": "action-surge",
                          "extra_action": True}]},
         5: {"effects": [extra_attack(2)]},
+        9: {"rules": ["indomitable"]},
         11: {"effects": [extra_attack(3)]},
         20: {"effects": [extra_attack(4)]},
     },
@@ -320,10 +338,15 @@ OVERLAY = {
                  "also": ["disengage", "dodge"]},
                 {"id": "step-of-the-wind", "name": "Step of the Wind", "economy": "bonus_action",
                  "uses": "focus-points", "also": ["disengage", "dash"]}]},
+        # Deflect Attacks: the reduction; redirecting the force (1 Focus Point) stays text.
+        3: {"actions": [{"id": "deflect-attacks", "name": "Deflect Attacks", "economy": "reaction",
+                         "reduces_attack_damage": {"dice": "1d10", "abilities": ["dex"], "class_level": True,
+                                                   "types": ["bludgeoning", "piercing", "slashing"]}}]},
         5: {"effects": [extra_attack(2), {"target": "martial_arts.die", "op": "max", "value": 8}],
             "actions": [{"id": "stunning-strike", "name": "Stunning Strike", "economy": "free", "uses": "focus-points",
                          "target": "other", "after_hit": True, "once_per_turn": True,
-                         "save": {"ability": "con", "dc_ability": "wis", "conditions": ["stunned"]}}]},
+                         "save": {"ability": "con", "dc_ability": "wis", "conditions": ["stunned"],
+                                  "on_success": ["speed_halved", "advantage_against"]}}]},
         6: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},
         7: {"rules": ["evasion"]},
         10: {"effects": [{"target": "speed", "value": 5, "when": "unarmored"}]},

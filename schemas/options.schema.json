@@ -3783,10 +3783,34 @@
             "target": {
               "type": "string"
             },
+            "targets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "amount": {
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
+            },
+            "damage_type": {
+              "type": "string",
+              "enum": [
+                "acid",
+                "bludgeoning",
+                "cold",
+                "fire",
+                "force",
+                "lightning",
+                "necrotic",
+                "piercing",
+                "poison",
+                "psychic",
+                "radiant",
+                "slashing",
+                "thunder"
+              ]
             }
           },
           "required": [

@@ -91,6 +91,13 @@ features:
       pool: true
       target: creature
       heal: {pooled: true}
+    - id: lay-on-hands-cure
+      name: Lay On Hands (cure Poisoned)
+      economy: bonus_action
+      uses: lay-on-hands
+      cost: 5
+      target: creature
+      removes: [poisoned]
     resources:
     - id: lay-on-hands
       name: Lay On Hands (Hit Point pool)

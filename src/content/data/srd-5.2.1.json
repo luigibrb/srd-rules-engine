@@ -1958,6 +1958,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": {
                                 "progression": "Bardic Die"
                             },
@@ -4006,7 +4011,141 @@
                     "advantages": [],
                     "rules": [],
                     "spell_damage": [],
-                    "actions": [],
+                    "actions": [
+                        {
+                            "id": "divine-spark-heal",
+                            "name": "Divine Spark (heal)",
+                            "economy": "action",
+                            "uses": "channel-divinity",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "other",
+                            "heal": {
+                                "dice": "1d8",
+                                "scaling": [
+                                    {
+                                        "level": 7,
+                                        "dice": "2d8"
+                                    },
+                                    {
+                                        "level": 13,
+                                        "dice": "3d8"
+                                    },
+                                    {
+                                        "level": 18,
+                                        "dice": "4d8"
+                                    }
+                                ],
+                                "bonus": "wis",
+                                "pooled": false
+                            },
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": 30,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "halves_attack_damage": false
+                        },
+                        {
+                            "id": "divine-spark",
+                            "name": "Divine Spark (harm)",
+                            "economy": "action",
+                            "uses": "channel-divinity",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "other",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": {
+                                "ability": "con",
+                                "dc_ability": "spell",
+                                "conditions": [],
+                                "rounds": null,
+                                "ends_on": [],
+                                "damage": {
+                                    "dice": "1d8",
+                                    "scaling": [
+                                        {
+                                            "level": 7,
+                                            "dice": "2d8"
+                                        },
+                                        {
+                                            "level": 13,
+                                            "dice": "3d8"
+                                        },
+                                        {
+                                            "level": 18,
+                                            "dice": "4d8"
+                                        }
+                                    ],
+                                    "bonus": "wis",
+                                    "types": [
+                                        "necrotic",
+                                        "radiant"
+                                    ],
+                                    "half": true
+                                },
+                                "on_success": []
+                            },
+                            "range": 30,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "halves_attack_damage": false
+                        },
+                        {
+                            "id": "turn-undead",
+                            "name": "Turn Undead",
+                            "economy": "action",
+                            "uses": "channel-divinity",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": {
+                                "ability": "wis",
+                                "dc_ability": "spell",
+                                "conditions": [
+                                    "frightened",
+                                    "incapacitated"
+                                ],
+                                "rounds": 10,
+                                "ends_on": [
+                                    "damage",
+                                    "source_incapacitated"
+                                ],
+                                "damage": null,
+                                "on_success": []
+                            },
+                            "range": 30,
+                            "many": true,
+                            "creature_types": [
+                                "undead"
+                            ],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "halves_attack_damage": false
+                        }
+                    ],
                     "toggles": [],
                     "items": [],
                     "gp": 0,
@@ -6635,6 +6774,7 @@
                             "target": "self",
                             "heal": {
                                 "dice": "1d10",
+                                "scaling": [],
                                 "bonus": "class_level",
                                 "pooled": false
                             },
@@ -6644,6 +6784,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         }
@@ -6800,6 +6945,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         }
@@ -7140,7 +7290,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "indomitable"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],
@@ -8040,6 +8192,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         },
@@ -8061,6 +8218,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         },
@@ -8082,6 +8244,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         }
@@ -8128,7 +8295,42 @@
                     "advantages": [],
                     "rules": [],
                     "spell_damage": [],
-                    "actions": [],
+                    "actions": [
+                        {
+                            "id": "deflect-attacks",
+                            "name": "Deflect Attacks",
+                            "economy": "reaction",
+                            "uses": null,
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": {
+                                "dice": "1d10",
+                                "abilities": [
+                                    "dex"
+                                ],
+                                "class_level": true,
+                                "types": [
+                                    "bludgeoning",
+                                    "piercing",
+                                    "slashing"
+                                ]
+                            },
+                            "inspiration": null,
+                            "halves_attack_damage": false
+                        }
+                    ],
                     "toggles": [],
                     "items": [],
                     "gp": 0,
@@ -8295,8 +8497,20 @@
                                 "dc_ability": "wis",
                                 "conditions": [
                                     "stunned"
+                                ],
+                                "rounds": null,
+                                "ends_on": [],
+                                "damage": null,
+                                "on_success": [
+                                    "speed_halved",
+                                    "advantage_against"
                                 ]
                             },
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         }
@@ -9380,6 +9594,7 @@
                             "target": "creature",
                             "heal": {
                                 "dice": null,
+                                "scaling": [],
                                 "bonus": 0,
                                 "pooled": true
                             },
@@ -9389,6 +9604,36 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "halves_attack_damage": false
+                        },
+                        {
+                            "id": "lay-on-hands-cure",
+                            "name": "Lay On Hands (cure Poisoned)",
+                            "economy": "bonus_action",
+                            "uses": "lay-on-hands",
+                            "cost": 5,
+                            "pool": false,
+                            "target": "creature",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [
+                                "poisoned"
+                            ],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": false
                         }
@@ -12509,6 +12754,11 @@
                             "after_hit": false,
                             "once_per_turn": false,
                             "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
                             "inspiration": null,
                             "halves_attack_damage": true
                         }
@@ -13419,7 +13669,58 @@
                     "rules": [],
                     "spell_damage": [],
                     "actions": [],
-                    "toggles": [],
+                    "toggles": [
+                        {
+                            "id": "innate-sorcery",
+                            "name": "Innate Sorcery",
+                            "uses": "innate-sorcery",
+                            "grants": {
+                                "size": null,
+                                "skills": [],
+                                "tools": [],
+                                "languages": [],
+                                "saving_throws": [],
+                                "armor_training": [],
+                                "weapon_proficiencies": [],
+                                "feats": [],
+                                "resistances": [],
+                                "cantrips": [],
+                                "spells": [],
+                                "spellcasting": null,
+                                "ac_calculations": [],
+                                "ability_bonuses": [],
+                                "resources": [],
+                                "on_long_rest": [],
+                                "effects": [
+                                    {
+                                        "target": "spell.save_dc",
+                                        "op": "add",
+                                        "value": 1,
+                                        "min": null,
+                                        "when": null
+                                    }
+                                ],
+                                "damage_riders": [],
+                                "advantages": [
+                                    "attack.spell"
+                                ],
+                                "rules": [],
+                                "spell_damage": [],
+                                "actions": [],
+                                "toggles": [],
+                                "items": [],
+                                "gp": 0,
+                                "traits": [],
+                                "choices": [],
+                                "at_class_level": []
+                            },
+                            "blocked_when": [],
+                            "ends_on": [],
+                            "no_spells": false,
+                            "extends_each_turn": false,
+                            "ends_at_turn_start": false
+                        }
+                    ],
                     "items": [],
                     "gp": 0,
                     "traits": [
