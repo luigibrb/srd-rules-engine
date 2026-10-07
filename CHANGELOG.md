@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Messages for translation: encounter results have `messages` next to `notes` (`Message`: `code`,
+  `params`, English `text`), with the English templates in `MESSAGES_EN` and `renderMessage` /
+  `formatMessage` to render them with another catalog. Concentration, zones, effects ending,
+  Relentless Rage and readied actions have codes so far; other sentences have code `text`.
 - `unassignedValues(method, scores, rules, pool)` is public: the standard array's or rolled pool's
   values not assigned to an ability yet.
 - `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would

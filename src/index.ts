@@ -32,6 +32,7 @@ export {
 } from "./content/split";
 // The bundled SRD data is in `srd-rules-engine/srd`, not here: the engine stays small.
 export { SRD_PACK_ID } from "./content/srd-id";
+export { MESSAGES_EN, type MessageCode } from "./messages/en";
 // Models
 export {
   ABILITY_METHODS,
@@ -207,6 +208,7 @@ export {
   type RefusalCode,
 } from "./models/events";
 export { type EncounterHistory, EncounterHistorySchema } from "./models/history";
+export { type Message, type MessageParam, MessageSchema } from "./models/messages";
 export {
   type ActionCheck,
   ActionCheckSchema,
@@ -392,6 +394,11 @@ export {
   type Terrain,
   type Wall,
 } from "./rules/grid";
+export {
+  formatMessage,
+  type MessageCatalog,
+  renderMessage,
+} from "./rules/messages";
 export { attackOdds, averageDamage, failOdds } from "./rules/odds";
 export {
   fixedRng,

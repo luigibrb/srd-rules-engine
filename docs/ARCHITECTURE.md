@@ -728,6 +728,18 @@ engine's "out of reach"), or "No creature within N ft". The result has a Zod sch
 (`CombatantOptionsSchema`, `schemas/options.schema.json`); `POST /v1/encounters/options` and
 `/v1/encounters/check` serve both functions.
 
+### Messages (for translation)
+
+An encounter result's `messages` are its `notes` as data: `{ code, params, text }`, `text` being
+the English sentence rendered from `MESSAGES_EN[code]` (`src/messages/en.ts`). Templates are a
+small subset of ICU MessageFormat (`{x}`, `plural`, `select`, `list`); a parameter can be a
+nested message (a save's roll, an ability's name, the reason an effect ends), so a translation
+rephrases every part. An app renders them with its own catalog (`renderMessage(message,
+catalog)`, English `text` for a code it lacks). Content names in params (spells, conditions,
+damage types) stay as the catalog has them. Sentences not given a code yet have code `text`
+(`params.text`): the conversion goes on by area (encounter notes, then play, refusals, the
+builder). `message()` throws on a missing parameter or a message pasted into a string.
+
 ### Events, refusal codes and undo
 
 - **Events.** `applyEncounterAction` returns `events` (`src/services/events.ts`,

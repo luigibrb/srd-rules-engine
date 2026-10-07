@@ -35,6 +35,7 @@ import {
   type Zone,
 } from "../models/encounter";
 import type { EncounterEvent, RefusalCode } from "../models/events";
+import type { Message } from "../models/messages";
 import type { CharacterState, PlayAction } from "../models/state";
 import {
   type AreaPlacement,
@@ -89,6 +90,7 @@ import {
   straightPath,
   type Terrain,
 } from "../rules/grid";
+import { message, plainMessage } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import { encounterEvents } from "./events";
@@ -123,7 +125,10 @@ export interface EncounterResult {
   readonly encounter: Encounter;
   /** Character states changed by the action, by character key. */
   readonly states: Readonly<Record<string, CharacterState>>;
+  /** What happened, in English (each one is `messages[i].text`). */
   readonly notes: readonly string[];
+  /** The same as `notes`, as data to translate: a code, its parameters and the English text. */
+  readonly messages: readonly Message[];
   /** The rolls of an `attack`, `save_action`, `cast`, `legendary`, `check`, `unarmed` or `escape`. */
   readonly result:
     | AttackResult
@@ -361,6 +366,7 @@ function attempt(
       encounter: EncounterSchema.parse({ ...encounter, pending: stopped }),
       states: {},
       notes: [error.question],
+      messages: [plainMessage(error.question)],
       result: null,
       pending: stopped,
     };
@@ -374,7 +380,8 @@ function run(
   answers: readonly boolean[],
 ): Omit<EncounterResult, "events" | "rolls"> {
   const e = structuredClone(encounter) as Encounter;
-  const notes: string[] = [];
+  // Coded messages, or English sentences not given a code yet (`text` messages in the result).
+  const notes: (Message | string)[] = [];
   const states: Record<string, CharacterState> = {};
   // `release`: the readied action, taken with the reaction (checked here, spent at the end).
   let releasing: { id: string; held: boolean } | null = null;
@@ -385,7 +392,7 @@ function run(
     const readied = c.readied ?? fail(`${c.name} has nothing readied`);
     if (c.used.reaction) fail(`${c.name} has already used its reaction`);
     releasing = { id: c.id, held: readied.held };
-    notes.push(`${c.name} takes its readied action (${readied.trigger}).`);
+    notes.push(message("readied.taken", { name: c.name, trigger: readied.trigger }));
     action = readied.action as EncounterAction;
   }
   // A working copy of the characters: several can change in one action (attacker and target).
@@ -415,7 +422,7 @@ function run(
     }
     chars[c.character as string] = { build: ref.build, state: r.state };
     states[c.character as string] = r.state;
-    notes.push(...r.notes);
+    notes.push(...r.notes.map(plainMessage));
   };
   const concentrationOf = (c: EncounterCombatant): string | null =>
     c.monster !== null ? c.concentration : characterRef(ctx, c).state.concentration;
@@ -434,7 +441,7 @@ function run(
       }
       if (c.monster !== null) {
         const alive = !c.defeated;
-        notes.push(...monsterEffect(ctx, c, a));
+        notes.push(...monsterEffect(ctx, c, a).map(plainMessage));
         if (alive && c.defeated) deathBurst(c);
       } else {
         const relentless = a.type === "damage" ? relentlessRage(c, a) : null;
@@ -449,7 +456,7 @@ function run(
             if (view.temp_hp) play(c, { type: "set_temp_hp", amount: 0 });
             if (relentless > view.hp) play(c, { type: "heal", amount: relentless - view.hp });
           }
-          notes.push(`Relentless Rage: ${c.name}'s Hit Points become ${relentless} instead.`);
+          notes.push(message("relentless_rage.hp", { name: c.name, hp: relentless }));
         }
         if (a.type === "activate") {
           c.toggled_on.push(a.key);
@@ -465,7 +472,7 @@ function run(
         for (const effect of e.effects.filter(
           (x) => x.target === c.id && x.ends_on.includes("damage"),
         )) {
-          endEffect(effect, "it took damage");
+          endEffect(effect, message("why.took_damage"));
         }
       }
       const spell = concentrationOf(c);
@@ -473,9 +480,10 @@ function run(
         const save = rollSavingThrow(encounterCombatant(e, c.id, ctx), "con", dc, { rng, decide });
         spendLegendaryResistance(c, save);
         const outcome = saveText(save);
-        if (save.success) notes.push(`${c.name} keeps Concentration on ${spell} (${outcome}).`);
-        else {
-          notes.push(`${c.name} loses Concentration on ${spell} (${outcome}).`);
+        if (save.success) {
+          notes.push(message("concentration.kept", { name: c.name, spell, save: outcome }));
+        } else {
+          notes.push(message("concentration.lost", { name: c.name, spell, save: outcome }));
           if (c.monster !== null) c.concentration = null;
           else play(c, { type: "set_concentration", spell: null });
         }
@@ -512,20 +520,32 @@ function run(
     if (use) play(c, { type: "use", key: use.key });
     const save = rollSavingThrow(view, "con", dc, { rng, decide });
     notes.push(
-      `Relentless Rage: ${c.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`,
+      message("relentless_rage.save", {
+        name: c.name,
+        success: save.success,
+        save: saveText(save),
+      }),
     );
     if (!save.success) return null;
     return 2 * (sheet.classes.find((x) => x.class_id === "barbarian")?.level ?? 0);
   };
   /** End an effect; its condition goes unless another effect still gives it. */
-  const endEffect = (effect: EncounterEffect, why: string): void => {
+  const endEffect = (effect: EncounterEffect, reason: Message | string): void => {
+    const why = typeof reason === "string" ? plainMessage(reason) : reason;
     e.effects = e.effects.filter((x) => x.id !== effect.id);
     const target = e.combatants.find((c) => c.id === effect.target);
     const still = e.effects.some(
       (x) => x.target === effect.target && x.condition === effect.condition,
     );
     const name = lookup(ctx.catalog.conditions, effect.condition)?.name ?? effect.condition;
-    notes.push(`${name} on ${target?.name ?? effect.target} ends (${effect.label}: ${why}).`);
+    notes.push(
+      message("effect.ends", {
+        condition: name,
+        target: target?.name ?? effect.target,
+        label: effect.label,
+        why,
+      }),
+    );
     if (!target || still) return;
     if (target.monster !== null) {
       target.conditions = target.conditions.filter((x) => x !== effect.condition);
@@ -594,7 +614,7 @@ function run(
         continue;
       }
       ends.count -= 1;
-      if (ends.count <= 0) endEffect(effect, "its duration is over");
+      if (ends.count <= 0) endEffect(effect, message("why.duration_over"));
     }
     for (const mark of [...e.masteries]) {
       const ends = mark.ends;
@@ -612,7 +632,7 @@ function run(
       const ends = zone.ends;
       if (!ends || ends.at !== at || ends.of !== c.id) continue;
       if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) endZone(zone, "its duration is over");
+      else if (--ends.count <= 0) endZone(zone, message("why.duration_over"));
     }
   };
   /**
@@ -637,7 +657,7 @@ function run(
    * spell says so; the damage is rolled once for all of them. When the save is the caster's to
    * force (Conjure Animals), the caster decides for each creature.
    */
-  const zoneSave = (z: Zone, ids: readonly string[], why: string): void => {
+  const zoneSave = (z: Zone, ids: readonly string[], why: Message): void => {
     const save = z.save;
     if (!save) {
       if (z.no_save && z.damage.length) zoneDamage(z, ids, why);
@@ -650,7 +670,7 @@ function run(
       if (!z.optional || !caster) return true;
       if (t.id === caster.id) return false; // the caster doesn't force itself
       const ability = ABILITY_NAMES[save.ability];
-      const question = `${caster.name}: force ${t.name} (${why}) to make a ${ability} saving throw against ${z.label}?`;
+      const question = `${caster.name}: force ${t.name} (${why.text}) to make a ${ability} saving throw against ${z.label}?`;
       const view = encounterCombatant(e, caster.id, ctx);
       return decide({
         kind: "zone_force",
@@ -662,8 +682,15 @@ function run(
     if (!who.length) return;
     const views = who.map((t) => encounterCombatant(e, t.id, ctx));
     const r = saveAgainst({ ...save, conditions: z.conditions }, z.damage, views, { rng, decide });
-    const names = who.map((t) => t.name).join(", ");
-    notes.push(`${z.label}: ${names} ${why} (${ABILITY_NAMES[save.ability]} DC ${save.dc}).`);
+    notes.push(
+      message("zone.save", {
+        label: z.label,
+        names: who.map((t) => t.name),
+        why,
+        ability: abilityMsg(save.ability),
+        dc: save.dc,
+      }),
+    );
     for (const hit of r.targets) {
       const t = who[hit.target] as EncounterCombatant;
       z.saved.push(t.id);
@@ -685,18 +712,18 @@ function run(
       if (z.on_fail.includes("no_actions") && current()?.id === t.id) {
         t.used.action = true;
         t.used.bonus_action = true;
-        notes.push(`${t.name} can't take an action or a Bonus Action this turn.`);
+        notes.push(message("zone.no_actions", { name: t.name }));
       }
       const spell = z.on_fail.includes("lose_concentration") ? concentrationOf(t) : null;
       if (spell) {
-        notes.push(`${t.name} loses Concentration on ${spell} (${z.label}).`);
+        notes.push(message("zone.lose_concentration", { name: t.name, spell, label: z.label }));
         if (t.monster !== null) t.concentration = null;
         else play(t, { type: "set_concentration", spell: null });
       }
     }
   };
   /** A zone's damage without a save (Wall of Fire), rolled once, each creature once per turn. */
-  const zoneDamage = (z: Zone, ids: readonly string[], why: string): void => {
+  const zoneDamage = (z: Zone, ids: readonly string[], why: Message): void => {
     const who = ids
       .map(find)
       .filter(
@@ -708,10 +735,11 @@ function run(
     if (!who.length) return;
     const rolled = rollDamage(z.damage, { rng });
     const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
-    const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
     for (const t of who) {
       z.saved.push(t.id);
-      notes.push(`${z.label}: ${t.name} ${why}: ${dealt}.`);
+      notes.push(
+        message("zone.damage", { label: z.label, name: t.name, why, dealt: dealtMsg(instances) }),
+      );
       applyTo(t, [{ type: "damage", instances }]);
     }
   };
@@ -727,8 +755,14 @@ function run(
       });
       const rolled = rollDamage(parts, { rng });
       const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
-      const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
-      notes.push(`${z.label}: ${c.name} moves ${n * 5} feet in it: ${dealt}.`);
+      notes.push(
+        message("zone.move_damage", {
+          label: z.label,
+          name: c.name,
+          feet: n * 5,
+          dealt: dealtMsg(instances),
+        }),
+      );
       applyTo(c, [{ type: "damage", instances }]);
     }
   };
@@ -741,19 +775,21 @@ function run(
       if (!z.triggers.includes("enter")) continue;
       const was = before.get(z.id) ?? new Set<string>();
       const entered = inZone(z).filter((id) => !was.has(id));
-      if (entered.length) zoneSave(z, entered, entered.length > 1 ? "are in it now" : "enters it");
+      if (entered.length)
+        zoneSave(z, entered, message("why.enters_zone", { count: entered.length }));
     }
   };
   /** Zones with this trigger that `c` is in make it save. */
   const zoneTurn = (c: EncounterCombatant, at: "start_turn" | "end_turn"): void => {
     for (const z of [...e.zones]) {
       if (!z.triggers.includes(at) || !inZone(z).includes(c.id)) continue;
-      zoneSave(z, [c.id], at === "start_turn" ? "starts its turn in it" : "ends its turn in it");
+      zoneSave(z, [c.id], message(at === "start_turn" ? "why.starts_turn_in" : "why.ends_turn_in"));
     }
   };
-  const endZone = (z: Zone, why: string): void => {
+  const endZone = (z: Zone, reason: Message | string): void => {
+    const why = typeof reason === "string" ? plainMessage(reason) : reason;
     e.zones = e.zones.filter((x) => x.id !== z.id);
-    notes.push(`${z.label} ends (${why}).`);
+    notes.push(message("zone.ends", { label: z.label, why }));
   };
   /** The creatures in an Emanation of `size` feet around `c` (not `c`), by position. */
   const emanationAround = (c: EncounterCombatant, size: number): EncounterCombatant[] | null => {
@@ -866,7 +902,7 @@ function run(
         decide,
       });
       spendLegendaryResistance(c, save);
-      notes.push(`${c.name} repeats the save against ${effect.label} (${saveText(save)}).`);
+      notes.push(`${c.name} repeats the save against ${effect.label} (${saveText(save).text}).`);
       if (save.success) endEffect(effect, "it succeeded on the save");
     }
     tick(c, "end");
@@ -1499,7 +1535,7 @@ function run(
       const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), ability, dc, { rng, decide });
       const name = effect === "poison" ? "Poison" : "Trip";
       notes.push(
-        `Cunning Strike (${name}): ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`,
+        `Cunning Strike (${name}): ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text}).`,
       );
       spendLegendaryResistance(t, save);
       if (save.success) continue;
@@ -1590,7 +1626,9 @@ function run(
     } else if (mastery === "topple") {
       const dc = 8 + modifier + attacker.proficiency_bonus;
       const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), "con", dc, { rng, decide });
-      notes.push(`Topple: ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)}).`);
+      notes.push(
+        `Topple: ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text}).`,
+      );
       spendLegendaryResistance(t, save);
       if (!save.success) applyTo(t, [{ type: "add_condition", condition: "prone" }]);
     } else if (mastery === "push") {
@@ -2686,7 +2724,7 @@ function run(
       const verb = action.option === "grapple" ? "grapple" : "shove";
       const outcome = save.success ? "succeeds on" : "fails";
       notes.push(
-        `${c.name} tries to ${verb} ${t.name}: ${t.name} ${outcome} a ${ABILITY_NAMES[ability]} saving throw (${saveText(save)}).`,
+        `${c.name} tries to ${verb} ${t.name}: ${t.name} ${outcome} a ${ABILITY_NAMES[ability]} saving throw (${saveText(save).text}).`,
       );
       spendLegendaryResistance(t, save);
       if (save.success) break;
@@ -2949,7 +2987,7 @@ function run(
           notes.push(`${t.name} has already saved against ${z.label} this turn.`);
         }
       }
-      zoneSave(z, action.targets, action.targets.length > 1 ? "save" : "saves");
+      zoneSave(z, action.targets, message("why.zone_save", { count: action.targets.length }));
       break;
     }
     case "move_zone": {
@@ -2960,7 +2998,7 @@ function run(
       z.point = { ...action.point };
       notes.push(`${z.label} moves to ${action.point.x},${action.point.y}.`);
       zoneEntries(before);
-      if (action.onto) zoneSave(z, [action.onto], "is in its way");
+      if (action.onto) zoneSave(z, [action.onto], message("why.in_its_way"));
       break;
     }
     case "move_mark": {
@@ -3296,7 +3334,7 @@ function run(
                 : rolled;
           const dealt = rolled === null ? "" : `: ${amount} ${damageType}`;
           notes.push(
-            `${x.name} ${save.success ? "succeeds" : "fails"} (${saveText(save)})${dealt}.`,
+            `${x.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text})${dealt}.`,
           );
           spendLegendaryResistance(x, save);
           if (amount > 0)
@@ -3473,7 +3511,14 @@ function run(
     c.readied = null;
   }
   sweep();
-  return { encounter: EncounterSchema.parse(e), states, notes, result };
+  const messages = notes.map((m) => (typeof m === "string" ? plainMessage(m) : m));
+  return {
+    encounter: EncounterSchema.parse(e),
+    states,
+    notes: messages.map((m) => m.text),
+    messages,
+    result,
+  };
 }
 
 // --- helpers ------------------------------------------------------------------------------------
@@ -3624,7 +3669,7 @@ function reorder(e: Encounter, ctx: EncounterContext): void {
 function skipToActive(
   e: Encounter,
   ctx: EncounterContext,
-  notes: string[],
+  notes: (Message | string)[],
   advance: boolean,
 ): EncounterCombatant {
   for (let step = advance ? 1 : 0; step <= e.order.length; step++) {
@@ -3726,7 +3771,8 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
 /** One target's share of a spell or saving throw effect: "Brakka: fails (12 vs DC 14): 28 fire." */
 function targetNote(name: string, hit: SpellTargetResult, ac?: number): string {
   const parts: string[] = [];
-  if (hit.save) parts.push(`${hit.save.success ? "succeeds" : "fails"} (${saveText(hit.save)})`);
+  if (hit.save)
+    parts.push(`${hit.save.success ? "succeeds" : "fails"} (${saveText(hit.save).text})`);
   if (hit.attack) {
     const crit = hit.critical ? "Critical Hit, " : "";
     const roll = `${hit.attack.total} vs AC${ac === undefined ? "" : ` ${ac}`}`;
@@ -3744,10 +3790,21 @@ function targetNote(name: string, hit: SpellTargetResult, ac?: number): string {
     : `${head}${parts.length ? "." : ": no effect."}`;
 }
 
-function saveText(save: SaveResult): string {
-  if (save.automatic_failure) return `fails automatically: ${save.automatic_failure}`;
-  const mode = save.roll.mode === "normal" ? "" : `, ${save.roll.mode}`;
-  return `${save.total} vs DC ${save.dc}${mode}`;
+function saveText(save: SaveResult): Message {
+  if (save.automatic_failure) {
+    return message("save.automatic_failure", { condition: save.automatic_failure });
+  }
+  return message("save.total", { total: save.total, dc: save.dc, mode: save.roll.mode });
+}
+
+/** An ability's name, as a message (`ability.str`: Strength). */
+function abilityMsg(ability: Ability): Message {
+  return message(`ability.${ability}`);
+}
+
+/** Damage dealt, part by part (`8 fire + 3 piercing`): `{dealt, list, plus}`. */
+function dealtMsg(instances: readonly { amount: number; type: string }[]): Message[] {
+  return instances.map((d) => message("damage.amount", { amount: d.amount, type: d.type }));
 }
 
 /** A given path: each square next to the one before it (diagonals included). */
