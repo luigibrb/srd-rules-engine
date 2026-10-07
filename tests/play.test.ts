@@ -4,13 +4,16 @@ import {
   type CharacterBuild,
   type CharacterState,
   computePlaySheet,
+  createBuild,
   createState,
   type PlayAction,
   PlayError,
+  parseState,
   reconcileState,
   resolve,
   scriptedRng,
   seededRng,
+  startingEquipment,
   validateState,
 } from "../src/index";
 import * as svc from "../src/services/builder";
@@ -51,6 +54,45 @@ describe("a new state", () => {
       equipped: false,
     });
     expect(s.armor_class.total).toBe(12); // 10 + Dex 2
+  });
+});
+
+describe("starting equipment taken later", () => {
+  // A state made for a new (empty) build, before its equipment was chosen.
+  const early = createState(createBuild(), catalog);
+
+  it("a state made before the build's equipment has none, and offers it", () => {
+    expect(early.inventory).toEqual([]);
+    expect(early.starting_equipment).toBe(false);
+    const sheet = computePlaySheet(fighter, early, catalog);
+    expect(sheet.play.starting_equipment_taken).toBe(false);
+    const kit = startingEquipment(fighter, catalog);
+    expect(kit.items).toContainEqual({ item: "chain-mail", name: "Chain Mail", qty: 1 });
+    expect(kit.gp).toBe(sheet.gp);
+  });
+
+  it("take_starting_equipment adds it once, wearing the armor, with the gold", () => {
+    const { state, notes, sheet } = act(fighter, early, { type: "take_starting_equipment" });
+    expect(state.starting_equipment).toBe(true);
+    expect(state.inventory.find((i) => i.item === "chain-mail")?.equipped).toBe(true);
+    expect(state.currency.gp).toBe(sheet.gp);
+    expect(sheet.armor_class.total).toBe(17);
+    expect(notes[0]).toMatch(/^Starting equipment added: .*Chain Mail/);
+    expect(() => act(fighter, state, { type: "take_starting_equipment" })).toThrow(
+      "The starting equipment is already in the inventory",
+    );
+  });
+
+  it("is refused while the build has no equipment", () => {
+    expect(() => act(createBuild(), early, { type: "take_starting_equipment" })).toThrow(
+      "The build has no starting equipment yet",
+    );
+  });
+
+  it("a state saved before the flag counts as taken when it holds items or coins", () => {
+    const { starting_equipment: _, ...old } = createState(fighter, catalog);
+    expect(parseState(old).starting_equipment).toBe(true);
+    expect(parseState({}).starting_equipment).toBe(false);
   });
 });
 

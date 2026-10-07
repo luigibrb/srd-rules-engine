@@ -161,7 +161,8 @@ Concentration DCs), healing, Short and Long Rests, spell and Pact slots, limited
 (Rage, Channel Divinity, Second Wind…), features you switch on and off (`activate`,
 `deactivate`: Rage), conditions and Exhaustion (their effects show on the
 sheet), Heroic Inspiration, items (equip, attune up to 3 with class restrictions, potions,
-charges), coins, and today's picks for "after a rest" choices such as prepared spells: those
+charges), the starting equipment for a state made before the build had it
+(`take_starting_equipment`), coins, and today's picks for "after a rest" choices such as prepared spells: those
 live in the state, so the build keeps its starting picks. An impossible action throws
 `PlayError` with the reason. Magic items change the sheet: +1 weapons and armor, Ring of
 Protection, Gauntlets of Ogre Power, Bracers of Defense, resistances…

@@ -269,6 +269,13 @@ marked `rest_change` (prepared spells, Weapon Mastery…). The state stores only
   (carried items, active conditions, Exhaustion, active toggles), then adds the live `play`
   block. A rest-change pick is validated by running the builder's `setChoice` on the played
   build, so it follows exactly the same rules as a build pick.
+- **Starting equipment.** `createState` puts the build's starting equipment (the armor and
+  Shield the sheet picks worn) and gold in the inventory and sets `starting_equipment: true`. A
+  state made before the build had its equipment (an app creating the state with a new, empty
+  build) has `false`; the play action `take_starting_equipment` adds the kit once, and the play
+  sheet's `starting_equipment_taken` tells an app to offer it (`startingEquipment(build,
+  catalog)` lists what it would add). States saved before the field existed read as taken when
+  the inventory or purse isn't empty, so no kit is ever added twice.
 - **Buying and selling.** Gear, tools, weapons and armor have their SRD price (`cost`, gear
   per `bundle`: 20 Arrows for 1 GP) and weight. The play action `buy` pays the price from the
   coins (`rules/currency.ts` `pay`: the smallest coins first, one larger coin broken for change

@@ -79,12 +79,31 @@ export const CharacterStateSchema = z.object({
     .prefault({}),
   /** Next inventory id number. */
   next_item: z.int().min(1).default(1),
+  /**
+   * Whether the build's starting equipment and gold are in the inventory (`createState` on a
+   * finished build, or the `take_starting_equipment` action later). Missing in states saved
+   * before it existed: `parseState` reads them as taken when the inventory or the purse isn't
+   * empty (see `startingEquipmentTaken`).
+   */
+  starting_equipment: z.boolean().optional(),
 });
 export type CharacterState = z.infer<typeof CharacterStateSchema>;
 
 /** Parse a state, e.g. one loaded from JSON. Throws a `ZodError` if invalid. */
 export function parseState(input: unknown): CharacterState {
-  return CharacterStateSchema.parse(input);
+  const state = CharacterStateSchema.parse(input);
+  return { ...state, starting_equipment: startingEquipmentTaken(state) };
+}
+
+/**
+ * Whether the starting equipment was taken. A state from before `starting_equipment` existed
+ * has it if anything is in the inventory or the purse (`createState` always put it there).
+ */
+export function startingEquipmentTaken(state: CharacterState): boolean {
+  return (
+    state.starting_equipment ??
+    (state.inventory.length > 0 || Object.values(state.currency).some((n) => n > 0))
+  );
 }
 
 /** Maximum number of magic items a creature can be attuned to (SRD Rules Glossary). */
@@ -155,6 +174,11 @@ export const PlayActionSchema = z
       variant: id.optional(),
     }),
     z.object({ type: z.literal("remove_item"), id, qty: n.min(1).optional() }),
+    /**
+     * Put the build's starting equipment (worn armor and Shield equipped) and gold in the
+     * inventory, once: for a state made before the build had its equipment.
+     */
+    z.object({ type: z.literal("take_starting_equipment") }),
     z.object({ type: z.literal("equip"), id, equipped: z.boolean() }),
     z.object({ type: z.literal("attune"), id, attuned: z.boolean() }),
     /** Drink a potion, spend a charge… `roll` overrides the healing roll. */

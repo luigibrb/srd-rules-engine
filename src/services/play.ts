@@ -18,6 +18,7 @@ import {
   MAX_ATTUNED,
   type PlayAction,
   parseState,
+  startingEquipmentTaken,
 } from "../models/state";
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
@@ -104,6 +105,11 @@ export interface PlaySheet extends DerivedSheet {
     readonly carrying_capacity: number;
     /** Choice keys whose picks come from the state (today's prepared spells…). */
     readonly rest_choices: readonly string[];
+    /**
+     * Whether the build's starting equipment and gold are in the inventory. While they aren't,
+     * `take_starting_equipment` adds them (`startingEquipment` lists what it would add).
+     */
+    readonly starting_equipment_taken: boolean;
   };
 }
 
@@ -275,6 +281,7 @@ export function computePlaySheet(
       carried_weight: inventory.reduce((sum, i) => sum + (i.weight ?? 0) * i.qty, 0),
       carrying_capacity: sheet.scores.str * 15,
       rest_choices: Object.keys(state.choices).filter((k) => restChoiceKeys(res).has(k)),
+      starting_equipment_taken: startingEquipmentTaken(state),
     },
   };
 }
@@ -368,10 +375,45 @@ function itemCategory(catalog: Catalog, id: string): string {
  * inventory (wearing the armor and Shield the sheet picks) with the starting gold.
  */
 export function createState(build: CharacterBuild, catalog: Catalog): CharacterState {
+  const kit = startingKit(build, catalog, 1);
+  return parseState({
+    inventory: kit.inventory,
+    currency: { gp: kit.gp },
+    next_item: kit.inventory.length + 1,
+    // A build without its equipment yet (a new character) takes it later.
+    starting_equipment: kit.inventory.length > 0 || kit.gp > 0,
+  });
+}
+
+/**
+ * The build's starting equipment and gold: what `createState` puts in a new state, and
+ * `take_starting_equipment` in one made before the build had its equipment.
+ */
+export function startingEquipment(
+  build: CharacterBuild,
+  catalog: Catalog,
+): { items: { item: string; name: string; qty: number }[]; gp: number } {
+  const kit = startingKit(build, catalog, 1);
+  return {
+    items: kit.inventory.map(({ item, qty }) => ({
+      item,
+      name: mundaneName(catalog, item) ?? lookup(catalog.magic_items, item)?.name ?? item,
+      qty,
+    })),
+    gp: kit.gp,
+  };
+}
+
+/** The build's starting equipment as inventory entries (from id `i<first>`), and its gold. */
+function startingKit(
+  build: CharacterBuild,
+  catalog: Catalog,
+  first: number,
+): { inventory: ItemInstance[]; gp: number } {
   const sheet = computeSheet(build, catalog);
   const worn = new Set(sheet.armor_class.parts.map((part) => part.source));
   const inventory: ItemInstance[] = [];
-  let n = 1;
+  let n = first;
   for (const [item, qty] of Object.entries(sheet.equipment)) {
     const armor = lookup(catalog.armor, item);
     const equipped =
@@ -389,7 +431,7 @@ export function createState(build: CharacterBuild, catalog: Catalog): CharacterS
       notes: "",
     });
   }
-  return parseState({ inventory, currency: { gp: sheet.gp }, next_item: n });
+  return { inventory, gp: sheet.gp };
 }
 
 export interface StateIssue {
@@ -908,6 +950,22 @@ export function applyAction(
     }
     case "reset_choice": {
       delete s.choices[action.key];
+      break;
+    }
+    case "take_starting_equipment": {
+      if (startingEquipmentTaken(s)) fail("The starting equipment is already in the inventory");
+      const kit = startingKit(build, catalog, s.next_item);
+      if (!kit.inventory.length && !kit.gp) fail("The build has no starting equipment yet");
+      s.inventory.push(...kit.inventory);
+      s.next_item += kit.inventory.length;
+      s.currency.gp += kit.gp;
+      s.starting_equipment = true;
+      const names = kit.inventory.map((i) => {
+        const name = mundaneName(catalog, i.item) ?? i.item;
+        return i.qty > 1 ? `${name} (${i.qty})` : name;
+      });
+      if (kit.gp) names.push(`${kit.gp} GP`);
+      notes.push(`Starting equipment added: ${names.join(", ")}.`);
       break;
     }
     case "add_item": {

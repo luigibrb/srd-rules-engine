@@ -2136,6 +2136,9 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 9007199254740991
+                  },
+                  "starting_equipment": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -4796,6 +4799,18 @@
           "required": [
             "type",
             "id"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "take_starting_equipment"
+            }
+          },
+          "required": [
+            "type"
           ]
         },
         {

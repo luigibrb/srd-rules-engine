@@ -8,6 +8,12 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Starting equipment taken later: play states have `starting_equipment` (whether the build's
+  starting equipment and gold are in the inventory), and the play action
+  `take_starting_equipment` adds them once, for a state made before the build had its
+  equipment. `computePlaySheet(...).play.starting_equipment_taken` and
+  `startingEquipment(build, catalog)` (what it would add) let an app offer it. States saved
+  before read as taken when their inventory or purse isn't empty.
 - Moves follow a path square by square (`move` `to`, straight, or a new `path`): zones entered
   on the way make their save, a creature held on the way stops, and zones with the `move`
   trigger deal damage for every 5 feet moved in them.

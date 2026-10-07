@@ -458,6 +458,7 @@ export {
   PlayError,
   type PlaySheet,
   reconcileState,
+  startingEquipment,
   validateState,
 } from "./services/play";
 export {

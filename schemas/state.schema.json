@@ -240,6 +240,9 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 9007199254740991
+    },
+    "starting_equipment": {
+      "type": "boolean"
     }
   },
   "title": "Character play state"

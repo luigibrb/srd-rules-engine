@@ -522,6 +522,18 @@
           "properties": {
             "type": {
               "type": "string",
+              "const": "take_starting_equipment"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
               "const": "equip"
             },
             "id": {
