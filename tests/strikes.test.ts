@@ -5,6 +5,7 @@ import {
   type CharacterBuild,
   type CharacterState,
   type CombatantSpellcasting,
+  combatantOptions,
   computePlaySheet,
   createEncounter,
   createState,
@@ -55,7 +56,8 @@ function session(builds: Record<string, CharacterBuild>, monsters: string[] = ["
     { type: "start" },
   );
   const get = (id: string) => encounter.combatants.find((c) => c.id === id);
-  return { act, notes, get, states, encounter: () => encounter, result: () => result };
+  const options = (id: string) => combatantOptions(encounter, id, ctx());
+  return { act, notes, get, states, options, encounter: () => encounter, result: () => result };
 }
 const toggle = (id: string, key: string): EncounterAction => ({
   type: "effects",
@@ -133,6 +135,45 @@ describe("Brutal Strike", () => {
     expect(() => s.act([], { type: "move", id: "ogre", feet: 30 })).toThrow(
       "Ogre can move 25 more feet this turn",
     );
+  });
+});
+
+describe("Cunning Strike and Brutal Strike on attack options", () => {
+  it("a level 5 Rogue's Shortsword lists Poison, Trip and Withdraw, each for 1d6 of Sneak Attack", () => {
+    const s = session({ rook: level("rogue", 5, "Rook") });
+    const sword = s.options("rook").attacks.find((a) => a.label.startsWith("Shortsword"));
+    expect(sword?.strikes.map((x) => [x.send, x.id, x.cost, x.sneak_attack_dice])).toEqual([
+      ["cunning", "poison", "1d6 of Sneak Attack", 1],
+      ["cunning", "trip", "1d6 of Sneak Attack", 1],
+      ["cunning", "withdraw", "1d6 of Sneak Attack", 1],
+    ]);
+    // Each judged by the engine: no Poisoner's Kit; Sneak Attack's own condition.
+    expect(sword?.strikes[0]?.reason).toBe(
+      "Cunning Strike's Poison needs a Poisoner's Kit on Rook's person",
+    );
+    expect(sword?.strikes[1]?.action).toMatchObject({
+      attack: "Shortsword",
+      riders: [{ rider: "sneak-attack" }],
+      cunning: ["trip"],
+    });
+    // Not on a weapon that can't deal Sneak Attack.
+    expect(s.options("rook").attacks.find((a) => a.label.startsWith("Spear"))?.strikes).toEqual([]);
+  });
+
+  it("a level 9 Barbarian's Greataxe: Brutal Strike's effects once Reckless Attack is on", () => {
+    const s = session({ grom: level("barbarian", 9, "Grom") });
+    const greataxe = () => s.options("grom").attacks.find((a) => a.label.startsWith("Greataxe"));
+    expect(greataxe()?.strikes.map((x) => [x.id, x.available, x.reason])).toEqual([
+      ["forceful", false, "Brutal Strike needs Reckless Attack this turn"],
+      ["hamstring", false, "Brutal Strike needs Reckless Attack this turn"],
+    ]);
+    s.act([], toggle("grom", "barbarian:reckless-attack"));
+    expect(greataxe()?.strikes.map((x) => [x.send, x.name, x.cost, x.available])).toEqual([
+      ["brutal", "Forceful Blow", "Reckless Attack's Advantage", true],
+      ["brutal", "Hamstring Blow", "Reckless Attack's Advantage", true],
+    ]);
+    const bow = s.options("grom").attacks.find((a) => a.label.startsWith("Shortbow"));
+    expect(bow?.strikes[0]?.reason).toBe("Brutal Strike is a Strength-based attack roll");
   });
 });
 

@@ -697,7 +697,10 @@ effects (those waiting for a Recharge too) and legendary actions (uses left this
 standard actions (Dash, Disengage, Dodge, Help, Grapple, Shove, escaping a hold, standing up,
 moving) and the zones it created. Each option is an `EncounterAction` ready to send, with its
 cost, label, candidate targets (`TargetSpec`: enemies first, then nearest first; only those
-within reach or range when positioned), and `available`/`reason`.
+within reach or range when positioned), and `available`/`reason`. An attack option also lists
+the Cunning Strike and Brutal Strike effects its attacker has (`strikes`: Cunning Strike's on a
+line that can deal Sneak Attack, Staggering and Sundering Blow with Improved Brutal Strike), each
+with its cost, its own ready action and its own dry-run verdict.
 
 Legality isn't re-derived: `checkAction(encounter, action, ctx)` dry-runs
 `applyEncounterAction` with dice fixed in the middle of their range and returns the

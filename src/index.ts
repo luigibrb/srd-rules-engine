@@ -216,6 +216,8 @@ export {
   type OptionCost,
   type OptionEntry,
   OptionEntrySchema,
+  type StrikeOption,
+  StrikeOptionSchema,
   type TargetSpec,
   TargetSpecSchema,
 } from "./models/options";

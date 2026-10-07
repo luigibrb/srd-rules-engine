@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Attack options list the Cunning Strike and Brutal Strike effects the attacker has
+  (`OptionEntry.strikes`, `StrikeOptionSchema`): cost, a ready action, and whether the engine
+  would take it now, with the reason.
 - A creature's space on the grid: `Combatant.space` (squares on a side: Large 2, Huge 3,
   Gargantuan 4, otherwise 1) and `spaceForSize(size)`.
 - `zoneSquares(encounter, zoneId, ctx)`: the squares a zone covers now, an Emanation's moving

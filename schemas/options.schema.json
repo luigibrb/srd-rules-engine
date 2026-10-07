@@ -412,6 +412,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -426,7 +510,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -719,6 +804,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -733,7 +902,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -1026,6 +1196,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -1040,7 +1294,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -1333,6 +1588,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -1347,7 +1686,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -1640,6 +1980,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -1654,7 +2078,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -1947,6 +2372,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -1961,7 +2470,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }
@@ -2254,6 +2764,90 @@
                   "string",
                   "null"
                 ]
+              },
+              "strikes": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "send": {
+                      "type": "string",
+                      "enum": [
+                        "cunning",
+                        "brutal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cost": {
+                      "type": "string"
+                    },
+                    "sneak_attack_dice": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "action": {
+                      "$ref": "#/$defs/EncounterAction"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "code": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "pending_decision",
+                            "halted",
+                            "not_started",
+                            "not_your_turn",
+                            "incapacitated",
+                            "defeated",
+                            "economy_used",
+                            "no_attacks_left",
+                            "once_per_turn",
+                            "out_of_range",
+                            "total_cover",
+                            "no_path",
+                            "no_movement",
+                            "no_resources",
+                            "unknown",
+                            "incomplete",
+                            "refused"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "send",
+                    "id",
+                    "name",
+                    "cost",
+                    "sneak_attack_dice",
+                    "action",
+                    "available",
+                    "reason",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
               }
             },
             "required": [
@@ -2268,7 +2862,8 @@
               "pact_slot",
               "uses",
               "odds",
-              "note"
+              "note",
+              "strikes"
             ],
             "additionalProperties": false
           }

@@ -43,6 +43,31 @@ export const TargetSpecSchema = z.object({
 });
 export type TargetSpec = z.infer<typeof TargetSpecSchema>;
 
+/**
+ * A Cunning Strike or Brutal Strike effect an attack option can carry (SRD Rogue "Cunning
+ * Strike", Barbarian "Brutal Strike"): send `action` (the attack with the effect, and the Sneak
+ * Attack rider for Cunning Strike), or add `id` to the attack's `cunning` / `brutal` list.
+ */
+export const StrikeOptionSchema = z.object({
+  /** Which list it goes in on the attack action. */
+  send: z.enum(["cunning", "brutal"]),
+  /** `trip`, `hamstring`. */
+  id: z.string(),
+  /** `Trip`, `Hamstring Blow`. */
+  name: z.string(),
+  /** What it costs: Sneak Attack dice forgone (`1d6`), or Reckless Attack's Advantage. */
+  cost: z.string(),
+  /** Sneak Attack dice it forgoes (Cunning Strike); 0 for Brutal Strike. */
+  sneak_attack_dice: z.int().min(0),
+  /** The attack action with this effect, ready to send. */
+  action: EncounterActionSchema,
+  /** The engine would take `action` now (a dry run); why not, in its words and as a code. */
+  available: z.boolean(),
+  reason: z.string().nullable(),
+  code: z.enum(REFUSAL_CODES).nullable().default(null),
+});
+export type StrikeOption = z.infer<typeof StrikeOptionSchema>;
+
 export const OptionEntrySchema = z.object({
   /**
    * The encounter action to send. Its target is the first candidate (`targets.ids[0]`), or `""`
@@ -83,6 +108,11 @@ export const OptionEntrySchema = z.object({
     .default(null),
   /** Something to know before choosing it ("Casting it ends Concentration on Bless"). */
   note: z.string().nullable().default(null),
+  /**
+   * An attack: the Cunning Strike / Brutal Strike effects its attacker has, each judged on its own
+   * (at level 11 or 17 two can go on one attack: merge their lists).
+   */
+  strikes: z.array(StrikeOptionSchema).default([]),
 });
 export type OptionEntry = z.infer<typeof OptionEntrySchema>;
 

@@ -13,6 +13,7 @@ import type {
   CombatantOptions,
   OptionCost,
   OptionEntry,
+  StrikeOption,
   TargetSpec,
 } from "../models/options";
 import { monsterSpells } from "../rules/combatant";
@@ -79,6 +80,20 @@ function dryRun(
     throw error;
   }
 }
+
+/** SRD Rogue "Cunning Strike" (each costs 1d6 of Sneak Attack). */
+const CUNNING = [
+  { send: "cunning", id: "poison", name: "Poison", improved: false },
+  { send: "cunning", id: "trip", name: "Trip", improved: false },
+  { send: "cunning", id: "withdraw", name: "Withdraw", improved: false },
+] as const;
+/** SRD Barbarian "Brutal Strike" (Staggering and Sundering Blow: Improved Brutal Strike). */
+const BRUTAL = [
+  { send: "brutal", id: "forceful", name: "Forceful Blow", improved: false },
+  { send: "brutal", id: "hamstring", name: "Hamstring Blow", improved: false },
+  { send: "brutal", id: "staggering", name: "Staggering Blow", improved: true },
+  { send: "brutal", id: "sundering", name: "Sundering Blow", improved: true },
+] as const;
 
 export interface OptionsSettings {
   /** Dry-run every option for `available` and `reason` (default true); `false` lists them only. */
@@ -149,6 +164,7 @@ export function combatantOptions(
       uses: null,
       odds: reason === null ? odds : null,
       note: null,
+      strikes: [],
       ...extra,
     };
   };
@@ -267,6 +283,47 @@ export function combatantOptions(
           },
         ),
       );
+    }
+  }
+
+  // Cunning Strike and Brutal Strike effects on each attack (a character's).
+  const has = (rule: string) => view.rules.some((r) => r === rule);
+  const strikeDefs = [
+    ...(has("cunning_strike") ? CUNNING : []),
+    ...(has("brutal_strike")
+      ? BRUTAL.filter((b) => !b.improved || has("improved_brutal_strike"))
+      : []),
+  ];
+  if (strikeDefs.length) {
+    for (const option of attacks) {
+      const a = option.action;
+      if (a.type !== "attack") continue;
+      const line = view.attacks.find((x) => x.name === a.attack);
+      const sneak = line?.riders.some((r) => r.id === "sneak-attack") ?? false;
+      option.strikes = strikeDefs
+        .filter((d) => d.send === "brutal" || sneak)
+        .map((d): StrikeOption => {
+          const action: EncounterAction =
+            d.send === "cunning"
+              ? { ...a, riders: [...(a.riders ?? []), { rider: "sneak-attack" }], cunning: [d.id] }
+              : { ...a, brutal: [d.id] };
+          let reason: string | null = null;
+          if (check && a.target !== "") {
+            const run = dryRun(e, action, ctx).check;
+            reason = run.ok ? null : run.reasons.join("; ");
+          } else if (check) reason = option.reason ?? "No creature to target";
+          return {
+            send: d.send,
+            id: d.id,
+            name: d.name,
+            cost: d.send === "cunning" ? "1d6 of Sneak Attack" : "Reckless Attack's Advantage",
+            sneak_attack_dice: d.send === "cunning" ? 1 : 0,
+            action,
+            available: reason === null,
+            reason,
+            code: reason === null ? null : refusalCode(reason.split("; ")[0] as string),
+          };
+        });
     }
   }
 
