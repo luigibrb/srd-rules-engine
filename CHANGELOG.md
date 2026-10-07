@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Spell and saving throw effect results name each target by its combatant id
+  (`SpellTargetResult.id`, `null` outside an encounter), next to `target` (the index) and `name`.
 - Rolls outside an encounter: `rollCheck(build, state, catalog, request, { dc, mode, rng })` and
   `rollD20Test(combatant, request, …)` roll a check, a saving throw or an attack roll with no
   target, with Advantage and Disadvantage from features and conditions and the reasons.

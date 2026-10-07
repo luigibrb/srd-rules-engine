@@ -76,6 +76,8 @@ export interface SpellAttackRoll {
 export interface SpellTargetResult {
   /** Index into the `targets` given to `castSpell` (several beams can hit the same one). */
   readonly target: number;
+  /** The target's combatant id (in an encounter); `null` for a combatant without one. */
+  readonly id: string | null;
   readonly name: string;
   readonly attack: SpellAttackRoll | null;
   readonly save: SaveResult | null;
@@ -485,6 +487,7 @@ function targetResult(
   for (const condition of conditions) actions.push({ type: "add_condition", condition });
   return {
     target: index,
+    id: target.id ?? null,
     name: target.name,
     attack: r.attack ?? null,
     save: r.save ?? null,

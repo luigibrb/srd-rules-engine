@@ -13,6 +13,7 @@ import {
   encounterCombatant,
   makeAttack,
   scriptedRng,
+  seededRng,
 } from "../src/index";
 import { catalog, fighterBuild } from "./helpers";
 
@@ -262,6 +263,45 @@ describe("attacks in an encounter", () => {
       { type: "next_turn" },
     ]);
     expect(down.notes).toContain("Brakka is at 0 Hit Points: make a Death Saving Throw.");
+  });
+});
+
+describe("results name their targets by combatant id", () => {
+  it("a Fireball and a breath weapon list each creature hit with its id", () => {
+    let e = createEncounter();
+    const act = (action: EncounterAction) => {
+      const r = applyEncounterAction(e, action, { catalog, rng: seededRng(7) });
+      e = r.encounter;
+      return r.result as unknown as { targets: { id: string | null; name: string }[] };
+    };
+    for (const monster of ["mage", "goblin-warrior", "goblin-warrior", "adult-blue-dragon"]) {
+      act({ type: "add_monster", monster });
+    }
+    act({ type: "set_initiative", id: "mage", value: 20 });
+    act({ type: "set_initiative", id: "goblin-warrior", value: 15 });
+    act({ type: "set_initiative", id: "goblin-warrior-2", value: 15 });
+    act({ type: "set_initiative", id: "adult-blue-dragon", value: 1 });
+    act({ type: "start" });
+    const fireball = act({
+      type: "cast",
+      id: "mage",
+      spell: "fireball",
+      targets: ["goblin-warrior-2", "goblin-warrior"],
+    });
+    expect(fireball.targets.map((t) => [t.id, t.name])).toEqual([
+      ["goblin-warrior-2", "Goblin Warrior 2"],
+      ["goblin-warrior", "Goblin Warrior"],
+    ]);
+    act({ type: "next_turn" });
+    act({ type: "next_turn" });
+    act({ type: "next_turn" });
+    const breath = act({
+      type: "save_action",
+      id: "adult-blue-dragon",
+      ability: "Lightning Breath",
+      targets: ["mage"],
+    });
+    expect(breath.targets.map((t) => t.id)).toEqual(["mage"]);
   });
 });
 

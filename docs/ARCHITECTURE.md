@@ -386,8 +386,8 @@ healing; conditions on a hit or a failed save (not for a target immune to them).
 and darts go at one target or one `targets` entry each, so a target given twice takes two. A
 follow-up save (Ice Knife) comes after the attack, hit or miss, for the target and `nearby`
 (`follow_up`); a hit's riders are in `targets[i].on_hit`. `modesFor(target, shot)` gives
-Advantage or Disadvantage to one spell attack roll. It returns each target's result with the
-play actions that apply it (`targets[i].actions`) and the caster's (`spend_slot` or
+Advantage or Disadvantage to one spell attack roll. It returns each target's result (`target`:
+its index in `targets`, `id`: its combatant id in an encounter, `name`) with the play actions that apply it (`targets[i].actions`) and the caster's (`spend_slot` or
 `spend_pact_slot`, `set_concentration`). `POST /v1/state/cast` checks
 that the caster has the spell and applies everything to the states.
 
