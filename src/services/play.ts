@@ -24,7 +24,7 @@ import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
 import { type Combatant, conditionRolls } from "../rules/combatant";
 import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currency";
-import { type Defenses, rollDamage, takeDamage } from "../rules/damage";
+import { type Defenses, isBloodied, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { mathRng, type Rng } from "../rules/rng";
 import {
@@ -55,7 +55,13 @@ export interface PlayResult {
 
 export interface PlaySheet extends DerivedSheet {
   readonly play: {
-    readonly hp: { readonly current: number; readonly max: number; readonly temp: number };
+    readonly hp: {
+      readonly current: number;
+      readonly max: number;
+      readonly temp: number;
+      /** At half the maximum or fewer, 0 included (`isBloodied`); Temporary Hit Points don't count. */
+      readonly bloodied: boolean;
+    };
     readonly dying: boolean;
     readonly stable: boolean;
     readonly dead: boolean;
@@ -245,7 +251,7 @@ export function computePlaySheet(
   return {
     ...sheet,
     play: {
-      hp: { current, max, temp: state.hp.temp },
+      hp: { current, max, temp: state.hp.temp, bloodied: isBloodied(current, max) },
       dying: current === 0 && !state.stable && !state.dead,
       stable: state.stable,
       dead: state.dead,
@@ -319,6 +325,7 @@ export function combatantFromCharacter(
     hp: sheet.play.hp.current,
     temp_hp: sheet.play.hp.temp,
     max_hp: sheet.play.hp.max,
+    bloodied: sheet.play.hp.bloodied,
     proficiency_bonus: sheet.proficiency_bonus,
     modifiers: sheet.modifiers,
     saving_throws: saves,

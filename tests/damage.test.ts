@@ -2,10 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   adjustDamage,
   applyAction,
+  applyEncounterAction,
   type CharacterState,
+  combatantFromCharacter,
   computePlaySheet,
+  createEncounter,
   createState,
+  type Encounter,
+  encounterCombatant,
   formatDamage,
+  isBloodied,
   rollDamage,
   scriptedRng,
   seededRng,
@@ -172,5 +178,53 @@ describe("play damage uses the same rules", () => {
     const r = applyAction(fighter, state, catalog, { type: "damage", amount: 7 });
     expect(r.notes).toContain("Resistance to all damage: 7 damage halved to 3.");
     expect(computePlaySheet(fighter, r.state, catalog).play.hp.current).toBe(9);
+  });
+});
+
+// SRD 5.2.1 Rules Glossary, "Bloodied": "half its Hit Points or fewer remaining".
+describe("Bloodied", () => {
+  it("at half the maximum or fewer, 0 included", () => {
+    expect([6, 5, 1, 0].map((hp) => isBloodied(hp, 10))).toEqual([false, true, true, true]);
+    // An odd maximum: 3 of 7 is Bloodied, 4 isn't.
+    expect([isBloodied(4, 7), isBloodied(3, 7)]).toEqual([false, true]);
+  });
+
+  it("a character's play sheet and combatant say it; Temporary Hit Points don't count", () => {
+    const fighter = fighterBuild(); // 12 HP
+    let state = createState(fighter, catalog);
+    const bloodied = () => computePlaySheet(fighter, state, catalog).play.hp.bloodied;
+    expect(bloodied()).toBe(false);
+    state = applyAction(fighter, state, catalog, { type: "damage", amount: 5 }).state;
+    expect(bloodied()).toBe(false); // 7 of 12
+    state = applyAction(fighter, state, catalog, { type: "set_temp_hp", amount: 10 }).state;
+    state = applyAction(fighter, state, catalog, { type: "damage", amount: 11 }).state;
+    expect(computePlaySheet(fighter, state, catalog).play.hp).toMatchObject({
+      current: 6,
+      temp: 0,
+      bloodied: true,
+    });
+    expect(combatantFromCharacter(fighter, state, catalog).bloodied).toBe(true);
+    state = applyAction(fighter, state, catalog, { type: "set_temp_hp", amount: 10 }).state;
+    expect(bloodied()).toBe(true);
+  });
+
+  it("a monster in an encounter: a 10 HP Goblin Warrior is Bloodied at 5, not at 6", () => {
+    let e: Encounter = applyEncounterAction(
+      createEncounter(),
+      { type: "add_monster", monster: "goblin-warrior" },
+      { catalog },
+    ).encounter;
+    const id = e.combatants[0]?.id as string;
+    const hit = (amount: number) => {
+      e = applyEncounterAction(
+        e,
+        { type: "effects", id, actions: [{ type: "damage", amount }] },
+        { catalog },
+      ).encounter;
+      return encounterCombatant(e, id, { catalog }).bloodied;
+    };
+    expect(encounterCombatant(e, id, { catalog }).bloodied).toBe(false);
+    expect(hit(4)).toBe(false);
+    expect(hit(1)).toBe(true);
   });
 });

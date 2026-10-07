@@ -30,6 +30,7 @@ import {
   type DamageResult,
   type Defenses,
   formatDamage,
+  isBloodied,
   type RolledDamage,
   rollDamage,
   takeDamage,
@@ -65,6 +66,8 @@ export interface Combatant {
   readonly hp: number;
   readonly temp_hp: number;
   readonly max_hp: number;
+  /** At half its Hit Point maximum or fewer (`isBloodied`). */
+  readonly bloodied: boolean;
   readonly proficiency_bonus: number;
   readonly modifiers: Readonly<Record<Ability, number>>;
   /** Saving throw bonuses (proficiency and penalties such as Exhaustion included). */
@@ -817,6 +820,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     hp: character.current_hit_points,
     temp_hp: 0,
     max_hp: character.max_hit_points,
+    bloodied: isBloodied(character.current_hit_points, character.max_hit_points),
     proficiency_bonus: character.proficiency_bonus,
     modifiers,
     saving_throws: modifiers,
@@ -1025,6 +1029,7 @@ export function combatantFromMonster(
     hp,
     temp_hp: state.temp_hp ?? 0,
     max_hp: monster.hit_points,
+    bloodied: isBloodied(hp, monster.hit_points),
     proficiency_bonus: monster.proficiency_bonus,
     modifiers,
     saving_throws: monster.saving_throws,

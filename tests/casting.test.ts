@@ -30,6 +30,7 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   hp: 40,
   temp_hp: 0,
   max_hp: 40,
+  bloodied: false,
   proficiency_bonus: 2,
   modifiers: zero,
   saving_throws: zero,

@@ -354,6 +354,7 @@ export {
   type DamageResult,
   type Defenses,
   formatDamage,
+  isBloodied,
   type RolledDamage,
   type RolledDamagePart,
   rollDamage,

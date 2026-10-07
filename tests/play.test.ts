@@ -38,7 +38,7 @@ describe("a new state", () => {
   const sheet = computePlaySheet(fighter, state, catalog);
 
   it("starts at full HP with the starting equipment, wearing the armor", () => {
-    expect(sheet.play.hp).toEqual({ current: 12, max: 12, temp: 0 });
+    expect(sheet.play.hp).toEqual({ current: 12, max: 12, temp: 0, bloodied: false });
     expect(state.inventory.find((i) => i.item === "chain-mail")?.equipped).toBe(true);
     expect(state.inventory.find((i) => i.item === "greatsword")?.equipped).toBe(false);
     expect(state.currency.gp).toBe(sheet.gp);
@@ -108,7 +108,7 @@ describe("damage, dying and healing", () => {
       { type: "damage", amount: 7 },
     );
     expect(r.notes).toContain("Temporary Hit Points don't stack: keeping 5.");
-    expect(r.sheet.play.hp).toEqual({ current: 10, max: 12, temp: 0 });
+    expect(r.sheet.play.hp).toEqual({ current: 10, max: 12, temp: 0, bloodied: false });
   });
 
   it("dropping to 0 makes you Unconscious (and Prone) and dying", () => {
@@ -243,6 +243,7 @@ describe("rests", () => {
       current: r.sheet.play.hp.max,
       max: r.sheet.play.hp.max,
       temp: 0,
+      bloodied: false,
     });
     expect(r.state.hit_dice_spent).toEqual({});
     expect(r.state.exhaustion).toBe(1);

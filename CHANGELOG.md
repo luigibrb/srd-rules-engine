@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Bloodied: `isBloodied(hp, maxHp)`, `Combatant.bloodied` and `computePlaySheet(...).play.hp.bloodied`
+  (half the Hit Point maximum or fewer, 0 included; Temporary Hit Points don't count).
 - Exploring: outside a fight (`round: 0`) a `move` has no limit, and its note and
   `previewMove(...).turns` (new) say how many turns of Speed it takes. Encounters have a travel
   `pace` (Fast: −5 to Passive Perception, Slow: +5; Disadvantage or Advantage on Perception

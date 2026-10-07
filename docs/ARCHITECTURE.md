@@ -321,6 +321,9 @@ encounter) applies those to each target's own document.
   Temporary Hit Points first, and reports dropping to 0, dying (massive damage, or damage at 0
   HP at least the maximum), Death Saving Throw failures and the Concentration DC. The caller
   updates its own state (conditions, death saves, Concentration).
+- `isBloodied(hp, maxHp)`: at half the Hit Point maximum or fewer (Rules Glossary "Bloodied"),
+  0 HP included, Temporary Hit Points not counted. Combatants carry it (`bloodied`), and so does
+  the play sheet (`play.hp.bloodied`).
 
 Every attack line on the sheet carries its damage as parts (`damage_parts`, and
 `two_handed_damage_parts` for Versatile weapons), and its display string is built from them.
@@ -777,6 +780,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Damage and attacks**
 
+- Bloodied uses the current Hit Point maximum (after any reduction), and an odd maximum's half
+  isn't rounded: 3 of 7 is Bloodied, 4 isn't (the SRD says "half its Hit Points or fewer").
 - Damage that Temporary Hit Points absorb entirely calls for no Concentration save and causes no
   Death Saving Throw failure, and the Concentration DC uses the damage that got past them (the
   SRD says "if you take damage"; this keeps Temporary Hit Points a full buffer).

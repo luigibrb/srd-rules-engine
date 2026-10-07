@@ -128,6 +128,14 @@ export interface DamageResult {
 }
 
 /**
+ * Bloodied (SRD Rules Glossary): at half its Hit Point maximum or fewer, 0 included; Temporary
+ * Hit Points don't count. `maxHp` is the current maximum (after any reduction).
+ */
+export function isBloodied(hp: number, maxHp: number): boolean {
+  return hp * 2 <= maxHp;
+}
+
+/**
  * Take one or more instances of damage (SRD "Damage and Healing"): each is adjusted for the
  * target's defenses, Temporary Hit Points absorb the total first, then Hit Points drop.
  *

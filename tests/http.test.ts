@@ -216,7 +216,7 @@ describe("HTTP play state", () => {
     });
     expect(applied.status).toBe(200);
     const sheet = await api.post("/v1/state/sheet", { build, state: applied.body.state });
-    expect(sheet.body.sheet.play.hp).toEqual({ current: 7, max: 12, temp: 0 });
+    expect(sheet.body.sheet.play.hp).toEqual({ current: 7, max: 12, temp: 0, bloodied: false });
     expect(sheet.body.sheet.play.conditions.map((c: { id: string }) => c.id)).toEqual(["poisoned"]);
     expect(sheet.body.issues).toEqual([]);
   });
