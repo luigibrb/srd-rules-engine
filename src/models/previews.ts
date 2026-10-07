@@ -48,6 +48,11 @@ export const MovePreviewSchema = z
     ),
     /** Enemies whose reach it would leave, who could make an Opportunity Attack. */
     opportunity_attacks: z.array(z.string()),
+    /**
+     * Outside a fight (no movement limit), how many turns of the mover's Speed it takes (about 6
+     * seconds each); `null` in a fight, where `movement_left` is the limit.
+     */
+    turns: z.int().min(0).nullable(),
   })
   .meta({ id: "MovePreview" });
 export type MovePreview = z.infer<typeof MovePreviewSchema>;

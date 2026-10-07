@@ -88,6 +88,9 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Spellcasting"; spells with a casting time of a minute or more (the Magic action on each turn,
   with Concentration); the two casting actions left as text (Pit Fiend, Unicorn); restrictions
   such as "self only".
+- **Light and obscurement (M).** Bright Light, Dim Light and Darkness on the map, Darkvision and
+  Heavily Obscured areas: noticing points of interest, hiding and attacking see only walls today
+  (flagged).
 - **Smaller flagged items (S each).** Which attacks a Multiattack allows; Dash with a Fly or Swim
   Speed (movement modes).
 

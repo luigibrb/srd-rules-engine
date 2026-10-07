@@ -20,6 +20,7 @@
             "type": "string",
             "enum": [
               "pending_decision",
+              "halted",
               "not_started",
               "not_your_turn",
               "incapacitated",
@@ -141,6 +142,18 @@
           "items": {
             "type": "string"
           }
+        },
+        "turns": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -151,7 +164,8 @@
         "cost",
         "movement_left",
         "zones",
-        "opportunity_attacks"
+        "opportunity_attacks",
+        "turns"
       ],
       "additionalProperties": false
     }

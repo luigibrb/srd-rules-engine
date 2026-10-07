@@ -530,6 +530,219 @@
           "properties": {
             "type": {
               "type": "string",
+              "const": "add_point"
+            },
+            "at": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "door",
+                "trap",
+                "puzzle",
+                "detail",
+                "fight",
+                "room",
+                "passage",
+                "scene",
+                "person",
+                "treasure"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "revealed": {
+              "type": "boolean"
+            },
+            "dc": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "within": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "type",
+            "at",
+            "title"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "update_point"
+            },
+            "id": {
+              "type": "string"
+            },
+            "at": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "door",
+                "trap",
+                "puzzle",
+                "detail",
+                "fight",
+                "room",
+                "passage",
+                "scene",
+                "person",
+                "treasure"
+              ]
+            },
+            "text": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "revealed": {
+              "type": "boolean"
+            },
+            "dc": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "within": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "type",
+            "id"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "remove_point"
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "id"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "set_exploration"
+            },
+            "pace": {
+              "type": "string",
+              "enum": [
+                "fast",
+                "normal",
+                "slow"
+              ]
+            },
+            "notice_stops": {
+              "type": "string",
+              "enum": [
+                "noticer",
+                "everyone"
+              ]
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "resume"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
               "const": "dash"
             },
             "id": {

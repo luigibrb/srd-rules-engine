@@ -17,6 +17,7 @@ import {
   type EncounterContext,
   EncounterError,
   encounterCombatant,
+  explorationBudget,
   feetApart,
   meleeReach,
   monsterDef,
@@ -28,6 +29,7 @@ import {
   speedOf,
   spellRangeFeet,
   terrainOf,
+  turnsFor,
   zoneArea,
 } from "./encounter";
 import { checkAction } from "./options";
@@ -91,7 +93,10 @@ export function previewMove(
     },
     ctx,
   );
-  const left = movementLeft(e, ctx, c);
+  // Outside a fight there's no limit: the turns of Speed it takes instead.
+  const exploring = e.round === 0;
+  const speed = speedOf(ctx, c, e);
+  const left = exploring ? speed : movementLeft(e, ctx, c);
   const empty: MovePreview = {
     ...check,
     path: [],
@@ -99,11 +104,14 @@ export function previewMove(
     movement_left: left,
     zones: [],
     opportunity_attacks: [],
+    turns: exploring ? 0 : null,
   };
   if (!c.position || (!move.to && !move.path)) return empty;
   let planned: { path: GridPoint[]; steps: number[] };
   try {
-    planned = planMove(e, ctx, c, move);
+    planned = exploring
+      ? planMove(e, ctx, c, move, { left: explorationBudget(c.position, move) })
+      : planMove(e, ctx, c, move);
   } catch (error) {
     if (error instanceof EncounterError) return empty;
     throw error;
@@ -190,11 +198,13 @@ export function previewMove(
     ...check,
     path: planned.path.map((p) => ({ x: p.x, y: p.y })),
     cost,
-    movement_left: Math.max(0, left - cost),
+    movement_left: exploring ? left : Math.max(0, left - cost),
     zones,
-    opportunity_attacks: c.disengaged
-      ? []
-      : enemies.filter((x) => leftReach.includes(x.id)).map((x) => x.id),
+    opportunity_attacks:
+      c.disengaged || exploring
+        ? []
+        : enemies.filter((x) => leftReach.includes(x.id)).map((x) => x.id),
+    turns: exploring ? turnsFor(cost, speed) : null,
   };
 }
 

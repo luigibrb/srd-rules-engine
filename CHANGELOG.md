@@ -8,6 +8,16 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Exploring: outside a fight (`round: 0`) a `move` has no limit, and its note and
+  `previewMove(...).turns` (new) say how many turns of Speed it takes. Encounters have a travel
+  `pace` (Fast: −5 to Passive Perception, Slow: +5; Disadvantage or Advantage on Perception
+  checks) set with `set_exploration`.
+- Points of interest: `encounter.points` (`PointOfInterestSchema`, `POINT_KINDS`), actions
+  `add_point`, `update_point`, `remove_point`. Hidden until the GM reveals them; a character
+  notices one in range and in sight by Passive Perception (`combatantPassivePerception`) or a
+  Perception `search` (which now takes no action outside a fight), and its move stops there;
+  with `notice_stops: everyone` every move waits (`halted`, refusal code `halted`) until the GM
+  reveals it or `resume`s.
 - Starting equipment taken later: play states have `starting_equipment` (whether the build's
   starting equipment and gold are in the inventory), and the play action
   `take_starting_equipment` adds them once, for a state made before the build had its

@@ -533,6 +533,22 @@ list of actions.
   within 5 feet or in range, as before. Cover can be given per attack (`cover`) or per target
   (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted;
   with positions and no cover given, it's worked out from the map (below).
+- **Exploring.** Before the fight starts and after it ends (`round: 0`) a `move` has no turns and
+  no limit: anyone moves along the planned path (walls, blocked squares, Difficult Terrain and
+  other creatures as in a fight, no Opportunity Attacks), and the note and `previewMove`'s
+  `turns` say how many turns of Speed it takes (`turnsFor`: about 6 seconds each). The group's
+  travel pace (`pace`, `set_exploration`) gives Disadvantage (Fast) or Advantage (Slow) on Wisdom
+  (Perception) checks, so −5 or +5 to Passive Perception (`combatantPassivePerception`).
+- **Points of interest.** `encounter.points` are places the GM prepared (`add_point`,
+  `update_point`, `remove_point`): a title, a `kind`, text for the players, notes for the GM,
+  `revealed` (hidden until the GM reveals it; the notes never name a hidden point, since the log
+  is everyone's). With a `dc`, a character notices a hidden point it sees (`pointsInSight`:
+  within its `within` feet, no Total Cover from walls or blocked squares to its square) when its
+  Passive Perception is at least the DC, after a move, a placing, or a change to the points;
+  `search` with Perception finds those its check total reaches. Noticing adds it to
+  `noticed_by` and never reveals it: that's the GM's. Outside a fight a move stops where the
+  mover notices one; with `notice_stops: everyone` (the GM's choice) every move then waits
+  (`halted`, refusal code `halted`) until the GM reveals it or `resume`s.
 - **The map.** `encounter.map` holds walls (segments between grid corners: corner `x,y` is the
   top-left corner of square `x,y`), Difficult Terrain squares and blocked squares (a pillar,
   solid rock); `set_terrain`, `add_wall` and `remove_wall` change it (the GM's actions, no
@@ -858,6 +874,12 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Positions**
 
+- **Noticing points of interest.** The SRD leaves noticing to the GM ("Passive Perception",
+  "Finding Hidden Objects"); the engine's reading: only characters notice (monsters don't look
+  for the party's clues), seeing a point means no Total Cover from a corner of the space to its
+  square (light and obscurement aren't modelled), and the move stops on the square where it was
+  noticed (a free one), so a noticed trap isn't walked into. Who else stops is the GM's
+  `notice_stops`.
 - **Walls on the grid.** The SRD doesn't say how walls sit on a grid: a wall is a segment
   between grid corners, so it stands between squares; a step goes from square center to square
   center and is blocked when that line touches a wall, so a diagonal can't cut a wall's corner

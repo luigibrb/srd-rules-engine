@@ -342,6 +342,47 @@ export const BattleMapSchema = z.object({
 });
 export type BattleMap = z.infer<typeof BattleMapSchema>;
 
+/** What a point of interest is (an app picks its icon from it). */
+export const POINT_KINDS = [
+  "door",
+  "trap",
+  "puzzle",
+  "detail",
+  "fight",
+  "room",
+  "passage",
+  "scene",
+  "person",
+  "treasure",
+] as const;
+export type PointKind = (typeof POINT_KINDS)[number];
+
+/**
+ * A point of interest: a place on the map the GM prepared (a door, a trap, a clue). The players
+ * don't know it until the GM reveals it. With a `dc`, a character can notice it: within `within`
+ * feet, with a clear line to its square (walls and blocked squares stop it), and a Passive
+ * Perception of at least the DC; the engine adds it to `noticed_by` after a move or a placing,
+ * for the GM to reveal it (or not).
+ */
+export const PointOfInterestSchema = z.object({
+  id: z.string(),
+  at: square,
+  title: z.string().min(1),
+  kind: z.enum(POINT_KINDS).default("detail"),
+  /** What the players read or are told, once it's revealed. */
+  text: z.string().default(""),
+  /** The GM's own notes: secrets, what happens here, where it leads. */
+  notes: z.string().default(""),
+  revealed: z.boolean().default(false),
+  /** Passive Perception that notices it (0: anyone who sees it); `null`: only the GM reveals it. */
+  dc: z.int().min(0).nullable().default(null),
+  /** How near a character must be to notice it, in feet. */
+  within: z.int().min(0).default(30),
+  /** Characters (combatant ids) that noticed it while it was hidden. */
+  noticed_by: z.array(z.string()).default([]),
+});
+export type PointOfInterest = z.infer<typeof PointOfInterestSchema>;
+
 export const EncounterSchema = z.object({
   /** The document format (`DOCUMENT_VERSION`); missing means 1. */
   version: DocumentVersionSchema,
@@ -372,6 +413,23 @@ export const EncounterSchema = z.object({
   auto_death_saves: z.boolean().default(true),
   /** Walls and terrain on the grid (positions only). */
   map: BattleMapSchema.prefault({}),
+  /** Points of interest on the map (`add_point`). */
+  points: z.array(PointOfInterestSchema).default([]),
+  /** Next point id number. */
+  next_point: z.int().min(1).default(1),
+  /**
+   * Outside a fight, the group's travel pace (SRD "Travel Pace"): Fast gives Disadvantage on
+   * Wisdom (Perception) checks (−5 to Passive Perception), Slow gives Advantage (+5).
+   */
+  pace: z.enum(["fast", "normal", "slow"]).default("normal"),
+  /**
+   * When a character notices a hidden point while moving, the GM's choice: `noticer` stops that
+   * character on the square where it noticed; `everyone` also halts every move (`halted`) until
+   * the GM reveals the point or `resume`s.
+   */
+  notice_stops: z.enum(["noticer", "everyone"]).default("noticer"),
+  /** The point every move waits on (`notice_stops: everyone`), until revealed or resumed. */
+  halted: z.string().nullable().default(null),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
@@ -571,6 +629,41 @@ export const EncounterActionSchema = z
       from: z.object({ x: n, y: n }),
       to: z.object({ x: n, y: n }),
     }),
+    /** Put a point of interest on the map (the GM's); it starts hidden unless `revealed`. */
+    z.object({
+      type: z.literal("add_point"),
+      at: z.object({ x: n, y: n }),
+      title: z.string().min(1),
+      kind: z.enum(POINT_KINDS).optional(),
+      text: z.string().optional(),
+      notes: z.string().optional(),
+      revealed: z.boolean().optional(),
+      dc: n.min(0).nullable().optional(),
+      within: n.min(0).optional(),
+    }),
+    /** Change a point: move it, rewrite it, reveal or hide it (hiding clears `noticed_by`). */
+    z.object({
+      type: z.literal("update_point"),
+      id: z.string(),
+      at: z.object({ x: n, y: n }).optional(),
+      title: z.string().min(1).optional(),
+      kind: z.enum(POINT_KINDS).optional(),
+      text: z.string().optional(),
+      notes: z.string().optional(),
+      revealed: z.boolean().optional(),
+      dc: n.min(0).nullable().optional(),
+      within: n.min(0).optional(),
+    }),
+    z.object({ type: z.literal("remove_point"), id: z.string() }),
+    /** Exploration settings (the GM's): the travel pace, and who stops when a point is noticed. */
+    z.object({
+      type: z.literal("set_exploration"),
+      pace: z.enum(["fast", "normal", "slow"]).optional(),
+      notice_stops: z.enum(["noticer", "everyone"]).optional(),
+    }),
+    /** Let moves go on after a halt (`notice_stops: everyone`) without revealing the point. */
+    z.object({ type: z.literal("resume") }),
+
     /**
      * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.
      * `bonus_action: true` takes it as a Bonus Action instead (a feature that allows it: Cunning
@@ -630,7 +723,10 @@ export const EncounterActionSchema = z
     z.object({ type: z.literal("reveal"), id: z.string() }),
     /**
      * The Search action: a Wisdom check (Perception by default); with Perception it finds the
-     * hidden enemies (or the `target`) whose Stealth total it equals or beats.
+     * hidden enemies (or the `target`) whose Stealth total it equals or beats, and notices the
+     * hidden points of interest it could see (SRD "Finding Hidden Objects": within the point's
+     * range, in sight) whose DC it equals or beats. Outside a fight it takes no action, and the
+     * travel pace applies (Fast: Disadvantage, Slow: Advantage).
      */
     z.object({
       type: z.literal("search"),

@@ -91,6 +91,8 @@ export type EncounterEvent = z.infer<typeof EncounterEventSchema>;
  */
 export const REFUSAL_CODES = [
   "pending_decision",
+  /** Outside a fight, every move waits on a noticed point (`notice_stops: everyone`). */
+  "halted",
   "not_started",
   "not_your_turn",
   "incapacitated",

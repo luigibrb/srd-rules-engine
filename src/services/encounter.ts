@@ -30,6 +30,7 @@ import {
   type Help,
   type MasteryMark,
   type Pending,
+  type PointOfInterest,
   type SpellMark,
   type Zone,
 } from "../models/encounter";
@@ -1010,6 +1011,36 @@ function run(
     const taken = spaceTaken(c, to);
     if (taken) fail(`${taken.name} is in that space`);
     c.position = { ...to };
+  };
+  /**
+   * The hidden points a character (not a monster) notices where it stands now, by its Passive
+   * Perception; they're added to `noticed_by` (for the GM, who reveals them or not).
+   */
+  const notice = (c: EncounterCombatant): PointOfInterest[] => {
+    if (c.character === null) return [];
+    const passive = combatantPassivePerception(e, ctx, c.id);
+    const found = pointsInSight(e, ctx, c).filter(
+      (p) => !p.noticed_by.includes(c.id) && passive >= (p.dc as number),
+    );
+    for (const p of found) p.noticed_by.push(c.id);
+    if (found.length) notes.push(`${c.name} notices something.`);
+    halt(found);
+    return found;
+  };
+  /** Outside a fight, with `notice_stops: everyone`, a noticed point holds every move. */
+  const halt = (found: readonly PointOfInterest[]): void => {
+    const first = found[0];
+    if (first && e.round === 0 && e.notice_stops === "everyone" && !e.halted) e.halted = first.id;
+  };
+  const noticeAll = (): void => {
+    for (const c of e.combatants) notice(c);
+  };
+  const point = (id: string): PointOfInterest =>
+    e.points.find((p) => p.id === id) ?? fail(`No point of interest '${id}'`);
+  /** The words for a move outside a fight: how far, and how many turns of Speed it takes. */
+  const exploreNote = (c: EncounterCombatant, feet: number, speed: number): string => {
+    const turns = turnsFor(feet, speed);
+    return `${c.name} moves ${feet} feet: ${turns} turn${turns === 1 ? "" : "s"} at a Speed of ${speed} feet (about ${turns * 6} seconds).`;
   };
   /** Another creature whose space overlaps `c`'s at `to`. */
   const spaceTaken = (c: EncounterCombatant, to: GridPoint): EncounterCombatant | undefined =>
@@ -2303,6 +2334,7 @@ function run(
       if (!e.combatants.length) fail("No combatants");
       const missing = e.combatants.filter((c) => c.initiative === null).map((c) => c.name);
       if (missing.length) fail(`Roll Initiative first: ${missing.join(", ")}`);
+      e.halted = null; // a fight doesn't wait on a noticed point
       e.round = 1;
       e.order = [];
       reorder(e, ctx);
@@ -2352,6 +2384,45 @@ function run(
     }
     case "move": {
       const c = find(action.id);
+      if (e.round === 0) {
+        // Exploring: no turns and no limit; the engine says how many turns of Speed it takes.
+        if (c.defeated) fail(`${c.name} is defeated`);
+        if (e.halted) {
+          const by = e.combatants.find((x) => point(e.halted as string).noticed_by.includes(x.id));
+          fail(
+            `Everyone waits: ${by?.name ?? "someone"} noticed something (the GM reveals it or lets you go on)`,
+          );
+        }
+        const speed = speedOf(ctx, c, e);
+        if (speed === 0) fail(`${c.name} can't move: its Speed is 0`);
+        if (!action.to && !action.path) {
+          notes.push(
+            exploreNote(
+              c,
+              action.feet ?? fail("Give the feet moved or a square to move to"),
+              speed,
+            ),
+          );
+          break;
+        }
+        const from = c.position ?? fail(`${c.name} has no position: place it first`);
+        const planned = planMove(e, ctx, c, action, { left: explorationBudget(from, action) });
+        let walked = 0;
+        for (const [i, square] of planned.path.entries()) {
+          const last = i === planned.path.length - 1;
+          if (last) occupy(c, square);
+          else c.position = { ...square };
+          walked += planned.steps[i] ?? 5;
+          const found = notice(c);
+          // Noticing stops it here (when the square is free); `halt` holds everyone else.
+          if (found.length && !last && !spaceTaken(c, square)) {
+            notes.push(`${c.name} stops at ${square.x},${square.y}.`);
+            break;
+          }
+        }
+        notes.push(exploreNote(c, walked, speed));
+        break;
+      }
       onTurn(c, "move");
       if (c.defeated) fail(`${c.name} is defeated`);
       const from = c.position;
@@ -2428,6 +2499,7 @@ function run(
           );
         }
       }
+      notice(c);
       break;
     }
     case "set_terrain": {
@@ -2465,7 +2537,75 @@ function run(
       break;
     }
     case "place": {
-      occupy(find(action.id), { x: action.x, y: action.y });
+      const c = find(action.id);
+      occupy(c, { x: action.x, y: action.y });
+      notice(c);
+      break;
+    }
+    case "add_point": {
+      const p: PointOfInterest = {
+        id: `poi${e.next_point++}`,
+        at: { x: action.at.x, y: action.at.y },
+        title: action.title,
+        kind: action.kind ?? "detail",
+        text: action.text ?? "",
+        notes: action.notes ?? "",
+        revealed: action.revealed ?? false,
+        dc: action.dc ?? null,
+        within: action.within ?? 30,
+        noticed_by: [],
+      };
+      e.points.push(p);
+      // A hidden point's title stays the GM's: the log is everyone's.
+      notes.push(
+        p.revealed ? `${p.title} is on the map.` : "A hidden point of interest is placed.",
+      );
+      noticeAll();
+      break;
+    }
+    case "update_point": {
+      const p = point(action.id);
+      const { type: _, id: __, ...changes } = action;
+      const wasRevealed = p.revealed;
+      Object.assign(p, structuredClone(changes));
+      if (p.revealed && !wasRevealed) {
+        notes.push(`${p.title} is revealed.`);
+        if (e.halted === p.id) e.halted = null;
+      } else if (!p.revealed && wasRevealed) {
+        p.noticed_by = [];
+        notes.push("A point of interest is hidden again.");
+      }
+      noticeAll();
+      break;
+    }
+    case "remove_point": {
+      point(action.id);
+      e.points = e.points.filter((p) => p.id !== action.id);
+      if (e.halted === action.id) e.halted = null;
+      notes.push("A point of interest is removed.");
+      break;
+    }
+    case "set_exploration": {
+      if (action.pace) {
+        e.pace = action.pace;
+        notes.push(`Travel pace: ${action.pace[0]?.toUpperCase()}${action.pace.slice(1)}.`);
+      }
+      if (action.notice_stops) {
+        e.notice_stops = action.notice_stops;
+        if (action.notice_stops === "noticer") e.halted = null;
+        notes.push(
+          action.notice_stops === "everyone"
+            ? "When someone notices something, everyone stops."
+            : "When someone notices something, only they stop.",
+        );
+      }
+      noticeAll();
+      break;
+    }
+    case "resume": {
+      if (!e.halted) fail("Nobody is waiting");
+      e.halted = null;
+      notes.push("Everyone goes on.");
       break;
     }
     case "dash": {
@@ -2660,11 +2800,25 @@ function run(
     }
     case "search": {
       const c = find(action.id);
-      takeAction(c, "Search");
+      if (e.round > 0) takeAction(c, "Search");
+      else canAct(c);
       const skill = action.skill ?? "perception";
       const target = action.target ? find(action.target) : null;
-      const check = checkRoll(c, { skill }, action.dc ?? target?.hidden ?? null);
+      const pace = paceModes(e)[0]?.mode;
+      const check = checkRoll(
+        c,
+        { skill },
+        action.dc ?? target?.hidden ?? null,
+        skill === "perception" ? pace : undefined,
+      );
       if (skill !== "perception") break;
+      // SRD "Finding Hidden Objects": only the hidden points near enough to be found, in sight.
+      const found = pointsInSight(e, ctx, c).filter(
+        (p) => check.total >= (p.dc as number) && !p.noticed_by.includes(c.id),
+      );
+      for (const p of found) p.noticed_by.push(c.id);
+      if (found.length) notes.push(`${c.name} finds something.`);
+      halt(found);
       const hidden = e.combatants.filter(
         (x) =>
           x.hidden !== null &&
@@ -3805,6 +3959,70 @@ export function terrainOf(e: Encounter, ctx: EncounterContext, c: EncounterComba
 /** The map's walls and the walls spells put up between squares (Wall of Force, Stone, Ice). */
 export function mapWalls(e: Encounter): GridWall[] {
   return [...e.map.walls, ...e.zones.flatMap((z) => z.segments)];
+}
+
+/**
+ * Outside a fight, the travel pace's effect on Wisdom (Perception) checks (SRD "Travel Pace"):
+ * Fast gives Disadvantage, Slow Advantage; in a fight, none.
+ */
+function paceModes(e: Encounter): ModeReason[] {
+  if (e.round > 0) return [];
+  if (e.pace === "fast") return [{ mode: "disadvantage", reason: "a Fast travel pace" }];
+  if (e.pace === "slow") return [{ mode: "advantage", reason: "a Slow travel pace" }];
+  return [];
+}
+
+/**
+ * Passive Perception (SRD Rules Glossary): 10 + the Wisdom (Perception) check bonus, +5 with
+ * Advantage on such checks, −5 with Disadvantage (features, conditions, the travel pace).
+ */
+export function combatantPassivePerception(
+  e: Encounter,
+  ctx: EncounterContext,
+  id: string,
+): number {
+  const c = encounterCombatant(e, id, ctx);
+  const bonus = c.skills.perception ?? c.ability_checks.wis;
+  const reasons: ModeReason[] = [...paceModes(e)];
+  if (c.advantages.includes("check.wis")) reasons.push({ mode: "advantage", reason: "features" });
+  for (const r of c.condition_rolls.ability_checks) {
+    reasons.push({ mode: r.mode, reason: r.condition });
+  }
+  const { mode } = resolveMode("normal", reasons);
+  return 10 + bonus + (mode === "advantage" ? 5 : mode === "disadvantage" ? -5 : 0);
+}
+
+/**
+ * The hidden points `c` could notice from where it is: a DC set, within the point's range, and a
+ * clear line from a corner of its space to the point's square (walls and blocked squares stop
+ * it, as for Total Cover).
+ */
+export function pointsInSight(
+  e: Encounter,
+  ctx: EncounterContext,
+  c: EncounterCombatant,
+): PointOfInterest[] {
+  if (!c.position || c.defeated) return [];
+  const size = spaceOf(ctx, c);
+  const corners = spaceCorners({ position: c.position, size });
+  const lines = obstacles(mapWalls(e), e.map.blocked.map(squareKey));
+  return e.points.filter(
+    (p) =>
+      !p.revealed &&
+      p.dc !== null &&
+      gridDistance(c.position as GridPoint, size, p.at, 1) <= p.within &&
+      coverDegree(corners, { position: p.at, size: 1 }, lines).degree !== "total",
+  );
+}
+
+/** `feet` moved at `speed`: the turns of Speed it takes (SRD: a turn is about 6 seconds). */
+export function turnsFor(feet: number, speed: number): number {
+  return speed > 0 ? Math.ceil(feet / speed) : 0;
+}
+
+/** How far `planMove` may look for a path outside a fight, where movement has no limit. */
+export function explorationBudget(from: GridPoint, move: { to?: GridPoint }): number {
+  return move.to ? gridDistance(from, 1, move.to, 1) * 3 + 300 : Number.MAX_SAFE_INTEGER;
 }
 
 /**

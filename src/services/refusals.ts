@@ -7,6 +7,7 @@ import type { RefusalCode } from "../models/events";
 
 const PATTERNS: readonly [RegExp, RefusalCode][] = [
   [/^Waiting for a decision/, "pending_decision"],
+  [/^Everyone waits: /, "halted"],
   [/The fight hasn't started|^Roll Initiative first/, "not_started"],
   [/It isn't .*'s turn|after another creature's turn, not on its own/, "not_your_turn"],
   [/ is Incapacitated$/, "incapacitated"],
@@ -18,7 +19,7 @@ const PATTERNS: readonly [RegExp, RefusalCode][] = [
   [/feet away|out of .*(range|reach)|beyond .*range|must start next to/, "out_of_range"],
   [/can't move to|can't reach|is blocked$|is in that space|The path jumps/, "no_path"],
   [
-    /can move \d+ more feet|feet of movement to stand up|can't right itself at Speed 0/,
+    /can move \d+ more feet|feet of movement to stand up|can't right itself at Speed 0|its Speed is 0/,
     "no_movement",
   ],
   [
@@ -26,7 +27,7 @@ const PATTERNS: readonly [RegExp, RefusalCode][] = [
     "no_resources",
   ],
   [
-    /^Unknown |^No (combatant|character|effect|wall|zone) |has no (feature|legendary|class)|can't cast/,
+    /^Unknown |^No (combatant|character|effect|wall|zone|point of interest) |has no (feature|legendary|class)|can't cast/,
     "unknown",
   ],
   [

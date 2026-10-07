@@ -20,6 +20,7 @@
             "type": "string",
             "enum": [
               "pending_decision",
+              "halted",
               "not_started",
               "not_your_turn",
               "incapacitated",
