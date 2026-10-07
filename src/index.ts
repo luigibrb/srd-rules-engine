@@ -264,6 +264,7 @@ export {
   pointBuyStatus,
   rollAbilityScore,
   rollAbilityScores,
+  unassignedValues,
 } from "./rules/ability-scores";
 export {
   type AreaPlacement,

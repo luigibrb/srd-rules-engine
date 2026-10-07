@@ -9,8 +9,8 @@ import {
   rollAbilityScores,
   scriptedRng,
   seededRng,
+  unassignedValues,
 } from "../src/index";
-import { unassignedValues } from "../src/rules/ability-scores";
 import { catalog } from "./helpers";
 
 const all = (score: number): AbilityMap => ({

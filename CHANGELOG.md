@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `unassignedValues(method, scores, rules, pool)` is public: the standard array's or rolled pool's
+  values not assigned to an ability yet.
 - `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would
   change (`StatChange`: `stat`, `label`, `before`, `after`), as the CLI builder shows them.
 - Spell and saving throw effect results name each target by its combatant id
