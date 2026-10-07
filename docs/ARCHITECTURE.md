@@ -249,7 +249,9 @@ wiping everything after the edited level:
    unchanged. The guard has no rules of its own, so anything the validator checks is enforced.
 
 `previewChange` runs a change and diffs the result (picks removed, new pending questions) so
-UIs can ask for confirmation. `setLevelClass` changes a past level's class: class features follow
+UIs can ask for confirmation. `previewOption(build, catalog, key, value)` lists the sheet numbers
+one option would change (AC, HP, Initiative, Speed, Passive Perception, ability scores), against
+the choice left unanswered, for a builder to show next to the option. `setLevelClass` changes a past level's class: class features follow
 the Nth level *in* a class (`class:fighter:3`), so they move along with their choices.
 
 ## Play state

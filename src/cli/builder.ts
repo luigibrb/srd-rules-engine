@@ -596,21 +596,21 @@ export class BuilderApp {
     const without = Object.fromEntries(
       Object.entries(this.build.choices).filter(([k]) => k !== choice.key),
     );
-    const before = this.sheet(updateBuild(this.build, { choices: without }));
     const after = this.sheet(
       updateBuild(this.build, { choices: { ...without, [choice.key]: [optionId] } }),
     );
     if (!after.scores_complete) return "";
-    const hp = (s: DerivedSheet) => s.max_hp?.total ?? 0;
-    const changes: string[] = [];
-    for (const [label, a, b] of [
-      ["AC", before.armor_class.total, after.armor_class.total],
-      ["HP", hp(before), hp(after)],
-      ["Init", before.initiative.total, after.initiative.total],
-      ["Speed", before.speed.total, after.speed.total],
-    ] as const) {
-      if (a !== b) changes.push(`${label} ${a}→${b}`);
-    }
+    const short: Record<string, string> = {
+      armor_class: "AC",
+      max_hp: "HP",
+      initiative: "Init",
+      speed: "Speed",
+      passive_perception: "PP",
+    };
+    const changes = svc
+      .previewOption(this.build, this.catalog, choice.key, optionId)
+      .map((c) => `${short[c.stat] ?? c.stat.toUpperCase()} ${c.before}→${c.after}`);
+    const before = this.sheet(updateBuild(this.build, { choices: without }));
     const newWarnings = after.warnings.filter((w) => !before.warnings.includes(w));
     changes.push(
       ...newWarnings.filter((w) => w.includes("Speed")).map((w) => `⚠ ${w.split(":")[0]}`),

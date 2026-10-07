@@ -16,7 +16,7 @@ import {
   characterLevel,
   updateBuild,
 } from "../models/build";
-import { STEPS, type Step } from "../models/content";
+import { ABILITIES, ABILITY_NAMES, STEPS, type Step } from "../models/content";
 import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "../rules/ability-scores";
 import {
   type ActiveChoice,
@@ -384,6 +384,54 @@ export interface ChangePreview extends BuildResult {
   readonly removed: readonly { level: number; key: string; label: string; values: string[] }[];
   /** New questions the change creates (e.g. the new subclass's choices). */
   readonly pending: readonly { level: number; message: string }[];
+}
+
+/** A sheet number an option would change (`previewOption`). */
+export interface StatChange {
+  /** `armor_class`, `max_hp`, `initiative`, `speed`, `passive_perception`, or an ability (`str`). */
+  readonly stat: string;
+  /** `AC`, `HP`, `Initiative`, `Speed`, `Passive Perception`, `Strength`. */
+  readonly label: string;
+  readonly before: number;
+  readonly after: number;
+}
+
+/**
+ * The sheet numbers picking `value` for choice `choiceKey` would change (AC, HP, Initiative,
+ * Speed, Passive Perception, ability scores), compared with the choice left unanswered, as a
+ * builder shows next to an option ("AC 16 → 17"). Empty when nothing changes, or until the
+ * ability scores are complete. Nothing is validated or committed.
+ */
+export function previewOption(
+  build: CharacterBuild,
+  catalog: Catalog,
+  choiceKey: string,
+  value: string,
+): StatChange[] {
+  const without = Object.fromEntries(
+    Object.entries(build.choices).filter(([k]) => k !== choiceKey),
+  );
+  const before = computeSheet(updateBuild(build, { choices: without }), catalog);
+  const after = computeSheet(
+    updateBuild(build, { choices: { ...without, [choiceKey]: [value] } }),
+    catalog,
+  );
+  if (!after.scores_complete) return [];
+  const rows: [string, string, (s: DerivedSheet) => number][] = [
+    ["armor_class", "AC", (s) => s.armor_class.total],
+    ["max_hp", "HP", (s) => s.max_hp?.total ?? 0],
+    ["initiative", "Initiative", (s) => s.initiative.total],
+    ["speed", "Speed", (s) => s.speed.total],
+    ["passive_perception", "Passive Perception", (s) => s.passive_perception],
+    ...ABILITIES.map((a): [string, string, (s: DerivedSheet) => number] => [
+      a,
+      ABILITY_NAMES[a],
+      (s) => s.scores[a],
+    ]),
+  ];
+  return rows
+    .map(([stat, label, of]) => ({ stat, label, before: of(before), after: of(after) }))
+    .filter((c) => c.before !== c.after);
 }
 
 /**

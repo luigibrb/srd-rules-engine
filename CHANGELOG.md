@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would
+  change (`StatChange`: `stat`, `label`, `before`, `after`), as the CLI builder shows them.
 - Spell and saving throw effect results name each target by its combatant id
   (`SpellTargetResult.id`, `null` outside an encounter), next to `target` (the index) and `name`.
 - Rolls outside an encounter: `rollCheck(build, state, catalog, request, { dc, mode, rng })` and
