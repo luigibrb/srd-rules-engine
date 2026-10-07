@@ -379,6 +379,7 @@ export {
   lineClear,
   type Occupant,
   obstacles,
+  spaceForSize,
   stepBlocked,
   stepCost,
   straightPath,
@@ -443,6 +444,7 @@ export {
   encounterCombatant,
   type MapCover,
   mapCover,
+  zoneSquares,
 } from "./services/encounter";
 export { encounterEvents } from "./services/events";
 export {

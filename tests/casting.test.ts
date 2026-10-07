@@ -50,6 +50,7 @@ const creature = (o: Partial<Combatant> = {}): Combatant => ({
   legendary_actions: [],
   legendary_resistance: 0,
   size: null,
+  space: 1,
   rules: [],
   proficient_skills: [],
   spell_damage: [],

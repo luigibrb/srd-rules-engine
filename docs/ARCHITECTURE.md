@@ -523,7 +523,7 @@ list of actions.
   each of the target's turns (`repeat_save`: Cunning Strike's Poison).
 - **Positions (optional).** A combatant's `position` is its square on a 5-foot grid (`place`,
   or `move` with `to`), top-left for a creature larger than Medium (Large 2×2, Huge 3×3,
-  Gargantuan 4×4). `gridDistance` counts squares to the nearest square of the other space,
+  Gargantuan 4×4: `spaceForSize`, and `space` on every `Combatant`). `gridDistance` counts squares to the nearest square of the other space,
   diagonals like any other step (SRD "Playing on a Grid"). When attacker and target both have
   positions, the encounter measures: a melee attack needs the target within its line's `reach`
   (5 ft, 10 with Reach, a monster's listed reach); a ranged or thrown (`thrown: true`) attack
@@ -645,7 +645,8 @@ list of actions.
   into a zone on the way (or the zone moves onto it: `move_zone`, or an Emanation's caster
   moving), at the start or end of its turn there, and takes `move` zones' damage for every 5
   feet in them (Spike Growth); a creature held on the way (Web) stops there. Without positions,
-  `zone_save` names who saves. "Only once per turn" is tracked per zone (`saved`, reset at every
+  `zone_save` names who saves. `zoneSquares` lists a zone's squares now (an Emanation's around
+  where its creature stands). "Only once per turn" is tracked per zone (`saved`, reset at every
   turn's start). A failed save can also take the turn's action and Bonus Action (Stinking Cloud)
   or end Concentration (Sleet Storm). Saves the caster may force (Conjure Animals) are a
   `zone_force` decision, by default for enemies only; a ramming zone (Flaming Sphere) makes the
@@ -973,7 +974,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - The SRD defines the shapes but not how they cover squares: a square is in an area when its
   center is inside the shape. Spheres and Cylinders spread from a grid intersection with the
   grid's distance rule (diagonals count as one step), so their area is square (a 20-foot radius:
-  8×8 squares); Emanations spread the same way from their origin's space. Cones and Lines start
+  8×8 squares); Emanations spread the same way from their origin's space, which isn't part of
+  the area (the SRD doesn't say whether it is; a spell that affects its caster says so). Cones and Lines start
   at the center of their origin's space; a Cone's width equals its distance from the origin.
 - A Cylinder's height and "each enemy" (rather than each creature) aren't distinguished: the
   caller removes a target that shouldn't be there by giving `targets` instead.

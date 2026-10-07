@@ -212,6 +212,7 @@ exports[`public API > srd-rules-engine 1`] = `
   "scriptedRng",
   "seededRng",
   "skillName",
+  "spaceForSize",
   "splitPack",
   "startingEquipment",
   "stat",
@@ -225,6 +226,7 @@ exports[`public API > srd-rules-engine 1`] = `
   "validateBuild",
   "validateReferences",
   "validateState",
+  "zoneSquares",
 ]
 `;
 
@@ -449,6 +451,7 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "seededRng",
   "serveNode",
   "skillName",
+  "spaceForSize",
   "splitPack",
   "srdCatalog",
   "srdPack",
@@ -464,6 +467,7 @@ exports[`public API > srd-rules-engine/node 1`] = `
   "validateBuild",
   "validateReferences",
   "validateState",
+  "zoneSquares",
 ]
 `;
 

@@ -8,6 +8,7 @@ import {
   type Encounter,
   type EncounterAction,
   scriptedRng,
+  zoneSquares,
 } from "../src/index";
 import * as svc from "../src/services/builder";
 import { apply, autocomplete, catalog, classBuild, levelUpIn } from "./helpers";
@@ -177,6 +178,31 @@ describe("Spirit Guardians", () => {
     expect(s.notes).toContain("Spirit Guardians: Ogre enters it (Wisdom DC 13).");
     expect(s.get("ogre")?.hp).toBe(68 - 12);
     expect(s.get("ogre-2")?.hp).toBe(68);
+  });
+});
+
+describe("a zone's squares now", () => {
+  it("Spirit Guardians from a Medium caster at 5,5 covers 15 feet around it, and moves with it", () => {
+    const s = session({}, [{ monster: "priest" }]);
+    s.act([], place("priest", 5, 5));
+    s.act([], {
+      type: "cast",
+      id: "priest",
+      spell: "spirit-guardians",
+      area: {},
+      damage_type: "radiant",
+    });
+    const id = s.encounter().zones[0]?.id as string;
+    const squares = () => zoneSquares(s.encounter(), id, { catalog });
+    // 3 squares on every side of its own, 2,2 to 8,8, without its own square (flagged).
+    expect(squares()).toHaveLength(48);
+    expect(squares()).not.toContainEqual({ x: 5, y: 5 });
+    expect(squares()?.[0]).toEqual({ x: 2, y: 2 });
+    expect(squares()?.at(-1)).toEqual({ x: 8, y: 8 });
+    s.act([], move("priest", 6, 5));
+    expect(squares()?.[0]).toEqual({ x: 3, y: 2 });
+    expect(squares()?.at(-1)).toEqual({ x: 9, y: 8 });
+    expect(() => zoneSquares(s.encounter(), "nope", { catalog })).toThrow("No zone 'nope'");
   });
 });
 

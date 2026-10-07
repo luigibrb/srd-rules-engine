@@ -4,17 +4,35 @@ import {
   applyEncounterAction,
   type CharacterBuild,
   type CharacterState,
+  combatantFromCharacter,
+  combatantFromMonster,
   createEncounter,
   createState,
   type Encounter,
   type EncounterAction,
   gridDistance,
+  lookup,
+  type MonsterDef,
   scriptedRng,
+  spaceForSize,
 } from "../src/index";
 import { autocomplete, catalog, classBuild, fighterBuild } from "./helpers";
 
 // SRD 5.2.1 "Playing on a Grid" (5-foot squares, diagonals count as one), "Creature Size and
 // Space", "Reach", "Range", "Ranged Attacks in Close Combat", "Cover", "Opportunity Attacks".
+
+describe("a creature's space", () => {
+  it("in squares on a side: Huge 3, Medium 1, Tiny 1", () => {
+    const space = (id: string) =>
+      combatantFromMonster(lookup(catalog.monsters, id) as MonsterDef).space;
+    expect([space("adult-red-dragon"), space("goblin-warrior"), space("badger")]).toEqual([
+      3, 1, 1,
+    ]);
+    const fighter = fighterBuild();
+    expect(combatantFromCharacter(fighter, createState(fighter, catalog), catalog).space).toBe(1);
+    expect(["Large", "gargantuan", "small", null].map(spaceForSize)).toEqual([2, 4, 1, 1]);
+  });
+});
 
 describe("gridDistance", () => {
   it("counts squares to the nearest square of the other space", () => {

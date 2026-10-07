@@ -43,6 +43,17 @@ export interface Terrain {
 
 export const key = (p: GridPoint): string => `${p.x},${p.y}`;
 
+const SPACE: Readonly<Record<string, number>> = { large: 2, huge: 3, gargantuan: 4 };
+
+/**
+ * Squares on a side of a creature's space (SRD "Creature Size and Space"): Large 2, Huge 3,
+ * Gargantuan 4; Tiny, Small, Medium and an unknown size 1 (a Tiny creature takes one square,
+ * flagged).
+ */
+export function spaceForSize(size: string | null | undefined): number {
+  return SPACE[size?.toLowerCase() ?? ""] ?? 1;
+}
+
 /**
  * Feet between two spaces on the grid: count squares from one space to the nearest square of
  * the other, diagonals like any other step (SRD "Playing on a Grid"); 5 feet when adjacent, 0

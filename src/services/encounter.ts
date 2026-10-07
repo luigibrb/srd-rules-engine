@@ -82,6 +82,7 @@ import {
   type Occupant,
   obstacles,
   spaceCorners,
+  spaceForSize,
   key as squareKey,
   stepBlocked,
   stepCost,
@@ -3860,10 +3861,9 @@ function withCover(view: Combatant, cover: Cover | undefined): Combatant {
   };
 }
 
-/** Squares on a side of a creature's space (SRD "Creature Size and Space"); Tiny counts as one. */
-const SPACE: Readonly<Record<string, number>> = { large: 2, huge: 3, gargantuan: 4 };
+/** Squares on a side of a creature's space (`spaceForSize`). */
 export function spaceOf(ctx: EncounterContext, c: EncounterCombatant): number {
-  return SPACE[sizeOf(ctx, c) ?? ""] ?? 1;
+  return spaceForSize(sizeOf(ctx, c));
 }
 
 /** Its size, lowercase (`medium`; a monster's first size when it lists two). */
@@ -4144,6 +4144,29 @@ export function placeArea(
  * or for an Emanation its caster's space, or the space at its point (`space` squares wide).
  * Squares the point of origin has no clear line to aren't in it.
  */
+/**
+ * The squares zone `zoneId` covers now (`null` when it has none on the grid: no point, or its
+ * caster isn't placed): an Emanation follows its creature and that creature's space (its own
+ * space isn't part of it, as for targeting: flagged); squares a
+ * wall or blocked square keeps out of the area's line of effect are left out. Sorted by row,
+ * then column.
+ */
+export function zoneSquares(
+  encounter: Encounter,
+  zoneId: string,
+  ctx: EncounterContext,
+): GridPoint[] | null {
+  const z = encounter.zones.find((x) => x.id === zoneId) ?? fail(`No zone '${zoneId}'`);
+  const area = zoneArea(encounter, ctx, z);
+  if (!area) return null;
+  return [...area]
+    .map((k) => {
+      const [x, y] = k.split(",").map(Number);
+      return { x: x as number, y: y as number };
+    })
+    .sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
 export function zoneArea(e: Encounter, ctx: EncounterContext, z: Zone): Set<string> | null {
   // A wall spell's zone: its squares, given when it was placed.
   if (z.squares) return new Set(z.squares.map(squareKey));

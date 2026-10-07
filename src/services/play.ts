@@ -26,6 +26,7 @@ import { type Combatant, conditionRolls } from "../rules/combatant";
 import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currency";
 import { type Defenses, isBloodied, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
+import { spaceForSize } from "../rules/grid";
 import { mathRng, type Rng } from "../rules/rng";
 import {
   type CarriedItem,
@@ -344,6 +345,7 @@ export function combatantFromCharacter(
     legendary_actions: [],
     legendary_resistance: 0,
     size: sheet.size,
+    space: spaceForSize(sheet.size),
     rules: sheet.rules,
     proficient_skills: sheet.skills.flatMap((line) => (line.proficient_from ? [line.skill] : [])),
     spell_damage: sheet.spell_damage,

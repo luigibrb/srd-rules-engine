@@ -36,6 +36,7 @@ import {
   takeDamage,
 } from "./damage";
 import { abilityModifier } from "./dice";
+import { spaceForSize } from "./grid";
 import { mathRng, type Rng } from "./rng";
 import type { AttackLine } from "./sheet";
 import { parseRange } from "./weapons";
@@ -103,6 +104,8 @@ export interface Combatant {
   readonly legendary_resistance: number;
   /** Its size, lowercase (`medium`; the first of a stat block's "Medium or Small"), if known. */
   readonly size: string | null;
+  /** Squares on a side of its space on the grid (`spaceForSize`: Large 2, Huge 3…). */
+  readonly space: number;
   /** Rules in code its features switch on (`evasion`, `reliable_talent`, `potent_cantrip`). */
   readonly rules: readonly FeatureRule[];
   /** Skills it's proficient in (Reliable Talent). */
@@ -840,6 +843,7 @@ export function combatantFromSnapshot(character: Character): Combatant {
     legendary_actions: [],
     legendary_resistance: 0,
     size: null,
+    space: 1,
     rules: [],
     proficient_skills: [],
     spell_damage: [],
@@ -1054,6 +1058,7 @@ export function combatantFromMonster(
     legendary_actions: legendaryActions,
     legendary_resistance: resistanceLeft,
     size: monster.size.split(" ")[0]?.toLowerCase() || null,
+    space: spaceForSize(monster.size.split(" ")[0]),
     // The Assassin's Evasion trait works like the Rogue's feature.
     rules: monster.traits.some((t) => t.name === "Evasion") ? ["evasion"] : [],
     proficient_skills: Object.keys(monster.skills),

@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- A creature's space on the grid: `Combatant.space` (squares on a side: Large 2, Huge 3,
+  Gargantuan 4, otherwise 1) and `spaceForSize(size)`.
+- `zoneSquares(encounter, zoneId, ctx)`: the squares a zone covers now, an Emanation's moving
+  with its creature and sized from its space.
 - Bloodied: `isBloodied(hp, maxHp)`, `Combatant.bloodied` and `computePlaySheet(...).play.hp.bloodied`
   (half the Hit Point maximum or fewer, 0 included; Temporary Hit Points don't count).
 - Exploring: outside a fight (`round: 0`) a `move` has no limit, and its note and
