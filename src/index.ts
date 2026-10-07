@@ -465,6 +465,7 @@ export {
   combatantFromCharacter,
   computePlaySheet,
   createState,
+  magicItemBases,
   PlayError,
   type PlaySheet,
   playBuild,

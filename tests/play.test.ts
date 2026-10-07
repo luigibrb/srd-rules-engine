@@ -6,6 +6,7 @@ import {
   computePlaySheet,
   createBuild,
   createState,
+  magicItemBases,
   type PlayAction,
   PlayError,
   parseState,
@@ -399,6 +400,50 @@ describe("magic items", () => {
     expect(r.state.currency).toMatchObject({ gp: state.currency.gp - 5, sp: 30 });
     expect(() => act(fighter, state, { type: "adjust_currency", changes: { pp: -1 } })).toThrow(
       /Not enough PP/,
+    );
+  });
+});
+
+describe("which items a magic item can be made from", () => {
+  const sorted = (ids: string[]) => [...ids].sort();
+
+  it("Weapon, +1: every weapon; Vorpal Sword: its four swords; Trident of Fish Command: one", () => {
+    expect(sorted(magicItemBases(catalog, "weapon-1"))).toEqual(
+      sorted(Object.keys(catalog.weapons)),
+    );
+    expect(sorted(magicItemBases(catalog, "vorpal-sword"))).toEqual([
+      "glaive",
+      "greatsword",
+      "longsword",
+      "scimitar",
+    ]);
+    expect(magicItemBases(catalog, "trident-of-fish-command")).toEqual(["trident"]);
+  });
+
+  it("Flame Tongue: melee weapons only; ammunition: the five kinds; a shield; none for wondrous items", () => {
+    const melee = magicItemBases(catalog, "flame-tongue");
+    expect(melee).toContain("longsword");
+    expect(melee).not.toContain("longbow");
+    expect(sorted(magicItemBases(catalog, "ammunition-1"))).toEqual([
+      "arrow",
+      "blowgun-needle",
+      "crossbow-bolt",
+      "firearm-bullet",
+      "sling-bullet",
+    ]);
+    expect(magicItemBases(catalog, "animated-shield")).toEqual(["shield"]);
+    expect(magicItemBases(catalog, "bag-of-holding")).toEqual([]);
+    expect(magicItemBases(catalog, "nope")).toEqual([]);
+  });
+
+  it("add_item accepts exactly those", () => {
+    const b = fighterBuild();
+    const s = createState(b, catalog);
+    expect(() =>
+      act(b, s, { type: "add_item", item: "ammunition-1", base: "arrow" }),
+    ).not.toThrow();
+    expect(() => act(b, s, { type: "add_item", item: "ammunition-1", base: "rope" })).toThrow(
+      PlayError,
     );
   });
 });

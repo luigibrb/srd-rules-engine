@@ -68,6 +68,7 @@ type Gear = {
   cost?: string;
   weight?: string;
   bundle?: number;
+  ammunition?: boolean;
 };
 const generated: Gear[] = [];
 for (const [name, weight, cost] of table("Adventuring Gear")) {
@@ -95,6 +96,7 @@ for (const [name, amount, , weight, cost] of table("Ammunition")) {
     cost: cost as string,
     weight: weight as string,
     bundle: Number(amount),
+    ammunition: true,
   });
 }
 for (const [title, prefix] of [
@@ -136,6 +138,7 @@ for (const old of existing) {
     ...(source?.cost ? { cost: source.cost } : {}),
     ...(source?.weight ? { weight: source.weight } : {}),
     ...(source?.bundle ? { bundle: source.bundle } : {}),
+    ...(made?.ammunition ? { ammunition: true } : {}),
     ...(made?.description && !old.description ? { description: made.description } : {}),
   });
   byId.delete(old.id);

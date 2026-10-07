@@ -7,6 +7,7 @@
   cost: 1 GP
   weight: 1 lb.
   bundle: 20
+  ammunition: true
 - id: book-history
   name: Book (history)
   cost: 25 GP
@@ -204,6 +205,7 @@
   cost: 1 GP
   weight: 1 lb.
   bundle: 50
+  ammunition: true
 - id: book
   name: Book
   description: A Book contains fiction or nonfiction. If you consult an accurate nonfiction Book about
@@ -275,6 +277,7 @@
   cost: 1 GP
   weight: 1½ lb.
   bundle: 20
+  ammunition: true
 - id: crossbow-bolt-case
   name: Crossbow Bolt Case
   description: A Crossbow Bolt Case holds up to 20 Bolts.
@@ -309,6 +312,7 @@
   cost: 3 GP
   weight: 2 lb.
   bundle: 10
+  ammunition: true
 - id: flask
   name: Flask
   description: A Flask holds up to 1 pint.
@@ -505,6 +509,7 @@
   cost: 4 CP
   weight: 1½ lb.
   bundle: 20
+  ammunition: true
 - id: spyglass
   name: Spyglass
   description: Objects viewed through a Spyglass are magnified to twice their size.

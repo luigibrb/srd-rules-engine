@@ -604,13 +604,22 @@ export function reconcileState(
   return { state: s, notes };
 }
 
-/** Which mundane items a magic item can be made from. */
-export function allowedBases(catalog: Catalog, magic: MagicItemDef): string[] {
+/**
+ * The catalog items a magic item can be made from (its `base`: kind, categories, `ids`,
+ * `except`, melee or ranged): weapon or armor ids, shields, or ammunition from the gear. Empty
+ * for a magic item with no base (a wondrous item) or an unknown id.
+ */
+export function magicItemBases(catalog: Catalog, magicItemId: string): string[] {
+  const magic = lookup(catalog.magic_items, magicItemId);
+  return magic ? allowedBases(catalog, magic) : [];
+}
+
+function allowedBases(catalog: Catalog, magic: MagicItemDef): string[] {
   const base = magic.base;
   if (!base) return [];
-  const fits = (id: string, category: string) =>
+  const fits = (id: string, category: string | null) =>
     (!base.ids || base.ids.includes(id)) &&
-    (!base.categories || base.categories.includes(category)) &&
+    (!base.categories || (category !== null && base.categories.includes(category))) &&
     !base.except.includes(id);
   switch (base.kind) {
     case "weapon":
@@ -623,10 +632,12 @@ export function allowedBases(catalog: Catalog, magic: MagicItemDef): string[] {
         .map((a) => a.id);
     case "shield":
       return Object.values(catalog.armor)
-        .filter((a) => a.category === "shield")
+        .filter((a) => a.category === "shield" && fits(a.id, null))
         .map((a) => a.id);
     case "ammunition":
-      return Object.keys(catalog.gear);
+      return Object.values(catalog.gear)
+        .filter((g) => g.ammunition && fits(g.id, null))
+        .map((g) => g.id);
   }
 }
 

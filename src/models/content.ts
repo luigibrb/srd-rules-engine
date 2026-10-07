@@ -920,6 +920,8 @@ export const GearSchema = z.strictObject({
   cost: z.string().default(""),
   weight: z.string().default(""),
   bundle: z.int().min(1).default(1),
+  /** Ammunition (SRD "Ammunition" table): what a magic item of kind `ammunition` is made from. */
+  ammunition: z.boolean().default(false),
 });
 export type GearDef = z.infer<typeof GearSchema>;
 

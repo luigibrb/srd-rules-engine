@@ -284,7 +284,8 @@ marked `rest_change` (prepared spells, Weapon Mastery…). The state stores only
   Equipment") in gold, silver and copper; `price` sets another (a deal, a magic item). Carried
   weight counts gear and tools too (a bundle's weight shared by its items).
 - **Items.** An inventory entry points at a catalog item; magic items made from a mundane one
-  store its `base` (Weapon, +1 → `longsword`) and kinds a `variant`. A magic item is *active*
+  store its `base` (Weapon, +1 → `longsword`; `magicItemBases` lists the allowed ones) and kinds
+  a `variant`. A magic item is *active*
   when worn/held (or carried, per `active_when`) and attuned if required; active items become
   sources, so their grants use the same machinery as feats. A magic weapon's bonus applies to
   its attack line whenever attunement allows (you wield it to attack). With a play context, AC

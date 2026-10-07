@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `magicItemBases(catalog, magicItemId)`: the catalog items a magic item can be made from. Gear has
+  `ammunition` (the SRD Ammunition table's five kinds).
 - `playBuild(build, state, catalog)` is public: the build as played today (after-a-rest picks
   overlaid), to list those choices' options as the play action `set_choice` judges them.
 - Attack options list the Cunning Strike and Brutal Strike effects the attacker has
@@ -139,6 +141,8 @@ migrated when it's loaded.
   `advantage_aura`, read by `import-srd-monsters.ts`.
 
 ### Changed
+- An ammunition magic item (Ammunition, +1) can only be made from ammunition, not from any gear;
+  a shield's base respects its `ids` and `except`.
 - Carried weight counts gear and tools.
 - Leaving an enemy's reach is judged at every step of a move, not only from its start and end.
 - **Breaking:** `srdCatalog` and `srdPack` moved from `srd-rules-engine` to
