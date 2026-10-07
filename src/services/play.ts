@@ -120,7 +120,10 @@ export interface PlaySheet extends DerivedSheet {
   };
 }
 
-/** The build as played today: rest-changeable choices use the state's picks. */
+/**
+ * The build as played today: rest-changeable choices use the state's picks. Evaluate it (or
+ * `resolve` it) for those choices' options as `set_choice` will judge them.
+ */
 export function playBuild(
   build: CharacterBuild,
   state: CharacterState,

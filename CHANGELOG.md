@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `playBuild(build, state, catalog)` is public: the build as played today (after-a-rest picks
+  overlaid), to list those choices' options as the play action `set_choice` judges them.
 - Attack options list the Cunning Strike and Brutal Strike effects the attacker has
   (`OptionEntry.strikes`, `StrikeOptionSchema`): cost, a ready action, and whether the engine
   would take it now, with the reason.

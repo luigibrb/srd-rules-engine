@@ -467,6 +467,7 @@ export {
   createState,
   PlayError,
   type PlaySheet,
+  playBuild,
   reconcileState,
   startingEquipment,
   validateState,

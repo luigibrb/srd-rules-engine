@@ -9,6 +9,7 @@ import {
   type PlayAction,
   PlayError,
   parseState,
+  playBuild,
   reconcileState,
   resolve,
   scriptedRng,
@@ -427,6 +428,28 @@ describe("today's prepared spells", () => {
     expect(act(c, r.state, { type: "reset_choice", key }).sheet.spells.map((s) => s.id)).toContain(
       built.at(-1),
     );
+  });
+
+  it("today's options come from the build as played (playBuild), as set_choice judges them", () => {
+    const today = [...built.slice(0, -1), third[0] as string];
+    const s = act(c, state, { type: "set_choice", key, values: today }).state;
+    const played = resolve(playBuild(c, s, catalog), catalog);
+    const pool = played.choice(key);
+    if (!pool) throw new Error("no prepared pool");
+    expect(played.selected(pool)).toEqual(today);
+    // Each option judged today: an unavailable one is refused, an available one accepted.
+    const options = played.options(pool);
+    const swap = (id: string) => [...today.slice(0, -1), id];
+    const open = options.find((o) => !o.unavailable && !today.includes(o.id));
+    const closed = options.find((o) => o.unavailable && !today.includes(o.id));
+    expect(() =>
+      act(c, s, { type: "set_choice", key, values: swap(open?.id as string) }),
+    ).not.toThrow();
+    expect(() =>
+      act(c, s, { type: "set_choice", key, values: swap(closed?.id as string) }),
+    ).toThrow(PlayError);
+    // Nothing picked today: the build itself.
+    expect(playBuild(c, state, catalog)).toBe(c);
   });
 
   it("are checked like the build's picks", () => {

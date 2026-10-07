@@ -268,7 +268,8 @@ marked `rest_change` (prepared spells, Weapon Mastery…). The state stores only
   `rest_change` choices); `computePlaySheet` computes the sheet from it with a `PlayContext`
   (carried items, active conditions, Exhaustion, active toggles), then adds the live `play`
   block. A rest-change pick is validated by running the builder's `setChoice` on the played
-  build, so it follows exactly the same rules as a build pick.
+  build, so it follows exactly the same rules as a build pick; a UI lists those choices' options
+  by resolving the played build (`playBuild` is public), so they match what `set_choice` accepts.
 - **Starting equipment.** `createState` puts the build's starting equipment (the armor and
   Shield the sheet picks worn) and gold in the inventory and sets `starting_equipment: true`. A
   state made before the build had its equipment (an app creating the state with a new, empty
