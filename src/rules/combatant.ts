@@ -326,11 +326,12 @@ export interface AttackModeOptions {
 
 /**
  * An attack roll's mode from the attacker's and the target's conditions, and whether a hit is a
- * Critical Hit (a Paralyzed or Unconscious target within 5 feet).
+ * Critical Hit (a Paralyzed or Unconscious target within 5 feet). Without a target (`null`), the
+ * attacker's side only.
  */
 export function attackMode(
   attacker: Combatant,
-  target: Combatant,
+  target: Combatant | null,
   {
     mode = "normal",
     within_5ft,
@@ -349,22 +350,25 @@ export function attackMode(
   if (ability === "str" && attacker.advantages.includes("attack.str")) {
     reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
   }
-  if (target.advantages.includes("attacked")) {
+  if (target?.advantages.includes("attacked")) {
     reasons.push({ mode: "advantage", reason: `${target.name} attacks recklessly` });
   }
   for (const c of attacker.condition_rolls.attack_rolls) {
     if (c.except_against_source && against_source_of.includes(c.id)) continue;
     reasons.push({ mode: c.mode, reason: `${attacker.name} is ${c.condition}` });
   }
-  const against = within_5ft
-    ? target.condition_rolls.attacked
-    : target.condition_rolls.attacked_beyond_5ft;
-  const where = within_5ft ? "within 5 ft" : "beyond 5 ft";
-  for (const c of against) {
-    reasons.push({ mode: c.mode, reason: `${target.name} is ${c.condition} (${where})` });
+  if (target) {
+    const against = within_5ft
+      ? target.condition_rolls.attacked
+      : target.condition_rolls.attacked_beyond_5ft;
+    const where = within_5ft ? "within 5 ft" : "beyond 5 ft";
+    for (const c of against) {
+      reasons.push({ mode: c.mode, reason: `${target.name} is ${c.condition} (${where})` });
+    }
   }
   const resolved = resolveMode(mode, reasons);
-  const critical_on_hit = within_5ft && target.condition_rolls.critical_within_5ft.length > 0;
+  const critical_on_hit =
+    target !== null && within_5ft && target.condition_rolls.critical_within_5ft.length > 0;
   return { ...resolved, critical_on_hit };
 }
 
@@ -679,13 +683,7 @@ export function rollSavingThrow(
       inspiration: null,
     };
   }
-  const reasons: ModeReason[] = [];
-  if (combatant.advantages.includes(`save.${ability}`)) {
-    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
-  }
-  const hindered = combatant.condition_rolls.save_disadvantage[ability];
-  if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
-  const resolved = resolveMode(mode, reasons);
+  const resolved = resolveMode(mode, saveModes(combatant, ability));
   let roll = rollD20({ mode: resolved.mode, rng });
   let total = roll.d20 + bonus;
   const what = `${ABILITY_NAMES[ability]} saving throw`;
@@ -716,6 +714,163 @@ export function rollSavingThrow(
     legendary_resistance: legendary,
     reasons: resolved.reasons,
     inspiration,
+  };
+}
+
+/** Advantage or Disadvantage on `combatant`'s saving throws with `ability` (features, conditions). */
+function saveModes(combatant: Combatant, ability: Ability): ModeReason[] {
+  const reasons: ModeReason[] = [];
+  if (combatant.advantages.includes(`save.${ability}`)) {
+    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
+  }
+  const hindered = combatant.condition_rolls.save_disadvantage[ability];
+  if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
+  return reasons;
+}
+
+/** A D20 Test to roll on its own: a check (skill or ability), a saving throw, an attack roll. */
+export type D20TestRequest =
+  | { skill: Skill }
+  | { ability: Ability }
+  | { save: Ability }
+  | { attack: string };
+
+/** A D20 Test rolled on its own (`rollD20Test`). */
+export interface D20TestResult {
+  readonly kind: "check" | "save" | "attack";
+  readonly name: string;
+  /** `Stealth check`, `Dexterity saving throw`, `Longsword attack roll`. */
+  readonly label: string;
+  /** The ability rolled with (`null`: an attack line with none). */
+  readonly ability: Ability | null;
+  readonly skill: string | null;
+  readonly attack: string | null;
+  /** The DC, or the AC for an attack; `null`: none given. */
+  readonly dc: number | null;
+  readonly bonus: number;
+  readonly roll: D20Roll;
+  readonly total: number;
+  /** Against `dc`; `null` without one. */
+  readonly success: boolean | null;
+  /** A save failed outright by a condition (Paralyzed: Strength and Dexterity). */
+  readonly automatic_failure: string | null;
+  /** An attack's natural roll in its Critical Hit range (or a natural 1: `critical_miss`). */
+  readonly critical: boolean;
+  readonly critical_miss: boolean;
+  /** Why it has Advantage or Disadvantage, Reliable Talent… */
+  readonly reasons: readonly string[];
+}
+
+/**
+ * A D20 Test for a sheet's roll button (SRD "D20 Tests"): an ability check, a saving throw or an
+ * attack roll with no target, with the Advantage and Disadvantage the combatant's features and
+ * conditions give, combined with `mode`. Nothing is spent: no Indomitable, Legendary Resistance
+ * or Bardic Inspiration is offered. An attack against `dc` (the target's AC) hits on a natural 20
+ * or its Critical Hit range and misses on a natural 1.
+ */
+export function rollD20Test(
+  combatant: Combatant,
+  request: D20TestRequest,
+  {
+    rng = mathRng,
+    mode = "normal",
+    dc = null,
+  }: { rng?: Rng; mode?: RollMode; dc?: number | null } = {},
+): D20TestResult {
+  const never: Decide = () => false;
+  const none = { attack: null, automatic_failure: null, critical: false, critical_miss: false };
+  if ("skill" in request || "ability" in request) {
+    const check = rollAbilityCheck(combatant, request, dc, { rng, mode, decide: never });
+    const label = check.skill ? skillName(check.skill as Skill) : ABILITY_NAMES[check.ability];
+    return {
+      ...none,
+      kind: "check",
+      name: combatant.name,
+      label: `${label} check`,
+      ability: check.ability,
+      skill: check.skill,
+      dc,
+      bonus: check.bonus,
+      roll: check.roll,
+      total: check.total,
+      success: check.success,
+      reasons: check.reasons,
+    };
+  }
+  if ("save" in request) {
+    const ability = request.save;
+    const label = `${ABILITY_NAMES[ability]} saving throw`;
+    const base = { ...none, kind: "save", name: combatant.name, label, ability, skill: null, dc };
+    if (dc !== null) {
+      const save = rollSavingThrow(combatant, ability, dc, { rng, mode, decide: never });
+      return {
+        ...base,
+        kind: "save",
+        bonus: save.bonus,
+        roll: save.roll,
+        total: save.total,
+        success: save.success,
+        automatic_failure: save.automatic_failure,
+        reasons: save.reasons,
+      };
+    }
+    const bonus = combatant.saving_throws[ability];
+    const failing = combatant.condition_rolls.fail_saves[ability];
+    if (failing) {
+      const roll = { rolls: [], d20: 0, mode: "normal" as const };
+      return {
+        ...base,
+        kind: "save",
+        bonus,
+        roll,
+        total: 0,
+        success: false,
+        automatic_failure: failing,
+        reasons: [],
+      };
+    }
+    const resolved = resolveMode(mode, saveModes(combatant, ability));
+    const roll = rollD20({ mode: resolved.mode, rng });
+    return {
+      ...base,
+      kind: "save",
+      bonus,
+      roll,
+      total: roll.d20 + bonus,
+      success: null,
+      reasons: resolved.reasons,
+    };
+  }
+  const line = combatant.attacks.find((a) => a.name === request.attack);
+  if (!line) {
+    const known = combatant.attacks.map((a) => a.name).join(", ");
+    throw new RangeError(`${combatant.name} has no attack '${request.attack}' (${known})`);
+  }
+  const moded = attackMode(combatant, null, {
+    mode,
+    within_5ft: line.kind === "melee",
+    ability: line.ability,
+  });
+  const roll = rollD20({ mode: moded.mode, rng });
+  const total = roll.d20 + line.attack_bonus;
+  const critical_miss = roll.d20 === 1;
+  const critical = !critical_miss && roll.d20 >= Math.min(20, combatant.critical_hit_on);
+  return {
+    kind: "attack",
+    name: combatant.name,
+    label: `${line.name} attack roll`,
+    ability: line.ability,
+    skill: null,
+    attack: line.name,
+    dc,
+    bonus: line.attack_bonus,
+    roll,
+    total,
+    success: dc === null ? null : critical || (!critical_miss && total >= dc),
+    automatic_failure: null,
+    critical,
+    critical_miss,
+    reasons: moded.reasons,
   };
 }
 

@@ -367,6 +367,13 @@ skills, else its ability modifier) or the ability's (`ability_checks` on the she
 (Poisoned, Frightened: Disadvantage, from the condition field `ability_checks`) combine as for
 other rolls; without a DC, `success` is `null` (a contest, or the GM decides).
 
+**Rolls on their own.** `rollD20Test(combatant, { skill } | { ability } | { save } | { attack },
+{ dc, mode, rng })` is a sheet's roll button: a check, a saving throw (a DC optional) or an
+attack roll with no target (the attacker's side of `attackMode` only; `dc` is an AC), each with
+the modes its features and conditions give and the reasons. It offers nothing to spend
+(Indomitable, Legendary Resistance, Bardic Inspiration: no `decide`). `rollCheck(build, state,
+catalog, …)` rolls it for a character from its play state.
+
 ### Casting spells
 
 Catalog spells can carry `mechanics` (attack or save, damage by type with a flat bonus,

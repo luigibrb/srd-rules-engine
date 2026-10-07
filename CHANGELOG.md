@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Rolls outside an encounter: `rollCheck(build, state, catalog, request, { dc, mode, rng })` and
+  `rollD20Test(combatant, request, …)` roll a check, a saving throw or an attack roll with no
+  target, with Advantage and Disadvantage from features and conditions and the reasons.
+  `attackMode` takes `null` for no target.
 - `magicItemBases(catalog, magicItemId)`: the catalog items a magic item can be made from. Gear has
   `ammunition` (the SRD Ammunition table's five kinds).
 - `playBuild(build, state, catalog)` is public: the build as played today (after-a-rest picks

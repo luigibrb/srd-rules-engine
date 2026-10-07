@@ -22,7 +22,14 @@ import {
 } from "../models/state";
 import { type Resolution, resolve } from "../rules/build-resolution";
 import { choiceIssues } from "../rules/build-validation";
-import { type Combatant, conditionRolls } from "../rules/combatant";
+import {
+  type Combatant,
+  conditionRolls,
+  type D20TestRequest,
+  type D20TestResult,
+  type RollMode,
+  rollD20Test,
+} from "../rules/combatant";
 import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currency";
 import { type Defenses, isBloodied, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
@@ -305,6 +312,21 @@ function characterDefenses(
     ? [...sheet.resistances, "all"]
     : [...sheet.resistances];
   return { resistances, vulnerabilities: [], immunities: [] };
+}
+
+/**
+ * A character's roll outside an encounter (a sheet's roll button): an ability check, a saving
+ * throw, or an attack roll on one of its attack lines, from its build and play state, with the
+ * Advantage and Disadvantage its conditions and features give (`rollD20Test`). Nothing is spent.
+ */
+export function rollCheck(
+  build: CharacterBuild,
+  state: CharacterState,
+  catalog: Catalog,
+  request: D20TestRequest,
+  options: { rng?: Rng; mode?: RollMode; dc?: number | null } = {},
+): D20TestResult {
+  return rollD20Test(combatantFromCharacter(build, state, catalog), request, options);
 }
 
 /**

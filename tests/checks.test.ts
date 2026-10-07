@@ -15,9 +15,10 @@ import {
   type MonsterDef,
   type PlayAction,
   rollAbilityCheck,
+  rollCheck,
   scriptedRng,
 } from "../src/index";
-import { autocomplete, catalog, classBuild, fighterBuild } from "./helpers";
+import { autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 const fighter = fighterBuild(); // Brakka: Str 17, Perception proficient (Skillful)
 const state = (build: CharacterBuild, ...actions: PlayAction[]) => {
@@ -25,6 +26,91 @@ const state = (build: CharacterBuild, ...actions: PlayAction[]) => {
   for (const a of actions) s = applyAction(build, s, catalog, a).state;
   return s;
 };
+
+// SRD 5.2.1 "D20 Tests", Poisoned (Disadvantage on attack rolls and ability checks), Rage
+// (Advantage on Strength checks and saves), Reckless Attack, Paralyzed (fails Str and Dex saves).
+describe("a character's rolls outside an encounter (rollCheck)", () => {
+  const poisoned = state(fighter, { type: "add_condition", condition: "poisoned" });
+
+  it("a Poisoned character's check has Disadvantage and says why", () => {
+    const r = rollCheck(
+      fighter,
+      poisoned,
+      catalog,
+      { skill: "perception" },
+      {
+        rng: scriptedRng([15, 4]),
+      },
+    );
+    expect(r).toMatchObject({ kind: "check", label: "Perception check", total: 4 + r.bonus });
+    expect(r.roll).toEqual({ rolls: [15, 4], d20: 4, mode: "disadvantage" });
+    expect(r.reasons).toEqual(["Disadvantage: Brakka is Poisoned"]);
+    // A DC gives success; asked Advantage cancels the Disadvantage.
+    const even = rollCheck(
+      fighter,
+      poisoned,
+      catalog,
+      { ability: "str" },
+      {
+        rng: scriptedRng([12]),
+        mode: "advantage",
+        dc: 15,
+      },
+    );
+    expect(even).toMatchObject({ total: 15, success: true });
+    expect(even.roll.mode).toBe("normal");
+  });
+
+  it("a raging Barbarian's Strength check and save have Advantage; Reckless Attack its Strength attacks", () => {
+    const barbarian = levelUpIn(
+      autocomplete(classBuild("barbarian", { name: "Ulla" })),
+      "barbarian",
+      1,
+    );
+    const raging = state(
+      barbarian,
+      { type: "activate", key: "barbarian:rage" },
+      { type: "activate", key: "barbarian:reckless-attack" },
+    );
+    const roll = (request: Parameters<typeof rollCheck>[3]) =>
+      rollCheck(barbarian, raging, catalog, request, { rng: scriptedRng([3, 17]) });
+    expect(roll({ ability: "str" }).roll.mode).toBe("advantage");
+    expect(roll({ save: "str" })).toMatchObject({
+      kind: "save",
+      success: null,
+      total: 17 + roll({ save: "str" }).bonus,
+    });
+    expect(roll({ ability: "dex" }).roll.mode).toBe("normal");
+    const axe = roll({ attack: "Greataxe" });
+    expect(axe).toMatchObject({ kind: "attack", label: "Greataxe attack roll", success: null });
+    expect(axe.roll.mode).toBe("advantage");
+  });
+
+  it("saves: a Paralyzed character fails Dexterity outright; attacks against an AC", () => {
+    const paralyzed = state(fighter, { type: "add_condition", condition: "paralyzed" });
+    expect(rollCheck(fighter, paralyzed, catalog, { save: "dex" })).toMatchObject({
+      success: false,
+      automatic_failure: "Paralyzed",
+    });
+    const hit = (d20: number, ac: number) =>
+      rollCheck(
+        fighter,
+        poisoned,
+        catalog,
+        { attack: "Greatsword" },
+        {
+          rng: scriptedRng([d20, d20]),
+          dc: ac,
+        },
+      );
+    expect(hit(20, 99)).toMatchObject({ success: true, critical: true });
+    expect(hit(1, 1)).toMatchObject({ success: false, critical_miss: true });
+    expect(hit(1, 1).reasons).toEqual(["Disadvantage: Brakka is Poisoned"]);
+    expect(() => rollCheck(fighter, poisoned, catalog, { attack: "Wand" })).toThrow(
+      "Brakka has no attack 'Wand'",
+    );
+  });
+});
 
 describe("the sheet's ability check bonuses", () => {
   it("are the modifiers, less 2 per Exhaustion level", () => {
