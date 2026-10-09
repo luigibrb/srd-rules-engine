@@ -66,6 +66,13 @@ describe("setting up", () => {
     expect(notes).toContain("Goblin Warrior 2 joins with 10 HP.");
   });
 
+  it("refuses an action it doesn't know", () => {
+    const bogus = { type: "bogus" } as unknown as EncounterAction;
+    expect(() => applyEncounterAction(createEncounter(), bogus, { catalog })).toThrow(
+      "Unknown action 'bogus'",
+    );
+  });
+
   it("rolls a monster's Hit Dice when asked", () => {
     const { encounter } = run(
       createEncounter(),

@@ -13,11 +13,13 @@ import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
 import { EncounterActionSchema, EncounterSchema } from "../models/encounter";
+import type { Message } from "../models/messages";
 import { type CharacterState, CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { castSpell } from "../rules/casting";
 import { abilityScore, savingThrow } from "../rules/combat";
 import { makeAttack, ROLL_MODES } from "../rules/combatant";
 import { abilityModifier, roll } from "../rules/dice";
+import { texts } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import {
   BuildError,
@@ -371,13 +373,13 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         const req = ApplyRequest.parse(body);
         const build = parseBuild(req.build);
         let state = req.state;
-        const notes: string[] = [];
+        const messages: Message[] = [];
         for (const action of Array.isArray(req.action) ? req.action : [req.action]) {
           const result = applyAction(build, state, getCatalog(), action, { rng });
           state = result.state;
-          notes.push(...result.notes);
+          messages.push(...result.messages);
         }
-        return { state, notes };
+        return { state, notes: texts(messages), messages };
       },
     },
     {
@@ -402,14 +404,21 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           if (e instanceof RangeError) throw new PlayError([e.message]);
           throw e;
         }
-        if (!result.hit) return { result, target_state: req.target.state, notes: [] };
+        if (!result.hit) {
+          return { result, target_state: req.target.state, notes: [], messages: [] };
+        }
         const action = {
           type: "damage" as const,
           instances: [...result.instances],
           critical: result.critical_hit,
         };
         const applied = applyAction(targetBuild, req.target.state, catalog, action, { rng });
-        return { result, target_state: applied.state, notes: applied.notes };
+        return {
+          result,
+          target_state: applied.state,
+          notes: applied.notes,
+          messages: applied.messages,
+        };
       },
     },
     {
@@ -443,12 +452,12 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           if (e instanceof RangeError) throw new PlayError([e.message]);
           throw e;
         }
-        const notes = [...result.notes];
+        const messages = [...result.messages];
         let casterState = req.caster.state;
         for (const action of result.caster_actions) {
           const applied = applyAction(casterBuild, casterState, catalog, action, { rng });
           casterState = applied.state;
-          notes.push(...applied.notes);
+          messages.push(...applied.messages);
         }
         const targetStates = targets.map((t) => t.state);
         for (const hit of result.targets) {
@@ -463,10 +472,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
               { rng },
             );
             targetStates[hit.target] = applied.state;
-            notes.push(...applied.notes);
+            messages.push(...applied.messages);
           }
         }
-        return { result, caster_state: casterState, target_states: targetStates, notes };
+        const notes = texts(messages);
+        return { result, caster_state: casterState, target_states: targetStates, notes, messages };
       },
     },
     {
@@ -481,7 +491,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         const characters = characterRefs(req.characters);
         let encounter = req.encounter;
         const states: Record<string, CharacterState> = {};
-        const notes: string[] = [];
+        const messages: Message[] = [];
         const actions = Array.isArray(req.action) ? req.action : [req.action];
         let applied = 0;
         // Each action applied, with the dice it drew (an encounter history's steps) and events.
@@ -493,17 +503,20 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           log.push({ action, rolls: result.rolls });
           events.push(...result.events);
           if (result.pending) {
-            notes.push(...result.notes);
-            return { encounter, states, notes, events, log, pending: result.pending, applied };
+            messages.push(...result.messages);
+            const notes = texts(messages);
+            const pending = result.pending;
+            return { encounter, states, notes, messages, events, log, pending, applied };
           }
           applied += 1;
           for (const [key, state] of Object.entries(result.states)) {
             states[key] = state;
             characters[key] = { build: (characters[key] as CharacterRef).build, state };
           }
-          notes.push(...result.notes);
+          messages.push(...result.messages);
         }
-        return { encounter, states, notes, events, log, pending: null, applied };
+        const notes = texts(messages);
+        return { encounter, states, notes, messages, events, log, pending: null, applied };
       },
     },
     {

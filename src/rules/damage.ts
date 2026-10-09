@@ -5,7 +5,9 @@
  * rules for Resistance, Temporary Hit Points, dropping to 0 and death live in one place.
  */
 
+import type { Message } from "../models/messages";
 import { parseDiceExpression, roll, signed } from "./dice";
+import { message, texts } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 /** One part of an attack's damage: `dice` (or none, for a fixed amount) + `bonus`, of a type. */
@@ -79,26 +81,27 @@ export interface Defenses {
 export function adjustDamage(
   instance: DamageInstance,
   defenses: Defenses = {},
-): { amount: number; notes: string[] } {
+): { amount: number; notes: string[]; messages: Message[] } {
   const type = instance.type?.toLowerCase() ?? null;
   const has = (list: readonly string[] = []) =>
     list.includes("all") || (type !== null && list.includes(type));
-  const label = type ?? "all damage";
+  const label = type ?? "all";
   const base = Math.max(0, Math.floor(instance.amount));
   if (has(defenses.immunities)) {
-    return { amount: 0, notes: base ? [`Immunity to ${label}: ${base} damage ignored.`] : [] };
+    const messages = base ? [message("damage.immunity", { type: label, amount: base })] : [];
+    return { amount: 0, notes: texts(messages), messages };
   }
   let amount = base;
-  const notes: string[] = [];
+  const messages: Message[] = [];
   if (has(defenses.resistances)) {
     amount = Math.floor(amount / 2);
-    notes.push(`Resistance to ${label}: ${base} damage halved to ${amount}.`);
+    messages.push(message("damage.resistance", { type: label, amount: base, after: amount }));
   }
   if (has(defenses.vulnerabilities)) {
-    notes.push(`Vulnerability to ${label}: ${amount} damage doubled to ${amount * 2}.`);
+    messages.push(message("damage.vulnerability", { type: label, amount, after: amount * 2 }));
     amount *= 2;
   }
-  return { amount, notes };
+  return { amount, notes: texts(messages), messages };
 }
 
 /** What a creature has before taking damage. */
@@ -125,6 +128,8 @@ export interface DamageResult {
   /** The Constitution save to keep Concentration, if the damage calls for one. */
   readonly concentration_dc: number | null;
   readonly notes: readonly string[];
+  /** `notes` as messages (for translation). */
+  readonly messages: readonly Message[];
 }
 
 /**
@@ -149,15 +154,15 @@ export function takeDamage(
   defenses: Defenses = {},
   { critical = false }: { critical?: boolean } = {},
 ): DamageResult {
-  const notes: string[] = [];
+  const messages: Message[] = [];
   let dealt = 0;
   for (const instance of instances) {
     const adjusted = adjustDamage(instance, defenses);
     dealt += adjusted.amount;
-    notes.push(...adjusted.notes);
+    messages.push(...adjusted.messages);
   }
   const absorbed = Math.min(vitals.temp, dealt);
-  if (absorbed) notes.push(`${absorbed} absorbed by Temporary Hit Points.`);
+  if (absorbed) messages.push(message("damage.absorbed", { amount: absorbed }));
   const rest = dealt - absorbed;
   const result = {
     dealt,
@@ -168,28 +173,21 @@ export function takeDamage(
     died: false,
     death_save_failures: 0,
     concentration_dc: rest > 0 ? Math.min(30, Math.max(10, Math.floor(rest / 2))) : null,
-    notes,
+  };
+  const done = (more: Partial<DamageResult>, last?: Message): DamageResult => {
+    const all = last ? [...messages, last] : messages;
+    return { ...result, ...more, notes: texts(all), messages: all };
   };
   if (vitals.hp === 0) {
-    if (rest >= vitals.max) {
-      notes.push("Damage at 0 HP equal to the Hit Point maximum: the character dies.");
-      return { ...result, died: true };
-    }
+    if (rest >= vitals.max) return done({ died: true }, message("damage.at_zero_dies"));
     if (rest > 0) {
-      notes.push(
-        `Damage at 0 HP: ${critical ? "two Death Saving Throw failures" : "a Death Saving Throw failure"}.`,
-      );
-      return { ...result, death_save_failures: critical ? 2 : 1 };
+      const failures = critical ? 2 : 1;
+      return done({ death_save_failures: failures }, message("damage.at_zero", { failures }));
     }
-    return result;
+    return done({});
   }
   const after = vitals.hp - rest;
-  if (after > 0) return { ...result, hp: after };
-  if (-after >= vitals.max) {
-    notes.push(
-      "Massive damage: the rest of the damage equals the Hit Point maximum. The character dies.",
-    );
-    return { ...result, hp: 0, died: true };
-  }
-  return { ...result, hp: 0, dropped_to_zero: true };
+  if (after > 0) return done({ hp: after });
+  if (-after >= vitals.max) return done({ hp: 0, died: true }, message("damage.massive"));
+  return done({ hp: 0, dropped_to_zero: true });
 }

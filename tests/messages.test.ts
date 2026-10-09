@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  type AttackResult,
+  applyAction,
   applyEncounterAction,
   createEncounter,
+  createState,
   type EncounterAction,
   formatMessage,
   MESSAGES_EN,
+  type Message,
+  type PlayAction,
   renderMessage,
   seededRng,
 } from "../src/index";
 import { message } from "../src/rules/messages";
-import { catalog } from "./helpers";
+import { catalog, fighterBuild } from "./helpers";
 
 describe("message templates", () => {
   it("values, plurals, selects and lists", () => {
@@ -86,5 +91,79 @@ describe("encounter results", () => {
     for (const template of Object.values(MESSAGES_EN)) {
       expect(() => formatMessage(template, {})).not.toThrow();
     }
+  });
+});
+
+describe("play results", () => {
+  it("every note is a coded message: damage, death saves, rests, shopping", () => {
+    const build = fighterBuild();
+    let state = createState(build, catalog);
+    const rng = seededRng(5);
+    const actions: PlayAction[] = [
+      { type: "set_temp_hp", amount: 3 },
+      { type: "damage", instances: [{ amount: 16, type: "slashing" }] },
+      { type: "death_save", roll: 12 },
+      { type: "heal", amount: 5 },
+      { type: "short_rest", hit_dice: [{ die: 10, roll: 6 }] },
+      { type: "adjust_currency", changes: { gp: 20 } },
+      { type: "buy", item: "rope", qty: 1 },
+      { type: "long_rest" },
+    ];
+    const codes: string[] = [];
+    for (const action of actions) {
+      const r = applyAction(build, state, catalog, action, { rng });
+      state = r.state;
+      expect(r.messages.map((m) => m.text)).toEqual(r.notes);
+      for (const m of r.messages) {
+        expect(m.code).not.toBe("text");
+        expect(renderMessage(m)).toBe(m.text);
+        codes.push(m.code);
+      }
+    }
+    expect(codes).toEqual([
+      "damage.absorbed",
+      "play.down",
+      "death_save.rolled",
+      "play.conscious",
+      "rest.hit_die",
+      "rest.short",
+      "shop.bought",
+      "rest.heroic_inspiration",
+      "rest.long",
+    ]);
+  });
+
+  it("roll reasons are messages too: the condition behind Advantage", () => {
+    let e = createEncounter();
+    const rng = seededRng(2);
+    for (const action of [
+      { type: "add_monster", monster: "ogre" },
+      { type: "add_monster", monster: "goblin-warrior", side: "party" },
+      { type: "set_initiative", id: "ogre", value: 20 },
+      { type: "set_initiative", id: "goblin-warrior", value: 10 },
+      { type: "start" },
+      {
+        type: "effects",
+        id: "goblin-warrior",
+        actions: [{ type: "add_condition", condition: "prone" }],
+      },
+    ] as EncounterAction[]) {
+      e = applyEncounterAction(e, action, { catalog, rng }).encounter;
+    }
+    const r = applyEncounterAction(
+      e,
+      { type: "attack", id: "ogre", target: "goblin-warrior", attack: "Greatclub" },
+      { catalog, rng },
+    );
+    const attack = r.result as AttackResult;
+    expect(attack.reason_messages.map((m) => m.text)).toEqual(attack.reasons);
+    expect(attack.reason_messages[0]?.code).toBe("roll.reason");
+    const it = {
+      "roll.reason": "{mode, select, advantage {Vantaggio} other {Svantaggio}}: {why}",
+      "reason.is_at": "{name} è {condition}",
+    };
+    expect(renderMessage(attack.reason_messages[0] as Message, it)).toBe(
+      "Vantaggio: Goblin Warrior è Prone",
+    );
   });
 });

@@ -169,6 +169,11 @@ export function message(
   };
 }
 
+/** The English texts of messages (a result's `notes`). */
+export function texts(messages: readonly Message[]): string[] {
+  return messages.map((m) => m.text);
+}
+
 /** A sentence not given a code yet (or free text from the content): code `text`. */
 export function plainMessage(text: string): Message {
   return { code: "text", params: { text }, text: checked(text) };

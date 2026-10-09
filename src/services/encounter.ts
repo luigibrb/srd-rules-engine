@@ -62,6 +62,7 @@ import {
   type Decision,
   type ModeReason,
   makeAttack,
+  modeReason,
   monsterSpells,
   type RollMode,
   resolveMode,
@@ -422,7 +423,7 @@ function run(
     }
     chars[c.character as string] = { build: ref.build, state: r.state };
     states[c.character as string] = r.state;
-    notes.push(...r.notes.map(plainMessage));
+    notes.push(...r.messages);
   };
   const concentrationOf = (c: EncounterCombatant): string | null =>
     c.monster !== null ? c.concentration : characterRef(ctx, c).state.concentration;
@@ -1151,13 +1152,16 @@ function run(
         fail(`${t.name} is ${distance} feet away: beyond ${line.name}'s range (${range.long} ft)`);
       }
       if (range && distance > range.normal) {
-        modes.push({
-          mode: "disadvantage",
-          reason: `${t.name} is beyond normal range (${range.normal} ft)`,
-        });
+        modes.push(
+          modeReason(
+            "disadvantage",
+            message("reason.beyond_range", { name: t.name, feet: range.normal }),
+          ),
+        );
       }
       const near = enemiesNear(c)[0];
-      if (near) modes.push({ mode: "disadvantage", reason: `${near.name} is within 5 ft` });
+      if (near)
+        modes.push(modeReason("disadvantage", message("reason.within_5ft", { name: near.name })));
     }
     ally_adjacent ??= e.combatants.some((x) => {
       if (x.id === c.id || x.id === t.id || x.defeated || !alliesOf(e, x.id, c)) return false;
@@ -1345,21 +1349,21 @@ function run(
     const help = e.helps.find(
       (h) => h.on === t.id && h.skill === null && h.by !== c.id && alliesOf(e, h.by, c),
     );
-    const modes: ModeReason[] = help
-      ? [{ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` }]
-      : [];
+    const modes: ModeReason[] = help ? [modeReason("advantage", helpReason(help.by, t))] : [];
     modes.push(...spatial.modes);
     // Vex: Advantage on c's next attack roll against t; Sap: Disadvantage on c's next attack roll.
     const vex = e.masteries.find((m) => m.mastery === "vex" && m.by === c.id && m.on === t.id);
     const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id);
-    if (vex) modes.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
-    if (sap) modes.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
+    if (vex) modes.push(modeReason("advantage", vexReason(c, t)));
+    if (sap) modes.push(modeReason("disadvantage", sapReason(sap.by)));
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
-    if (mark) modes.push({ mode: "advantage", reason: markReason(mark) });
+    if (mark) modes.push(modeReason("advantage", markReason(mark)));
     // Aura of Authority: Advantage on attack rolls.
     const authority = authorityOver(e, ctx, c);
-    if (authority) modes.push({ mode: "advantage", reason: `${authority}'s Aura of Authority` });
+    if (authority) {
+      modes.push(modeReason("advantage", message("reason.aura_of_authority", { name: authority })));
+    }
     // Hunter's Mark, Hex: extra damage when its caster hits the marked creature.
     const quarry = e.marks.filter(
       (m) => m.kind === "quarry" && m.by === c.id && m.on === t.id && m.damage,
@@ -1409,7 +1413,7 @@ function run(
       total: hit.total,
       ac: hit.target_ac,
       count: hit.reasons.length,
-      reasons: hit.reasons.map(plainMessage),
+      reasons: [...hit.reason_messages],
     });
     if (!hit.hit) {
       notes.push(
@@ -1832,7 +1836,7 @@ function run(
     // Positions: an enemy within 5 feet hinders ranged spell attacks; Prone targets within 5 ft.
     const near = enemiesNear(c)[0];
     const modes: ModeReason[] = near
-      ? [{ mode: "disadvantage", reason: `${near.name} is within 5 ft` }]
+      ? [modeReason("disadvantage", message("reason.within_5ft", { name: near.name }))]
       : [];
     const within_5ft = targets.map((t) => {
       const d = feetBetween(c, t);
@@ -1874,7 +1878,7 @@ function run(
       );
       if (help) {
         used.helps.push(help);
-        out.push({ mode: "advantage", reason: `${find(help.by).name} Helps against ${t.name}` });
+        out.push(modeReason("advantage", helpReason(help.by, t)));
       }
       const fresh = (m: MasteryMark) => !used.masteries.includes(m);
       const vex = e.masteries.find(
@@ -1882,19 +1886,19 @@ function run(
       );
       if (vex) {
         used.masteries.push(vex);
-        out.push({ mode: "advantage", reason: `Vex (${c.name}'s last hit on ${t.name})` });
+        out.push(modeReason("advantage", vexReason(c, t)));
       }
       const sap = e.masteries.find((m) => m.mastery === "sap" && m.on === c.id && fresh(m));
       if (sap) {
         used.masteries.push(sap);
-        out.push({ mode: "disadvantage", reason: `Sap (${find(sap.by).name}'s hit)` });
+        out.push(modeReason("disadvantage", sapReason(sap.by)));
       }
       const mark = e.marks.find(
         (m) => m.on === t.id && m.kind === "advantage_against" && !used.marks.includes(m),
       );
       if (mark) {
         used.marks.push(mark);
-        out.push({ mode: "advantage", reason: markReason(mark) });
+        out.push(modeReason("advantage", markReason(mark)));
       }
       return out;
     };
@@ -1920,7 +1924,7 @@ function run(
     const upcast = r.slot_level !== null && r.slot_level > spell.level ? r.slot_level : 0;
     notes.push(
       message("spell.cast", { name: c.name, spell: spell.name, level: upcast }),
-      ...r.notes.map(plainMessage),
+      ...r.messages,
     );
     // A held spell's slot was spent when it was readied.
     applyTo(
@@ -2227,10 +2231,15 @@ function run(
     }
   };
   /** Why an attack roll has Advantage from a spell's mark: `Guiding Bolt (Ilse's hit on Goblin)`. */
-  const markReason = (mark: SpellMark): string => {
+  const markReason = (mark: SpellMark): Message => {
     const by = e.combatants.find((x) => x.id === mark.by)?.name ?? mark.by;
-    return `${mark.label} (${by}'s hit on ${find(mark.on).name})`;
+    return message("reason.mark", { label: mark.label, name: by, target: find(mark.on).name });
   };
+  const helpReason = (by: string, t: EncounterCombatant): Message =>
+    message("reason.help_against", { name: find(by).name, target: t.name });
+  const vexReason = (c: EncounterCombatant, t: EncounterCombatant): Message =>
+    message("reason.vex", { name: c.name, target: t.name });
+  const sapReason = (by: string): Message => message("reason.sap", { name: find(by).name });
   const find = (id: string) =>
     e.combatants.find((c) => c.id === id) ?? fail(`No combatant '${id}' in the encounter`);
   const current = () => currentCombatant(e);
@@ -2302,7 +2311,7 @@ function run(
         total: check.total,
         dc: check.dc ?? "none",
         count: check.reasons.length,
-        reasons: check.reasons.map(plainMessage),
+        reasons: [...check.reason_messages],
         outcome: check.success === null ? "none" : check.success,
       }),
     );
@@ -2313,7 +2322,7 @@ function run(
     const help = skill ? e.helps.find((h) => h.on === c.id && h.skill === skill) : undefined;
     if (!help) return [];
     e.helps = e.helps.filter((h) => h !== help);
-    return [{ mode: "advantage", reason: `${find(help.by).name} Helps` }];
+    return [modeReason("advantage", message("reason.help", { name: find(help.by).name }))];
   };
 
   switch (action.type) {
@@ -2395,14 +2404,15 @@ function run(
           // Surprised: Disadvantage; conditions too (Invisible: Advantage, Incapacitated:
           // Disadvantage); features (Feral Instinct: Advantage).
           const view = encounterCombatant(e, c.id, ctx);
-          const reasons: ModeReason[] = view.condition_rolls.initiative.map((x) => ({
-            mode: x.mode,
-            reason: `${c.name} is ${x.condition}`,
-          }));
+          const reasons: ModeReason[] = view.condition_rolls.initiative.map((x) =>
+            modeReason(x.mode, message("reason.is", { name: c.name, condition: x.condition })),
+          );
           if (view.advantages.includes("initiative")) {
-            reasons.push({ mode: "advantage", reason: `${c.name}'s features` });
+            reasons.push(modeReason("advantage", message("reason.features", { name: c.name })));
           }
-          if (surprised.has(c.id)) reasons.push({ mode: "disadvantage", reason: "surprised" });
+          if (surprised.has(c.id)) {
+            reasons.push(modeReason("disadvantage", message("reason.surprised")));
+          }
           d20 = rollD20({ mode: resolveMode("normal", reasons).mode, rng }).d20;
           if (key !== null) groupRolls.set(key, d20);
         }
@@ -2854,7 +2864,7 @@ function run(
           total: check.total,
           dc: hold.escape_dc ?? "none",
           count: check.reasons.length,
-          reasons: check.reasons.map(plainMessage),
+          reasons: [...check.reason_messages],
           success: check.success === true,
           condition,
         }),
@@ -3602,6 +3612,8 @@ function run(
       }
       break;
     }
+    default:
+      fail(`Unknown action '${(action as { type: string }).type}'`);
   }
   if (releasing) {
     const c = find(releasing.id);
@@ -3805,9 +3817,9 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       c.hp = result.hp;
       c.temp_hp = result.temp;
       // Massive Damage and Death Saving Throws are for characters: a monster just dies at 0 HP.
-      const notes = result.notes
-        .filter((n) => !/^(Massive damage|Damage at 0 HP)/.test(n))
-        .map(plainMessage);
+      const notes = result.messages.filter(
+        (m) => !["damage.massive", "damage.at_zero", "damage.at_zero_dies"].includes(m.code),
+      );
       const regen = def.traits.find((t) => t.regeneration)?.regeneration;
       const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
       if (
@@ -4136,8 +4148,8 @@ export function mapWalls(e: Encounter): GridWall[] {
  */
 function paceModes(e: Encounter): ModeReason[] {
   if (e.round > 0) return [];
-  if (e.pace === "fast") return [{ mode: "disadvantage", reason: "a Fast travel pace" }];
-  if (e.pace === "slow") return [{ mode: "advantage", reason: "a Slow travel pace" }];
+  if (e.pace === "fast") return [modeReason("disadvantage", message("reason.pace_fast"))];
+  if (e.pace === "slow") return [modeReason("advantage", message("reason.pace_slow"))];
   return [];
 }
 

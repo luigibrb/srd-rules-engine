@@ -8,11 +8,13 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
-- Messages for translation: encounter results have `messages` next to `notes` (`Message`: `code`,
+- Messages for translation: results have `messages` next to `notes` (`Message`: `code`,
   `params`, English `text`), with the English templates in `MESSAGES_EN` and `renderMessage` /
-  `formatMessage` to render them with another catalog. Every sentence of the encounter's own
-  (attacks, spells, turns, moves, actions, monster traits) has a code; sentences from play
-  (healing, conditions, damage adjustments) and roll reasons still have code `text`.
+  `formatMessage` to render them with another catalog: encounter results, `applyAction` and
+  `reconcileState` (`PlayResult`), `takeDamage`, `adjustDamage`, `castSpell`, and the HTTP routes
+  that return notes. Attack, save and check results have `reason_messages` next to `reasons`
+  (`ModeReason` takes an optional `message`). Every sentence has a code except decision
+  questions (code `text` for now).
 - `unassignedValues(method, scores, rules, pool)` is public: the standard array's or rolled pool's
   values not assigned to an ability yet.
 - `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would
@@ -166,6 +168,9 @@ migrated when it's loaded.
   `SRD_PACK_ID` stays in the main entry.
 - `srd-rules fight`: `options` shows what's left this turn and every option, dimmed with the
   reason when the engine would refuse it.
+
+### Fixed
+- An encounter action of an unknown type did nothing; it's refused ("Unknown action").
 
 ## [0.1.0] - 2026-10-05
 

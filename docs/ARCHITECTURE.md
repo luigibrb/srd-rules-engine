@@ -730,18 +730,22 @@ engine's "out of reach"), or "No creature within N ft". The result has a Zod sch
 
 ### Messages (for translation)
 
-An encounter result's `messages` are its `notes` as data: `{ code, params, text }`, `text` being
-the English sentence rendered from `MESSAGES_EN[code]` (`src/messages/en.ts`). Templates are a
-small subset of ICU MessageFormat (`{x}`, `plural`, `select`, `list` joined by `,`, `+`, `;` or
-"or"); a parameter can be a
-nested message (a save's roll, an ability's name, the reason an effect ends), so a translation
-rephrases every part. An app renders them with its own catalog (`renderMessage(message,
-catalog)`, English `text` for a code it lacks). Content names in params (spells, conditions,
-damage types) stay as the catalog has them. Sentences not given a code yet have code `text`
-(`params.text`): the conversion goes on by area. Every encounter sentence has a code (`run()`
-collects `Message`s only, so the compiler holds it); play's notes (`applyAction`, `takeDamage`,
-`castSpell`), roll reasons (Advantage and its causes) and decision questions are next, then
-refusals and the builder. `message()` throws on a missing parameter or a message pasted into a string.
+A result's `messages` are its `notes` as data: `{ code, params, text }`, `text` being the English
+sentence rendered from `MESSAGES_EN[code]` (`src/messages/en.ts`). Encounter and play results,
+`takeDamage`, `adjustDamage` and `castSpell` have them; attack, save and check results have
+`reason_messages` next to `reasons` (each "Advantage: …" a `roll.reason` message around the
+cause, which a `ModeReason` carries as `message`). Templates are a small subset of ICU
+MessageFormat (`{x}`, `plural`, `select`, `list` joined by `,`, `+`, `;` or "or"); a parameter can
+be a nested message (a save's roll, an ability's name, the reason an effect ends), so a
+translation rephrases every part. An app renders them with its own catalog
+(`renderMessage(message, catalog)`, English `text` for a code it lacks). Content names in params
+(spells, conditions, damage types) stay as the catalog has them.
+
+Internally the services collect `Message`s, not strings (`run()` in the encounter,
+`applyAction`), and derive `notes` with `texts()`, so the compiler refuses an uncoded sentence.
+Code `text` (`params.text`) is left for decision questions, which come next with refusals, and
+for a reason an app passes as a plain string. `message()` throws on a missing parameter or a
+message pasted into a string.
 
 ### Events, refusal codes and undo
 

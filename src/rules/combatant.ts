@@ -24,6 +24,7 @@ import {
   type SpellArea,
   skillName,
 } from "../models/content";
+import type { Message } from "../models/messages";
 import {
   type DamageInstance,
   type DamagePart,
@@ -37,6 +38,7 @@ import {
 } from "./damage";
 import { abilityModifier } from "./dice";
 import { spaceForSize } from "./grid";
+import { message, plainMessage, texts } from "./messages";
 import { mathRng, type Rng } from "./rng";
 import type { AttackLine } from "./sheet";
 import { parseRange } from "./weapons";
@@ -282,6 +284,13 @@ export function conditionRolls(ids: readonly string[], table: Table<ConditionDef
 export interface ModeReason {
   readonly mode: "advantage" | "disadvantage";
   readonly reason: string;
+  /** The reason as a message (for translation); `reason` is its text. */
+  readonly message?: Message;
+}
+
+/** A reason for Advantage or Disadvantage, from its message. */
+export function modeReason(mode: "advantage" | "disadvantage", why: Message): ModeReason {
+  return { mode, reason: why.text, message: why };
 }
 
 /**
@@ -291,7 +300,7 @@ export interface ModeReason {
 export function resolveMode(
   asked: RollMode,
   reasons: readonly ModeReason[],
-): { mode: RollMode; reasons: string[] } {
+): { mode: RollMode; reasons: string[]; reason_messages: Message[] } {
   const all: ModeReason[] = [...reasons];
   if (asked !== "normal") all.unshift({ mode: asked, reason: "asked" });
   const advantage = all.some((r) => r.mode === "advantage");
@@ -304,9 +313,10 @@ export function resolveMode(
         : disadvantage
           ? "disadvantage"
           : "normal";
-  const label = (r: ModeReason) =>
-    `${r.mode === "advantage" ? "Advantage" : "Disadvantage"}: ${r.reason}`;
-  return { mode, reasons: all.filter((r) => r.reason !== "asked").map(label) };
+  const reason_messages = all
+    .filter((r) => r.reason !== "asked")
+    .map((r) => message("roll.reason", { mode: r.mode, why: r.message ?? plainMessage(r.reason) }));
+  return { mode, reasons: texts(reason_messages), reason_messages };
 }
 
 export interface AttackModeOptions {
@@ -340,30 +350,36 @@ export function attackMode(
     ability = null,
     spell = false,
   }: AttackModeOptions,
-): { mode: RollMode; reasons: string[]; critical_on_hit: boolean } {
+): { mode: RollMode; reasons: string[]; reason_messages: Message[]; critical_on_hit: boolean } {
   const reasons: ModeReason[] = [...modes];
   // Innate Sorcery: Advantage on the attack rolls of spells.
   if (spell && attacker.advantages.includes("attack.spell")) {
-    reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
+    reasons.push(modeReason("advantage", message("reason.features", { name: attacker.name })));
   }
   // Reckless Attack: Advantage on attack rolls using Strength, and on attack rolls against you.
   if (ability === "str" && attacker.advantages.includes("attack.str")) {
-    reasons.push({ mode: "advantage", reason: `${attacker.name}'s features` });
+    reasons.push(modeReason("advantage", message("reason.features", { name: attacker.name })));
   }
   if (target?.advantages.includes("attacked")) {
-    reasons.push({ mode: "advantage", reason: `${target.name} attacks recklessly` });
+    reasons.push(modeReason("advantage", message("reason.reckless", { name: target.name })));
   }
   for (const c of attacker.condition_rolls.attack_rolls) {
     if (c.except_against_source && against_source_of.includes(c.id)) continue;
-    reasons.push({ mode: c.mode, reason: `${attacker.name} is ${c.condition}` });
+    reasons.push(
+      modeReason(c.mode, message("reason.is", { name: attacker.name, condition: c.condition })),
+    );
   }
   if (target) {
     const against = within_5ft
       ? target.condition_rolls.attacked
       : target.condition_rolls.attacked_beyond_5ft;
-    const where = within_5ft ? "within 5 ft" : "beyond 5 ft";
     for (const c of against) {
-      reasons.push({ mode: c.mode, reason: `${target.name} is ${c.condition} (${where})` });
+      const why = message("reason.is_at", {
+        name: target.name,
+        condition: c.condition,
+        within_5ft,
+      });
+      reasons.push(modeReason(c.mode, why));
     }
   }
   const resolved = resolveMode(mode, reasons);
@@ -430,6 +446,8 @@ export interface AttackResult {
   readonly critical_miss: boolean;
   /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
   readonly reasons: readonly string[];
+  /** `reasons` as messages (for translation). */
+  readonly reason_messages: readonly Message[];
   /** The Bardic Inspiration die rolled and added to a miss, if any. */
   readonly inspiration: number | null;
   /** The damage rolled on a hit. */
@@ -526,9 +544,15 @@ export function makeAttack(
   if (forgo_advantage && moded.mode === "disadvantage") {
     throw new RangeError("The attack roll has Disadvantage: its Advantage can't be forgone");
   }
+  const forgone = message("reason.advantage_forgone");
   const effective =
     forgo_advantage && moded.mode === "advantage"
-      ? { ...moded, mode: "normal" as const, reasons: [...moded.reasons, "Advantage forgone"] }
+      ? {
+          ...moded,
+          mode: "normal" as const,
+          reasons: [...moded.reasons, forgone.text],
+          reason_messages: [...moded.reason_messages, forgone],
+        }
       : moded;
   if (light_extra && !line.light_extra_damage_parts) {
     throw new RangeError(`${line.name} isn't a Light weapon`);
@@ -604,6 +628,7 @@ export function makeAttack(
     critical_hit,
     critical_miss,
     reasons: effective.reasons,
+    reason_messages: effective.reason_messages,
     inspiration,
   };
   if (!hit) return { ...base, damage: null, riders: [], instances: [], outcome: null };
@@ -637,6 +662,8 @@ export interface SaveResult {
   readonly legendary_resistance: boolean;
   /** Why the roll had Advantage or Disadvantage, if it did. */
   readonly reasons: readonly string[];
+  /** `reasons` as messages (for translation). */
+  readonly reason_messages: readonly Message[];
   /** The Bardic Inspiration die rolled and added (it failed without it), if any. */
   readonly inspiration: number | null;
   /** It failed and was rerolled with Indomitable (one use spent): `roll` is the new roll. */
@@ -680,6 +707,7 @@ export function rollSavingThrow(
       automatic_failure: failing,
       legendary_resistance: resisted,
       reasons: [],
+      reason_messages: [],
       inspiration: null,
     };
   }
@@ -713,6 +741,7 @@ export function rollSavingThrow(
     automatic_failure: null,
     legendary_resistance: legendary,
     reasons: resolved.reasons,
+    reason_messages: resolved.reason_messages,
     inspiration,
   };
 }
@@ -721,10 +750,17 @@ export function rollSavingThrow(
 function saveModes(combatant: Combatant, ability: Ability): ModeReason[] {
   const reasons: ModeReason[] = [];
   if (combatant.advantages.includes(`save.${ability}`)) {
-    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
+    reasons.push(modeReason("advantage", message("reason.features", { name: combatant.name })));
   }
   const hindered = combatant.condition_rolls.save_disadvantage[ability];
-  if (hindered) reasons.push({ mode: "disadvantage", reason: `${combatant.name} is ${hindered}` });
+  if (hindered) {
+    reasons.push(
+      modeReason(
+        "disadvantage",
+        message("reason.is", { name: combatant.name, condition: hindered }),
+      ),
+    );
+  }
   return reasons;
 }
 
@@ -759,6 +795,8 @@ export interface D20TestResult {
   readonly critical_miss: boolean;
   /** Why it has Advantage or Disadvantage, Reliable Talent… */
   readonly reasons: readonly string[];
+  /** `reasons` as messages (for translation). */
+  readonly reason_messages: readonly Message[];
 }
 
 /**
@@ -795,6 +833,7 @@ export function rollD20Test(
       total: check.total,
       success: check.success,
       reasons: check.reasons,
+      reason_messages: check.reason_messages,
     };
   }
   if ("save" in request) {
@@ -812,6 +851,7 @@ export function rollD20Test(
         success: save.success,
         automatic_failure: save.automatic_failure,
         reasons: save.reasons,
+        reason_messages: save.reason_messages,
       };
     }
     const bonus = combatant.saving_throws[ability];
@@ -827,6 +867,7 @@ export function rollD20Test(
         success: false,
         automatic_failure: failing,
         reasons: [],
+        reason_messages: [],
       };
     }
     const resolved = resolveMode(mode, saveModes(combatant, ability));
@@ -839,6 +880,7 @@ export function rollD20Test(
       total: roll.d20 + bonus,
       success: null,
       reasons: resolved.reasons,
+      reason_messages: resolved.reason_messages,
     };
   }
   const line = combatant.attacks.find((a) => a.name === request.attack);
@@ -871,6 +913,7 @@ export function rollD20Test(
     critical,
     critical_miss,
     reasons: moded.reasons,
+    reason_messages: moded.reason_messages,
   };
 }
 
@@ -886,6 +929,8 @@ export interface CheckResult {
   /** Against a DC; `null` when none was given (a contest, or the GM decides). */
   readonly success: boolean | null;
   readonly reasons: readonly string[];
+  /** `reasons` as messages (for translation). */
+  readonly reason_messages: readonly Message[];
   /** The Bardic Inspiration die rolled and added, if any. */
   readonly inspiration: number | null;
 }
@@ -912,10 +957,12 @@ export function rollAbilityCheck(
   const bonus = (skill ? combatant.skills[skill] : undefined) ?? combatant.ability_checks[ability];
   const reasons: ModeReason[] = [...modes];
   if (combatant.advantages.includes(`check.${ability}`)) {
-    reasons.push({ mode: "advantage", reason: `${combatant.name}'s features` });
+    reasons.push(modeReason("advantage", message("reason.features", { name: combatant.name })));
   }
   for (const c of combatant.condition_rolls.ability_checks) {
-    reasons.push({ mode: c.mode, reason: `${combatant.name} is ${c.condition}` });
+    reasons.push(
+      modeReason(c.mode, message("reason.is", { name: combatant.name, condition: c.condition })),
+    );
   }
   const resolved = resolveMode(mode, reasons);
   let roll = rollD20({ mode: resolved.mode, rng });
@@ -926,7 +973,9 @@ export function rollAbilityCheck(
     combatant.proficient_skills.includes(skill);
   if (reliable && roll.d20 < 10) {
     roll = { ...roll, d20: 10 };
-    resolved.reasons.push("Reliable Talent: the d20 counts as 10");
+    const why = message("reason.reliable_talent");
+    resolved.reasons.push(why.text);
+    resolved.reason_messages.push(why);
   }
   let total = roll.d20 + bonus;
   const label = skill ? skillName(skill) : ABILITY_NAMES[ability];
@@ -943,6 +992,7 @@ export function rollAbilityCheck(
     total,
     success: dc === null ? null : total >= dc,
     reasons: resolved.reasons,
+    reason_messages: resolved.reason_messages,
     inspiration,
   };
 }

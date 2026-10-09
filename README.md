@@ -206,7 +206,8 @@ const greatsword = sheet.attacks.find((a) => a.name === "Greatsword")!;
 const hit = rollDamage(greatsword.damage_parts, { critical: true, rng: seededRng(3) });
 takeDamage({ hp: 7, temp: 0, max: 7 }, hit.parts.map((p) => ({ amount: p.total, type: p.type })),
   { resistances: ["slashing"] });
-// { dealt, absorbed, hp, temp, dropped_to_zero, died, death_save_failures, concentration_dc, notes }
+// { dealt, absorbed, hp, temp, dropped_to_zero, died, death_save_failures, concentration_dc, notes,
+//   messages }
 ```
 
 Class features that change attacks are data. Rage is a feature you switch on:
@@ -407,11 +408,11 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/builds/set-choice` · `/v1/builds/level-up` · `/v1/builds/remove-level` · `/v1/builds/set-level-class` · `/v1/builds/set-level-hp` | Change a build the same way the builder does (validated, repaired, with notes) |
 | `POST /v1/builds/preview` | What a `set-choice` or `set-level-class` change would remove and add, without applying it |
 | `POST /v1/state/new` | Build → a fresh play state |
-| `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes }` |
+| `POST /v1/state/apply` | `{ build, state, action }` (one action or a list, all or nothing) → `{ state, notes, messages }` |
 | `POST /v1/state/sheet` · `/v1/state/reconcile` | Play sheet and state issues · fit a state to a changed build |
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
-| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, events, log, pending, applied }` (`log`: each action with the dice it drew): Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
+| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, messages, events, log, pending, applied }` (`log`: each action with the dice it drew): Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
 | `POST /v1/encounters/options` | `{ encounter, characters, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
 | `POST /v1/encounters/reachable` · `/preview-move` · `/preview-area` | `{ encounter, characters, id }` (+ `to` or `path`; + `area` and `spell`, `ability` or `legendary`) → where it can move, what a move or an area would do (schemas in `schemas/`) |
 | `POST /v1/encounters/check` | `{ encounter, characters, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |

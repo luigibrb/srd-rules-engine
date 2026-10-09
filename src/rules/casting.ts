@@ -7,6 +7,7 @@
  */
 
 import type { Ability, DamageType, SpellDef } from "../models/content";
+import type { Message } from "../models/messages";
 import type { PlayAction } from "../models/state";
 import {
   attackMode,
@@ -30,6 +31,7 @@ import {
   takeDamage,
 } from "./damage";
 import { parseDiceExpression } from "./dice";
+import { message } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 export interface CastOptions {
@@ -69,6 +71,8 @@ export interface SpellAttackRoll {
   readonly critical_miss: boolean;
   /** Why the roll had Advantage or Disadvantage (conditions), if it did. */
   readonly reasons: readonly string[];
+  /** `reasons` as messages (for translation). */
+  readonly reason_messages: readonly Message[];
   /** The Bardic Inspiration die rolled and added to a miss, if any. */
   readonly inspiration: number | null;
 }
@@ -117,6 +121,8 @@ export interface SpellCastResult {
   /** Play actions for the caster: spend the slot, start Concentration. */
   readonly caster_actions: readonly PlayAction[];
   readonly notes: readonly string[];
+  /** `notes` as messages (for translation). */
+  readonly messages: readonly Message[];
 }
 
 export interface SpellFollowUpResult {
@@ -206,6 +212,7 @@ export function castSpell(
   if (spell.concentration) casterActions.push({ type: "set_concentration", spell: spell.name });
   const base = { spell: spell.id, slot_level: slot, caster_actions: casterActions };
   if (!m) {
+    const manual = message("spell.manual", { spell: spell.name });
     return {
       ...base,
       spellcasting: null,
@@ -215,7 +222,8 @@ export function castSpell(
       damage_parts: [],
       targets: [],
       follow_up: null,
-      notes: [`${spell.name}: its effects aren't automated; see the spell's text.`],
+      notes: [manual.text],
+      messages: [manual],
     };
   }
 
@@ -323,8 +331,11 @@ export function castSpell(
       total += inspiration ?? 0;
       const hit = roll.d20 === 20 || (!critical_miss && total >= target.armor_class);
       const critical_hit = roll.d20 === 20 || (hit && effective.critical_on_hit);
-      const reasons = effective.reasons;
-      const attack = { roll, total, hit, critical_hit, critical_miss, reasons, inspiration };
+      const { reasons, reason_messages } = effective;
+      const attack = {
+        ...{ roll, total, hit, critical_hit, critical_miss },
+        ...{ reasons, reason_messages, inspiration },
+      };
       const rolled =
         (hit || potent) && parts.length
           ? rollDamage(partsFor(beam === 0), { critical: critical_hit, rng })
@@ -423,6 +434,7 @@ export function castSpell(
     targets: results,
     follow_up,
     notes: [],
+    messages: [],
   };
 }
 

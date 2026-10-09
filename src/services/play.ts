@@ -11,6 +11,7 @@
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import type { ConditionDef, MagicItemDef } from "../models/content";
+import type { Message } from "../models/messages";
 import {
   type CharacterState,
   CURRENCIES,
@@ -34,6 +35,7 @@ import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currenc
 import { type Defenses, isBloodied, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { spaceForSize } from "../rules/grid";
+import { message, texts } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import {
   type CarriedItem,
@@ -57,6 +59,8 @@ export interface PlayResult {
   readonly state: CharacterState;
   /** What happened, for the player to read ("Concentration: Constitution save, DC 10"). */
   readonly notes: readonly string[];
+  /** The same as `notes`, as data to translate: a code, its parameters and the English text. */
+  readonly messages: readonly Message[];
 }
 
 // --- the sheet in play --------------------------------------------------------------------
@@ -562,7 +566,7 @@ export function reconcileState(
   state: CharacterState,
   catalog: Catalog,
 ): PlayResult {
-  const notes: string[] = [];
+  const notes: Message[] = [];
   let s = structuredClone(state) as CharacterState;
   const res = resolve(build, catalog);
   const restKeys = restChoiceKeys(res);
@@ -575,7 +579,7 @@ export function reconcileState(
     }
     if (drop) {
       delete s.choices[key];
-      notes.push(`${res.choice(key)?.label ?? key}: back to the build's picks.`);
+      notes.push(message("play.choice_reset", { choice: res.choice(key)?.label ?? key }));
     }
   }
   s.conditions = s.conditions.filter((id) => lookup(catalog.conditions, id));
@@ -587,13 +591,17 @@ export function reconcileState(
     if (toggle && !toggle.blocked) return true;
     notes.push(
       toggle
-        ? `${toggle.name} ends (${(toggle.blocked ?? "").replaceAll("_", " ")}).`
-        : `'${key}' ends: the feature is gone.`,
+        ? message("play.toggle_blocked", {
+            toggle: toggle.name,
+            blocked: toggle.blocked ?? "",
+            label: (toggle.blocked ?? "").replaceAll("_", " "),
+          })
+        : message("play.toggle_gone", { key }),
     );
     return false;
   });
   if (s.concentration && before.toggles.some((t) => t.no_spells && s.active.includes(t.key))) {
-    notes.push(`Concentration on ${s.concentration} ends.`);
+    notes.push(message("concentration.ends", { spell: s.concentration }));
     s.concentration = null;
   }
   const sheet = computePlaySheet(build, s, catalog);
@@ -619,11 +627,11 @@ export function reconcileState(
       (!magic?.attunement || (magic && attunementBlocker(res, magic)) || attuned >= MAX_ATTUNED);
     if (blocked) {
       i.attuned = false;
-      notes.push(`No longer attuned to ${magic?.name ?? i.item}.`);
+      notes.push(message("play.unattuned", { item: magic?.name ?? i.item }));
     } else if (i.attuned) attuned++;
   }
   s = parseState(s);
-  return { state: s, notes };
+  return { state: s, notes: texts(notes), messages: notes };
 }
 
 /**
@@ -702,15 +710,17 @@ export function applyAction(
   const sheet = computePlaySheet(build, state, catalog);
   const p = sheet.play;
   const s = structuredClone(state) as CharacterState;
-  const notes: string[] = [];
-  const fail = (message: string): never => {
-    throw new PlayError([message]);
+  const notes: Message[] = [];
+  const fail = (text: string): never => {
+    throw new PlayError([text]);
   };
   const needItem = (id: string) =>
     s.inventory.find((i) => i.id === id) ?? fail(`No item '${id}' in the inventory`);
   const conditionsNow = new Set(p.conditions.map((c) => c.id));
-  const dropConcentration = (why: string) => {
-    if (s.concentration) notes.push(`Concentration on ${s.concentration} ends (${why}).`);
+  const dropConcentration = (why: Message) => {
+    if (s.concentration) {
+      notes.push(message("concentration.ends_because", { spell: s.concentration, why }));
+    }
     s.concentration = null;
   };
   const current = p.hp.current;
@@ -727,7 +737,7 @@ export function applyAction(
         characterDefenses(sheet, conditionsNow),
         { critical: action.critical },
       );
-      notes.push(...hit.notes);
+      notes.push(...hit.messages);
       s.hp.temp = hit.temp;
       if (current > 0) s.hp.current = hit.hp;
       if (hit.death_save_failures) {
@@ -735,7 +745,7 @@ export function applyAction(
         s.death_saves.failures = Math.min(3, s.death_saves.failures + hit.death_save_failures);
         if (s.death_saves.failures >= 3) {
           s.dead = true;
-          notes.push("Three failures: the character dies.");
+          notes.push(message("death_save.dies"));
         }
       }
       if (hit.died) s.dead = true;
@@ -743,12 +753,12 @@ export function applyAction(
         if (!s.conditions.includes("unconscious")) s.conditions.push("unconscious");
         s.death_saves = { successes: 0, failures: 0 };
         s.stable = false;
-        notes.push("Down to 0 Hit Points: Unconscious, making Death Saving Throws.");
+        notes.push(message("play.down"));
       }
-      if (current > 0 && hit.hp === 0) dropConcentration("down to 0 HP");
+      if (current > 0 && hit.hp === 0) dropConcentration(message("why.down_to_zero"));
       if (current > 0 && hit.concentration_dc !== null && s.concentration) {
         notes.push(
-          `Concentration on ${s.concentration}: Constitution saving throw, DC ${hit.concentration_dc}.`,
+          message("concentration.save", { spell: s.concentration, dc: hit.concentration_dc }),
         );
       }
       break;
@@ -771,7 +781,7 @@ export function applyAction(
     case "set_temp_hp": {
       const amount = Math.max(0, Math.floor(action.amount));
       if (action.replace || amount > s.hp.temp) s.hp.temp = amount;
-      else notes.push(`Temporary Hit Points don't stack: keeping ${s.hp.temp}.`);
+      else notes.push(message("play.temp_hp_kept", { amount: s.hp.temp }));
       break;
     }
     case "death_save": {
@@ -781,22 +791,26 @@ export function applyAction(
       if (d20 === 20) {
         s.hp.current = 1;
         regainConsciousness(s, notes);
-        notes.push("Natural 20: you regain 1 Hit Point.");
+        notes.push(message("death_save.natural_20"));
         break;
       }
       if (d20 === 1) s.death_saves.failures = Math.min(3, s.death_saves.failures + 2);
       else if (d20 >= 10) s.death_saves.successes += 1;
       else s.death_saves.failures += 1;
       notes.push(
-        `Death Saving Throw: ${d20} (${s.death_saves.successes} successes, ${s.death_saves.failures} failures).`,
+        message("death_save.rolled", {
+          roll: d20,
+          successes: s.death_saves.successes,
+          failures: s.death_saves.failures,
+        }),
       );
       if (s.death_saves.failures >= 3) {
         s.dead = true;
-        notes.push("Three failures: the character dies.");
+        notes.push(message("death_save.dies"));
       } else if (s.death_saves.successes >= 3) {
         s.stable = true;
         s.death_saves = { successes: 0, failures: 0 };
-        notes.push("Three successes: Stable.");
+        notes.push(message("death_save.stable"));
       }
       break;
     }
@@ -808,7 +822,7 @@ export function applyAction(
     }
     case "short_rest": {
       if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Short Rest");
-      endToggles(s, sheet, notes, "rest");
+      endToggles(s, sheet, notes, message("why.rest"));
       let hp = current;
       for (const spend of action.hit_dice ?? []) {
         const pool = p.hit_dice.find((d) => d.die === spend.die);
@@ -819,7 +833,7 @@ export function applyAction(
         const gained = Math.max(1, d + sheet.modifiers.con);
         hp = Math.min(p.hp.max, hp + gained);
         s.hit_dice_spent[String(spend.die)] = spent + 1;
-        notes.push(`Hit Point Die d${spend.die}: ${d} + Con → ${gained} HP.`);
+        notes.push(message("rest.hit_die", { die: spend.die, roll: d, hp: gained }));
       }
       s.hp.current = hp >= p.hp.max ? null : hp;
       for (const u of sheet.limited_uses) {
@@ -830,12 +844,12 @@ export function applyAction(
           s.uses_spent[u.key] = Math.max(0, spent - u.short_rest_regain);
       }
       s.pact_slots_spent = 0;
-      notes.push("Short Rest: Pact Magic slots and short-rest features recharged.");
+      notes.push(message("rest.short"));
       break;
     }
     case "long_rest": {
       if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Long Rest");
-      endToggles(s, sheet, notes, "rest");
+      endToggles(s, sheet, notes, message("why.rest"));
       s.hp = { current: null, temp: 0 };
       s.hit_dice_spent = {};
       s.death_saves = { successes: 0, failures: 0 };
@@ -845,14 +859,14 @@ export function applyAction(
       s.uses_spent = {};
       if (s.exhaustion > 0) {
         s.exhaustion -= 1;
-        notes.push(`Exhaustion reduced to ${s.exhaustion}.`);
+        notes.push(message("rest.exhaustion", { level: s.exhaustion }));
       }
       const played = resolve(playBuild(build, state, catalog), catalog);
       if (played.sources.some((src) => src.grants.on_long_rest.includes("heroic_inspiration"))) {
         s.heroic_inspiration = true;
-        notes.push("Heroic Inspiration gained.");
+        notes.push(message("rest.heroic_inspiration"));
       }
-      notes.push("Long Rest: all Hit Points, Hit Point Dice, spell slots and features recovered.");
+      notes.push(message("rest.long"));
       break;
     }
     case "spend_slot": {
@@ -907,8 +921,14 @@ export function applyAction(
         const after = Math.min(p.hp.max, current + healed);
         s.hp.current = after >= p.hp.max ? null : after;
         if (current === 0 && healed > 0) regainConsciousness(s, notes);
-        const capped = after - current < healed ? ` (rolled ${healed})` : "";
-        notes.push(`${feature.name}: regains ${after - current} Hit Points${capped}.`);
+        notes.push(
+          message("play.feature_heals", {
+            feature: feature.name,
+            amount: after - current,
+            capped: after - current < healed,
+            rolled: healed,
+          }),
+        );
       }
       break;
     }
@@ -925,7 +945,7 @@ export function applyAction(
       if (def.levels) fail("Use set_exhaustion for Exhaustion levels");
       if (!s.conditions.includes(def.id)) s.conditions.push(def.id);
       const incapacitated = def.id === "incapacitated" || def.implies.includes("incapacitated");
-      if (incapacitated) dropConcentration(def.name);
+      if (incapacitated) dropConcentration(message("why.condition", { condition: def.name }));
       break;
     }
     case "remove_condition": {
@@ -938,7 +958,7 @@ export function applyAction(
       s.exhaustion = action.level;
       if (action.level === 6) {
         s.dead = true;
-        notes.push("Exhaustion 6: the character dies.");
+        notes.push(message("play.exhaustion_dies"));
       }
       break;
     }
@@ -947,7 +967,9 @@ export function applyAction(
         fail("You can't concentrate while Incapacitated");
       const blocking = sheet.toggles.find((t) => t.active && t.no_spells);
       if (action.spell && blocking) fail(`You can't concentrate during ${blocking.name}`);
-      if (action.spell && s.concentration) notes.push(`Concentration on ${s.concentration} ends.`);
+      if (action.spell && s.concentration) {
+        notes.push(message("concentration.ends", { spell: s.concentration }));
+      }
       s.concentration = action.spell;
       break;
     }
@@ -963,7 +985,7 @@ export function applyAction(
         s.uses_spent[toggle.uses] = (use?.spent ?? 0) + 1;
       }
       s.active.push(toggle.key);
-      if (toggle.no_spells) dropConcentration(toggle.name);
+      if (toggle.no_spells) dropConcentration(message("why.toggle", { toggle: toggle.name }));
       break;
     }
     case "deactivate": {
@@ -1005,12 +1027,11 @@ export function applyAction(
       s.next_item += kit.inventory.length;
       s.currency.gp += kit.gp;
       s.starting_equipment = true;
-      const names = kit.inventory.map((i) => {
-        const name = mundaneName(catalog, i.item) ?? i.item;
-        return i.qty > 1 ? `${name} (${i.qty})` : name;
-      });
-      if (kit.gp) names.push(`${kit.gp} GP`);
-      notes.push(`Starting equipment added: ${names.join(", ")}.`);
+      const items = kit.inventory.map((i) =>
+        message("item.qty", { item: mundaneName(catalog, i.item) ?? i.item, qty: i.qty }),
+      );
+      if (kit.gp) items.push(message("coins.gp", { amount: kit.gp }));
+      notes.push(message("play.starting_equipment", { items }));
       break;
     }
     case "add_item": {
@@ -1067,7 +1088,11 @@ export function applyAction(
           const otherKind = wornKind(catalog, carried.find((c) => c.id === other.id)?.base ?? null);
           if (other.id !== item.id && other.equipped && otherKind === kind) {
             other.equipped = false;
-            notes.push(`Took off ${carried.find((c) => c.id === other.id)?.name}.`);
+            notes.push(
+              message("play.took_off", {
+                item: carried.find((c) => c.id === other.id)?.name ?? other.item,
+              }),
+            );
           }
         }
       }
@@ -1082,7 +1107,7 @@ export function applyAction(
         if (reason) fail(reason);
         const count = s.inventory.filter((i) => i.attuned && i.id !== item.id).length;
         if (count >= MAX_ATTUNED) fail(`You can be attuned to at most ${MAX_ATTUNED} magic items`);
-        notes.push("Attuning takes a Short Rest focused on the item.");
+        notes.push(message("play.attuning"));
       }
       item.attuned = action.attuned;
       break;
@@ -1103,7 +1128,7 @@ export function applyAction(
         s.hp.current = Math.min(p.hp.max, current + healed);
         if (s.hp.current >= p.hp.max) s.hp.current = null;
         if (current === 0 && healed > 0) regainConsciousness(s, notes);
-        notes.push(`${def.name}: ${healed} Hit Points.`);
+        notes.push(message("play.item_heals", { item: def.name, amount: healed }));
       }
       if (item.qty > 1) item.qty -= 1;
       else s.inventory = s.inventory.filter((i) => i.id !== item.id);
@@ -1140,9 +1165,14 @@ export function applyAction(
         variant: action.variant,
       });
       notes.push(
-        `Bought ${qty * def.bundle} × ${def.name} for ${formatCp((each as number) * qty)}.`,
+        message("shop.bought", {
+          qty: qty * def.bundle,
+          item: def.name,
+          price: formatCp((each as number) * qty),
+        }),
       );
-      return { state: bought.state, notes: [...notes, ...bought.notes] };
+      const all = [...notes, ...bought.messages];
+      return { state: bought.state, notes: texts(all), messages: all };
     }
     case "sell": {
       const entry = s.inventory.find((i) => i.id === action.id) ?? fail(`No item '${action.id}'`);
@@ -1161,7 +1191,7 @@ export function applyAction(
       for (const c of CURRENCIES) s.currency[c] += coins[c];
       entry.qty -= qty;
       if (entry.qty <= 0) s.inventory = s.inventory.filter((i) => i !== entry);
-      notes.push(`Sold ${qty} × ${def.name} for ${formatCp(total)}.`);
+      notes.push(message("shop.sold", { qty, item: def.name, price: formatCp(total) }));
       break;
     }
     case "adjust_currency": {
@@ -1176,25 +1206,26 @@ export function applyAction(
       fail(`Unknown action '${(action as { type: string }).type}'`);
   }
   const repaired = reconcileState(build, parseState(s), catalog);
-  return { state: repaired.state, notes: [...notes, ...repaired.notes] };
+  const all = [...notes, ...repaired.messages];
+  return { state: repaired.state, notes: texts(all), messages: all };
 }
 
 /** Every active toggle ends (a rest lasts longer than Rage's 10 minutes). */
-function endToggles(s: CharacterState, sheet: PlaySheet, notes: string[], why: string): void {
+function endToggles(s: CharacterState, sheet: PlaySheet, notes: Message[], why: Message): void {
   for (const key of s.active) {
     const name = sheet.toggles.find((t) => t.key === key)?.name ?? key;
-    notes.push(`${name} ends (${why}).`);
+    notes.push(message("toggle.ends", { toggle: name, why }));
   }
   s.active = [];
 }
 
-function regainConsciousness(s: CharacterState, notes: string[]): void {
+function regainConsciousness(s: CharacterState, notes: Message[]): void {
   s.death_saves = { successes: 0, failures: 0 };
   s.stable = false;
   if (s.conditions.includes("unconscious")) {
     s.conditions = s.conditions.filter((c) => c !== "unconscious");
     if (!s.conditions.includes("prone")) s.conditions.push("prone");
-    notes.push("Conscious again (still Prone).");
+    notes.push(message("play.conscious"));
   }
 }
 
