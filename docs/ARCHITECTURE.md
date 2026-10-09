@@ -544,7 +544,11 @@ list of actions.
   feet", Touch) is checked; Unarmed Strike and Help need 5 ft. Moving to a square costs its
   distance, can't end in another creature's space, and notes the enemies whose reach it leaves
   (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
-  within 5 feet or in range, as before. Cover can be given per attack (`cover`) or per target
+  within 5 feet or in range, as before. That's the default (`positions: optional`); the GM can set
+  `positions: required` (`set_positions`): once anyone is on the map, an action that checks reach
+  or range (attacks, ranged spells and their area points, save effects with targets, Help,
+  Grapple and Shove, features with a range) is refused when the actor or a target isn't on it
+  (refusal code `off_map`). Cover can be given per attack (`cover`) or per target
   (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted;
   with positions and no cover given, it's worked out from the map (below).
 - **Exploring.** Before the fight starts and after it ends (`round: 0`) a `move` has no turns and

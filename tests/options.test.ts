@@ -382,6 +382,52 @@ describe("combatantOptions: positions", () => {
       targets: { kind: "point", range: 30 },
     });
   });
+
+  it("positions required: off the map, an attack is refused, here and in checkAction", () => {
+    const s = session({ brakka: fighterBuild() }, [{ monster: "goblin-warrior", at: [1, 0] }]);
+    const attack = {
+      type: "attack",
+      id: "brakka",
+      target: "goblin-warrior",
+      attack: "Greatsword",
+    } as const;
+    // Optional (the default): the distance is unknown and the attack passes.
+    expect(checkAction(s.encounter(), attack, s.ctx()).ok).toBe(true);
+    s.act([], { type: "set_positions", mode: "required" });
+    expect(s.encounter().positions).toBe("required");
+    const refused = { ok: false, reasons: ["Brakka isn't on the map"], codes: ["off_map"] };
+    expect(checkAction(s.encounter(), attack, s.ctx())).toEqual(refused);
+    const help = { type: "help", id: "brakka", target: "goblin-warrior" } as const;
+    expect(checkAction(s.encounter(), help, s.ctx()).codes).toEqual(["off_map"]);
+    expect(find(s.options("brakka").attacks, "Greatsword")).toMatchObject({
+      available: false,
+      reason: "Brakka isn't on the map",
+      code: "off_map",
+    });
+    expect(() =>
+      applyEncounterAction(s.encounter(), attack, { ...s.ctx(), rng: scriptedRng([15, 4]) }),
+    ).toThrow("Brakka isn't on the map");
+    // Placed, against a goblin off the map: refused too.
+    s.act([], { type: "place", id: "brakka", x: 0, y: 0 });
+    s.act([], { type: "remove", id: "goblin-warrior" });
+    s.act([], { type: "add_monster", monster: "goblin-warrior", side: "enemies" });
+    const target = { ...attack, target: "goblin-warrior" };
+    expect(checkAction(s.encounter(), target, s.ctx()).reasons).toEqual([
+      "Goblin Warrior isn't on the map",
+    ]);
+  });
+
+  it("positions required with nobody on the map changes nothing", () => {
+    const s = session({ brakka: fighterBuild() }, [{ monster: "goblin-warrior" }]);
+    s.act([], { type: "set_positions", mode: "required" });
+    const attack = {
+      type: "attack",
+      id: "brakka",
+      target: "goblin-warrior",
+      attack: "Greatsword",
+    } as const;
+    expect(checkAction(s.encounter(), attack, s.ctx()).ok).toBe(true);
+  });
 });
 
 describe("checkAction", () => {

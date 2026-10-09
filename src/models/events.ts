@@ -101,6 +101,8 @@ export const REFUSAL_CODES = [
   "no_attacks_left",
   "once_per_turn",
   "out_of_range",
+  /** With `positions: required`, the actor or a target isn't on a map in use. */
+  "off_map",
   "total_cover",
   "no_path",
   "no_movement",

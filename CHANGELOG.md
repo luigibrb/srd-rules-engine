@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `encounter.positions` (`optional` by default, or `required`), set by the GM with
+  `{ type: "set_positions", mode }`: when required and anyone is on the map, an attack, spell,
+  save effect, Help, Grapple, Shove or feature that checks reach or range is refused if the actor
+  or a target has no position (refusal code `off_map`).
 - Messages for translation: results have `messages` next to `notes` (`Message`: `code`,
   `params`, English `text`), with the English templates in `MESSAGES_EN` and `renderMessage` /
   `formatMessage` to render them with another catalog: encounter results, `applyAction` and

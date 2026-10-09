@@ -430,6 +430,12 @@ export const EncounterSchema = z.object({
   notice_stops: z.enum(["noticer", "everyone"]).default("noticer"),
   /** The point every move waits on (`notice_stops: everyone`), until revealed or resumed. */
   halted: z.string().nullable().default(null),
+  /**
+   * The GM's setting for creatures off the map: `optional`, a distance with an unplaced creature
+   * is unknown and passes; `required`, once anyone is on the map, an action that checks reach or
+   * range is refused when the actor or a target has no position.
+   */
+  positions: z.enum(["optional", "required"]).default("optional"),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
@@ -663,6 +669,8 @@ export const EncounterActionSchema = z
     }),
     /** Let moves go on after a halt (`notice_stops: everyone`) without revealing the point. */
     z.object({ type: z.literal("resume") }),
+    /** The GM's setting for creatures off the map (`Encounter.positions`). */
+    z.object({ type: z.literal("set_positions"), mode: z.enum(["optional", "required"]) }),
 
     /**
      * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.

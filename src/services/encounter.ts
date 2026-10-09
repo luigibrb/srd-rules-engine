@@ -1110,6 +1110,20 @@ function run(
     spaceTakenBy(e, ctx, c, to);
   const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null =>
     feetApart(ctx, a, b);
+  /**
+   * The distance an action checks (reach, range): with `positions: required` and the map in use,
+   * a creature off the map is refused instead of passing as unknown.
+   */
+  const checkedFeet = (a: EncounterCombatant, b: EncounterCombatant): number | null => {
+    if (a.id === b.id) return 0;
+    offMap(a, b);
+    return feetBetween(a, b);
+  };
+  /** With `positions: required` and anyone on the map, a creature off it is refused. */
+  const offMap = (...who: EncounterCombatant[]): void => {
+    if (e.positions !== "required" || !e.combatants.some((x) => x.position)) return;
+    for (const x of who) if (!x.position) fail(`${x.name} isn't on the map`);
+  };
   const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] => enemiesWithin5(e, ctx, c);
   /**
    * What positions say about an attack: a melee attack within reach, a ranged one within long
@@ -1132,7 +1146,7 @@ function run(
       fail(`${line.name} can't be thrown`);
     }
     const ranged = line.kind === "ranged" || Boolean(options.thrown);
-    const distance = feetBetween(c, t);
+    const distance = checkedFeet(c, t);
     let within_5ft = options.within_5ft;
     let ally_adjacent = options.ally_adjacent;
     if (distance === null) {
@@ -1232,7 +1246,7 @@ function run(
       return ids;
     }
     for (const id of given ?? []) {
-      const d = feetBetween(c, find(id));
+      const d = checkedFeet(c, find(id));
       if (line.range && d !== null && d > line.range) {
         fail(`${find(id).name} is ${d} feet away: out of ${line.name}'s range (${line.range} ft)`);
       }
@@ -1261,6 +1275,7 @@ function run(
   /** A zone's point out of a positioned caster's spell range is refused. */
   const checkZonePoint = (c: EncounterCombatant, spell: SpellDef, point?: GridPoint) => {
     const reach = spellRangeFeet(spell);
+    if (point && reach !== null) offMap(c);
     if (!point || !c.position || reach === null) return;
     const d = gridDistance(point, 1, c.position, spaceOf(ctx, c));
     if (d > reach)
@@ -1275,7 +1290,7 @@ function run(
     const limit = spellTargetRange(spell);
     if (limit === null) return;
     for (const t of targets) {
-      const d = t === c ? 0 : feetBetween(c, t);
+      const d = checkedFeet(c, t);
       if (d !== null && d > limit) {
         fail(`${t.name} is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
       }
@@ -2713,6 +2728,11 @@ function run(
       noticeAll();
       break;
     }
+    case "set_positions": {
+      e.positions = action.mode;
+      notes.push(message("positions.set", { mode: action.mode }));
+      break;
+    }
     case "resume": {
       if (!e.halted) fail("Nobody is waiting");
       e.halted = null;
@@ -2757,7 +2777,7 @@ function run(
       } else {
         if (c.side && c.side === t.side) fail(`${t.name} is on ${c.name}'s side`);
         // "You momentarily distract an enemy within 5 feet of you."
-        const d = feetBetween(c, t);
+        const d = checkedFeet(c, t);
         if (d !== null && d > 5)
           fail(`${t.name} is ${d} feet away: Help distracts an enemy within 5 ft`);
       }
@@ -2788,7 +2808,7 @@ function run(
       if (mine >= 0 && theirs > mine + 1) {
         fail(`${t.name} is too large for ${c.name} to ${action.option}`);
       }
-      const d = feetBetween(c, t);
+      const d = checkedFeet(c, t);
       if (d !== null && d > 5) fail(`${t.name} is ${d} feet away: an Unarmed Strike reaches 5 ft`);
       spendAttack(c, action.reaction);
       c.extended = true; // forcing a saving throw extends Rage
@@ -3336,7 +3356,7 @@ function run(
         : [t];
       for (const x of targets) {
         if (f.many && x === c) fail(`${f.name} doesn't affect ${c.name}`);
-        const d = x === c ? 0 : feetBetween(c, x);
+        const d = f.range === null ? null : checkedFeet(c, x);
         if (f.range !== null && d !== null && d > f.range) {
           fail(`${x.name} is ${d} feet away: out of ${f.name}'s range (${f.range} ft)`);
         }

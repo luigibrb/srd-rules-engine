@@ -315,7 +315,7 @@ checkAction(encounter, { type: "dodge", id: "goblin-warrior" }, ctx);
 Each result also has `events`: what the action changed, as data (a turn, a move with its path,
 HP before and after, conditions, Concentration, the economy and resources spent, effects,
 zones), for animations and a combat log. A refusal's `EncounterError` has a `codes` entry per
-message (`not_your_turn`, `out_of_range`, `total_cover`, `no_resources`…). Undo: an action's
+message (`not_your_turn`, `out_of_range`, `off_map`, `total_cover`, `no_resources`…). Undo: an action's
 result lists the dice it drew (`rolls`), so a history (`createHistory`, `recordAction`)
 replays to the same state, and `undoAction` replays all but the last action.
 

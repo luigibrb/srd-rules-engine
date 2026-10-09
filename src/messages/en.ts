@@ -279,6 +279,8 @@ export const MESSAGES_EN = {
   "reason.surprised": "surprised",
   "reason.pace_fast": "a Fast travel pace",
   "reason.pace_slow": "a Slow travel pace",
+  "positions.set":
+    "{mode, select, required {Creatures off the map can't attack, cast or act on others at a distance} other {Creatures off the map act as if in reach and range}}.",
 } as const;
 
 export type MessageCode = keyof typeof MESSAGES_EN;

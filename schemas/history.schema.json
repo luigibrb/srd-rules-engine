@@ -2010,6 +2010,14 @@
                     "string",
                     "null"
                   ]
+                },
+                "positions": {
+                  "default": "optional",
+                  "type": "string",
+                  "enum": [
+                    "optional",
+                    "required"
+                  ]
                 }
               }
             },
@@ -3025,6 +3033,26 @@
           },
           "required": [
             "type"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "set_positions"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "optional",
+                "required"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "mode"
           ]
         },
         {
