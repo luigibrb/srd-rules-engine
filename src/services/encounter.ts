@@ -380,8 +380,8 @@ function run(
   answers: readonly boolean[],
 ): Omit<EncounterResult, "events" | "rolls"> {
   const e = structuredClone(encounter) as Encounter;
-  // Coded messages, or English sentences not given a code yet (`text` messages in the result).
-  const notes: (Message | string)[] = [];
+  // What happened, as messages; sentences from play and damage have code `text` for now.
+  const notes: Message[] = [];
   const states: Record<string, CharacterState> = {};
   // `release`: the readied action, taken with the reaction (checked here, spent at the end).
   let releasing: { id: string; held: boolean } | null = null;
@@ -441,7 +441,7 @@ function run(
       }
       if (c.monster !== null) {
         const alive = !c.defeated;
-        notes.push(...monsterEffect(ctx, c, a).map(plainMessage));
+        notes.push(...monsterEffect(ctx, c, a));
         if (alive && c.defeated) deathBurst(c);
       } else {
         const relentless = a.type === "damage" ? relentlessRage(c, a) : null;
@@ -530,8 +530,7 @@ function run(
     return 2 * (sheet.classes.find((x) => x.class_id === "barbarian")?.level ?? 0);
   };
   /** End an effect; its condition goes unless another effect still gives it. */
-  const endEffect = (effect: EncounterEffect, reason: Message | string): void => {
-    const why = typeof reason === "string" ? plainMessage(reason) : reason;
+  const endEffect = (effect: EncounterEffect, why: Message): void => {
     e.effects = e.effects.filter((x) => x.id !== effect.id);
     const target = e.combatants.find((c) => c.id === effect.target);
     const still = e.effects.some(
@@ -786,8 +785,7 @@ function run(
       zoneSave(z, [c.id], message(at === "start_turn" ? "why.starts_turn_in" : "why.ends_turn_in"));
     }
   };
-  const endZone = (z: Zone, reason: Message | string): void => {
-    const why = typeof reason === "string" ? plainMessage(reason) : reason;
+  const endZone = (z: Zone, why: Message): void => {
     e.zones = e.zones.filter((x) => x.id !== z.id);
     notes.push(message("zone.ends", { label: z.label, why }));
   };
@@ -813,14 +811,26 @@ function run(
     const save = trait?.save;
     if (!trait || !save?.area) return;
     const around = emanationAround(c, save.area.size);
-    const what = `${ABILITY_NAMES[save.ability]} DC ${save.dc}`;
     if (!around) {
       notes.push(
-        `${trait.name}: each creature within ${save.area.size} feet of ${c.name} saves (${what}).`,
+        message("trait.burst_unplaced", {
+          trait: trait.name,
+          feet: save.area.size,
+          name: c.name,
+          ability: abilityMsg(save.ability),
+          dc: save.dc,
+        }),
       );
       return;
     }
-    notes.push(`${trait.name}: ${c.name} explodes (${what}).`);
+    notes.push(
+      message("trait.burst", {
+        trait: trait.name,
+        name: c.name,
+        ability: abilityMsg(save.ability),
+        dc: save.dc,
+      }),
+    );
     if (!around.length) return;
     const parts = save.damage.map((d) => ({ dice: d.dice, bonus: d.bonus, type: d.type }));
     const views = around.map((x) => encounterCombatant(e, x.id, ctx));
@@ -853,7 +863,13 @@ function run(
       const dice = aura.damage.map((d) => ({ dice: d.dice, bonus: d.bonus, type: d.type }));
       if (!around) {
         notes.push(
-          `${trait.name}: each creature within ${aura.size} feet of ${c.name} takes ${formatDamage(dice)} ${aura.damage[0]?.type} damage.`,
+          message("trait.aura_unplaced", {
+            trait: trait.name,
+            feet: aura.size,
+            name: c.name,
+            dice: formatDamage(dice),
+            type: aura.damage[0]?.type ?? "",
+          }),
         );
         continue;
       }
@@ -862,9 +878,14 @@ function run(
       if (!who.length) continue;
       const rolled = rollDamage(dice, { rng });
       const instances = rolled.parts.map((p) => ({ amount: p.total, type: p.type }));
-      const dealt = instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
       for (const t of who) {
-        notes.push(`${trait.name}: ${t.name} takes ${dealt}.`);
+        notes.push(
+          message("trait.aura_damage", {
+            trait: trait.name,
+            name: t.name,
+            dealt: dealtMsg(instances),
+          }),
+        );
         applyTo(t, [{ type: "damage", instances }]);
       }
     }
@@ -880,15 +901,17 @@ function run(
       c.regeneration_blocked = false;
       if (hp === 0) {
         c.defeated = true;
-        notes.push(`${c.name} starts its turn at 0 Hit Points and can't regenerate: it dies.`);
+        notes.push(message("regeneration.dies", { name: c.name }));
         deathBurst(c);
-      } else notes.push(`${c.name}'s ${regen.name} doesn't work this turn.`);
+      } else notes.push(message("regeneration.blocked", { name: c.name, trait: regen.name }));
       return;
     }
     if (hp >= def.hit_points) return;
     c.hp = Math.min(def.hit_points, hp + regen.regeneration.amount);
     if (hp === 0) c.conditions = c.conditions.filter((x) => x !== "unconscious");
-    notes.push(`${c.name} regains ${c.hp - hp} Hit Points (${regen.name}).`);
+    notes.push(
+      message("regeneration.heals", { name: c.name, amount: c.hp - hp, trait: regen.name }),
+    );
   };
   /** The end of `c`'s turn: effects, and toggles that weren't extended (Rage). */
   const endTurn = (c: EncounterCombatant): void => {
@@ -902,8 +925,10 @@ function run(
         decide,
       });
       spendLegendaryResistance(c, save);
-      notes.push(`${c.name} repeats the save against ${effect.label} (${saveText(save).text}).`);
-      if (save.success) endEffect(effect, "it succeeded on the save");
+      notes.push(
+        message("effect.repeat_save", { name: c.name, label: effect.label, save: saveText(save) }),
+      );
+      if (save.success) endEffect(effect, message("why.saved"));
     }
     tick(c, "end");
     if (c.character !== null) {
@@ -911,7 +936,7 @@ function run(
       const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
       for (const t of sheet.toggles) {
         if (t.active && t.extends_each_turn && !c.extended && !c.toggled_on.includes(t.key)) {
-          notes.push(`${t.name} ends: it wasn't extended this turn.`);
+          notes.push(message("toggle.not_extended", { toggle: t.name }));
           play(c, { type: "deactivate", key: t.key });
         }
       }
@@ -937,7 +962,7 @@ function run(
       const ref = characterRef(ctx, c);
       const play = computePlaySheet(ref.build, ref.state, ctx.catalog).play;
       if (play.dying && e.auto_death_saves) applyTo(c, [{ type: "death_save" }]);
-      else if (play.dying) notes.push(`${c.name} is at 0 Hit Points: make a Death Saving Throw.`);
+      else if (play.dying) notes.push(message("turn.death_save", { name: c.name }));
     }
     for (const x of e.combatants) x.riders_used = [];
     // "Only once per turn": every creature's turn is a new one.
@@ -952,7 +977,7 @@ function run(
           continue;
         }
         if (t.ends_at_turn_start) {
-          notes.push(`${t.name} ends: it lasts until the start of ${c.name}'s next turn.`);
+          notes.push(message("toggle.turn_start", { toggle: t.name, name: c.name }));
           play(c, { type: "deactivate", key: t.key });
           continue;
         }
@@ -960,7 +985,7 @@ function run(
         if (left === undefined || c.toggled_on.includes(t.key)) continue;
         if (left <= 1) {
           delete c.toggle_rounds[t.key];
-          notes.push(`${t.name} ends: its duration is over.`);
+          notes.push(message("toggle.duration_over", { toggle: t.name }));
           play(c, { type: "deactivate", key: t.key });
         } else c.toggle_rounds[t.key] = left - 1;
       }
@@ -968,7 +993,7 @@ function run(
     // A readied action lasts until the start of its next turn; a held spell is lost.
     if (c.readied) {
       const spell = c.readied.held ? c.readied.action : null;
-      notes.push(`${c.name}'s readied action is lost (its turn started).`);
+      notes.push(message("readied.lost", { name: c.name }));
       c.readied = null;
       if (spell?.type === "cast") {
         const name = lookup(ctx.catalog.spells, spell.spell)?.name ?? spell.spell;
@@ -1001,8 +1026,8 @@ function run(
         const d6 = rng.int(1, 6);
         if (d6 >= min) {
           c.expended = c.expended.filter((x) => x !== name);
-          notes.push(`${c.name}'s ${name} recharges (${d6}).`);
-        } else notes.push(`${c.name}'s ${name} doesn't recharge (${d6}).`);
+          notes.push(message("recharge.yes", { name: c.name, action: name, roll: d6 }));
+        } else notes.push(message("recharge.no", { name: c.name, action: name, roll: d6 }));
       }
     }
   };
@@ -1010,7 +1035,7 @@ function run(
   /** A Bardic Inspiration die added to a roll is gone. */
   const useInspiration = (c: EncounterCombatant, rolled: number | null | undefined): void => {
     if (rolled === null || rolled === undefined || !c.inspiration) return;
-    notes.push(`${c.name} adds its Bardic Inspiration die: ${rolled}.`);
+    notes.push(message("inspiration.used", { name: c.name, roll: rolled }));
     c.inspiration = null;
   };
   const spendLegendaryResistance = (c: EncounterCombatant, save: SaveResult | null): void => {
@@ -1022,7 +1047,7 @@ function run(
         u.key.endsWith(":indomitable"),
       );
       if (use) play(c, { type: "use", key: use.key });
-      notes.push(`${c.name} rerolls the save with Indomitable.`);
+      notes.push(message("indomitable.used", { name: c.name }));
     }
     useInspiration(c, save?.inspiration);
     if (!save?.legendary_resistance || c.monster === null) return;
@@ -1034,7 +1059,7 @@ function run(
         : def.legendary_resistance.uses
       : 0;
     const left = Math.max(0, max - c.legendary_resistance_used);
-    notes.push(`${c.name} uses Legendary Resistance to succeed instead (${left} left today).`);
+    notes.push(message("legendary_resistance.used", { name: c.name, left }));
   };
   /** Put `c` on a square; another creature's space can't be the end of a move. */
   const occupy = (c: EncounterCombatant, to: { x: number; y: number }): void => {
@@ -1060,7 +1085,7 @@ function run(
       (p) => !p.noticed_by.includes(c.id) && passive >= (p.dc as number),
     );
     for (const p of found) p.noticed_by.push(c.id);
-    if (found.length) notes.push(`${c.name} notices something.`);
+    if (found.length) notes.push(message("explore.notices", { name: c.name }));
     halt(found);
     return found;
   };
@@ -1075,9 +1100,9 @@ function run(
   const point = (id: string): PointOfInterest =>
     e.points.find((p) => p.id === id) ?? fail(`No point of interest '${id}'`);
   /** The words for a move outside a fight: how far, and how many turns of Speed it takes. */
-  const exploreNote = (c: EncounterCombatant, feet: number, speed: number): string => {
+  const exploreNote = (c: EncounterCombatant, feet: number, speed: number): Message => {
     const turns = turnsFor(feet, speed);
-    return `${c.name} moves ${feet} feet: ${turns} turn${turns === 1 ? "" : "s"} at a Speed of ${speed} feet (about ${turns * 6} seconds).`;
+    return message("explore.moves", { name: c.name, feet, turns, speed, seconds: turns * 6 });
   };
   /** Another creature whose space overlaps `c`'s at `to`. */
   const spaceTaken = (c: EncounterCombatant, to: GridPoint): EncounterCombatant | undefined =>
@@ -1155,7 +1180,7 @@ function run(
     const placed = placeArea(e, ctx, c, area, placement, range, label);
     areaCover.clear();
     for (const id of placed.total) {
-      notes.push(`${find(id).name} has Total Cover from ${label}'s point of origin.`);
+      notes.push(message("cover.total_from_origin", { name: find(id).name, label }));
     }
     for (const [id, cover] of placed.cover) areaCover.set(id, cover);
     return placed.ids;
@@ -1182,8 +1207,9 @@ function run(
     if (!found || found.degree === "none") return undefined;
     const cover = found.degree;
     if (relevant && cover !== "total") {
-      const what = cover === "half" ? "Half Cover" : "Three-Quarters Cover";
-      notes.push(`${t.name} has ${what} (behind ${found.by ?? "an obstacle"}).`);
+      notes.push(
+        message("cover.has", { name: t.name, cover, by: found.by ?? message("cover.obstacle") }),
+      );
     }
     return cover;
   };
@@ -1210,13 +1236,13 @@ function run(
     return [...(given ?? [])];
   };
   /** "Fireball's Sphere covers Brakka and Lute." */
-  const areaNote = (label: string, area: SpellArea, ids: readonly string[]): string => {
-    const names = ids.map((id) => find(id).name);
-    const shape = `${area.shape[0]?.toUpperCase()}${area.shape.slice(1)}`;
-    return names.length
-      ? `${label}'s ${shape} covers ${names.join(", ")}.`
-      : `${label}'s ${shape} covers no one.`;
-  };
+  const areaNote = (label: string, area: SpellArea, ids: readonly string[]): Message =>
+    message("area.covers", {
+      label,
+      shape: area.shape,
+      count: ids.length,
+      names: ids.map((id) => find(id).name),
+    });
   /** The creatures in a spell's area (its point within the spell's range), noted. */
   const spellArea = (
     c: EncounterCombatant,
@@ -1340,7 +1366,7 @@ function run(
     );
     // Sundering Blow: +5 to the next attack roll against it by another creature.
     const sundered = e.marks.find((m) => m.on === t.id && m.kind === "sundered" && m.by !== c.id);
-    if (sundered) notes.push(`Sundering Blow: +5 to ${c.name}'s attack roll against ${t.name}.`);
+    if (sundered) notes.push(message("brutal.sundered_bonus", { name: c.name, target: t.name }));
     let hit: AttackResult;
     try {
       // The attacker's conditions caused by this target (Grappled by it), from the effects.
@@ -1372,15 +1398,24 @@ function run(
       throw error;
     }
     c.extended = true; // an attack roll extends Rage
-    unhide(c, "it made an attack roll");
+    unhide(c, message("why.attack_roll"));
     useInspiration(c, hit.inspiration);
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
     e.marks = e.marks.filter((m) => m !== mark && m !== sundered);
     const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
     const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
-    if (!hit.hit) notes.push(`${c.name} misses ${t.name} with ${hit.attack} (${roll}).`);
-    else {
+    const rollMsg = message("attack.roll", {
+      total: hit.total,
+      ac: hit.target_ac,
+      count: hit.reasons.length,
+      reasons: hit.reasons.map(plainMessage),
+    });
+    if (!hit.hit) {
+      notes.push(
+        message("attack.miss", { name: c.name, target: t.name, attack: hit.attack, roll: rollMsg }),
+      );
+    } else {
       c.riders_used.push(...onceIds);
       c.hits.push(t.id);
       c.last_hit = {
@@ -1388,9 +1423,16 @@ function run(
         melee: line?.kind === "melee" && !options.thrown,
         critical: hit.critical_hit,
       };
-      const dealt = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
-      const crit = hit.critical_hit ? "Critical Hit! " : "";
-      notes.push(`${crit}${c.name} hits ${t.name} with ${hit.attack} (${roll}): ${dealt}.`);
+      notes.push(
+        message("attack.hit", {
+          critical: hit.critical_hit,
+          name: c.name,
+          target: t.name,
+          attack: hit.attack,
+          roll: rollMsg,
+          dealt: dealtMsg(hit.instances),
+        }),
+      );
       let instances = [...hit.instances];
       // Uncanny Dodge: the target's reaction once it knows it's hit.
       const dodge = reactionThatHalves(t);
@@ -1401,7 +1443,7 @@ function run(
       ) {
         t.used.reaction = true;
         instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
-        notes.push(`${t.name} uses ${dodge}: the damage is halved.`);
+        notes.push(message("reaction.halves", { name: t.name, reaction: dodge }));
       }
       // Deflect Attacks: the target's reaction takes 1d10 + modifiers off the attack's damage.
       const deflect = reactionThatReduces(t);
@@ -1419,7 +1461,13 @@ function run(
             rng,
           }).total;
           const total = instances.reduce((a, d) => a + d.amount, 0);
-          notes.push(`${t.name} uses ${deflect.name}: ${Math.min(cut, total)} damage less.`);
+          notes.push(
+            message("reaction.reduces", {
+              name: t.name,
+              reaction: deflect.name,
+              amount: Math.min(cut, total),
+            }),
+          );
           instances = instances.map((d) => {
             const off = Math.min(d.amount, cut);
             cut -= off;
@@ -1522,20 +1570,22 @@ function run(
         const half = Math.floor(speedOf(ctx, c, e) / 2);
         c.extra_movement += half;
         c.disengaged = true;
-        notes.push(
-          `Cunning Strike (Withdraw): ${c.name} can move ${half} feet without provoking Opportunity Attacks.`,
-        );
+        notes.push(message("cunning.withdraw", { name: c.name, feet: half }));
         continue;
       }
       if (effect === "trip" && ["huge", "gargantuan"].includes(sizeOf(ctx, t) ?? "")) {
-        notes.push(`Cunning Strike (Trip): ${t.name} is too large to trip.`);
+        notes.push(message("cunning.too_large", { name: t.name }));
         continue;
       }
       const ability = effect === "poison" ? "con" : "dex";
       const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), ability, dc, { rng, decide });
-      const name = effect === "poison" ? "Poison" : "Trip";
       notes.push(
-        `Cunning Strike (${name}): ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text}).`,
+        message("cunning.save", {
+          effect,
+          name: t.name,
+          success: save.success,
+          save: saveText(save),
+        }),
       );
       spendLegendaryResistance(t, save);
       if (save.success) continue;
@@ -1552,7 +1602,7 @@ function run(
         });
       }
     }
-    const mark = (kind: "hamstrung" | "staggered" | "sundered", text: string) => {
+    const mark = (kind: "hamstrung" | "staggered" | "sundered", text: Message) => {
       e.marks = e.marks.filter((m) => !(m.on === t.id && m.kind === kind));
       e.marks.push({
         kind,
@@ -1566,24 +1616,13 @@ function run(
     };
     for (const effect of options.brutal ?? []) {
       if (effect === "forceful") {
-        notes.push(
-          `Forceful Blow: ${t.name} is pushed 15 feet straight away; ${c.name} can move up to half its Speed toward it without provoking Opportunity Attacks.`,
-        );
+        notes.push(message("brutal.forceful", { target: t.name, name: c.name }));
       } else if (effect === "hamstring") {
-        mark(
-          "hamstrung",
-          `Hamstring Blow: ${t.name}'s Speed is 15 feet lower until the start of ${c.name}'s next turn.`,
-        );
+        mark("hamstrung", message("brutal.hamstring", { target: t.name, name: c.name }));
       } else if (effect === "staggering") {
-        mark(
-          "staggered",
-          `Staggering Blow: ${t.name} has Disadvantage on its next saving throw and can't make Opportunity Attacks until the start of ${c.name}'s next turn.`,
-        );
+        mark("staggered", message("brutal.staggering", { target: t.name, name: c.name }));
       } else {
-        mark(
-          "sundered",
-          `Sundering Blow: the next attack roll by another creature against ${t.name} gets +5.`,
-        );
+        mark("sundered", message("brutal.sundering", { target: t.name }));
       }
     }
   };
@@ -1608,7 +1647,9 @@ function run(
     if (!hit.hit) {
       // Graze: damage equal to the ability modifier on a miss.
       if (mastery === "graze" && modifier > 0 && !outOfFight(ctx, t)) {
-        notes.push(`Graze: ${t.name} takes ${modifier} ${line.damage_type} damage.`);
+        notes.push(
+          message("mastery.graze", { target: t.name, amount: modifier, type: line.damage_type }),
+        );
         applyTo(t, [{ type: "damage", instances: [{ amount: modifier, type: line.damage_type }] }]);
       }
       return;
@@ -1616,31 +1657,29 @@ function run(
     if (outOfFight(ctx, t) || t.defeated) return;
     if (mastery === "vex" && dealt) {
       e.masteries.push({ mastery: "vex", by: c.id, on: t.id, ends: until("end") });
-      notes.push(`Vex: ${c.name}'s next attack roll against ${t.name} has Advantage.`);
+      notes.push(message("mastery.vex", { name: c.name, target: t.name }));
     } else if (mastery === "sap") {
       e.masteries.push({ mastery: "sap", by: c.id, on: t.id, ends: until("start") });
-      notes.push(`Sap: ${t.name}'s next attack roll has Disadvantage.`);
+      notes.push(message("mastery.sap", { target: t.name }));
     } else if (mastery === "slow" && dealt) {
       e.masteries.push({ mastery: "slow", by: c.id, on: t.id, ends: until("start") });
-      notes.push(`Slow: ${t.name}'s Speed is 10 feet lower until ${c.name}'s next turn.`);
+      notes.push(message("mastery.slow", { target: t.name, name: c.name }));
     } else if (mastery === "topple") {
       const dc = 8 + modifier + attacker.proficiency_bonus;
       const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), "con", dc, { rng, decide });
       notes.push(
-        `Topple: ${t.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text}).`,
+        message("mastery.topple", { target: t.name, success: save.success, save: saveText(save) }),
       );
       spendLegendaryResistance(t, save);
       if (!save.success) applyTo(t, [{ type: "add_condition", condition: "prone" }]);
     } else if (mastery === "push") {
       const size = encounterCombatant(e, t.id, ctx).size;
       if (!["huge", "gargantuan"].includes(size ?? "")) {
-        notes.push(`Push: ${c.name} can push ${t.name} up to 10 feet straight away.`);
+        notes.push(message("mastery.push", { name: c.name, target: t.name }));
       }
     } else if (mastery === "cleave" && line.kind === "melee" && !cleaving && !c.cleave_used) {
       c.cleave = { attack: line.name, target: t.id };
-      notes.push(
-        `Cleave: ${c.name} can attack a second creature within 5 feet of ${t.name} with ${line.name}.`,
-      );
+      notes.push(message("mastery.cleave", { name: c.name, target: t.name, attack: line.name }));
     }
   };
   /** A saving throw effect used by `user` against targets, applied. */
@@ -1878,9 +1917,11 @@ function run(
     e.masteries = e.masteries.filter((m) => !used.masteries.includes(m));
     e.marks = e.marks.filter((m) => !used.marks.includes(m));
     c.extended = true;
-    const level =
-      r.slot_level !== null && r.slot_level > spell.level ? ` at level ${r.slot_level}` : "";
-    notes.push(`${c.name} casts ${spell.name}${level}.`, ...r.notes);
+    const upcast = r.slot_level !== null && r.slot_level > spell.level ? r.slot_level : 0;
+    notes.push(
+      message("spell.cast", { name: c.name, spell: spell.name, level: upcast }),
+      ...r.notes.map(plainMessage),
+    );
     // A held spell's slot was spent when it was readied.
     applyTo(
       c,
@@ -1889,7 +1930,7 @@ function run(
       ),
     );
     // "you make … or you cast a spell with a Verbal component": no longer hidden.
-    if (/\bV\b/.test(spell.components)) unhide(c, `it cast ${spell.name}`);
+    if (/\bV\b/.test(spell.components)) unhide(c, message("why.cast_spell", { spell: spell.name }));
     for (const hit of r.targets) {
       const t = targets[hit.target] as EncounterCombatant;
       useInspiration(c, hit.attack?.inspiration);
@@ -1906,7 +1947,7 @@ function run(
           ends: until("end"),
           damage: null,
         });
-        notes.push(`${spell.name}: the next attack roll against ${t.name} has Advantage.`);
+        notes.push(message("mark.advantage_against", { label: spell.name, target: t.name }));
       }
     }
     // Divine Smite's extra die against a Fiend or an Undead (doubled on a Critical Hit).
@@ -1923,7 +1964,14 @@ function run(
           rng,
           critical: options.critical,
         }).total;
-        notes.push(`${spell.name}: ${more} ${kind} more against a ${creatureTypeOf(ctx, t)}.`);
+        notes.push(
+          message("spell.bonus_vs", {
+            spell: spell.name,
+            amount: more,
+            type: kind,
+            creature_type: creatureTypeOf(ctx, t),
+          }),
+        );
         applyTo(t, [{ type: "damage", instances: [{ amount: more, type: kind }] }]);
       }
     }
@@ -1944,15 +1992,25 @@ function run(
           damage: { ...marking },
         });
         notes.push(
-          `${spell.name}: ${c.name}'s attack hits on ${t.name} deal ${marking.dice} ${marking.type} more.`,
+          message("spell.mark", {
+            spell: spell.name,
+            name: c.name,
+            target: t.name,
+            dice: marking.dice,
+            type: marking.type,
+          }),
         );
       }
     }
     if (r.follow_up) {
       const all = [...targets, ...nearby];
-      const what = r.follow_up.targets.length ? "" : ": no creature is in it";
       notes.push(
-        `${spell.name}'s saving throw (${ABILITY_NAMES[r.follow_up.ability]} DC ${r.follow_up.dc})${what}.`,
+        message("spell.follow_up", {
+          spell: spell.name,
+          ability: abilityMsg(r.follow_up.ability),
+          dc: r.follow_up.dc,
+          count: r.follow_up.targets.length,
+        }),
       );
       for (const hit of r.follow_up.targets) {
         const t = all[hit.target] as EncounterCombatant;
@@ -2054,18 +2112,20 @@ function run(
         // The save on casting counts as this turn's.
         saved: r.targets.map((x) => (targets[x.target] as EncounterCombatant).id),
       });
-      const WHEN = {
-        enter: "enter it",
-        start_turn: "start their turn there",
-        end_turn: "end their turn there",
-      } as const;
-      const when = triggers.flatMap((t) => (t === "move" ? [] : [WHEN[t]])).join(" or ");
-      const lasts = `${spell.name} lasts (${id})`;
-      const what = wallSpec?.later === "damage" ? "take its damage" : "save";
-      if (when) notes.push(`${lasts}: creatures ${what} when they ${when}.`);
-      else notes.push(`${lasts}.`);
+      const when = triggers
+        .filter((t) => t !== "move")
+        .map((t) => message(`zone.when.${t as "enter" | "start_turn" | "end_turn"}`));
+      notes.push(
+        message("zone.lasts", {
+          spell: spell.name,
+          id,
+          count: when.length,
+          damage: wallSpec?.later === "damage",
+          when,
+        }),
+      );
       if (triggers.includes("move")) {
-        notes.push(`${lasts}: creatures take its damage for every 5 feet they move in it.`);
+        notes.push(message("zone.lasts_move", { spell: spell.name, id }));
       }
     }
     return r;
@@ -2120,7 +2180,7 @@ function run(
         const name = lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell;
         if (concentrationOf(c) !== name) {
           c.readied = null;
-          notes.push(`${c.name}'s readied ${name} dissipates (Concentration ended).`);
+          notes.push(message("readied.dissipates", { name: c.name, spell: name }));
         }
       }
     }
@@ -2135,34 +2195,34 @@ function run(
     });
     for (const z of [...e.zones]) {
       const source = e.combatants.find((c) => c.id === z.by);
-      if (z.concentration && !source) endZone(z, "its caster left");
+      if (z.concentration && !source) endZone(z, message("why.caster_left"));
       else if (z.concentration && source && concentrationOf(source) !== z.label) {
-        endZone(z, "Concentration ended");
+        endZone(z, message("why.concentration_ended"));
       }
     }
     for (const effect of [...e.effects]) {
       const target = e.combatants.find((c) => c.id === effect.target);
       const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
-      if (!target) endEffect(effect, "its target left");
+      if (!target) endEffect(effect, message("why.target_left"));
       else if (!conditionsOf(ctx, target).has(effect.condition)) {
         // The condition was removed some other way (remove_condition, a rest): forget it.
         e.effects = e.effects.filter((x) => x.id !== effect.id);
-      } else if (effect.source && !source) endEffect(effect, "its source left");
+      } else if (effect.source && !source) endEffect(effect, message("why.source_left"));
       else if (
         effect.condition === "grappled" &&
         source &&
         conditionsOf(ctx, source).has("incapacitated")
       ) {
         // SRD "Grappling": the condition ends if the grappler has the Incapacitated condition.
-        endEffect(effect, `${source.name} is Incapacitated`);
+        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
       } else if (
         effect.ends_on.includes("source_incapacitated") &&
         source &&
         (conditionsOf(ctx, source).has("incapacitated") || outOfFight(ctx, source))
       ) {
-        endEffect(effect, `${source.name} is Incapacitated`);
+        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
       } else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
-        endEffect(effect, "Concentration ended");
+        endEffect(effect, message("why.concentration_ended"));
       }
     }
   };
@@ -2212,12 +2272,12 @@ function run(
     if (bonus) c.extended = true; // a Bonus Action extends Rage
   };
   /** It stops being hidden (SRD "Hide"): its Invisible condition from hiding ends. */
-  const unhide = (c: EncounterCombatant, why: string): void => {
+  const unhide = (c: EncounterCombatant, why: Message): void => {
     if (c.hidden === null) return;
     c.hidden = null;
     const effect = e.effects.find((x) => x.target === c.id && x.label === "Hidden");
     if (effect) endEffect(effect, why);
-    else notes.push(`${c.name} is no longer hidden (${why}).`);
+    else notes.push(message("hide.ends", { name: c.name, why }));
   };
   /** An ability check, noted: `check`, and the actions that are checks (Search, Study…). */
   const checkRoll = (
@@ -2235,11 +2295,17 @@ function run(
     });
     result = check;
     useInspiration(c, check.inspiration);
-    const label = check.skill ? skillName(check.skill as Skill) : ABILITY_NAMES[check.ability];
-    const against = check.dc === null ? "" : ` vs DC ${check.dc}`;
-    const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
-    const outcome = check.success === null ? "" : check.success ? ": success" : ": failure";
-    notes.push(`${c.name}'s ${label} check: ${check.total}${against}${why}${outcome}.`);
+    notes.push(
+      message("check.result", {
+        name: c.name,
+        label: check.skill ? message(`skill.${check.skill as Skill}`) : abilityMsg(check.ability),
+        total: check.total,
+        dc: check.dc ?? "none",
+        count: check.reasons.length,
+        reasons: check.reasons.map(plainMessage),
+        outcome: check.success === null ? "none" : check.success,
+      }),
+    );
     return check;
   };
   /** Help on `c`'s next check with `skill`, used up by it. */
@@ -2273,7 +2339,7 @@ function run(
           decisions: action.decisions ?? null,
         }),
       );
-      notes.push(`${action.name ?? numbered} joins with ${hp} HP.`);
+      notes.push(message("combatant.joins_hp", { name: action.name ?? numbered, hp }));
       break;
     }
     case "add_character": {
@@ -2294,7 +2360,7 @@ function run(
           decisions: action.decisions ?? null,
         }),
       );
-      notes.push(`${name} joins.`);
+      notes.push(message("combatant.joins", { name }));
       break;
     }
     case "decide":
@@ -2313,7 +2379,7 @@ function run(
         if (index < e.turn) e.turn -= 1;
         if (e.turn >= e.order.length) e.turn = 0;
       }
-      notes.push(`${c.name} leaves the encounter.`);
+      notes.push(message("combatant.leaves", { name: c.name }));
       break;
     }
     case "roll_initiative": {
@@ -2341,7 +2407,14 @@ function run(
           if (key !== null) groupRolls.set(key, d20);
         }
         c.initiative = d20 + bonus;
-        notes.push(`${c.name}: Initiative ${c.initiative} (${d20} ${signedText(bonus)}).`);
+        notes.push(
+          message("initiative.rolled", {
+            name: c.name,
+            total: c.initiative,
+            d20,
+            bonus: signedText(bonus),
+          }),
+        );
       }
       if (e.round > 0) reorder(e, ctx);
       break;
@@ -2380,7 +2453,7 @@ function run(
       for (const c of e.combatants) resetTurn(c);
       e.turn = 0;
       const first = skipToActive(e, ctx, notes, false);
-      notes.push(`Round 1: ${first.name}'s turn.`);
+      notes.push(message("turn.starts", { round: 1, name: first.name }));
       startTurn(first);
       break;
     }
@@ -2389,7 +2462,7 @@ function run(
       const ending = current();
       if (ending) endTurn(ending);
       const next = skipToActive(e, ctx, notes, true);
-      notes.push(`Round ${e.round}: ${next.name}'s turn.`);
+      notes.push(message("turn.starts", { round: e.round, name: next.name }));
       startTurn(next);
       break;
     }
@@ -2399,7 +2472,7 @@ function run(
       e.turn = 0;
       e.order = [];
       for (const c of e.combatants) resetTurn(c);
-      notes.push("The fight ends.");
+      notes.push(message("fight.ends"));
       break;
     }
     case "use": {
@@ -2455,7 +2528,7 @@ function run(
           const found = notice(c);
           // Noticing stops it here (when the square is free); `halt` holds everyone else.
           if (found.length && !last && !spaceTaken(c, square)) {
-            notes.push(`${c.name} stops at ${square.x},${square.y}.`);
+            notes.push(message("move.stops", { name: c.name, x: square.x, y: square.y }));
             break;
           }
         }
@@ -2524,7 +2597,7 @@ function run(
         zonesBefore = zoneOccupants();
         // Held on the way (Web) or out of the fight: it stops there.
         if (i < path.length - 1 && (outOfFight(ctx, c) || speedOf(ctx, c, e) === 0)) {
-          notes.push(`${c.name} stops at ${square.x},${square.y}.`);
+          notes.push(message("move.stops", { name: c.name, x: square.x, y: square.y }));
           break;
         }
       }
@@ -2533,9 +2606,7 @@ function run(
       // Enemies whose reach it left can make an Opportunity Attack (not after Disengage).
       for (const x of reachOf.keys()) {
         if (leftReach.includes(x) && !c.disengaged && !x.used.reaction) {
-          notes.push(
-            `${c.name} leaves ${x.name}'s reach: ${x.name} can make an Opportunity Attack.`,
-          );
+          notes.push(message("move.leaves_reach", { name: c.name, enemy: x.name }));
         }
       }
       notice(c);
@@ -2549,12 +2620,7 @@ function run(
       if (action.kind !== "clear") {
         e.map[action.kind].push(...action.squares.map((p) => ({ x: p.x, y: p.y })));
       }
-      const what = { difficult: "Difficult Terrain", blocked: "blocked", clear: "clear" }[
-        action.kind
-      ];
-      notes.push(
-        `${action.squares.length} square${action.squares.length > 1 ? "s" : ""}: ${what}.`,
-      );
+      notes.push(message("map.terrain", { count: action.squares.length, kind: action.kind }));
       break;
     }
     case "add_wall":
@@ -2567,11 +2633,11 @@ function run(
       if (action.type === "add_wall") {
         if (e.map.walls.some(same)) fail("That wall is already there");
         e.map.walls.push({ from: { ...from }, to: { ...to } });
-        notes.push(`A wall from ${from.x},${from.y} to ${to.x},${to.y}.`);
+        notes.push(message("map.wall_added", { x1: from.x, y1: from.y, x2: to.x, y2: to.y }));
       } else {
         if (!e.map.walls.some(same)) fail(`No wall from ${from.x},${from.y} to ${to.x},${to.y}`);
         e.map.walls = e.map.walls.filter((w) => !same(w));
-        notes.push(`The wall from ${from.x},${from.y} to ${to.x},${to.y} is gone.`);
+        notes.push(message("map.wall_removed", { x1: from.x, y1: from.y, x2: to.x, y2: to.y }));
       }
       break;
     }
@@ -2597,7 +2663,7 @@ function run(
       e.points.push(p);
       // A hidden point's title stays the GM's: the log is everyone's.
       notes.push(
-        p.revealed ? `${p.title} is on the map.` : "A hidden point of interest is placed.",
+        p.revealed ? message("poi.placed", { title: p.title }) : message("poi.placed_hidden"),
       );
       noticeAll();
       break;
@@ -2608,11 +2674,11 @@ function run(
       const wasRevealed = p.revealed;
       Object.assign(p, structuredClone(changes));
       if (p.revealed && !wasRevealed) {
-        notes.push(`${p.title} is revealed.`);
+        notes.push(message("poi.revealed", { title: p.title }));
         if (e.halted === p.id) e.halted = null;
       } else if (!p.revealed && wasRevealed) {
         p.noticed_by = [];
-        notes.push("A point of interest is hidden again.");
+        notes.push(message("poi.hidden"));
       }
       noticeAll();
       break;
@@ -2621,22 +2687,18 @@ function run(
       point(action.id);
       e.points = e.points.filter((p) => p.id !== action.id);
       if (e.halted === action.id) e.halted = null;
-      notes.push("A point of interest is removed.");
+      notes.push(message("poi.removed"));
       break;
     }
     case "set_exploration": {
       if (action.pace) {
         e.pace = action.pace;
-        notes.push(`Travel pace: ${action.pace[0]?.toUpperCase()}${action.pace.slice(1)}.`);
+        notes.push(message("explore.pace", { pace: action.pace }));
       }
       if (action.notice_stops) {
         e.notice_stops = action.notice_stops;
         if (action.notice_stops === "noticer") e.halted = null;
-        notes.push(
-          action.notice_stops === "everyone"
-            ? "When someone notices something, everyone stops."
-            : "When someone notices something, only they stop.",
-        );
+        notes.push(message("explore.notice_stops", { who: action.notice_stops }));
       }
       noticeAll();
       break;
@@ -2644,32 +2706,33 @@ function run(
     case "resume": {
       if (!e.halted) fail("Nobody is waiting");
       e.halted = null;
-      notes.push("Everyone goes on.");
+      notes.push(message("explore.resume"));
       break;
     }
     case "dash": {
       const c = find(action.id);
       takeAction(c, "Dash", action.bonus_action);
       c.extra_movement += speedOf(ctx, c, e);
-      notes.push(`${c.name} Dashes: ${speedOf(ctx, c, e) + c.extra_movement - c.moved} feet left.`);
+      notes.push(
+        message("action.dash", {
+          name: c.name,
+          feet: speedOf(ctx, c, e) + c.extra_movement - c.moved,
+        }),
+      );
       break;
     }
     case "disengage": {
       const c = find(action.id);
       takeAction(c, "Disengage", action.bonus_action);
       c.disengaged = true;
-      notes.push(
-        `${c.name} Disengages: its movement doesn't provoke Opportunity Attacks this turn.`,
-      );
+      notes.push(message("action.disengage", { name: c.name }));
       break;
     }
     case "dodge": {
       const c = find(action.id);
       takeAction(c, "Dodge", action.bonus_action);
       c.dodging = true;
-      notes.push(
-        `${c.name} Dodges: until the start of its next turn, attack rolls against it have Disadvantage and it has Advantage on Dexterity saving throws.`,
-      );
+      notes.push(message("action.dodge", { name: c.name }));
       break;
     }
     case "help": {
@@ -2692,8 +2755,12 @@ function run(
       e.helps.push({ by: c.id, on: t.id, skill: action.skill ?? null });
       notes.push(
         action.skill
-          ? `${c.name} Helps ${t.name}: Advantage on its next ${action.skill} check before the start of ${c.name}'s next turn.`
-          : `${c.name} Helps against ${t.name}: Advantage on an ally's next attack roll against it before the start of ${c.name}'s next turn.`,
+          ? message("action.help_check", {
+              name: c.name,
+              target: t.name,
+              skill: message(`skill.${action.skill}`),
+            })
+          : message("action.help_attack", { name: c.name, target: t.name }),
       );
       break;
     }
@@ -2721,10 +2788,15 @@ function run(
         action.save ?? (target.saving_throws.dex > target.saving_throws.str ? "dex" : "str");
       const save = rollSavingThrow(target, ability, dc, { rng, decide });
       result = save;
-      const verb = action.option === "grapple" ? "grapple" : "shove";
-      const outcome = save.success ? "succeeds on" : "fails";
       notes.push(
-        `${c.name} tries to ${verb} ${t.name}: ${t.name} ${outcome} a ${ABILITY_NAMES[ability]} saving throw (${saveText(save).text}).`,
+        message("unarmed.save", {
+          name: c.name,
+          option: action.option,
+          target: t.name,
+          success: save.success,
+          ability: abilityMsg(ability),
+          save: saveText(save),
+        }),
       );
       spendLegendaryResistance(t, save);
       if (save.success) break;
@@ -2738,11 +2810,11 @@ function run(
           escape_dc: dc,
         });
         if (conditionsOf(ctx, t).has("grappled")) {
-          notes.push(`${t.name} is Grappled by ${c.name} (escape DC ${dc}).`);
+          notes.push(message("unarmed.grappled", { target: t.name, name: c.name, dc }));
         }
       } else if (action.shove === "prone") {
         applyTo(t, [{ type: "add_condition", condition: "prone" }]);
-      } else notes.push(`${t.name} is pushed 5 feet away from ${c.name}.`);
+      } else notes.push(message("unarmed.pushed", { target: t.name, name: c.name }));
       break;
     }
     case "escape": {
@@ -2774,13 +2846,20 @@ function run(
       });
       result = check;
       useInspiration(c, check.inspiration);
-      const why = check.reasons.length ? `; ${check.reasons.join("; ")}` : "";
       const condition = lookup(ctx.catalog.conditions, hold.condition)?.name ?? hold.condition;
-      const outcome = check.success ? "escapes" : `stays ${condition}`;
       notes.push(
-        `${c.name} tries to escape (${skill} ${check.total} vs DC ${hold.escape_dc}${why}): ${outcome}.`,
+        message("escape.result", {
+          name: c.name,
+          skill: message(`skill.${skill}`),
+          total: check.total,
+          dc: hold.escape_dc ?? "none",
+          count: check.reasons.length,
+          reasons: check.reasons.map(plainMessage),
+          success: check.success === true,
+          condition,
+        }),
       );
-      if (check.success) endEffect(hold, "escaped");
+      if (check.success) endEffect(hold, message("why.escaped"));
       break;
     }
     case "stand": {
@@ -2797,7 +2876,7 @@ function run(
       if (c.moved + cost > budget) fail(`${c.name} needs ${cost} feet of movement to stand up`);
       c.moved += cost;
       applyTo(c, [{ type: "remove_condition", condition: "prone" }]);
-      notes.push(`${c.name} stands up (${cost} feet of movement).`);
+      notes.push(message("action.stand_up", { name: c.name, feet: cost }));
       break;
     }
     case "hide": {
@@ -2828,13 +2907,13 @@ function run(
         ends: null,
       });
       c.hidden = check.total;
-      notes.push(`${c.name} is hidden (Invisible; Perception DC ${check.total} to find it).`);
+      notes.push(message("hide.hidden", { name: c.name, dc: check.total }));
       break;
     }
     case "reveal": {
       const c = find(action.id);
       if (c.hidden === null) fail(`${c.name} isn't hidden`);
-      unhide(c, "it was revealed");
+      unhide(c, message("why.revealed"));
       break;
     }
     case "search": {
@@ -2856,7 +2935,7 @@ function run(
         (p) => check.total >= (p.dc as number) && !p.noticed_by.includes(c.id),
       );
       for (const p of found) p.noticed_by.push(c.id);
-      if (found.length) notes.push(`${c.name} finds something.`);
+      if (found.length) notes.push(message("search.finds", { name: c.name }));
       halt(found);
       const hidden = e.combatants.filter(
         (x) =>
@@ -2865,8 +2944,9 @@ function run(
           (target ? x.id === target.id : !alliesOf(e, x.id, c)),
       );
       for (const x of hidden) {
-        if (check.total >= (x.hidden as number)) unhide(x, `${c.name} finds it`);
-        else notes.push(`${c.name} doesn't find ${x.name}.`);
+        if (check.total >= (x.hidden as number))
+          unhide(x, message("why.found_by", { name: c.name }));
+        else notes.push(message("search.misses", { name: c.name, target: x.name }));
       }
       break;
     }
@@ -2886,7 +2966,13 @@ function run(
     case "utilize": {
       const c = find(action.id);
       takeAction(c, "Utilize");
-      notes.push(`${c.name} takes the Utilize action${action.what ? `: ${action.what}` : ""}.`);
+      notes.push(
+        message("action.utilize", {
+          name: c.name,
+          given: Boolean(action.what),
+          what: action.what ?? "",
+        }),
+      );
       break;
     }
     case "ready": {
@@ -2937,12 +3023,12 @@ function run(
         }
         held = true;
         notes.push(
-          `${c.name} readies ${spell.name}, holding it with Concentration: ${action.trigger}.`,
+          message("readied.spell", { name: c.name, spell: spell.name, trigger: action.trigger }),
         );
       } else {
         takeAction(c, "Ready");
         notes.push(
-          `${c.name} readies ${then.type === "move" ? "a move" : `a ${then.type}`}: ${action.trigger}.`,
+          message("readied.action", { name: c.name, kind: then.type, trigger: action.trigger }),
         );
       }
       c.readied = { trigger: action.trigger, action: then, held };
@@ -2984,7 +3070,7 @@ function run(
       for (const id of action.targets) {
         const t = find(id);
         if (z.once_per_turn && z.saved.includes(t.id)) {
-          notes.push(`${t.name} has already saved against ${z.label} this turn.`);
+          notes.push(message("zone.already_saved", { name: t.name, label: z.label }));
         }
       }
       zoneSave(z, action.targets, message("why.zone_save", { count: action.targets.length }));
@@ -2996,7 +3082,7 @@ function run(
       if (action.onto && !z.ram) fail(`${z.label} doesn't make a creature save by moving into it`);
       const before = zoneOccupants();
       z.point = { ...action.point };
-      notes.push(`${z.label} moves to ${action.point.x},${action.point.y}.`);
+      notes.push(message("zone.moves", { label: z.label, x: action.point.x, y: action.point.y }));
       zoneEntries(before);
       if (action.onto) zoneSave(z, [action.onto], message("why.in_its_way"));
       break;
@@ -3019,18 +3105,18 @@ function run(
       }
       takeAction(c, `move ${mark.label}`, true);
       mark.on = t.id;
-      notes.push(`${c.name} moves ${mark.label} to ${t.name}.`);
+      notes.push(message("mark.moved", { name: c.name, label: mark.label, target: t.name }));
       break;
     }
     case "end_zone": {
       const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
-      endZone(z, "ended");
+      endZone(z, message("why.ended"));
       break;
     }
     case "end_effect": {
       const effect =
         e.effects.find((x) => x.id === action.effect) ?? fail(`No effect '${action.effect}'`);
-      endEffect(effect, "ended");
+      endEffect(effect, message("why.ended"));
       break;
     }
     case "check": {
@@ -3087,7 +3173,7 @@ function run(
         // Nick: "as part of the Attack action instead of as a Bonus Action", once per turn.
         if (line?.mastery === "Nick" && action.mastery !== false && !c.nick_used) {
           c.nick_used = true;
-          notes.push(`Nick: ${c.name}'s extra attack is part of the Attack action.`);
+          notes.push(message("mastery.nick", { name: c.name }));
         } else {
           if (c.used.bonus_action) fail(`${c.name} has already used its bonus action this turn`);
           c.used.bonus_action = true;
@@ -3158,7 +3244,11 @@ function run(
       c.legendary_used += 1;
       if (line.once_per_round) c.legendary_taken.push(line.name);
       notes.push(
-        `${c.name} takes a legendary action: ${line.name} (${perRound - c.legendary_used} left this round).`,
+        message("legendary.action", {
+          name: c.name,
+          action: line.name,
+          left: perRound - c.legendary_used,
+        }),
       );
       const needTarget = () => find(action.target ?? fail(`${line.name} needs a target`));
       const attackable = (name: string) => user.attacks.some((a) => a.name === name);
@@ -3210,7 +3300,7 @@ function run(
           !!action.area,
         );
       } else {
-        notes.push(`${line.name}: its effect is in the stat block's text.`);
+        notes.push(message("legendary.text_only", { action: line.name }));
       }
       break;
     }
@@ -3278,8 +3368,10 @@ function run(
       if (f.extra_action && !c.used.action) {
         fail(`Take your action first: ${f.name} gives one additional action`);
       }
-      const on = f.many ? targets.map((x) => x.name).join(", ") : t === c ? "" : t.name;
-      notes.push(`${c.name} uses ${f.name}${on ? ` on ${on}` : ""}.`);
+      const on = f.many ? targets.map((x) => x.name) : t === c ? [] : [t.name];
+      notes.push(
+        message("feature.used", { name: c.name, feature: f.name, count: on.length, targets: on }),
+      );
       play(c, { type: "use_feature", key: f.key, amount: action.amount });
       if (f.once_per_turn) c.features_used.push(f.key);
       if (f.heal && f.target !== "self") {
@@ -3288,12 +3380,12 @@ function run(
           : rollDamage([{ dice: f.heal.dice, bonus: f.heal.bonus, type: "healing" }], { rng })
               .total;
         applyTo(t, [{ type: "heal", amount }]);
-        notes.push(`${t.name} regains ${amount} Hit Points.`);
+        notes.push(message("feature.heals", { name: t.name, amount }));
       }
       for (const condition of f.removes) {
         applyTo(t, [{ type: "remove_condition", condition }]);
         const name = lookup(ctx.catalog.conditions, condition)?.name ?? condition;
-        notes.push(`${t.name} is no longer ${name}.`);
+        notes.push(message("feature.removes", { name: t.name, condition: name }));
       }
       if (f.extra_action) {
         c.used.action = false;
@@ -3332,9 +3424,15 @@ function run(
                   ? Math.floor(rolled / 2)
                   : 0
                 : rolled;
-          const dealt = rolled === null ? "" : `: ${amount} ${damageType}`;
           notes.push(
-            `${x.name} ${save.success ? "succeeds" : "fails"} (${saveText(save).text})${dealt}.`,
+            message("feature.save", {
+              name: x.name,
+              success: save.success,
+              save: saveText(save),
+              damage: rolled !== null,
+              amount,
+              type: damageType ?? "",
+            }),
           );
           spendLegendaryResistance(x, save);
           if (amount > 0)
@@ -3364,7 +3462,7 @@ function run(
                 damage: null,
               });
               notes.push(
-                `${f.name}: ${x.name}'s Speed is halved until the start of ${c.name}'s next turn.`,
+                message("feature.speed_halved", { feature: f.name, target: x.name, name: c.name }),
               );
             }
             if (fs.on_success.includes("advantage_against")) {
@@ -3376,14 +3474,14 @@ function run(
                 ends: { ...until },
                 damage: null,
               });
-              notes.push(`${f.name}: the next attack roll against ${x.name} has Advantage.`);
+              notes.push(message("mark.advantage_against", { label: f.name, target: x.name }));
             }
           }
         }
       }
       if (f.inspiration_die) {
         t.inspiration = { die: f.inspiration_die, by: c.id };
-        notes.push(`${t.name} has a Bardic Inspiration die (d${f.inspiration_die}).`);
+        notes.push(message("inspiration.given", { name: t.name, die: f.inspiration_die }));
       }
       break;
     }
@@ -3511,12 +3609,11 @@ function run(
     c.readied = null;
   }
   sweep();
-  const messages = notes.map((m) => (typeof m === "string" ? plainMessage(m) : m));
   return {
     encounter: EncounterSchema.parse(e),
     states,
-    notes: messages.map((m) => m.text),
-    messages,
+    notes: notes.map((m) => m.text),
+    messages: notes,
     result,
   };
 }
@@ -3669,7 +3766,7 @@ function reorder(e: Encounter, ctx: EncounterContext): void {
 function skipToActive(
   e: Encounter,
   ctx: EncounterContext,
-  notes: (Message | string)[],
+  notes: Message[],
   advance: boolean,
 ): EncounterCombatant {
   for (let step = advance ? 1 : 0; step <= e.order.length; step++) {
@@ -3677,7 +3774,7 @@ function skipToActive(
     if (advance && step > 0 && index === 0) e.round += 1;
     const c = e.combatants.find((x) => x.id === e.order[index]);
     if (!c || outOfFight(ctx, c)) {
-      if (c) notes.push(`${c.name} is out of the fight: turn skipped.`);
+      if (c) notes.push(message("turn.skipped", { name: c.name }));
       continue;
     }
     e.turn = index;
@@ -3688,7 +3785,7 @@ function skipToActive(
 }
 
 /** A play action applied to a monster in the encounter. */
-function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayAction): string[] {
+function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayAction): Message[] {
   const def = monsterDef(ctx, c);
   const hp = c.hp ?? def.hit_points;
   switch (a.type) {
@@ -3708,7 +3805,9 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       c.hp = result.hp;
       c.temp_hp = result.temp;
       // Massive Damage and Death Saving Throws are for characters: a monster just dies at 0 HP.
-      const notes = result.notes.filter((n) => !/^(Massive damage|Damage at 0 HP)/.test(n));
+      const notes = result.notes
+        .filter((n) => !/^(Massive damage|Damage at 0 HP)/.test(n))
+        .map(plainMessage);
       const regen = def.traits.find((t) => t.regeneration)?.regeneration;
       const instances = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
       if (
@@ -3721,13 +3820,11 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       if (result.hp === 0 && regen) {
         // Regeneration: "dies only if it starts its turn with 0 Hit Points and doesn't regenerate".
         if (!c.conditions.includes("unconscious")) c.conditions.push("unconscious");
-        notes.push(
-          `${c.name} drops to 0 Hit Points (it dies if it starts its turn there and doesn't regenerate).`,
-        );
+        notes.push(message("monster.down_regenerating", { name: c.name }));
       } else if (result.hp === 0) {
         // SRD "Monster Death": a monster dies the instant it drops to 0 Hit Points.
         c.defeated = true;
-        notes.push(`${c.name} drops to 0 Hit Points and dies.`);
+        notes.push(message("monster.dies", { name: c.name }));
       }
       return notes;
     }
@@ -3744,7 +3841,7 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       const condition =
         lookup(ctx.catalog.conditions, a.condition) ?? fail(`Unknown condition '${a.condition}'`);
       if (def.condition_immunities.includes(condition.id)) {
-        return [`${c.name} is immune to ${condition.name}.`];
+        return [message("monster.immune", { name: c.name, condition: condition.name })];
       }
       if (!c.conditions.includes(condition.id)) c.conditions.push(condition.id);
       return [];
@@ -3757,7 +3854,7 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
     case "set_concentration": {
       const previous = c.concentration;
       c.concentration = a.spell;
-      return previous && a.spell ? [`Concentration on ${previous} ends.`] : [];
+      return previous && a.spell ? [message("concentration.ends", { spell: previous })] : [];
     }
     case "spend_slot":
     case "spend_pact_slot":
@@ -3769,25 +3866,36 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
 
 /** "14 vs DC 13", or "fails automatically: Paralyzed". */
 /** One target's share of a spell or saving throw effect: "Brakka: fails (12 vs DC 14): 28 fire." */
-function targetNote(name: string, hit: SpellTargetResult, ac?: number): string {
-  const parts: string[] = [];
-  if (hit.save)
-    parts.push(`${hit.save.success ? "succeeds" : "fails"} (${saveText(hit.save).text})`);
-  if (hit.attack) {
-    const crit = hit.critical ? "Critical Hit, " : "";
-    const roll = `${hit.attack.total} vs AC${ac === undefined ? "" : ` ${ac}`}`;
-    parts.push(hit.attack.hit ? `${crit}hit (${roll})` : `missed (${roll})`);
+function targetNote(name: string, hit: SpellTargetResult, ac?: number): Message {
+  const parts: Message[] = [];
+  if (hit.save) {
+    parts.push(message("target.save", { success: hit.save.success, save: saveText(hit.save) }));
   }
-  const damage = hit.instances.map((d) => `${d.amount} ${d.type}`).join(" + ");
-  const effects = [
-    damage,
-    hit.healing ? `regains ${hit.healing} HP` : "",
-    hit.conditions.length ? hit.conditions.join(", ") : "",
-  ].filter(Boolean);
-  const head = parts.length ? `${name}: ${parts.join(", ")}` : name;
-  return effects.length
-    ? `${head}: ${effects.join("; ")}.`
-    : `${head}${parts.length ? "." : ": no effect."}`;
+  if (hit.attack) {
+    parts.push(
+      message("target.attack", {
+        hit: hit.attack.hit,
+        critical: hit.critical,
+        total: hit.attack.total,
+        ac: ac ?? "unknown",
+      }),
+    );
+  }
+  const effects: Message[] = [];
+  if (hit.instances.length) {
+    effects.push(message("target.damage", { dealt: dealtMsg(hit.instances) }));
+  }
+  if (hit.healing) effects.push(message("target.healing", { amount: hit.healing }));
+  if (hit.conditions.length) {
+    effects.push(message("target.conditions", { conditions: [...hit.conditions] }));
+  }
+  return message("target.result", {
+    name,
+    count: parts.length,
+    parts,
+    effect_count: effects.length,
+    effects,
+  });
 }
 
 function saveText(save: SaveResult): Message {
@@ -3803,8 +3911,12 @@ function abilityMsg(ability: Ability): Message {
 }
 
 /** Damage dealt, part by part (`8 fire + 3 piercing`): `{dealt, list, plus}`. */
-function dealtMsg(instances: readonly { amount: number; type: string }[]): Message[] {
-  return instances.map((d) => message("damage.amount", { amount: d.amount, type: d.type }));
+function dealtMsg(instances: readonly { amount: number; type?: string | null }[]): Message[] {
+  return instances.map((d) =>
+    d.type
+      ? message("damage.amount", { amount: d.amount, type: d.type })
+      : message("damage.untyped", { amount: d.amount }),
+  );
 }
 
 /** A given path: each square next to the one before it (diagonals included). */

@@ -225,7 +225,7 @@ describe("Web", () => {
       "Escaping Web takes an Athletics check",
     );
     s.act([12], { type: "escape", id: "ogre" });
-    expect(s.notes.at(-2)).toMatch(/^Ogre tries to escape \(athletics 16 vs DC 14\): escapes\.$/);
+    expect(s.notes.at(-2)).toMatch(/^Ogre tries to escape \(Athletics 16 vs DC 14\): escapes\.$/);
     expect(s.get("ogre")?.conditions).toEqual([]);
   });
 });

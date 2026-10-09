@@ -39,17 +39,32 @@ describe("message templates", () => {
 });
 
 describe("encounter results", () => {
+  // A catalog that marks every code: a coded message renders through it, `text` doesn't.
+  const marked = Object.fromEntries(
+    Object.entries(MESSAGES_EN).map(([code, t]) => [code, code === "text" ? t : `‹${t}›`]),
+  );
+
   it("carry a message for every note, with a known code; English renders back to the note", () => {
     let e = createEncounter();
     const rng = seededRng(3);
     const actions: EncounterAction[] = [
       { type: "add_monster", monster: "mage" },
       { type: "add_monster", monster: "ogre" },
+      { type: "add_monster", monster: "goblin-warrior", side: "party" },
+      { type: "set_terrain", squares: [{ x: 4, y: 4 }], kind: "difficult" },
       { type: "roll_initiative" },
+      { type: "set_initiative", id: "mage", value: 20 },
+      { type: "set_initiative", id: "goblin-warrior", value: 15 },
+      { type: "set_initiative", id: "ogre", value: 10 },
       { type: "start" },
       { type: "cast", id: "mage", spell: "fireball", targets: ["ogre"] },
       { type: "next_turn" },
+      { type: "dodge", id: "goblin-warrior" },
+      { type: "next_turn" },
+      { type: "attack", id: "ogre", target: "goblin-warrior", attack: "Greatclub" },
+      { type: "end" },
     ];
+    const codes = new Set<string>();
     for (const action of actions) {
       const r = applyEncounterAction(e, action, { catalog, rng });
       e = r.encounter;
@@ -57,7 +72,19 @@ describe("encounter results", () => {
       for (const m of r.messages) {
         expect(m.code in MESSAGES_EN).toBe(true);
         expect(renderMessage(m)).toBe(m.text);
+        if (m.code !== "text") expect(renderMessage(m, marked)).toMatch(/^‹.*›$/);
+        codes.add(m.code);
       }
+    }
+    expect([...codes]).toEqual(
+      expect.arrayContaining(["map.terrain", "initiative.rolled", "turn.starts", "spell.cast"]),
+    );
+    expect([...codes]).toEqual(expect.arrayContaining(["action.dodge", "fight.ends"]));
+  });
+
+  it("every English template parses", () => {
+    for (const template of Object.values(MESSAGES_EN)) {
+      expect(() => formatMessage(template, {})).not.toThrow();
     }
   });
 });

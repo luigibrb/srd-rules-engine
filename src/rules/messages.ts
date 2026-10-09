@@ -4,7 +4,8 @@
  *
  * - `{name}`: a parameter (a nested message is rendered with the same catalog; a list is joined
  *   with ", ");
- * - `{name, list}` / `{name, list, plus}`: a list joined with ", " or " + ";
+ * - `{name, list}` / `{name, list, plus}` / `{name, list, semicolon}` / `{name, list, or}`: a list
+ *   joined with ", ", " + ", "; " or " or ";
  * - `{n, plural, one {…} other {…}}` (also `=0 {…}`): by the number, `#` standing for it;
  * - `{key, select, a {…} b {…} other {…}}`: by the value (`true`/`false` for a boolean).
  */
@@ -19,6 +20,8 @@ type Node =
   | { arg: string; kind: "value" | "list"; style: string | null }
   | { arg: string; kind: "plural" | "select"; options: Record<string, Node[]> }
   | { hash: true };
+
+const LIST_JOINERS: Readonly<Record<string, string>> = { plus: " + ", semicolon: "; ", or: " or " };
 
 const parsed = new Map<string, Node[]>();
 
@@ -132,7 +135,7 @@ export function formatMessage(
         if ("hash" in node) return n === null ? "#" : String(n);
         const v = value(node.arg);
         if (v === undefined) return `{${node.arg}}`;
-        if (!("options" in node)) return show(v, node.style === "plus" ? " + " : ", ");
+        if (!("options" in node)) return show(v, LIST_JOINERS[node.style ?? ""] ?? ", ");
         if (node.kind === "plural") {
           const count = Number(v);
           const option =

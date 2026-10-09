@@ -222,7 +222,7 @@ describe("Grapple and Shove", () => {
     s.act([5], grapple, next);
     s.act([12], { type: "escape", id: goblin }); // Acrobatics (Dex +2): 14 vs 13
     expect(s.notes.slice(-2)).toEqual([
-      "Goblin Warrior tries to escape (acrobatics 14 vs DC 13): escapes.",
+      "Goblin Warrior tries to escape (Acrobatics 14 vs DC 13): escapes.",
       "Grappled on Goblin Warrior ends (Grapple: escaped).",
     ]);
     expect(s.get(goblin)?.conditions).toEqual([]);
