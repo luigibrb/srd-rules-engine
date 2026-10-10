@@ -13,6 +13,8 @@
  */
 
 import type { SpellArea } from "../models/content";
+import type { Message } from "../models/messages";
+import { message, RuleError } from "./messages";
 
 export interface GridPoint {
   readonly x: number;
@@ -44,7 +46,7 @@ export function areaSquares(
   switch (area.shape) {
     case "sphere":
     case "cylinder": {
-      const p = placement.point ?? fail(`A ${area.shape} needs a point`);
+      const p = placement.point ?? fail(message("rule.needs_point", { shape: area.shape }));
       const r = area.size / 5;
       // Squares whose center (x + 0.5) is within r of the corner p, on each axis.
       for (let x = Math.floor(p.x - r); x <= Math.ceil(p.x + r); x++) {
@@ -65,20 +67,22 @@ export function areaSquares(
       break;
     }
     case "cube": {
-      const p = placement.point ?? fail("A cube needs a point (its top-left square)");
+      const p = placement.point ?? fail(message("rule.cube_needs_point_top"));
       const n = area.size / 5;
       for (let x = p.x; x < p.x + n; x++) for (let y = p.y; y < p.y + n; y++) add(x, y);
       break;
     }
     case "cone":
     case "line": {
-      const t = placement.toward ?? fail(`A ${area.shape} needs a direction (a square toward)`);
+      const t =
+        placement.toward ??
+        fail(message("rule.needs_direction_square_toward", { shape: area.shape }));
       const cx = o.x + s / 2;
       const cy = o.y + s / 2;
       const dx = t.x + 0.5 - cx;
       const dy = t.y + 0.5 - cy;
       const length = Math.hypot(dx, dy);
-      if (length === 0) fail(`A ${area.shape} needs a direction away from its origin`);
+      if (length === 0) fail(message("rule.needs_direction_away_origin", { shape: area.shape }));
       const [ux, uy] = [dx / length, dy / length];
       const limit = area.size / 5;
       for (let x = o.x - reach; x <= o.x + s + reach; x++) {
@@ -115,6 +119,6 @@ export function distanceToPoint(space: GridSpace, point: GridPoint): number {
   return Math.max(gap(point.x, space.position.x), gap(point.y, space.position.y)) * 5;
 }
 
-function fail(message: string): never {
-  throw new RangeError(message);
+function fail(reason: Message): never {
+  throw new RuleError(reason);
 }

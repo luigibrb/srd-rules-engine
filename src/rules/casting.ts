@@ -31,7 +31,7 @@ import {
   takeDamage,
 } from "./damage";
 import { parseDiceExpression } from "./dice";
-import { message } from "./messages";
+import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 export interface CastOptions {
@@ -176,15 +176,18 @@ export function castSpell(
     critical = false,
   }: CastOptions = {},
 ): SpellCastResult {
-  if (caster.no_spells) throw new RangeError(`${caster.name} can't cast spells right now`);
+  if (caster.no_spells)
+    throw new RuleError(message("rule.cant_cast_spells_right", { name: caster.name }));
   const m = spell.mechanics;
   const cantrip = spell.level === 0;
   const slot = cantrip ? null : (slot_level ?? spell.level);
   if (cantrip && slot_level !== undefined) {
-    throw new RangeError(`${spell.name} is a cantrip: it doesn't use a spell slot`);
+    throw new RuleError(message("rule.cantrip_doesnt_use_spell", { spell: spell.name }));
   }
   if (slot !== null && (slot < spell.level || slot > 9)) {
-    throw new RangeError(`${spell.name} needs a spell slot of level ${spell.level} to 9`);
+    throw new RuleError(
+      message("rule.needs_spell_slot_level", { spell: spell.name, level: spell.level }),
+    );
   }
   const above = slot === null ? 0 : slot - spell.level;
   const tier = cantripTier(caster.level);
@@ -199,10 +202,12 @@ export function castSpell(
   if (beams > 1) {
     const what = projectiles ? (m?.attack ? "rays" : "darts") : "beams";
     if (targets.length !== 1 && targets.length !== beams) {
-      throw new RangeError(`${spell.name} has ${beams} ${what}: give 1 target or ${beams}`);
+      throw new RuleError(message("rule.give_target", { spell: spell.name, beams, what }));
     }
   } else if (maxTargets !== null && targets.length > maxTargets) {
-    throw new RangeError(`${spell.name} can target at most ${maxTargets} at this level`);
+    throw new RuleError(
+      message("rule.target_most_level", { spell: spell.name, max_targets: maxTargets }),
+    );
   }
 
   const casterActions: PlayAction[] = [];
@@ -231,7 +236,9 @@ export function castSpell(
   const needsLine = m.attack !== null || m.save !== null || m.follow_up !== null;
   const modifierUsed = m.damage.some((d) => d.add_modifier) || m.heal?.add_modifier === true;
   if (!line && (needsLine || modifierUsed)) {
-    throw new RangeError(`${caster.name} has no spellcasting feature to cast ${spell.name}`);
+    throw new RuleError(
+      message("rule.no_spellcasting_feature_cast", { name: caster.name, spell: spell.name }),
+    );
   }
   const modifier = line?.modifier ?? 0;
 
@@ -263,13 +270,14 @@ export function castSpell(
   // A damage type the caster picks (Spirit Guardians), for every part.
   if (m.damage_types.length) {
     const options = m.damage_types.join(" or ");
-    if (!damage_type) throw new RangeError(`${spell.name}: choose its damage type (${options})`);
+    if (!damage_type)
+      throw new RuleError(message("rule.choose_damage_type", { spell: spell.name, options }));
     if (!m.damage_types.includes(damage_type)) {
-      throw new RangeError(`${spell.name}'s damage is ${options}, not ${damage_type}`);
+      throw new RuleError(message("rule.damage_not", { spell: spell.name, options, damage_type }));
     }
     for (const [i, part] of parts.entries()) parts[i] = { ...part, type: damage_type };
   } else if (damage_type) {
-    throw new RangeError(`${spell.name}'s damage type isn't a choice`);
+    throw new RuleError(message("rule.damage_type_isnt_choice", { spell: spell.name }));
   }
 
   // Spell damage bonuses from features (Potent Spellcasting): an ability modifier added to the
@@ -323,7 +331,7 @@ export function castSpell(
       const critical_miss = roll.d20 === 1;
       let total = roll.d20 + bonus;
       // Bardic Inspiration on a miss (not a natural 1 or 20).
-      const what = `spell attack roll with ${spell.name}`;
+      const what = message("roll.spell_attack_with", { spell: spell.name });
       const inspiration =
         roll.d20 === 20 || critical_miss
           ? null
@@ -449,7 +457,7 @@ function pickSpellcasting(
 ): CombatantSpellcasting | null {
   if (source !== undefined) {
     const named = caster.spellcasting.find((s) => s.source === source);
-    if (!named) throw new RangeError(`${caster.name} has no spellcasting from '${source}'`);
+    if (!named) throw new RuleError(message("rule.no_spellcasting", { name: caster.name, source }));
     return named;
   }
   const best = (lines: readonly CombatantSpellcasting[]) =>
@@ -589,7 +597,9 @@ export function useSaveAction(
   const action = user.save_actions.find((a) => a.name === name);
   if (!action) {
     const known = user.save_actions.map((a) => a.name).join(", ");
-    throw new RangeError(`${user.name} has no saving throw action '${name}' (${known})`);
+    throw new RuleError(
+      message("rule.no_saving_throw_action", { name: user.name, action: name, known }),
+    );
   }
   const resolved = resolveSave(action, action.damage_parts, targets, rng, decide);
   return {

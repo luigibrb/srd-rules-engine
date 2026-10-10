@@ -60,6 +60,7 @@ import {
   combatantFromMonster,
   type Decide,
   type Decision,
+  decision,
   type ModeReason,
   makeAttack,
   modeReason,
@@ -91,7 +92,7 @@ import {
   straightPath,
   type Terrain,
 } from "../rules/grid";
-import { message, plainMessage } from "../rules/messages";
+import { message, plainMessage, ruleReason, texts, toMessage } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
 import { encounterEvents } from "./events";
@@ -103,10 +104,14 @@ export class EncounterError extends Error {
   readonly messages: readonly string[];
   /** A code per message, for a UI (`REFUSAL_CODES`). */
   readonly codes: readonly RefusalCode[];
-  constructor(messages: readonly string[]) {
-    super(messages.join("; "));
-    this.messages = messages;
-    this.codes = messages.map(refusalCode);
+  /** The same as `messages`, as data to translate: a code, its parameters and the English text. */
+  readonly details: readonly Message[];
+  constructor(messages: readonly (Message | string)[]) {
+    const details = messages.map(toMessage);
+    super(texts(details).join("; "));
+    this.details = details;
+    this.messages = texts(details);
+    this.codes = this.messages.map(refusalCode);
   }
 }
 
@@ -170,7 +175,8 @@ export function encounterCombatant(
   ctx: EncounterContext,
 ): Combatant {
   const c =
-    encounter.combatants.find((x) => x.id === id) ?? fail(`No combatant '${id}' in the encounter`);
+    encounter.combatants.find((x) => x.id === id) ??
+    fail(message("refusal.no_combatant_encounter", { id }));
   if (c.monster !== null) {
     const def = monsterDef(ctx, c);
     const base = combatantFromMonster(
@@ -302,12 +308,15 @@ export function applyEncounterAction(
   };
   let r: Omit<EncounterResult, "events" | "rolls">;
   if (action.type === "decide") {
-    if (!pending) fail("There's no decision to make");
+    if (!pending) fail(message("refusal.there_no_decision_make"));
     // Replay the stopped action with the same dice and one more answer.
     const clear = { ...encounter, pending: null };
     r = attempt(clear, pending.action, counted, pending.rolls, [...pending.answers, action.use]);
   } else {
-    if (pending) fail(`Waiting for a decision: ${pending.question}`);
+    if (pending) {
+      const question = pending.question_message ?? plainMessage(pending.question);
+      fail(message("refusal.waiting_decision", { question }));
+    }
     r = attempt(encounter, action, counted, [], []);
   }
   if (!withEvents) return { ...r, events: [], rolls: drawn };
@@ -327,7 +336,7 @@ class PendingDecision {
   constructor(
     readonly combatant: string,
     readonly kind: Decision["kind"],
-    readonly question: string,
+    readonly question: Message,
     readonly recommended: boolean,
   ) {}
 }
@@ -360,14 +369,15 @@ function attempt(
       answers: [...answers],
       combatant: error.combatant,
       kind: error.kind,
-      question: error.question,
+      question: error.question.text,
+      question_message: error.question,
       recommended: error.recommended,
     };
     return {
       encounter: EncounterSchema.parse({ ...encounter, pending: stopped }),
       states: {},
-      notes: [error.question],
-      messages: [plainMessage(error.question)],
+      notes: [error.question.text],
+      messages: [error.question],
       result: null,
       pending: stopped,
     };
@@ -389,9 +399,10 @@ function run(
   if (action.type === "release") {
     const id = action.id;
     const c =
-      e.combatants.find((x) => x.id === id) ?? fail(`No combatant '${id}' in the encounter`);
-    const readied = c.readied ?? fail(`${c.name} has nothing readied`);
-    if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+      e.combatants.find((x) => x.id === id) ??
+      fail(message("refusal.no_combatant_encounter", { id }));
+    const readied = c.readied ?? fail(message("refusal.nothing_readied", { name: c.name }));
+    if (c.used.reaction) fail(message("refusal.already_used_reaction", { name: c.name }));
     releasing = { id: c.id, held: readied.held };
     notes.push(message("readied.taken", { name: c.name, trigger: readied.trigger }));
     action = readied.action as EncounterAction;
@@ -408,7 +419,7 @@ function run(
     const c = d.combatant.id ? e.combatants.find((x) => x.id === d.combatant.id) : undefined;
     if (!c || (c.decisions ?? e.decisions) === "auto") return d.recommended;
     if (answered < answers.length) return answers[answered++] as boolean;
-    throw new PendingDecision(c.id, d.kind, d.question, d.recommended);
+    throw new PendingDecision(c.id, d.kind, d.message, d.recommended);
   };
   const play = (c: EncounterCombatant, a: PlayAction): void => {
     const ref = characterRef(ctx, c);
@@ -417,7 +428,9 @@ function run(
       r = applyAction(ref.build, ref.state, ctx.catalog, a, { rng });
     } catch (error) {
       if (error instanceof PlayError) {
-        throw new EncounterError(error.messages.map((m) => `${c.name}: ${m}`));
+        throw new EncounterError(
+          error.details.map((reason) => message("refusal.character", { name: c.name, reason })),
+        );
       }
       throw error;
     }
@@ -515,9 +528,8 @@ function run(
     if (!taken.dropped_to_zero || taken.died) return null;
     const use = sheet.play.uses.find((u) => u.key.endsWith(":relentless-rage"));
     const dc = 10 + 5 * (use?.spent ?? 0);
-    const question = `${c.name} drops to 0 Hit Points while raging. Make a DC ${dc} Constitution saving throw (Relentless Rage)?`;
-    if (!decide({ kind: "relentless_rage", combatant: view, question, recommended: true }))
-      return null;
+    const question = message("decision.relentless_rage", { name: c.name, dc });
+    if (!decide(decision("relentless_rage", view, question, true))) return null;
     if (use) play(c, { type: "use", key: use.key });
     const save = rollSavingThrow(view, "con", dc, { rng, decide });
     notes.push(
@@ -669,15 +681,15 @@ function run(
       if (z.once_per_turn && z.saved.includes(t.id)) return false;
       if (!z.optional || !caster) return true;
       if (t.id === caster.id) return false; // the caster doesn't force itself
-      const ability = ABILITY_NAMES[save.ability];
-      const question = `${caster.name}: force ${t.name} (${why.text}) to make a ${ability} saving throw against ${z.label}?`;
-      const view = encounterCombatant(e, caster.id, ctx);
-      return decide({
-        kind: "zone_force",
-        combatant: view,
-        question,
-        recommended: !alliesOf(e, t.id, caster),
+      const question = message("decision.zone_force", {
+        name: caster.name,
+        target: t.name,
+        why,
+        ability: abilityMsg(save.ability),
+        label: z.label,
       });
+      const view = encounterCombatant(e, caster.id, ctx);
+      return decide(decision("zone_force", view, question, !alliesOf(e, t.id, caster)));
     });
     if (!who.length) return;
     const views = who.map((t) => encounterCombatant(e, t.id, ctx));
@@ -1068,11 +1080,12 @@ function run(
     const blocked = new Set(e.map.blocked.map(squareKey));
     for (let dx = 0; dx < size; dx++) {
       for (let dy = 0; dy < size; dy++) {
-        if (blocked.has(`${to.x + dx},${to.y + dy}`)) fail(`${to.x + dx},${to.y + dy} is blocked`);
+        if (blocked.has(`${to.x + dx},${to.y + dy}`))
+          fail(message("refusal.square_blocked", { x: to.x + dx, y: to.y + dy }));
       }
     }
     const taken = spaceTaken(c, to);
-    if (taken) fail(`${taken.name} is in that space`);
+    if (taken) fail(message("refusal.space", { taken: taken.name }));
     c.position = { ...to };
   };
   /**
@@ -1099,7 +1112,7 @@ function run(
     for (const c of e.combatants) notice(c);
   };
   const point = (id: string): PointOfInterest =>
-    e.points.find((p) => p.id === id) ?? fail(`No point of interest '${id}'`);
+    e.points.find((p) => p.id === id) ?? fail(message("refusal.no_point_interest", { id }));
   /** The words for a move outside a fight: how far, and how many turns of Speed it takes. */
   const exploreNote = (c: EncounterCombatant, feet: number, speed: number): Message => {
     const turns = turnsFor(feet, speed);
@@ -1122,7 +1135,7 @@ function run(
   /** With `positions: required` and anyone on the map, a creature off it is refused. */
   const offMap = (...who: EncounterCombatant[]): void => {
     if (e.positions !== "required" || !e.combatants.some((x) => x.position)) return;
-    for (const x of who) if (!x.position) fail(`${x.name} isn't on the map`);
+    for (const x of who) if (!x.position) fail(message("refusal.off_map", { name: x.name }));
   };
   const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] => enemiesWithin5(e, ctx, c);
   /**
@@ -1143,7 +1156,7 @@ function run(
   ) => {
     const modes: ModeReason[] = [];
     if (options.thrown && !line.properties.includes("thrown")) {
-      fail(`${line.name} can't be thrown`);
+      fail(message("refusal.cant_thrown", { attack: line.name }));
     }
     const ranged = line.kind === "ranged" || Boolean(options.thrown);
     const distance = checkedFeet(c, t);
@@ -1158,12 +1171,26 @@ function run(
       // An Opportunity Attack happens just before the target leaves the reach.
       const reach = line.reach ?? 5;
       if (!options.opportunity && distance > reach) {
-        fail(`${t.name} is ${distance} feet away: out of ${line.name}'s reach (${reach} ft)`);
+        fail(
+          message("refusal.feet_away_out_reach", {
+            target: t.name,
+            distance,
+            attack: line.name,
+            reach,
+          }),
+        );
       }
     } else {
       const range = line.range;
       if (range && distance > range.long) {
-        fail(`${t.name} is ${distance} feet away: beyond ${line.name}'s range (${range.long} ft)`);
+        fail(
+          message("refusal.feet_away_beyond_range", {
+            target: t.name,
+            distance,
+            attack: line.name,
+            long: range.long,
+          }),
+        );
       }
       if (range && distance > range.normal) {
         modes.push(
@@ -1239,8 +1266,8 @@ function run(
     given: readonly string[] | undefined,
   ): string[] => {
     if (placement) {
-      if (!line.area) fail(`${line.name} has no area: give its targets`);
-      if (given?.length) fail("Give targets or an area, not both");
+      if (!line.area) fail(message("refusal.no_area_give_targets", { attack: line.name }));
+      if (given?.length) fail(message("refusal.give_targets_area_not"));
       const ids = areaTargets(c, line.area, placement, line.range ?? null, line.name);
       notes.push(areaNote(line.name, line.area, ids));
       return ids;
@@ -1248,7 +1275,14 @@ function run(
     for (const id of given ?? []) {
       const d = checkedFeet(c, find(id));
       if (line.range && d !== null && d > line.range) {
-        fail(`${find(id).name} is ${d} feet away: out of ${line.name}'s range (${line.range} ft)`);
+        fail(
+          message("refusal.out_of_range_ft", {
+            target: find(id).name,
+            d,
+            what: line.name,
+            range: line.range,
+          }),
+        );
       }
     }
     return [...(given ?? [])];
@@ -1267,7 +1301,8 @@ function run(
     spell: SpellDef,
     placement: AreaPlacement,
   ): string[] => {
-    const area = spell.mechanics?.area ?? fail(`${spell.name} has no area to place`);
+    const area =
+      spell.mechanics?.area ?? fail(message("refusal.no_area_place", { spell: spell.name }));
     const ids = areaTargets(c, area, placement, spellRangeFeet(spell), spell.name);
     notes.push(areaNote(spell.name, area, ids));
     return ids;
@@ -1279,7 +1314,7 @@ function run(
     if (!point || !c.position || reach === null) return;
     const d = gridDistance(point, 1, c.position, spaceOf(ctx, c));
     if (d > reach)
-      fail(`That point is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
+      fail(message("refusal.point_feet_away_out", { d, spell: spell.name, range: spell.range }));
   };
   /** A target out of a positioned caster's spell range is refused ("60 feet", "Touch"). */
   const checkSpellRange = (
@@ -1292,7 +1327,14 @@ function run(
     for (const t of targets) {
       const d = checkedFeet(c, t);
       if (d !== null && d > limit) {
-        fail(`${t.name} is ${d} feet away: out of ${spell.name}'s range (${spell.range})`);
+        fail(
+          message("refusal.feet_away_out_range", {
+            target: t.name,
+            d,
+            spell: spell.name,
+            range: spell.range,
+          }),
+        );
       }
     }
   };
@@ -1352,11 +1394,11 @@ function run(
       return rider?.once_per_turn ? [rider.id] : [];
     });
     const again = onceIds.find((id) => c.riders_used.includes(id));
-    if (again) fail(`${c.name} has already used ${again} this turn`);
+    if (again) fail(message("refusal.already_used_turn", { name: c.name, again }));
     for (const r of riders) {
       const rider = line?.riders.find((x) => x.id === r.rider || x.name === r.rider);
       if (rider?.own_turn && current()?.id !== c.id) {
-        fail(`${rider.name} is used on ${c.name}'s own turns`);
+        fail(message("refusal.used_own_turns", { rider: rider.name, name: c.name }));
       }
     }
     const target = withCover(encounterCombatant(e, t.id, ctx), coverFor(c, t, options.cover));
@@ -1413,7 +1455,7 @@ function run(
         bonus: sundered ? 5 : 0,
       });
     } catch (error) {
-      if (error instanceof RangeError) fail(error.message);
+      if (error instanceof RangeError) fail(ruleReason(error));
       throw error;
     }
     c.extended = true; // an attack roll extends Rage
@@ -1422,8 +1464,6 @@ function run(
     if (help) e.helps = e.helps.filter((h) => h !== help);
     e.masteries = e.masteries.filter((m) => m !== vex && m !== sap);
     e.marks = e.marks.filter((m) => m !== mark && m !== sundered);
-    const why = hit.reasons.length ? `; ${hit.reasons.join("; ")}` : "";
-    const roll = `${hit.total} vs AC ${hit.target_ac}${why}`;
     const rollMsg = message("attack.roll", {
       total: hit.total,
       ac: hit.target_ac,
@@ -1455,10 +1495,17 @@ function run(
       let instances = [...hit.instances];
       // Uncanny Dodge: the target's reaction once it knows it's hit.
       const dodge = reactionThatHalves(t);
-      const question = `${c.name} hits ${t.name} with ${hit.attack} (${roll}). ${t.name}: use ${dodge} to halve the damage?`;
+      const hits = { name: c.name, target: t.name, attack: hit.attack, roll: rollMsg };
       if (
         dodge &&
-        decide({ kind: "uncanny_dodge", combatant: target, question, recommended: true })
+        decide(
+          decision(
+            "uncanny_dodge",
+            target,
+            message("decision.halve", { ...hits, reaction: dodge }),
+            true,
+          ),
+        )
       ) {
         t.used.reaction = true;
         instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
@@ -1470,11 +1517,9 @@ function run(
         deflect &&
         (!deflect.types.length || instances.some((d) => deflect.types.includes(d.type ?? "")))
       ) {
-        const ask = `${c.name} hits ${t.name} with ${hit.attack} (${roll}). ${t.name}: use ${deflect.name} to reduce the damage?`;
+        const ask = message("decision.reduce", { ...hits, reaction: deflect.name });
         const view = encounterCombatant(e, t.id, ctx);
-        if (
-          decide({ kind: "deflect_attacks", combatant: view, question: ask, recommended: true })
-        ) {
+        if (decide(decision("deflect_attacks", view, ask, true))) {
           t.used.reaction = true;
           let cut = rollDamage([{ dice: deflect.dice, bonus: deflect.bonus, type: "none" }], {
             rng,
@@ -1525,49 +1570,50 @@ function run(
       forgo_advantage: false,
     };
     if (!cunning.length && !brutal.length) return out;
-    if (c.character === null) fail(`${c.name} has no class features`);
+    if (c.character === null) fail(message("refusal.no_class_features", { name: c.name }));
     const ref = characterRef(ctx, c);
     const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
     const levelIn = (id: string) => sheet.classes.find((x) => x.class_id === id)?.level ?? 0;
     if (new Set(cunning).size < cunning.length || new Set(brutal).size < brutal.length) {
-      fail("Each effect can be used once per attack");
+      fail(message("refusal.each_effect_used_once"));
     }
     if (cunning.length) {
-      if (!sheet.rules.includes("cunning_strike")) fail(`${c.name} doesn't have Cunning Strike`);
+      if (!sheet.rules.includes("cunning_strike"))
+        fail(message("refusal.doesnt_cunning_strike", { name: c.name }));
       const most = sheet.rules.includes("improved_cunning_strike") ? 2 : 1;
       if (cunning.length > most)
-        fail(`${c.name} can use ${most} Cunning Strike effect${most > 1 ? "s" : ""}`);
+        fail(message("refusal.cunning_strike_count", { name: c.name, most }));
       if (
         !(options.riders ?? []).some(
           (r) => r.rider === "sneak-attack" || r.rider === "Sneak Attack",
         )
       ) {
-        fail(
-          "Cunning Strike is used when you deal Sneak Attack damage: add the sneak-attack rider",
-        );
+        fail(message("refusal.cunning_strike_used_when"));
       }
       if (
         cunning.includes("poison") &&
         !ref.state.inventory.some((i) => i.item === "poisoners-kit")
       ) {
-        fail(`Cunning Strike's Poison needs a Poisoner's Kit on ${c.name}'s person`);
+        fail(message("refusal.cunning_strike_poison_needs", { name: c.name }));
       }
       out.forgo.push({ rider: "sneak-attack", dice: cunning.length });
     }
     if (brutal.length) {
-      if (!sheet.rules.includes("brutal_strike")) fail(`${c.name} doesn't have Brutal Strike`);
+      if (!sheet.rules.includes("brutal_strike"))
+        fail(message("refusal.doesnt_brutal_strike", { name: c.name }));
       const reckless = sheet.toggles.some((x) => x.active && x.key.endsWith(":reckless-attack"));
-      if (!reckless) fail("Brutal Strike needs Reckless Attack this turn");
-      if (options.opportunity || current()?.id !== c.id) fail("Brutal Strike is used on your turn");
+      if (!reckless) fail(message("refusal.brutal_strike_needs_reckless"));
+      if (options.opportunity || current()?.id !== c.id)
+        fail(message("refusal.brutal_strike_used_your"));
       const line = attacker.attacks.find((a) => a.name === attackName);
-      if (line?.ability !== "str") fail("Brutal Strike is a Strength-based attack roll");
+      if (line?.ability !== "str") fail(message("refusal.brutal_strike_strength_based"));
       const improved = sheet.rules.includes("improved_brutal_strike");
       if (!improved && brutal.some((x) => x === "staggering" || x === "sundering")) {
-        fail("Staggering Blow and Sundering Blow come with Improved Brutal Strike (level 13)");
+        fail(message("refusal.staggering_blow_sundering_blow"));
       }
       const most = levelIn("barbarian") >= 17 ? 2 : 1;
       if (brutal.length > most)
-        fail(`${c.name} can use ${most} Brutal Strike effect${most > 1 ? "s" : ""}`);
+        fail(message("refusal.brutal_strike_count", { name: c.name, most }));
       out.forgo_advantage = true;
       out.extra_damage.push({ dice: levelIn("barbarian") >= 17 ? "2d10" : "1d10", type: "weapon" });
     }
@@ -1723,7 +1769,7 @@ function run(
       );
       r = useSaveAction(user, name, combatants, { rng, decide });
     } catch (error) {
-      if (error instanceof RangeError) fail(error.message);
+      if (error instanceof RangeError) fail(ruleReason(error));
       throw error;
     }
     c.extended = true; // forcing a saving throw extends Rage
@@ -1746,19 +1792,25 @@ function run(
     spell: SpellDef,
     at: { from: GridPoint; to: GridPoint; side?: "left" | "right" },
   ): PlacedWall => {
-    const spec = spell.mechanics?.wall ?? fail(`${spell.name} isn't a wall`);
-    if (!c.position) fail(`${c.name} has no position: a wall needs positions`);
+    const spec = spell.mechanics?.wall ?? fail(message("refusal.isnt_wall", { spell: spell.name }));
+    if (!c.position) fail(message("refusal.no_position_wall_needs", { name: c.name }));
     const me = { position: c.position, size: spaceOf(ctx, c) };
     const range = spellRangeFeet(spell);
     const steps = Math.max(Math.abs(at.to.x - at.from.x), Math.abs(at.to.y - at.from.y));
     if (spec.between) {
       if (steps * 5 > spec.length) {
-        fail(`${spell.name} is at most ${spec.length} feet long (this one: ${steps * 5})`);
+        fail(
+          message("refusal.wall_too_long", {
+            spell: spell.name,
+            max: spec.length,
+            feet: steps * 5,
+          }),
+        );
       }
       for (const p of [at.from, at.to]) {
         const d = distanceToPoint(me, p);
         if (range !== null && d > range)
-          fail(`That point is ${d} feet away: out of ${spell.name}'s range`);
+          fail(message("refusal.point_feet_away_out_2", { d, spell: spell.name }));
       }
       return {
         squares: [],
@@ -1769,20 +1821,26 @@ function run(
     }
     const line = [at.from, ...straightPath(at.from, at.to)];
     if (line.length * 5 > spec.length) {
-      fail(`${spell.name} is at most ${spec.length} feet long (this one: ${line.length * 5})`);
+      fail(
+        message("refusal.wall_too_long", {
+          spell: spell.name,
+          max: spec.length,
+          feet: line.length * 5,
+        }),
+      );
     }
     for (const p of [at.from, at.to]) {
       const d = gridDistance(p, 1, me.position, me.size);
       if (range !== null && d > range)
-        fail(`${p.x},${p.y} is ${d} feet away: out of ${spell.name}'s range`);
+        fail(message("refusal.feet_away_out_range_2", { x: p.x, y: p.y, d, spell: spell.name }));
     }
     const keys = new Set(line.map(squareKey));
     const zone = [...line];
     if (spec.side) {
-      if (!at.side) fail(`${spell.name}: choose its damaging side (\`side\`: left or right)`);
+      if (!at.side) fail(message("refusal.choose_damaging_side_side", { spell: spell.name }));
       const dx = Math.sign(at.to.x - at.from.x);
       const dy = Math.sign(at.to.y - at.from.y);
-      if (!dx && !dy) fail(`${spell.name}: a one-square wall has no side`);
+      if (!dx && !dy) fail(message("refusal.one_square_wall_no", { spell: spell.name }));
       // Left of the direction from `from` to `to` (y grows downward).
       const [nx, ny] = at.side === "left" ? [dy, -dx] : [-dy, dx];
       for (const p of line) {
@@ -1841,10 +1899,10 @@ function run(
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
     if (options.unaffected?.length && !zone?.designate) {
-      fail(`${spell.name} doesn't let its caster designate creatures it doesn't affect`);
+      fail(message("refusal.doesnt_let_caster_designate", { spell: spell.name }));
     }
     if (zone && !zone.on_cast && targetIds.length && !options.area) {
-      fail(`${spell.name}: creatures don't save when it appears; give no targets`);
+      fail(message("refusal.creatures_dont_save_when", { spell: spell.name }));
     }
     const targets = targetIds.map(find);
     if (!options.area) checkSpellRange(c, spell, targets);
@@ -1929,7 +1987,7 @@ function run(
         nearby: nearbyViews,
       });
     } catch (error) {
-      if (error instanceof RangeError) fail(error.message);
+      if (error instanceof RangeError) fail(ruleReason(error));
       throw error;
     }
     e.helps = e.helps.filter((h) => !used.helps.includes(h));
@@ -2165,7 +2223,7 @@ function run(
   ): EncounterCombatant[] => {
     const f = spell.mechanics?.follow_up;
     if (!f) {
-      if (ids?.length) fail(`${spell.name} has no saving throw for creatures near its target`);
+      if (ids?.length) fail(message("refusal.no_saving_throw_creatures", { spell: spell.name }));
       return [];
     }
     if (ids) return ids.map(find);
@@ -2181,8 +2239,7 @@ function run(
   const spendDaily = (c: EncounterCombatant, key: string, perDay: number | null, what: string) => {
     if (perDay === null) return;
     const used = c.daily_used[key] ?? 0;
-    if (used >= perDay)
-      fail(`${c.name} has used ${what} ${perDay} time${perDay > 1 ? "s" : ""} today`);
+    if (used >= perDay) fail(message("refusal.used_today", { name: c.name, what, count: perDay }));
     c.daily_used[key] = used + 1;
   };
   /** After every action: Concentration effects whose source stopped concentrating end. */
@@ -2256,29 +2313,31 @@ function run(
     message("reason.vex", { name: c.name, target: t.name });
   const sapReason = (by: string): Message => message("reason.sap", { name: find(by).name });
   const find = (id: string) =>
-    e.combatants.find((c) => c.id === id) ?? fail(`No combatant '${id}' in the encounter`);
+    e.combatants.find((c) => c.id === id) ??
+    fail(message("refusal.no_combatant_encounter", { id }));
   const current = () => currentCombatant(e);
   const onTurn = (c: EncounterCombatant, what: string) => {
-    if (e.round === 0) fail("The fight hasn't started");
+    if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
     if (releasing?.id === c.id) return; // a readied action, with the reaction
-    if (current()?.id !== c.id) fail(`It isn't ${c.name}'s turn: only a reaction can ${what}`);
+    if (current()?.id !== c.id) fail(message("refusal.isnt_turn_reaction", { name: c.name, what }));
   };
   const canAct = (c: EncounterCombatant) => {
-    if (c.defeated) fail(`${c.name} is defeated`);
-    if (conditionsOf(ctx, c).has("incapacitated")) fail(`${c.name} is Incapacitated`);
+    if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
+    if (conditionsOf(ctx, c).has("incapacitated"))
+      fail(message("refusal.incapacitated", { name: c.name }));
   };
   /** One attack's place in the economy: the Attack action (and its extra attacks) or a reaction. */
   const spendAttack = (c: EncounterCombatant, reaction: boolean | undefined): void => {
     if (releasing?.id === c.id) return; // the reaction, spent at the end
     if (reaction) {
-      if (e.round === 0) fail("The fight hasn't started");
-      if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+      if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
+      if (c.used.reaction) fail(message("refusal.already_used_reaction", { name: c.name }));
       c.used.reaction = true;
       return;
     }
     onTurn(c, "attack");
     if (c.attacks_left > 0) c.attacks_left -= 1;
-    else if (c.used.action) fail(`${c.name} has no attacks left this turn`);
+    else if (c.used.action) fail(message("refusal.no_attacks_left_turn", { name: c.name }));
     else {
       // The Attack action: Extra Attack or Multiattack give more attacks with it.
       c.used.action = true;
@@ -2291,7 +2350,7 @@ function run(
     canAct(c);
     if (releasing?.id === c.id) return; // the reaction, spent at the end
     const what = bonus ? "bonus_action" : "action";
-    if (c.used[what]) fail(`${c.name} has already used its ${what.replace("_", " ")} this turn`);
+    if (c.used[what]) fail(message("refusal.economy_used_turn", { name: c.name, what }));
     c.used[what] = true;
     if (bonus) c.extended = true; // a Bonus Action extends Rage
   };
@@ -2343,9 +2402,10 @@ function run(
   switch (action.type) {
     case "add_monster": {
       const def =
-        lookup(ctx.catalog.monsters, action.monster) ?? fail(`Unknown monster '${action.monster}'`);
+        lookup(ctx.catalog.monsters, action.monster) ??
+        fail(message("refusal.unknown_monster", { monster: action.monster }));
       const id = action.id ?? freeId(e, def.id);
-      if (e.combatants.some((c) => c.id === id)) fail(`'${id}' is already in the encounter`);
+      if (e.combatants.some((c) => c.id === id)) fail(message("refusal.already_encounter", { id }));
       let hp = action.hp ?? def.hit_points;
       if (action.roll_hp && action.hp === undefined && def.hit_dice) {
         hp = Math.max(1, roll(def.hit_dice, rng).total);
@@ -2368,11 +2428,12 @@ function run(
     }
     case "add_character": {
       const ref =
-        ctx.characters?.[action.character] ?? fail(`No character '${action.character}' given`);
+        ctx.characters?.[action.character] ??
+        fail(message("refusal.no_character_given", { character: action.character }));
       const id = action.id ?? freeId(e, slugify(ref.build.name || action.character));
-      if (e.combatants.some((c) => c.id === id)) fail(`'${id}' is already in the encounter`);
+      if (e.combatants.some((c) => c.id === id)) fail(message("refusal.already_encounter", { id }));
       if (e.combatants.some((c) => c.character === action.character)) {
-        fail(`'${action.character}' is already in the encounter`);
+        fail(message("refusal.already_encounter_2", { character: action.character }));
       }
       const name = action.name ?? (ref.build.name || action.character);
       e.combatants.push(
@@ -2388,10 +2449,10 @@ function run(
       break;
     }
     case "decide":
-      return fail("There's no decision to make");
+      return fail(message("refusal.there_no_decision_make"));
     case "set_decisions": {
       if (action.id !== undefined) find(action.id).decisions = action.mode;
-      else e.decisions = action.mode ?? fail("The encounter's mode is ask or auto");
+      else e.decisions = action.mode ?? fail(message("refusal.encounter_mode_ask_auto"));
       break;
     }
     case "remove": {
@@ -2453,24 +2514,25 @@ function run(
       const everyone = e.combatants.map((c) => c.id);
       const same =
         action.ids.length === everyone.length && everyone.every((id) => action.ids.includes(id));
-      if (!same) fail("set_order needs every combatant's id, once each");
+      if (!same) fail(message("refusal.set_order_needs_every_combatant"));
       const now = current()?.id;
       const byId = new Map(e.combatants.map((c) => [c.id, c]));
       // Only ties can be reordered: the Initiative counts must still go down.
       const counts = action.ids.map((id) => byId.get(id)?.initiative ?? null);
       for (let i = 1; i < counts.length; i++) {
         const [a, b] = [counts[i - 1], counts[i]];
-        if (a != null && b != null && b > a) fail("set_order can only reorder tied Initiatives");
+        if (a != null && b != null && b > a)
+          fail(message("refusal.set_order_reorder_tied_initiatives"));
       }
       e.order = [...action.ids];
       if (now) e.turn = e.order.indexOf(now);
       break;
     }
     case "start": {
-      if (e.round > 0) fail("The fight has already started");
-      if (!e.combatants.length) fail("No combatants");
+      if (e.round > 0) fail(message("refusal.fight_already_started"));
+      if (!e.combatants.length) fail(message("refusal.no_combatants"));
       const missing = e.combatants.filter((c) => c.initiative === null).map((c) => c.name);
-      if (missing.length) fail(`Roll Initiative first: ${missing.join(", ")}`);
+      if (missing.length) fail(message("refusal.roll_initiative_first", { names: missing }));
       e.halted = null; // a fight doesn't wait on a noticed point
       e.round = 1;
       e.order = [];
@@ -2483,7 +2545,7 @@ function run(
       break;
     }
     case "next_turn": {
-      if (e.round === 0) fail("The fight hasn't started");
+      if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
       const ending = current();
       if (ending) endTurn(ending);
       const next = skipToActive(e, ctx, notes, true);
@@ -2492,7 +2554,7 @@ function run(
       break;
     }
     case "end": {
-      if (e.round === 0) fail("The fight hasn't started");
+      if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
       e.round = 0;
       e.turn = 0;
       e.order = [];
@@ -2503,15 +2565,15 @@ function run(
     case "use": {
       const c = find(action.id);
       if (action.what === "reaction") {
-        if (e.round === 0) fail("The fight hasn't started");
+        if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
       } else onTurn(c, "act");
       canAct(c);
       const label = action.what.replace("_", " ");
       if (c.used[action.what]) {
         fail(
           action.what === "reaction"
-            ? `${c.name} has already used its reaction (it returns at the start of its turn)`
-            : `${c.name} has already used its ${label} this turn`,
+            ? message("refusal.reaction_used", { name: c.name })
+            : message("refusal.economy_used_turn", { name: c.name, what: action.what }),
         );
       }
       c.used[action.what] = true;
@@ -2523,26 +2585,20 @@ function run(
       const c = find(action.id);
       if (e.round === 0) {
         // Exploring: no turns and no limit; the engine says how many turns of Speed it takes.
-        if (c.defeated) fail(`${c.name} is defeated`);
+        if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
         if (e.halted) {
           const by = e.combatants.find((x) => point(e.halted as string).noticed_by.includes(x.id));
-          fail(
-            `Everyone waits: ${by?.name ?? "someone"} noticed something (the GM reveals it or lets you go on)`,
-          );
+          fail(message("refusal.everyone_waits", { name: by?.name ?? message("word.someone") }));
         }
         const speed = speedOf(ctx, c, e);
-        if (speed === 0) fail(`${c.name} can't move: its Speed is 0`);
+        if (speed === 0) fail(message("refusal.cant_move_speed", { name: c.name }));
         if (!action.to && !action.path) {
           notes.push(
-            exploreNote(
-              c,
-              action.feet ?? fail("Give the feet moved or a square to move to"),
-              speed,
-            ),
+            exploreNote(c, action.feet ?? fail(message("refusal.give_feet_moved_square")), speed),
           );
           break;
         }
-        const from = c.position ?? fail(`${c.name} has no position: place it first`);
+        const from = c.position ?? fail(message("refusal.no_position_place", { name: c.name }));
         const planned = planMove(e, ctx, c, action, { left: explorationBudget(from, action) });
         let walked = 0;
         for (const [i, square] of planned.path.entries()) {
@@ -2561,10 +2617,11 @@ function run(
         break;
       }
       onTurn(c, "move");
-      if (c.defeated) fail(`${c.name} is defeated`);
+      if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
       const from = c.position;
-      if ((action.to || action.path) && !from) fail(`${c.name} has no position: place it first`);
-      if (action.to && action.path) fail("Give a square to move to or a path, not both");
+      if ((action.to || action.path) && !from)
+        fail(message("refusal.no_position_place", { name: c.name }));
+      if (action.to && action.path) fail(message("refusal.give_square_move_path"));
       // A readied move: up to its Speed, apart from its own turn's movement.
       const released = releasing?.id === c.id;
       const budget = released ? speedOf(ctx, c, e) : speedOf(ctx, c, e) + c.extra_movement;
@@ -2578,11 +2635,9 @@ function run(
       const steps = planned?.steps ?? [];
       const feet =
         action.feet ??
-        (path
-          ? steps.reduce((a, b) => a + b, 0)
-          : fail("Give the feet moved or a square to move to"));
+        (path ? steps.reduce((a, b) => a + b, 0) : fail(message("refusal.give_feet_moved_square")));
       if (spent + feet > budget) {
-        fail(`${c.name} can move ${left} more feet this turn`);
+        fail(message("refusal.move_more_feet_turn", { name: c.name, left }));
       }
       if (!path) {
         if (!released) c.moved += feet;
@@ -2651,16 +2706,17 @@ function run(
     case "add_wall":
     case "remove_wall": {
       const { from, to } = action;
-      if (from.x === to.x && from.y === to.y) fail("A wall goes from one corner to another");
+      if (from.x === to.x && from.y === to.y) fail(message("refusal.wall_goes_one_corner"));
       const same = (w: { from: GridPoint; to: GridPoint }) =>
         (squareKey(w.from) === squareKey(from) && squareKey(w.to) === squareKey(to)) ||
         (squareKey(w.from) === squareKey(to) && squareKey(w.to) === squareKey(from));
       if (action.type === "add_wall") {
-        if (e.map.walls.some(same)) fail("That wall is already there");
+        if (e.map.walls.some(same)) fail(message("refusal.wall_already_there"));
         e.map.walls.push({ from: { ...from }, to: { ...to } });
         notes.push(message("map.wall_added", { x1: from.x, y1: from.y, x2: to.x, y2: to.y }));
       } else {
-        if (!e.map.walls.some(same)) fail(`No wall from ${from.x},${from.y} to ${to.x},${to.y}`);
+        if (!e.map.walls.some(same))
+          fail(message("refusal.no_wall", { x: from.x, y: from.y, x2: to.x, y2: to.y }));
         e.map.walls = e.map.walls.filter((w) => !same(w));
         notes.push(message("map.wall_removed", { x1: from.x, y1: from.y, x2: to.x, y2: to.y }));
       }
@@ -2734,7 +2790,7 @@ function run(
       break;
     }
     case "resume": {
-      if (!e.halted) fail("Nobody is waiting");
+      if (!e.halted) fail(message("refusal.nobody_waiting"));
       e.halted = null;
       notes.push(message("explore.resume"));
       break;
@@ -2768,18 +2824,22 @@ function run(
     case "help": {
       const c = find(action.id);
       const t = find(action.target);
-      if (t.id === c.id) fail(`${c.name} can't Help itself`);
+      if (t.id === c.id) fail(message("refusal.cant_help_itself", { name: c.name }));
       if (action.skill) {
-        if (!alliesOf(e, c.id, t)) fail(`${t.name} isn't ${c.name}'s ally`);
+        if (!alliesOf(e, c.id, t))
+          fail(message("refusal.isnt_ally", { target: t.name, name: c.name }));
         if (!proficientIn(ctx, c, action.skill)) {
-          fail(`${c.name} isn't proficient in ${action.skill}: Help assists with a proficiency`);
+          fail(
+            message("refusal.isnt_proficient_help_assists", { name: c.name, skill: action.skill }),
+          );
         }
       } else {
-        if (c.side && c.side === t.side) fail(`${t.name} is on ${c.name}'s side`);
+        if (c.side && c.side === t.side)
+          fail(message("refusal.side", { target: t.name, name: c.name }));
         // "You momentarily distract an enemy within 5 feet of you."
         const d = checkedFeet(c, t);
         if (d !== null && d > 5)
-          fail(`${t.name} is ${d} feet away: Help distracts an enemy within 5 ft`);
+          fail(message("refusal.feet_away_help_distracts", { target: t.name, d }));
       }
       takeAction(c, "Help");
       e.helps.push({ by: c.id, on: t.id, skill: action.skill ?? null });
@@ -2799,17 +2859,18 @@ function run(
       const t = find(action.target);
       canAct(c);
       if (action.option === "shove" && !action.shove)
-        fail("A shove pushes or knocks Prone: `shove`");
+        fail(message("refusal.shove_pushes_knocks_prone"));
       const user = encounterCombatant(e, c.id, ctx);
       const target = encounterCombatant(e, t.id, ctx);
       // "possible only if the target is no more than one size larger than you"
       const sizes = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
       const [mine, theirs] = [sizes.indexOf(user.size ?? ""), sizes.indexOf(target.size ?? "")];
       if (mine >= 0 && theirs > mine + 1) {
-        fail(`${t.name} is too large for ${c.name} to ${action.option}`);
+        fail(message("refusal.too_large", { target: t.name, name: c.name, option: action.option }));
       }
       const d = checkedFeet(c, t);
-      if (d !== null && d > 5) fail(`${t.name} is ${d} feet away: an Unarmed Strike reaches 5 ft`);
+      if (d !== null && d > 5)
+        fail(message("refusal.feet_away_unarmed_strike", { target: t.name, d }));
       spendAttack(c, action.reaction);
       c.extended = true; // forcing a saving throw extends Rage
       const dc = 8 + user.modifiers.str + user.proficiency_bonus;
@@ -2852,14 +2913,19 @@ function run(
       const holds = e.effects.filter((x) => x.target === c.id && x.escape_dc !== null);
       const hold = action.effect
         ? (holds.find((x) => x.id === action.effect) ??
-          fail(`${action.effect} isn't a grapple or hold on ${c.name}`))
+          fail(message("refusal.isnt_grapple_hold", { effect: action.effect, name: c.name })))
         : holds.length === 1
           ? (holds[0] as EncounterEffect)
           : holds.length
-            ? fail(`Choose what to escape: ${holds.map((x) => x.id).join(", ")}`)
-            : fail(`${c.name} has no grapple or hold with an escape DC`);
+            ? fail(message("refusal.choose_escape", { ids: holds.map((x) => x.id) }))
+            : fail(message("refusal.no_grapple_hold_escape", { name: c.name }));
       if (action.skill && hold.escape_skill && action.skill !== hold.escape_skill) {
-        fail(`Escaping ${hold.label} takes an ${skillName(hold.escape_skill)} check`);
+        fail(
+          message("refusal.escape_skill", {
+            label: hold.label,
+            skill: message(`skill.${hold.escape_skill}`),
+          }),
+        );
       }
       takeAction(c, "escape");
       const me = encounterCombatant(e, c.id, ctx);
@@ -2895,15 +2961,16 @@ function run(
     case "stand": {
       const c = find(action.id);
       onTurn(c, "stand up");
-      if (c.defeated) fail(`${c.name} is defeated`);
+      if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
       const own = c.monster !== null ? c.conditions : characterRef(ctx, c).state.conditions;
-      if (!own.includes("prone")) fail(`${c.name} isn't Prone`);
+      if (!own.includes("prone")) fail(message("refusal.isnt_prone", { name: c.name }));
       const speed = speedOf(ctx, c, e);
-      if (speed === 0) fail(`${c.name} can't right itself at Speed 0`);
+      if (speed === 0) fail(message("refusal.cant_right_itself_speed", { name: c.name }));
       // "spend an amount of movement equal to half your Speed (round down)"
       const cost = Math.floor(speed / 2);
       const budget = speed + c.extra_movement;
-      if (c.moved + cost > budget) fail(`${c.name} needs ${cost} feet of movement to stand up`);
+      if (c.moved + cost > budget)
+        fail(message("refusal.needs_feet_movement_stand", { name: c.name, cost }));
       c.moved += cost;
       applyTo(c, [{ type: "remove_condition", condition: "prone" }]);
       notes.push(message("action.stand_up", { name: c.name, feet: cost }));
@@ -2911,7 +2978,7 @@ function run(
     }
     case "hide": {
       const c = find(action.id);
-      if (c.hidden !== null) fail(`${c.name} is already hidden`);
+      if (c.hidden !== null) fail(message("refusal.already_hidden", { name: c.name }));
       // "behind Three-Quarters Cover or Total Cover … out of any enemy's line of sight"
       if (c.position && !action.obscured) {
         for (const x of e.combatants) {
@@ -2920,9 +2987,7 @@ function run(
           const corners = spaceCorners({ position: x.position, size: spaceOf(ctx, x) });
           const cover = mapCover(e, ctx, corners, c, [x.id]).degree;
           if (cover !== "three_quarters" && cover !== "total") {
-            fail(
-              `${x.name} can see ${c.name}: hiding needs Three-Quarters or Total Cover from every enemy, or being Heavily Obscured (obscured: true)`,
-            );
+            fail(message("refusal.see_hiding_needs_three", { other: x.name, name: c.name }));
           }
         }
       }
@@ -2942,7 +3007,7 @@ function run(
     }
     case "reveal": {
       const c = find(action.id);
-      if (c.hidden === null) fail(`${c.name} isn't hidden`);
+      if (c.hidden === null) fail(message("refusal.isnt_hidden", { name: c.name }));
       unhide(c, message("why.revealed"));
       break;
     }
@@ -3008,27 +3073,32 @@ function run(
     case "ready": {
       const c = find(action.id);
       const then = action.action;
-      if (then.id !== c.id) fail("The readied action is the combatant's own");
+      if (then.id !== c.id) fail(message("refusal.readied_action_combatant_own"));
       if (then.type === "attack" && (then.reaction || then.opportunity || then.light_extra)) {
-        fail("The readied attack is taken with the reaction: give a plain attack");
+        fail(message("refusal.readied_attack_taken_reaction"));
       }
-      if (c.readied) fail(`${c.name} has already readied an action`);
+      if (c.readied) fail(message("refusal.already_readied_action", { name: c.name }));
       let held = false;
       if (then.type === "cast") {
         // "you cast it as normal (expending any resources used to cast it) but hold its energy
         // … To be readied, a spell must have a casting time of an action … Concentration".
         const spell =
-          lookup(ctx.catalog.spells, then.spell) ?? fail(`Unknown spell '${then.spell}'`);
+          lookup(ctx.catalog.spells, then.spell) ??
+          fail(message("refusal.unknown_spell", { spell: then.spell }));
         if (!/^Action/i.test(spell.casting_time)) {
           fail(
-            `${spell.name} takes ${spell.casting_time}: only a spell cast with an action can be readied`,
+            message("refusal.takes_spell_cast_action", {
+              spell: spell.name,
+              casting_time: spell.casting_time,
+            }),
           );
         }
         takeAction(c, "Ready");
         if (c.character !== null) {
           const ref = characterRef(ctx, c);
           const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
-          if (!known.some((x) => x.id === spell.id)) fail(`${c.name} can't cast ${spell.name}`);
+          if (!known.some((x) => x.id === spell.id))
+            fail(message("refusal.cant_cast", { name: c.name, spell: spell.name }));
           if (spell.level > 0) {
             play(
               c,
@@ -3045,7 +3115,7 @@ function run(
                 x.spell === spell.id &&
                 x.section === "actions" &&
                 (then.via === undefined || x.action === then.via),
-            ) ?? fail(`${c.name} can't cast ${spell.name} with an action`);
+            ) ?? fail(message("refusal.cant_cast_action", { name: c.name, spell: spell.name }));
           spendDaily(c, line.action, line.action_per_day, line.action);
           spendDaily(c, `${line.action}#${line.spell}`, line.per_day, spell.name);
           if (line.recharge) c.expended.push(line.action);
@@ -3065,7 +3135,7 @@ function run(
       break;
     }
     case "release":
-      return fail("Nothing to release");
+      return fail(message("refusal.nothing_release"));
     case "effects": {
       const c = find(action.id);
       applyTo(c, action.actions);
@@ -3075,7 +3145,8 @@ function run(
       // Tracked when it has a duration, depends on Concentration, or has a known source (a
       // grapple: Grappled's Disadvantage doesn't apply against the grappler).
       if (ends || action.concentration || source !== undefined) {
-        if (action.concentration && !source) fail("A Concentration effect needs its source");
+        if (action.concentration && !source)
+          fail(message("refusal.concentration_effect_needs_source"));
         const conditions = action.actions.flatMap((a) =>
           a.type === "add_condition" ? [a.condition] : [],
         );
@@ -3083,8 +3154,9 @@ function run(
           action.label ??
           (action.concentration ? (concentrationOf(find(source as string)) ?? "") : "effect");
         if (action.concentration && !label)
-          fail(`${find(source as string).name} isn't concentrating`);
-        if (action.escape_dc !== undefined && !source) fail("A grapple needs its source");
+          fail(message("refusal.not_concentrating", { name: find(source as string).name }));
+        if (action.escape_dc !== undefined && !source)
+          fail(message("refusal.grapple_needs_source"));
         addEffects(c, conditions, {
           source: source ?? null,
           label,
@@ -3096,7 +3168,9 @@ function run(
       break;
     }
     case "zone_save": {
-      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
+      const z =
+        e.zones.find((x) => x.id === action.zone) ??
+        fail(message("refusal.no_zone", { zone: action.zone }));
       for (const id of action.targets) {
         const t = find(id);
         if (z.once_per_turn && z.saved.includes(t.id)) {
@@ -3107,9 +3181,12 @@ function run(
       break;
     }
     case "move_zone": {
-      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
-      if (!z.point) fail(`${z.label} moves with its caster`);
-      if (action.onto && !z.ram) fail(`${z.label} doesn't make a creature save by moving into it`);
+      const z =
+        e.zones.find((x) => x.id === action.zone) ??
+        fail(message("refusal.no_zone", { zone: action.zone }));
+      if (!z.point) fail(message("refusal.moves_caster", { label: z.label }));
+      if (action.onto && !z.ram)
+        fail(message("refusal.doesnt_make_creature_save", { label: z.label }));
       const before = zoneOccupants();
       z.point = { ...action.point };
       notes.push(message("zone.moves", { label: z.label, x: action.point.x, y: action.point.y }));
@@ -3127,11 +3204,11 @@ function run(
           (!action.spell ||
             m.label.toLowerCase() === action.spell.toLowerCase().replace(/-/g, " ")),
       );
-      const mark = marks[0] ?? fail(`${c.name} has no Hunter's Mark or Hex to move`);
+      const mark = marks[0] ?? fail(message("refusal.no_hunter_mark_hex", { name: c.name }));
       const old = find(mark.on);
       // "If the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action".
       if (!outOfFight(ctx, old) && encounterCombatant(e, old.id, ctx).hp > 0) {
-        fail(`${mark.label} moves only once ${old.name} drops to 0 Hit Points`);
+        fail(message("refusal.moves_once_drops_hit", { label: mark.label, old: old.name }));
       }
       takeAction(c, `move ${mark.label}`, true);
       mark.on = t.id;
@@ -3139,22 +3216,25 @@ function run(
       break;
     }
     case "end_zone": {
-      const z = e.zones.find((x) => x.id === action.zone) ?? fail(`No zone '${action.zone}'`);
+      const z =
+        e.zones.find((x) => x.id === action.zone) ??
+        fail(message("refusal.no_zone", { zone: action.zone }));
       endZone(z, message("why.ended"));
       break;
     }
     case "end_effect": {
       const effect =
-        e.effects.find((x) => x.id === action.effect) ?? fail(`No effect '${action.effect}'`);
+        e.effects.find((x) => x.id === action.effect) ??
+        fail(message("refusal.no_effect", { effect: action.effect }));
       endEffect(effect, message("why.ended"));
       break;
     }
     case "check": {
       const c = find(action.id);
-      if (c.defeated) fail(`${c.name} is defeated`);
+      if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
       const what = action.skill
         ? { skill: action.skill }
-        : { ability: action.ability ?? fail("A check needs a skill or an ability") };
+        : { ability: action.ability ?? fail(message("refusal.check_needs_skill_ability")) };
       checkRoll(c, what, action.dc ?? null, action.mode);
       break;
     }
@@ -3174,49 +3254,53 @@ function run(
         onTurn(c, "attack");
         const granted = c.granted_attacks;
         if (!granted || granted.count === 0)
-          fail(`${c.name} has no granted attacks left this turn`);
-        if (granted.attack !== action.attack) fail(`The granted attacks are ${granted.attack}s`);
+          fail(message("refusal.no_granted_attacks_left", { name: c.name }));
+        if (granted.attack !== action.attack)
+          fail(message("refusal.granted_attacks_are", { attack: granted.attack }));
         granted.count -= 1;
       } else if (action.cleave) {
         // SRD "Cleave": after a melee hit with this weapon, an attack against a second creature
         // within 5 feet of the first, once per turn; it isn't one of the Attack action's attacks.
         onTurn(c, "attack");
-        if (c.cleave_used) fail(`${c.name} has already made its Cleave attack this turn`);
+        if (c.cleave_used) fail(message("refusal.already_made_cleave_attack", { name: c.name }));
         const from =
-          c.cleave ?? fail(`${c.name} hasn't hit a creature with a Cleave weapon this turn`);
-        if (from.attack !== action.attack) fail(`The Cleave attack is made with ${from.attack}`);
-        if (from.target === t.id) fail("The Cleave attack is against a second creature");
+          c.cleave ?? fail(message("refusal.hasnt_hit_creature_cleave", { name: c.name }));
+        if (from.attack !== action.attack)
+          fail(message("refusal.cleave_attack_made", { attack: from.attack }));
+        if (from.target === t.id) fail(message("refusal.cleave_attack_against_second"));
         c.cleave = null;
         c.cleave_used = true;
       } else if (action.light_extra) {
         // SRD "Light": after attacking with a Light weapon in the Attack action, one extra attack
         // as a Bonus Action with a different Light weapon.
         onTurn(c, "attack");
-        if (!light) fail(`${action.attack} isn't a Light weapon`);
+        if (!light) fail(message("refusal.isnt_light_weapon", { attack: action.attack }));
         if (!c.light_attacks.length) {
-          fail(`${c.name} hasn't attacked with a Light weapon in the Attack action this turn`);
+          fail(message("refusal.hasnt_attacked_light_weapon", { name: c.name }));
         }
         const same = attacker.attacks.filter((a) => a.name === action.attack).length;
         if (same < 2 && c.light_attacks.every((name) => name === action.attack)) {
-          fail(`The extra attack must be made with a different Light weapon than ${action.attack}`);
+          fail(message("refusal.extra_attack_must_made", { attack: action.attack }));
         }
         // Nick: "as part of the Attack action instead of as a Bonus Action", once per turn.
         if (line?.mastery === "Nick" && action.mastery !== false && !c.nick_used) {
           c.nick_used = true;
           notes.push(message("mastery.nick", { name: c.name }));
         } else {
-          if (c.used.bonus_action) fail(`${c.name} has already used its bonus action this turn`);
+          if (c.used.bonus_action)
+            fail(message("refusal.already_used_bonus_action", { name: c.name }));
           c.used.bonus_action = true;
         }
       } else {
         const reaction = action.reaction || action.opportunity;
         if (action.opportunity) {
-          if (line && line.kind !== "melee") fail("An Opportunity Attack is a melee attack");
+          if (line && line.kind !== "melee")
+            fail(message("refusal.opportunity_attack_melee_attack"));
           if (e.marks.some((m) => m.kind === "staggered" && m.on === c.id)) {
-            fail(`${c.name} can't make Opportunity Attacks (Staggering Blow)`);
+            fail(message("refusal.cant_make_opportunity_attacks", { name: c.name }));
           }
           if (t.disengaged)
-            fail(`${t.name} Disengaged: its movement doesn't provoke Opportunity Attacks`);
+            fail(message("refusal.disengaged_movement_doesnt_provoke", { target: t.name }));
         }
         spendAttack(c, reaction);
         if (light && !reaction) c.light_attacks.push(action.attack);
@@ -3231,8 +3315,8 @@ function run(
       onTurn(c, "act");
       canAct(c);
       if (c.expended.includes(action.ability))
-        fail(`${c.name}'s ${action.ability} hasn't recharged`);
-      if (c.used.action) fail(`${c.name} has already used its action this turn`);
+        fail(message("refusal.hasnt_recharged", { name: c.name, ability: action.ability }));
+      if (c.used.action) fail(message("refusal.already_used_action_turn", { name: c.name }));
       const user = encounterCombatant(e, c.id, ctx);
       const line = user.save_actions.find((a) => a.name === action.ability);
       if (c.monster !== null)
@@ -3247,10 +3331,10 @@ function run(
     }
     case "legendary": {
       const c = find(action.id);
-      if (c.monster === null) fail(`${c.name} has no legendary actions`);
-      if (e.round === 0) fail("The fight hasn't started");
+      if (c.monster === null) fail(message("refusal.no_legendary_actions", { name: c.name }));
+      if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
       if (current()?.id === c.id) {
-        fail(`${c.name} takes legendary actions after another creature's turn, not on its own`);
+        fail(message("refusal.takes_legendary_actions_after", { name: c.name }));
       }
       canAct(c);
       const def = monsterDef(ctx, c);
@@ -3260,16 +3344,20 @@ function run(
           : def.legendary_uses.uses
         : 0;
       if (c.legendary_used >= perRound) {
-        fail(`${c.name} has no legendary action uses left until the start of its turn`);
+        fail(message("refusal.no_legendary_action_uses", { name: c.name }));
       }
       const user = encounterCombatant(e, c.id, ctx);
       const line =
         user.legendary_actions.find((a) => a.name === action.action) ??
         fail(
-          `${c.name} has no legendary action '${action.action}' (${user.legendary_actions.map((a) => a.name).join(", ")})`,
+          message("refusal.no_legendary_action", {
+            name: c.name,
+            action: action.action,
+            known: user.legendary_actions.map((a) => a.name),
+          }),
         );
       if (line.once_per_round && c.legendary_taken.includes(line.name)) {
-        fail(`${c.name} can't take ${line.name} again until the start of its next turn`);
+        fail(message("refusal.cant_take_again_until", { name: c.name, attack: line.name }));
       }
       c.legendary_used += 1;
       if (line.once_per_round) c.legendary_taken.push(line.name);
@@ -3280,18 +3368,25 @@ function run(
           left: perRound - c.legendary_used,
         }),
       );
-      const needTarget = () => find(action.target ?? fail(`${line.name} needs a target`));
+      const needTarget = () =>
+        find(action.target ?? fail(message("refusal.needs_target", { attack: line.name })));
       const attackable = (name: string) => user.attacks.some((a) => a.name === name);
       if (line.attacks.length) {
         const attack =
           action.attack ??
           (line.attacks.length === 1
             ? (line.attacks[0] as string)
-            : fail(`${line.name}: choose the attack (${line.attacks.join(" or ")})`));
+            : fail(message("refusal.choose_attack", { action: line.name, attacks: line.attacks })));
         if (!line.attacks.includes(attack)) {
-          fail(`${line.name} makes one ${line.attacks.join(" or ")} attack, not ${attack}`);
+          fail(
+            message("refusal.one_attack_of", {
+              action: line.name,
+              attacks: line.attacks,
+              attack,
+            }),
+          );
         }
-        if (!attackable(attack)) fail(`${attack} has no attack roll to resolve: see its text`);
+        if (!attackable(attack)) fail(message("refusal.no_attack_roll_resolve", { attack }));
         result = attackOn(c, needTarget(), attack, action);
       } else if (line.uses && attackable(line.uses)) {
         result = attackOn(c, needTarget(), line.uses, action);
@@ -3311,7 +3406,8 @@ function run(
           (x) => x.section === "legendary_actions" && x.action === line.name,
         ) as ReturnType<typeof monsterSpells>[number];
         const spell =
-          lookup(ctx.catalog.spells, cast.spell) ?? fail(`Unknown spell '${cast.spell}'`);
+          lookup(ctx.catalog.spells, cast.spell) ??
+          fail(message("refusal.unknown_spell", { spell: cast.spell }));
         const area = action.area ? spellArea(c, spell, action.area) : null;
         const targets = area ?? action.targets ?? (action.target ? [action.target] : []);
         result = castBy(c, spell, targets, {
@@ -3336,40 +3432,51 @@ function run(
     }
     case "feature": {
       const c = find(action.id);
-      if (c.character === null) fail(`${c.name} has no class features`);
+      if (c.character === null) fail(message("refusal.no_class_features", { name: c.name }));
       const ref = characterRef(ctx, c);
       const f =
         computePlaySheet(ref.build, ref.state, ctx.catalog).actions.find(
           (a) => a.key === action.feature || a.name === action.feature,
-        ) ?? fail(`${c.name} has no feature '${action.feature}'`);
+        ) ?? fail(message("refusal.no_feature", { name: c.name, feature: action.feature }));
       if (f.halves_attack_damage || f.reduces_attack_damage) {
-        fail(`${f.name} is offered when an attack hits ${c.name}`);
+        fail(message("refusal.offered_when_attack_hits", { feature: f.name, name: c.name }));
       }
       const t = action.target ? find(action.target) : c;
-      if (f.target === "self" && t !== c) fail(`${f.name} is used on yourself`);
-      if (f.target === "other" && t === c) fail(`${f.name} is used on another creature`);
+      if (f.target === "self" && t !== c)
+        fail(message("refusal.used_yourself", { feature: f.name }));
+      if (f.target === "other" && t === c)
+        fail(message("refusal.used_another_creature", { feature: f.name }));
       // A feature that affects several creatures (Turn Undead) takes `targets`.
       const targets = f.many
-        ? (action.targets ?? fail(`${f.name} affects several creatures: give \`targets\``)).map(
-            find,
-          )
+        ? (
+            action.targets ??
+            fail(message("refusal.affects_several_creatures_give", { feature: f.name }))
+          ).map(find)
         : [t];
       for (const x of targets) {
-        if (f.many && x === c) fail(`${f.name} doesn't affect ${c.name}`);
+        if (f.many && x === c)
+          fail(message("refusal.doesnt_affect", { feature: f.name, name: c.name }));
         const d = f.range === null ? null : checkedFeet(c, x);
         if (f.range !== null && d !== null && d > f.range) {
-          fail(`${x.name} is ${d} feet away: out of ${f.name}'s range (${f.range} ft)`);
+          fail(
+            message("refusal.feet_away_out_range_3", {
+              other: x.name,
+              d,
+              feature: f.name,
+              range: f.range,
+            }),
+          );
         }
         if (f.creature_types.length) {
           const type = creatureTypeOf(ctx, x).toLowerCase();
           if (!f.creature_types.some((y) => y.toLowerCase() === type)) {
-            fail(`${x.name} isn't ${f.creature_types.join(" or ")}`);
+            fail(message("refusal.not_creature_type", { name: x.name, types: f.creature_types }));
           }
         }
         for (const condition of f.removes) {
           if (!conditionsOf(ctx, x).has(condition)) {
             const name = lookup(ctx.catalog.conditions, condition)?.name ?? condition;
-            fail(`${x.name} isn't ${name}`);
+            fail(message("refusal.isnt", { other: x.name, name }));
           }
         }
       }
@@ -3378,25 +3485,31 @@ function run(
         (action.damage_type ??
           (f.save.damage.types.length === 1
             ? f.save.damage.types[0]
-            : fail(`${f.name}: choose the damage type (${f.save.damage.types.join(" or ")})`)));
+            : fail(
+                message("refusal.choose_damage_type", {
+                  feature: f.name,
+                  types: f.save.damage.types,
+                }),
+              )));
       if (damageType && f.save?.damage && !f.save.damage.types.includes(damageType)) {
-        fail(`${f.name} deals ${f.save.damage.types.join(" or ")} damage`);
+        fail(message("refusal.damage_types", { feature: f.name, types: f.save.damage.types }));
       }
       if (f.economy === "reaction") {
-        if (e.round === 0) fail("The fight hasn't started");
+        if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
         canAct(c);
-        if (c.used.reaction) fail(`${c.name} has already used its reaction`);
+        if (c.used.reaction) fail(message("refusal.already_used_reaction", { name: c.name }));
         c.used.reaction = true;
       } else if (f.economy === "free") {
         onTurn(c, `use ${f.name}`);
         canAct(c);
       } else takeAction(c, f.name, f.economy === "bonus_action");
       if (f.once_per_turn && c.features_used.includes(f.key)) {
-        fail(`${c.name} has already used ${f.name} this turn`);
+        fail(message("refusal.already_used_turn_2", { name: c.name, feature: f.name }));
       }
-      if (f.after_hit && !c.hits.includes(t.id)) fail(`${c.name} hasn't hit ${t.name} this turn`);
+      if (f.after_hit && !c.hits.includes(t.id))
+        fail(message("refusal.hasnt_hit_turn", { name: c.name, target: t.name }));
       if (f.extra_action && !c.used.action) {
-        fail(`Take your action first: ${f.name} gives one additional action`);
+        fail(message("refusal.take_your_action_gives", { feature: f.name }));
       }
       const on = f.many ? targets.map((x) => x.name) : t === c ? [] : [t.name];
       notes.push(
@@ -3519,7 +3632,8 @@ function run(
       const c = find(action.id);
       canAct(c);
       const spell =
-        lookup(ctx.catalog.spells, action.spell) ?? fail(`Unknown spell '${action.spell}'`);
+        lookup(ctx.catalog.spells, action.spell) ??
+        fail(message("refusal.unknown_spell", { spell: action.spell }));
       let what: "action" | "bonus_action" | "reaction" = "action";
       let slot_level = action.slot_level;
       let spellcasting: string | undefined;
@@ -3527,7 +3641,8 @@ function run(
       if (c.character !== null) {
         const ref = characterRef(ctx, c);
         const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
-        if (!known.some((x) => x.id === spell.id)) fail(`${c.name} can't cast ${spell.name}`);
+        if (!known.some((x) => x.id === spell.id))
+          fail(message("refusal.cant_cast", { name: c.name, spell: spell.name }));
         what = castingEconomy(spell);
       } else {
         // A monster casts it through an action that lists it (legendary ones: `legendary`).
@@ -3538,17 +3653,31 @@ function run(
             (action.via === undefined || x.action === action.via),
         );
         if (!lines.length) {
-          fail(`${c.name} can't cast ${spell.name}${action.via ? ` with ${action.via}` : ""}`);
+          fail(
+            message("refusal.cant_cast_via", {
+              name: c.name,
+              spell: spell.name,
+              via: action.via ?? "",
+              given: action.via !== undefined,
+            }),
+          );
         }
         if (lines.length > 1) {
           fail(
-            `${c.name} casts ${spell.name} with ${lines.map((x) => x.action).join(" or ")}: give \`via\``,
+            message("refusal.give_via", {
+              name: c.name,
+              spell: spell.name,
+              actions: lines.map((x) => x.action),
+            }),
           );
         }
         line = lines[0] as (typeof lines)[number];
         if (!/^(Action|Bonus Action|Reaction)\b/.test(spell.casting_time)) {
           fail(
-            `${spell.name} takes ${spell.casting_time}: a monster casts it with the Magic action on each of its turns, which isn't modeled`,
+            message("refusal.takes_monster_casts_magic", {
+              spell: spell.name,
+              casting_time: spell.casting_time,
+            }),
           );
         }
         what =
@@ -3560,40 +3689,48 @@ function run(
         // "always cast at its lowest possible level and can't be cast at a higher level"
         const fixed = spell.level === 0 ? undefined : (line.level ?? spell.level);
         if (action.slot_level !== undefined && action.slot_level !== fixed) {
-          fail(`${c.name} casts ${spell.name} at level ${fixed ?? 0} only`);
+          fail(
+            message("refusal.fixed_level", { name: c.name, spell: spell.name, level: fixed ?? 0 }),
+          );
         }
         slot_level = fixed;
         spellcasting = line.action;
         if (line.recharge && c.expended.includes(line.action)) {
-          fail(`${c.name}'s ${line.action} hasn't recharged`);
+          fail(message("refusal.hasnt_recharged_2", { name: c.name, action: line.action }));
         }
       }
       const released = releasing?.id === c.id;
       if (what === "reaction") {
-        if (e.round === 0) fail("The fight hasn't started");
+        if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
       } else onTurn(c, "cast");
       if (!released && c.used[what]) {
-        fail(`${c.name} has already used its ${what.replace("_", " ")}`);
+        fail(message("refusal.economy_used", { name: c.name, what }));
       }
       if (what === "action" && c.surged) {
-        fail("Action Surge's additional action can't be the Magic action (casting a spell)");
+        fail(message("refusal.action_surge_additional_action"));
       }
-      if (action.area && action.targets?.length) fail("Give targets or an area, not both");
+      if (action.area && action.targets?.length) fail(message("refusal.give_targets_area_not"));
       // A wall: placed from point to point; the creatures in its squares are its targets.
       const wallSpec = spell.mechanics?.wall ?? null;
       if (wallSpec && !action.wall)
-        fail(`${spell.name} is a wall: place it with \`wall: {from, to}\``);
-      if (!wallSpec && action.wall) fail(`${spell.name} isn't a wall`);
+        fail(message("refusal.place_wall", { spell: spell.name, example: "`wall: {from, to}`" }));
+      if (!wallSpec && action.wall) fail(message("refusal.isnt_wall", { spell: spell.name }));
       const wall = wallSpec && action.wall ? placeWall(c, spell, action.wall) : null;
       // A smite (Divine Smite): "immediately after hitting a target with a Melee weapon or an
       // Unarmed Strike"; the target is the one hit, and a Critical Hit doubles its dice.
       const smite = spell.mechanics?.after_hit
-        ? (c.last_hit ?? fail(`${spell.name} is cast right after ${c.name} hits a creature`))
+        ? (c.last_hit ??
+          fail(message("refusal.cast_right_after_hits", { spell: spell.name, name: c.name })))
         : null;
-      if (smite && !smite.melee) fail(`${spell.name} follows a hit with a melee attack`);
+      if (smite && !smite.melee)
+        fail(message("refusal.follows_hit_melee_attack", { spell: spell.name }));
       if (smite && action.targets?.length && action.targets[0] !== smite.target) {
         fail(
-          `${spell.name}'s target is the creature ${c.name} just hit (${find(smite.target).name})`,
+          message("refusal.smite_target", {
+            spell: spell.name,
+            name: c.name,
+            target: find(smite.target).name,
+          }),
         );
       }
       // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
@@ -3633,7 +3770,7 @@ function run(
       break;
     }
     default:
-      fail(`Unknown action '${(action as { type: string }).type}'`);
+      fail(message("refusal.unknown_action", { type: (action as { type: string }).type }));
   }
   if (releasing) {
     const c = find(releasing.id);
@@ -3652,8 +3789,8 @@ function run(
 
 // --- helpers ------------------------------------------------------------------------------------
 
-function fail(message: string): never {
-  throw new EncounterError([message]);
+function fail(reason: Message): never {
+  throw new EncounterError([reason]);
 }
 
 function combatant(fields: Partial<EncounterCombatant>): EncounterCombatant {
@@ -3683,13 +3820,16 @@ function signedText(n: number): string {
 }
 
 export function monsterDef(ctx: EncounterContext, c: EncounterCombatant): MonsterDef {
-  return lookup(ctx.catalog.monsters, c.monster) ?? fail(`Unknown monster '${c.monster}'`);
+  return (
+    lookup(ctx.catalog.monsters, c.monster) ??
+    fail(message("refusal.unknown_monster", { monster: c.monster ?? "" }))
+  );
 }
 
 export function characterRef(ctx: EncounterContext, c: EncounterCombatant): CharacterRef {
   return (
     ctx.characters?.[c.character ?? ""] ??
-    fail(`${c.name}: the character '${c.character}' wasn't given`)
+    fail(message("refusal.character_wasnt_given", { name: c.name, character: c.character ?? "" }))
   );
 }
 
@@ -3813,7 +3953,7 @@ function skipToActive(
     resetTurn(c);
     return c;
   }
-  return fail("No one is left to take a turn");
+  return fail(message("refusal.no_one_left_take"));
 }
 
 /** A play action applied to a monster in the encounter. */
@@ -3822,7 +3962,7 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
   const hp = c.hp ?? def.hit_points;
   switch (a.type) {
     case "damage": {
-      if (c.defeated) fail(`${c.name} is already defeated`);
+      if (c.defeated) fail(message("refusal.already_defeated", { name: c.name }));
       const petrified = conditionsOf(ctx, c).has("petrified");
       const result = takeDamage(
         { hp, temp: c.temp_hp, max: def.hit_points },
@@ -3861,7 +4001,7 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       return notes;
     }
     case "heal": {
-      if (c.defeated) fail(`${c.name} is dead: healing can't help`);
+      if (c.defeated) fail(message("refusal.dead_healing_cant_help", { name: c.name }));
       c.hp = Math.min(def.hit_points, hp + Math.max(0, a.amount));
       return [];
     }
@@ -3871,7 +4011,8 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
     }
     case "add_condition": {
       const condition =
-        lookup(ctx.catalog.conditions, a.condition) ?? fail(`Unknown condition '${a.condition}'`);
+        lookup(ctx.catalog.conditions, a.condition) ??
+        fail(message("refusal.unknown_condition", { condition: a.condition }));
       if (def.condition_immunities.includes(condition.id)) {
         return [message("monster.immune", { name: c.name, condition: condition.name })];
       }
@@ -3879,7 +4020,8 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
       return [];
     }
     case "remove_condition": {
-      if (!c.conditions.includes(a.condition)) fail(`${c.name} isn't ${a.condition}`);
+      if (!c.conditions.includes(a.condition))
+        fail(message("refusal.isnt_2", { name: c.name, condition: a.condition }));
       c.conditions = c.conditions.filter((x) => x !== a.condition);
       return [];
     }
@@ -3892,7 +4034,7 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
     case "spend_pact_slot":
       return []; // a monster's spell slots aren't tracked
     default:
-      return fail(`A monster can't take the play action '${a.type}'`);
+      return fail(message("refusal.monster_cant_take_play", { type: a.type }));
   }
 }
 
@@ -3956,7 +4098,9 @@ export function checkedPath(from: GridPoint, path: readonly GridPoint[]): GridPo
   let at = from;
   for (const square of path) {
     if (Math.max(Math.abs(square.x - at.x), Math.abs(square.y - at.y)) !== 1) {
-      fail(`The path jumps from ${at.x},${at.y} to ${square.x},${square.y}: give every square`);
+      fail(
+        message("refusal.path_jumps_give_every", { x: at.x, y: at.y, x2: square.x, y2: square.y }),
+      );
     }
     at = square;
   }
@@ -3968,7 +4112,12 @@ export function castingEconomy(spell: SpellDef): "action" | "bonus_action" | "re
   if (/^Action/i.test(spell.casting_time)) return "action";
   if (/^Bonus Action/i.test(spell.casting_time)) return "bonus_action";
   if (/^Reaction/i.test(spell.casting_time)) return "reaction";
-  return fail(`${spell.name} takes ${spell.casting_time} to cast: not in combat`);
+  return fail(
+    message("refusal.takes_cast_not_combat", {
+      spell: spell.name,
+      casting_time: spell.casting_time,
+    }),
+  );
 }
 
 /** A spell's range in feet ("60 feet"), or `null` (Self, Touch, Sight, Unlimited…). */
@@ -4053,7 +4202,7 @@ interface PlacedWall {
 /** A target behind cover: +2 or +5 to AC and Dexterity saves; Total Cover can't be targeted. */
 function withCover(view: Combatant, cover: Cover | undefined): Combatant {
   if (!cover) return view;
-  if (cover === "total") fail(`${view.name} has Total Cover: it can't be targeted`);
+  if (cover === "total") fail(message("refusal.total_cover_cant_targeted", { view: view.name }));
   const bonus = cover === "half" ? 2 : 5;
   return {
     ...view,
@@ -4239,15 +4388,15 @@ export function planMove(
   /** The movement it has (default: what's left this turn). */
   { left = Math.max(0, speedOf(ctx, c, e) + c.extra_movement - c.moved) }: { left?: number } = {},
 ): { path: GridPoint[]; steps: number[] } {
-  const from = c.position ?? fail(`${c.name} has no position: place it first`);
-  if (move.to && move.path) fail("Give a square to move to or a path, not both");
+  const from = c.position ?? fail(message("refusal.no_position_place", { name: c.name }));
+  if (move.to && move.path) fail(message("refusal.give_square_move_path"));
   const size = spaceOf(ctx, c);
   const terrain = terrainOf(e, ctx, c);
   const costs = (squares: readonly GridPoint[]): number[] => {
     let at = from;
     return squares.map((square) => {
       const why = stepBlocked(terrain, at, square, size);
-      if (why) fail(`${c.name} can't move to ${square.x},${square.y}: ${why}`);
+      if (why) fail(message("refusal.cant_move", { name: c.name, x: square.x, y: square.y, why }));
       const cost = stepCost(terrain, at, square, size);
       at = square;
       return cost;
@@ -4257,9 +4406,9 @@ export function planMove(
     const path = checkedPath(from, move.path);
     return { path, steps: costs(path) };
   }
-  const to = move.to ?? fail("Give a square to move to or a path");
+  const to = move.to ?? fail(message("refusal.give_square_move_path_2"));
   const taken = spaceTakenBy(e, ctx, c, to);
-  if (taken) fail(`${taken.name} is in that space`);
+  if (taken) fail(message("refusal.space", { taken: taken.name }));
   const straight = straightPath(from, to);
   let at = from;
   const clear = straight.every((square) => {
@@ -4271,9 +4420,18 @@ export function planMove(
   // Around the obstacle: the cheapest path (looking a little past the movement left, to say how
   // far it is).
   const found = findPath(terrain, from, to, { size, maxCost: left + 300 });
-  if (!found) fail(`${c.name} can't reach ${to.x},${to.y}: something blocks every path`);
+  if (!found)
+    fail(message("refusal.cant_reach_something_blocks", { name: c.name, x: to.x, y: to.y }));
   if (found.cost > left) {
-    fail(`${c.name} can't reach ${to.x},${to.y} (needs ${found.cost} ft, ${left} left)`);
+    fail(
+      message("refusal.cant_reach_needs_ft", {
+        name: c.name,
+        x: to.x,
+        y: to.y,
+        cost: found.cost,
+        left,
+      }),
+    );
   }
   return { path: found.path, steps: costs(found.path) };
 }
@@ -4298,23 +4456,25 @@ export function placeArea(
   cover: Map<string, MapCover>;
   total: string[];
 } {
-  if (!c.position) fail(`${c.name} has no position: an area needs positions`);
+  if (!c.position) fail(message("refusal.no_position_area_needs", { name: c.name }));
   const origin = { position: c.position, size: spaceOf(ctx, c) };
   const point = placement.point;
   if ((area.shape === "sphere" || area.shape === "cylinder") && point && range !== null) {
     const d = distanceToPoint(origin, point);
-    if (d > range) fail(`That point is ${d} feet away: out of ${label}'s range (${range} ft)`);
+    if (d > range) fail(message("refusal.point_feet_away_out_3", { d, label, range }));
   }
   if (area.shape === "cube" && point) {
     const d = gridDistance(point, area.size / 5, origin.position, origin.size);
-    if (range === null && d !== 5) fail(`${label}'s Cube must start next to ${c.name}`);
-    if (range !== null && d > range) fail(`That Cube is ${d} feet away: out of ${label}'s range`);
+    if (range === null && d !== 5)
+      fail(message("refusal.cube_must_start_next", { label, name: c.name }));
+    if (range !== null && d > range) fail(message("refusal.cube_feet_away_out", { d, label }));
   }
   let squares: Set<string>;
   try {
     squares = areaSquares(area, origin, placement);
   } catch (error) {
-    if (error instanceof RangeError) fail(`${label}: ${error.message}`);
+    if (error instanceof RangeError)
+      fail(message("refusal.message", { label, message: error.message }));
     throw error;
   }
   // Squares with no clear line from the point of origin aren't in it (SRD "Area of Effect").
@@ -4357,7 +4517,9 @@ export function zoneSquares(
   zoneId: string,
   ctx: EncounterContext,
 ): GridPoint[] | null {
-  const z = encounter.zones.find((x) => x.id === zoneId) ?? fail(`No zone '${zoneId}'`);
+  const z =
+    encounter.zones.find((x) => x.id === zoneId) ??
+    fail(message("refusal.no_zone_2", { zone_id: zoneId }));
   const area = zoneArea(encounter, ctx, z);
   if (!area) return null;
   return [...area]

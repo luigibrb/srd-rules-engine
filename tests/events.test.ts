@@ -171,6 +171,25 @@ describe("events", () => {
     expect(r.events).toEqual([
       expect.objectContaining({ type: "pending", combatant: "brakka", kind: "inspiration" }),
     ]);
+    // The question as a message too: in the pending decision, its event and the result.
+    const question = r.encounter.pending?.question_message;
+    expect(question).toMatchObject({
+      code: "decision.inspiration",
+      params: { name: "Brakka", total: expect.any(Number), target: 25, die: 8 },
+    });
+    expect(question?.text).toBe(r.encounter.pending?.question);
+    expect(r.messages).toEqual([question]);
+    expect(r.events[0]).toMatchObject({ question_message: question });
+    // Another action now is refused, saying which question waits.
+    try {
+      applyEncounterAction(r.encounter, { type: "dodge", id: "brakka" }, s.ctx());
+      expect.unreachable();
+    } catch (error) {
+      expect((error as EncounterError).details[0]).toMatchObject({
+        code: "refusal.waiting_decision",
+        params: { question },
+      });
+    }
   });
 });
 

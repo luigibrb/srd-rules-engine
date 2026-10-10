@@ -1,12 +1,13 @@
 import { ABILITY_FULL_NAMES, type AbilityFullName, type Character } from "../models/character";
 import type { SavingThrow } from "../models/combat";
 import { abilityModifier, roll } from "./dice";
+import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 export function abilityScore(character: Character, ability: string): number {
   const key = ability.toLowerCase();
   if (!(ABILITY_FULL_NAMES as readonly string[]).includes(key)) {
-    throw new RangeError(`Unknown ability '${ability}'`);
+    throw new RuleError(message("rule.unknown_ability", { ability }));
   }
   return character.ability_scores[key as AbilityFullName];
 }

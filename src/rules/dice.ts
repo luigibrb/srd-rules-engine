@@ -1,4 +1,5 @@
 import type { RollResult } from "../models/combat";
+import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 const DICE_PATTERN = /^(\d+)d(\d+)([+-]\d+)?$/i;
@@ -16,13 +17,15 @@ export interface DiceExpression {
 /** Parse an expression like `2d6+3`. Throws `RangeError` if it is malformed or too large. */
 export function parseDiceExpression(expression: string): DiceExpression {
   const match = DICE_PATTERN.exec(expression.trim());
-  if (!match) throw new RangeError(`Invalid dice expression: '${expression}'`);
+  if (!match) throw new RuleError(message("rule.invalid_dice_expression", { expression }));
   const count = Number(match[1]);
   const sides = Number(match[2]);
   const modifier = match[3] ? Number(match[3]) : 0;
-  if (sides < 1) throw new RangeError(`Dice need at least one side: '${expression}'`);
+  if (sides < 1) throw new RuleError(message("rule.dice_need_least_one", { expression }));
   if (count > MAX_DICE || sides > MAX_SIDES) {
-    throw new RangeError(`At most ${MAX_DICE} dice of ${MAX_SIDES} sides: '${expression}'`);
+    throw new RuleError(
+      message("rule.most_dice_sides", { max_dice: MAX_DICE, max_sides: MAX_SIDES, expression }),
+    );
   }
   return { count, sides, modifier };
 }

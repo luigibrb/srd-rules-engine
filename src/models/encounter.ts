@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 import { ABILITIES, DAMAGE_TYPES, SKILLS, SpellAreaSchema } from "./content";
+import { MessageSchema } from "./messages";
 import { PlayActionSchema } from "./state";
 import { DocumentVersionSchema } from "./version";
 
@@ -323,6 +324,8 @@ export const PendingSchema = z.object({
     "relentless_rage",
   ]),
   question: z.string(),
+  /** `question` as a message (for translation); absent in documents saved before it. */
+  question_message: MessageSchema.optional(),
   /** What `auto` would answer (only when it can turn the failure into a success). */
   recommended: z.boolean().default(true),
 });

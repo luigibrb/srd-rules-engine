@@ -17,8 +17,11 @@ migrated when it's loaded.
   `formatMessage` to render them with another catalog: encounter results, `applyAction` and
   `reconcileState` (`PlayResult`), `takeDamage`, `adjustDamage`, `castSpell`, and the HTTP routes
   that return notes. Attack, save and check results have `reason_messages` next to `reasons`
-  (`ModeReason` takes an optional `message`). Every sentence has a code except decision
-  questions (code `text` for now).
+  (`ModeReason` takes an optional `message`). Refusals too: `EncounterError`, `PlayError` and
+  `BuildError` have `details` next to `messages`; `checkAction` and the move and area previews
+  have `reason_messages`, options `reason_message`; the rules throw `RuleError` (a `RangeError`
+  with `detail`). Decisions have `message` next to `question`, and `encounter.pending` and its
+  event `question_message`. Builder validation errors and option labels still have code `text`.
 - `unassignedValues(method, scores, rules, pool)` is public: the standard array's or rolled pool's
   values not assigned to an ability yet.
 - `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would

@@ -17,6 +17,7 @@ import {
   updateBuild,
 } from "../models/build";
 import { ABILITIES, ABILITY_NAMES, STEPS, type Step } from "../models/content";
+import type { Message } from "../models/messages";
 import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "../rules/ability-scores";
 import {
   type ActiveChoice,
@@ -34,6 +35,7 @@ import {
   type ValidationReport,
   validateBuild,
 } from "../rules/build-validation";
+import { message, texts, toMessage } from "../rules/messages";
 import { computeSheet, type DerivedSheet } from "../rules/sheet";
 
 export const STEP_TITLES: Readonly<Record<Step, string>> = {
@@ -52,10 +54,14 @@ export const STEP_TITLES: Readonly<Record<Step, string>> = {
 export class BuildError extends Error {
   override name = "BuildError";
   readonly messages: readonly string[];
+  /** The same as `messages`, as data to translate: a code, its parameters and the English text. */
+  readonly details: readonly Message[];
 
-  constructor(messages: readonly string[]) {
-    super(messages.join("; "));
-    this.messages = messages;
+  constructor(messages: readonly (Message | string)[]) {
+    const details = messages.map(toMessage);
+    super(texts(details).join("; "));
+    this.details = details;
+    this.messages = texts(details);
   }
 }
 
@@ -94,7 +100,8 @@ export function nextIncompleteStep(ev: Evaluation): Step | null {
 // --- setters ------------------------------------------------------------------------------
 
 export function setClass(build: CharacterBuild, catalog: Catalog, classId: string): BuildResult {
-  if (!lookup(catalog.classes, classId)) throw new BuildError([`Unknown class '${classId}'`]);
+  if (!lookup(catalog.classes, classId))
+    throw new BuildError([message("builder.unknown_class", { class: classId })]);
   return commit(build, catalog, normalize(updateBuild(build, { class_id: classId }), catalog));
 }
 
@@ -104,7 +111,7 @@ export function setSpecies(
   speciesId: string,
 ): BuildResult {
   if (!lookup(catalog.species, speciesId)) {
-    throw new BuildError([`Unknown species '${speciesId}'`]);
+    throw new BuildError([message("builder.unknown_species", { species: speciesId })]);
   }
   return commit(build, catalog, normalize(updateBuild(build, { species_id: speciesId }), catalog));
 }
@@ -115,7 +122,7 @@ export function setBackground(
   backgroundId: string,
 ): BuildResult {
   if (!lookup(catalog.backgrounds, backgroundId)) {
-    throw new BuildError([`Unknown background '${backgroundId}'`]);
+    throw new BuildError([message("builder.unknown_background", { background: backgroundId })]);
   }
   const notes: string[] = [];
   let update: Partial<CharacterBuild> = { background_id: backgroundId };
@@ -134,7 +141,7 @@ export function setAbilityMethod(
   rolledPool: readonly number[] = [],
 ): BuildResult {
   if (method === "roll" && rolledPool.length !== 6) {
-    throw new BuildError(["Rolling needs six rolled scores"]);
+    throw new BuildError([message("builder.six_rolls")]);
   }
   const update = {
     ability_method: method,
@@ -151,7 +158,7 @@ export function setBaseScores(
   scores: AbilityMap,
 ): BuildResult {
   if (build.ability_method === null) {
-    throw new BuildError(["Choose an ability score method first"]);
+    throw new BuildError([message("builder.method_first")]);
   }
   const errors = baseScoreErrors(build.ability_method, scores, catalog.creation, build.rolled_pool);
   if (errors.length) throw new BuildError(errors);
@@ -173,7 +180,7 @@ export function setBackgroundBonus(
   catalog: Catalog,
   bonus: AbilityMap,
 ): BuildResult {
-  if (build.background_id === null) throw new BuildError(["Choose a background first"]);
+  if (build.background_id === null) throw new BuildError([message("builder.background_first")]);
   const errors = bonusErrors(build, catalog, bonus, build.base_scores);
   if (errors.length) throw new BuildError(errors);
   return commit(
@@ -191,14 +198,19 @@ export function setChoice(
 ): BuildResult {
   const res = resolve(build, catalog);
   const choice = res.choice(key);
-  if (!choice) throw new BuildError([`No such choice '${key}' for this character`]);
+  if (!choice) throw new BuildError([message("builder.no_choice", { key })]);
   if (choice.fixed !== null) {
-    throw new BuildError([`${choice.label} is fixed by ${choice.source.name}`]);
+    throw new BuildError([
+      message("builder.choice_fixed", { choice: choice.label, source: choice.source.name }),
+    ]);
   }
   const errors: string[] = [];
   if (choice.replaces) {
     const errors = replaceErrors(res, choice, values);
-    if (errors.length) throw new BuildError(errors.map((e) => `${choice.label}: ${e}`));
+    if (errors.length)
+      throw new BuildError(
+        errors.map((e) => message("builder.choice_error", { choice: choice.label, error: e })),
+      );
     const choices = { ...build.choices, [key]: [...values] };
     return commit(build, catalog, normalize(updateBuild(build, { choices }), catalog));
   }
@@ -286,8 +298,11 @@ export function levelUp(
   hp: number | null = null,
 ): BuildResult {
   const option = levelUpOptions(build, catalog).find((o) => o.class_id === classId);
-  if (!option) throw new BuildError([`Unknown class '${classId}'`]);
-  if (option.unavailable) throw new BuildError([`${option.name}: ${option.unavailable}`]);
+  if (!option) throw new BuildError([message("builder.unknown_class", { class: classId })]);
+  if (option.unavailable)
+    throw new BuildError([
+      message("builder.class_unavailable", { class: option.name, why: option.unavailable }),
+    ]);
   checkRoll(hp, option.hit_die);
   const levels = [...build.levels, { class_id: classId, hp }];
   return commit(build, catalog, normalize(updateBuild(build, { levels }), catalog));
@@ -301,7 +316,7 @@ export function setLevelHp(
   hp: number | null,
 ): BuildResult {
   const entry = build.levels[level - 2];
-  if (!entry) throw new BuildError([`The character has no level ${level}`]);
+  if (!entry) throw new BuildError([message("builder.no_level", { level })]);
   const cls = lookup(catalog.classes, entry.class_id);
   if (cls) checkRoll(hp, cls.hit_die);
   const levels = build.levels.map((l, i) => (i === level - 2 ? { ...l, hp } : l));
@@ -310,7 +325,7 @@ export function setLevelHp(
 
 /** Undo the last level-up, dropping the choices it made. */
 export function removeLastLevel(build: CharacterBuild, catalog: Catalog): BuildResult {
-  if (!build.levels.length) throw new BuildError(["The character is level 1"]);
+  if (!build.levels.length) throw new BuildError([message("builder.level_1")]);
   const level = characterLevel(build);
   const result = normalize(updateBuild(build, { levels: build.levels.slice(0, -1) }), catalog);
   return commit(build, catalog, {
@@ -321,7 +336,7 @@ export function removeLastLevel(build: CharacterBuild, catalog: Catalog): BuildR
 
 function checkRoll(hp: number | null, hitDie: number): void {
   if (hp !== null && (!Number.isInteger(hp) || hp < 1 || hp > hitDie)) {
-    throw new BuildError([`A d${hitDie} roll is between 1 and ${hitDie}, not ${hp}`]);
+    throw new BuildError([message("builder.hp_roll_range", { die: hitDie, hp })]);
   }
 }
 
@@ -343,9 +358,9 @@ export function setLevelClass(
 ): BuildResult {
   if (level === 1) return setClass(build, catalog, classId);
   const entry = build.levels[level - 2];
-  if (!entry) throw new BuildError([`The character has no level ${level}`]);
+  if (!entry) throw new BuildError([message("builder.no_level", { level })]);
   const cls = lookup(catalog.classes, classId);
-  if (!cls) throw new BuildError([`Unknown class '${classId}'`]);
+  if (!cls) throw new BuildError([message("builder.unknown_class", { class: classId })]);
   const notes: string[] = [];
   let hp = entry.hp;
   if (hp !== null && hp > cls.hit_die) {
@@ -480,7 +495,7 @@ export function previewChange(
 
 export function setName(build: CharacterBuild, _catalog: Catalog, name: string): BuildResult {
   const trimmed = name.trim();
-  if (!trimmed) throw new BuildError(["Name can't be empty"]);
+  if (!trimmed) throw new BuildError([message("builder.empty_name")]);
   return { build: updateBuild(build, { name: trimmed }), notes: [] };
 }
 

@@ -395,14 +395,20 @@ describe("combatantOptions: positions", () => {
     expect(checkAction(s.encounter(), attack, s.ctx()).ok).toBe(true);
     s.act([], { type: "set_positions", mode: "required" });
     expect(s.encounter().positions).toBe("required");
-    const refused = { ok: false, reasons: ["Brakka isn't on the map"], codes: ["off_map"] };
-    expect(checkAction(s.encounter(), attack, s.ctx())).toEqual(refused);
+    const offMap = { code: "refusal.off_map", params: { name: "Brakka" } };
+    expect(checkAction(s.encounter(), attack, s.ctx())).toEqual({
+      ok: false,
+      reasons: ["Brakka isn't on the map"],
+      codes: ["off_map"],
+      reason_messages: [{ ...offMap, text: "Brakka isn't on the map" }],
+    });
     const help = { type: "help", id: "brakka", target: "goblin-warrior" } as const;
     expect(checkAction(s.encounter(), help, s.ctx()).codes).toEqual(["off_map"]);
     expect(find(s.options("brakka").attacks, "Greatsword")).toMatchObject({
       available: false,
       reason: "Brakka isn't on the map",
       code: "off_map",
+      reason_message: offMap,
     });
     expect(() =>
       applyEncounterAction(s.encounter(), attack, { ...s.ctx(), rng: scriptedRng([15, 4]) }),
@@ -481,6 +487,13 @@ describe("checkAction", () => {
       ok: false,
       reasons: ["No combatant 'nobody' in the encounter"],
       codes: ["unknown"],
+      reason_messages: [
+        {
+          code: "refusal.no_combatant_encounter",
+          params: { id: "nobody" },
+          text: "No combatant 'nobody' in the encounter",
+        },
+      ],
     });
   });
 
@@ -499,7 +512,12 @@ describe("checkAction", () => {
     const check: EncounterAction = { type: "check", id: "brakka", skill: "athletics", dc: 25 };
     const r = applyEncounterAction(encounter, check, { ...s.ctx(), rng: scriptedRng([10]) });
     expect(r.pending?.kind).toBe("inspiration");
-    expect(checkAction(encounter, check, s.ctx())).toEqual({ ok: true, reasons: [], codes: [] });
+    expect(checkAction(encounter, check, s.ctx())).toEqual({
+      ok: true,
+      reasons: [],
+      codes: [],
+      reason_messages: [],
+    });
   });
 
   it("ten combatants' options stay quick", () => {

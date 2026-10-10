@@ -8,10 +8,12 @@
 import { lookup } from "../content/catalog";
 import type { SpellArea } from "../models/content";
 import type { Encounter, EncounterCombatant, Zone } from "../models/encounter";
+import type { Message } from "../models/messages";
 import type { AreaPreview, MovePreview, Reachable } from "../models/previews";
 import { type AreaPlacement, type GridPoint, inArea } from "../rules/areas";
 import { monsterSpells } from "../rules/combatant";
 import { reachable } from "../rules/grid";
+import { message, texts } from "../rules/messages";
 import {
   alliesOf,
   type EncounterContext,
@@ -39,7 +41,7 @@ function combatantIn(e: Encounter, id: string): EncounterCombatant {
   return (
     e.combatants.find((x) => x.id === id) ??
     (() => {
-      throw new EncounterError([`No combatant '${id}' in the encounter`]);
+      throw new EncounterError([message("refusal.no_combatant_encounter", { id })]);
     })()
   );
 }
@@ -228,10 +230,11 @@ export function previewArea(
   request: AreaRequest,
   ctx: EncounterContext,
 ): AreaPreview {
-  const fail = (reasons: readonly string[]): AreaPreview => ({
+  const fail = (reasons: readonly Message[]): AreaPreview => ({
     ok: false,
-    reasons: [...reasons],
-    codes: reasons.map(refusalCode),
+    reasons: texts(reasons),
+    codes: texts(reasons).map(refusalCode),
+    reason_messages: [...reasons],
     squares: [],
     targets: [],
     total_cover: [],
@@ -239,7 +242,7 @@ export function previewArea(
   try {
     const c = combatantIn(encounter, request.id);
     const { area, range, label } = areaOf(encounter, ctx, c, request);
-    if (!area) return fail([`${label} has no area to place`]);
+    if (!area) return fail([message("refusal.no_area_place", { spell: label })]);
     const placed = placeArea(encounter, ctx, c, area, request.area, range, label);
     const squares = [...placed.squares]
       .map((k) => k.split(",").map(Number) as [number, number])
@@ -249,6 +252,7 @@ export function previewArea(
       ok: true,
       reasons: [],
       codes: [],
+      reason_messages: [],
       squares,
       targets: placed.ids.map((id) => {
         const cover = placed.cover.get(id);
@@ -262,7 +266,7 @@ export function previewArea(
       total_cover: placed.total,
     };
   } catch (error) {
-    if (error instanceof EncounterError) return fail(error.messages);
+    if (error instanceof EncounterError) return fail(error.details);
     throw error;
   }
 }
@@ -275,7 +279,7 @@ function areaOf(
 ): { area: SpellArea | null; range: number | null; label: string } {
   const fromSpell = (id: string) => {
     const spell = lookup(ctx.catalog.spells, id);
-    if (!spell) throw new EncounterError([`Unknown spell '${id}'`]);
+    if (!spell) throw new EncounterError([message("refusal.unknown_spell", { spell: id })]);
     return { area: spell.mechanics?.area ?? null, range: spellRangeFeet(spell), label: spell.name };
   };
   if (request.spell) return fromSpell(request.spell);
@@ -284,7 +288,9 @@ function areaOf(
     const line =
       view.save_actions.find((a) => a.name === request.ability) ??
       (() => {
-        throw new EncounterError([`${c.name} has no saving throw effect '${request.ability}'`]);
+        throw new EncounterError([
+          message("refusal.no_save_effect", { name: c.name, ability: request.ability }),
+        ]);
       })();
     return { area: line.area ?? null, range: line.range ?? null, label: line.name };
   }
@@ -292,7 +298,9 @@ function areaOf(
     const line =
       view.legendary_actions.find((a) => a.name === request.legendary) ??
       (() => {
-        throw new EncounterError([`${c.name} has no legendary action '${request.legendary}'`]);
+        throw new EncounterError([
+          message("refusal.no_legendary_action_named", { name: c.name, action: request.legendary }),
+        ]);
       })();
     const save = line.save ?? view.save_actions.find((a) => a.name === line.uses);
     if (save) return { area: save.area ?? null, range: save.range ?? null, label: line.name };
@@ -305,5 +313,5 @@ function areaOf(
     if (cast) return fromSpell(cast.spell);
     return { area: null, range: null, label: line.name };
   }
-  throw new EncounterError(["Give the spell, ability or legendary action whose area to place"]);
+  throw new EncounterError([message("refusal.give_area_source")]);
 }

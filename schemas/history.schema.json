@@ -1761,6 +1761,9 @@
                         "question": {
                           "type": "string"
                         },
+                        "question_message": {
+                          "$ref": "#/$defs/Message"
+                        },
                         "recommended": {
                           "default": true,
                           "type": "boolean"
@@ -5345,6 +5348,53 @@
             "type",
             "changes"
           ]
+        }
+      ]
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "params",
+        "text"
+      ]
+    },
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Message"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
         }
       ]
     }

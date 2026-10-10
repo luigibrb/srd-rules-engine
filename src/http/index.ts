@@ -19,7 +19,7 @@ import { castSpell } from "../rules/casting";
 import { abilityScore, savingThrow } from "../rules/combat";
 import { makeAttack, ROLL_MODES } from "../rules/combatant";
 import { abilityModifier, roll } from "../rules/dice";
-import { texts } from "../rules/messages";
+import { message, ruleReason, texts } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import {
   BuildError,
@@ -401,7 +401,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
           const options = { rng, mode, two_handed, riders, ally_adjacent, within_5ft };
           result = makeAttack(attacker, req.attack, target, options);
         } catch (e) {
-          if (e instanceof RangeError) throw new PlayError([e.message]);
+          if (e instanceof RangeError) throw new PlayError([ruleReason(e)]);
           throw e;
         }
         if (!result.hit) {
@@ -433,7 +433,8 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         const casterBuild = parseBuild(req.caster.build);
         const casterSheet = computePlaySheet(casterBuild, req.caster.state, catalog);
         if (!casterSheet.spells.some((s) => s.id === spell.id)) {
-          throw new PlayError([`${casterBuild.name || "The caster"} can't cast ${spell.name}`]);
+          const name = casterBuild.name || message("word.the_caster");
+          throw new PlayError([message("refusal.cant_cast", { name, spell: spell.name })]);
         }
         const caster = combatantFromCharacter(casterBuild, req.caster.state, catalog);
         const targets = req.targets.map((t) => ({ build: parseBuild(t.build), state: t.state }));
@@ -449,7 +450,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
             rng,
           });
         } catch (e) {
-          if (e instanceof RangeError) throw new PlayError([e.message]);
+          if (e instanceof RangeError) throw new PlayError([ruleReason(e)]);
           throw e;
         }
         const messages = [...result.messages];
@@ -598,13 +599,15 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       if (error instanceof z.ZodError) {
         return json(422, { detail: z.treeifyError(error), message: z.prettifyError(error) }, cors);
       }
-      if (error instanceof RangeError) return json(400, { detail: error.message }, cors);
-      if (error instanceof BuildError) return json(400, { detail: error.messages }, cors);
-      if (error instanceof EncounterError) {
-        return json(400, { detail: error.messages, codes: error.codes }, cors);
+      if (error instanceof RangeError) {
+        return json(400, { detail: error.message, details: [ruleReason(error)] }, cors);
       }
-      if (error instanceof PlayError) {
-        return json(400, { detail: error.messages }, cors);
+      if (error instanceof BuildError || error instanceof PlayError) {
+        return json(400, { detail: error.messages, details: error.details }, cors);
+      }
+      if (error instanceof EncounterError) {
+        const body = { detail: error.messages, codes: error.codes, details: error.details };
+        return json(400, body, cors);
       }
       return json(500, { detail: "Internal Server Error" }, cors);
     }

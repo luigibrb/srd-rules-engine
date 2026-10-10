@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { MessageSchema } from "./messages";
 
 const square = z.object({ x: z.int(), y: z.int() });
 
@@ -80,6 +81,7 @@ export const EncounterEventSchema = z
       combatant: z.string(),
       kind: z.string(),
       question: z.string(),
+      question_message: MessageSchema.optional(),
     }),
   ])
   .meta({ id: "EncounterEvent" });

@@ -397,6 +397,7 @@ export {
 export {
   formatMessage,
   type MessageCatalog,
+  RuleError,
   renderMessage,
 } from "./rules/messages";
 export { attackOdds, averageDamage, failOdds } from "./rules/odds";

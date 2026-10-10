@@ -40,6 +40,13 @@
             ]
           }
         },
+        "reason_messages": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Message"
+          }
+        },
         "path": {
           "type": "array",
           "items": {
@@ -161,6 +168,7 @@
         "ok",
         "reasons",
         "codes",
+        "reason_messages",
         "path",
         "cost",
         "movement_left",
@@ -169,6 +177,54 @@
         "turns"
       ],
       "additionalProperties": false
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "params",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Message"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
     }
   },
   "title": "Move preview"

@@ -174,6 +174,29 @@ export function texts(messages: readonly Message[]): string[] {
   return messages.map((m) => m.text);
 }
 
+/**
+ * A rule refusing a roll or an option (no such attack, no slot of that level): a `RangeError`
+ * whose `detail` is the reason as a message.
+ */
+export class RuleError extends RangeError {
+  override name = "RuleError";
+  readonly detail: Message;
+  constructor(detail: Message) {
+    super(detail.text);
+    this.detail = detail;
+  }
+}
+
+/** A `RangeError`'s reason as a message: a `RuleError`'s `detail`, else a `text` message. */
+export function ruleReason(error: RangeError): Message {
+  return error instanceof RuleError ? error.detail : plainMessage(error.message);
+}
+
+/** A message as is; a plain string as a `text` message. */
+export function toMessage(m: Message | string): Message {
+  return typeof m === "string" ? plainMessage(m) : m;
+}
+
 /** A sentence not given a code yet (or free text from the content): code `text`. */
 export function plainMessage(text: string): Message {
   return { code: "text", params: { text }, text: checked(text) };

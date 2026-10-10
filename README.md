@@ -425,8 +425,8 @@ Attacks and spells use builds and states (`/v1/state/attack`, `/v1/state/cast`) 
 encounter.
 
 Invalid bodies return `422` with a readable message; bad JSON, bad dice expressions and refused
-setters or actions return `400` with the reasons in `detail` (and an encounter's refusal codes in
-`codes`); unknown routes and entities `404`.
+setters or actions return `400` with the reasons in `detail`, as messages to translate in
+`details` (and an encounter's refusal codes in `codes`); unknown routes and entities `404`.
 
 ## Homebrew and custom content
 

@@ -38,7 +38,7 @@ import {
 } from "./damage";
 import { abilityModifier } from "./dice";
 import { spaceForSize } from "./grid";
-import { message, plainMessage, texts } from "./messages";
+import { message, plainMessage, RuleError, texts } from "./messages";
 import { mathRng, type Rng } from "./rng";
 import type { AttackLine } from "./sheet";
 import { parseRange } from "./weapons";
@@ -158,7 +158,19 @@ export interface Decision {
   readonly combatant: Combatant;
   /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */
   readonly question: string;
+  /** `question` as a message (for translation). */
+  readonly message: Message;
   readonly recommended: boolean;
+}
+
+/** A decision asking `message` (its text is the `question`). */
+export function decision(
+  kind: Decision["kind"],
+  combatant: Combatant,
+  message: Message,
+  recommended: boolean,
+): Decision {
+  return { kind, combatant, question: message.text, message, recommended };
 }
 /** Answers decisions; without one, the rolls follow each decision's `recommended`. */
 export type Decide = (decision: Decision) => boolean;
@@ -169,19 +181,14 @@ export function inspire(
   c: Combatant,
   total: number,
   target: number,
-  what: string,
+  what: Message,
   decide: Decide,
   rng: Rng,
 ): number | null {
   const die = c.inspiration_die;
   if (!die || total >= target) return null;
-  const question = `${c.name}: ${what} ${total} vs ${target}. Add the Bardic Inspiration die (d${die})?`;
-  const use = decide({
-    kind: "inspiration",
-    combatant: c,
-    question,
-    recommended: target - total <= die,
-  });
+  const question = message("decision.inspiration", { name: c.name, what, total, target, die });
+  const use = decide(decision("inspiration", c, question, target - total <= die));
   return use ? rng.int(1, die) : null;
 }
 
@@ -532,7 +539,9 @@ export function makeAttack(
     typeof attack === "string" ? attacker.attacks.find((a) => a.name === attack) : attack;
   if (!line) {
     const known = attacker.attacks.map((a) => a.name).join(", ");
-    throw new RangeError(`${attacker.name} has no attack '${String(attack)}' (${known})`);
+    throw new RuleError(
+      message("rule.no_attack_named", { name: attacker.name, attack: String(attack), known }),
+    );
   }
   const moded = attackMode(attacker, target, {
     mode,
@@ -542,7 +551,7 @@ export function makeAttack(
     ability: line.ability,
   });
   if (forgo_advantage && moded.mode === "disadvantage") {
-    throw new RangeError("The attack roll has Disadvantage: its Advantage can't be forgone");
+    throw new RuleError(message("rule.attack_roll_disadvantage_advantage"));
   }
   const forgone = message("reason.advantage_forgone");
   const effective =
@@ -555,27 +564,26 @@ export function makeAttack(
         }
       : moded;
   if (light_extra && !line.light_extra_damage_parts) {
-    throw new RangeError(`${line.name} isn't a Light weapon`);
+    throw new RuleError(message("rule.isnt_light_weapon", { attack: line.name }));
   }
   if (cleave && !line.cleave_damage_parts) {
-    throw new RangeError(`${line.name} doesn't have the Cleave mastery property`);
+    throw new RuleError(message("rule.doesnt_cleave_mastery_property", { attack: line.name }));
   }
   // Check the riders before rolling, so a refused request rolls nothing.
   const extra: DamagePart[] = [];
   const riderNames: string[] = [];
   for (const request of riders) {
     const rider = line.riders.find((r) => r.id === request.rider || r.name === request.rider);
-    if (!rider) throw new RangeError(`${line.name} has no rider '${request.rider}'`);
+    if (!rider)
+      throw new RuleError(message("rule.no_rider", { attack: line.name, rider: request.rider }));
     if (rider.requires === "target_damaged" && target.hp >= target.max_hp) {
-      throw new RangeError(`${rider.name} needs a target that's missing some of its Hit Points`);
+      throw new RuleError(message("rule.needs_target_missing_some", { rider: rider.name }));
     }
     if (rider.requires === "advantage_or_ally") {
       const ok =
         effective.mode === "advantage" || (ally_adjacent && effective.mode !== "disadvantage");
       if (!ok) {
-        throw new RangeError(
-          `${rider.name} needs Advantage, or an ally next to the target and no Disadvantage`,
-        );
+        throw new RuleError(message("rule.needs_advantage_ally_next", { rider: rider.name }));
       }
     }
     let type: string;
@@ -583,19 +591,22 @@ export function makeAttack(
     else {
       const choice = request.type?.toLowerCase();
       if (!choice || !rider.type.includes(choice)) {
-        throw new RangeError(`${rider.name}: choose a damage type (${rider.type.join(", ")})`);
+        throw new RuleError(
+          message("rule.choose_rider_damage_type", { rider: rider.name, types: rider.type }),
+        );
       }
       type = choice;
     }
     if (!(DAMAGE_TYPES as readonly string[]).includes(type)) {
-      throw new RangeError(`${rider.name}: unknown damage type '${type}'`);
+      throw new RuleError(message("rule.unknown_damage_type", { rider: rider.name, type }));
     }
     let dice = rider.dice;
     const taken = forgo.filter((f) => f.rider === rider.id).reduce((n, f) => n + f.dice, 0);
     if (taken && dice) {
       const m = /^(\d+)d(\d+)$/.exec(dice);
       const count = Number(m?.[1] ?? 0);
-      if (taken > count) throw new RangeError(`${rider.name} has only ${count} dice to forgo`);
+      if (taken > count)
+        throw new RuleError(message("rule.dice_forgo", { rider: rider.name, count }));
       dice = count - taken > 0 ? `${count - taken}d${m?.[2]}` : null;
     }
     if (dice !== null || rider.bonus) extra.push({ dice, bonus: rider.bonus, type });
@@ -612,7 +623,14 @@ export function makeAttack(
   const inspiration =
     criticalRoll || critical_miss
       ? null
-      : inspire(attacker, total, target.armor_class, `attack roll with ${line.name}`, decide, rng);
+      : inspire(
+          attacker,
+          total,
+          target.armor_class,
+          message("roll.attack_with", { attack: line.name }),
+          decide,
+          rng,
+        );
   total += inspiration ?? 0;
   const hit = criticalRoll || (!critical_miss && total >= target.armor_class);
   const critical_hit = criticalRoll || (hit && effective.critical_on_hit);
@@ -691,9 +709,15 @@ export function rollSavingThrow(
   const resist = (total: number | null) => {
     const left = combatant.legendary_resistance;
     if (left <= 0) return false;
-    const roll = total === null ? "" : ` (${total} vs DC ${dc})`;
-    const question = `${combatant.name} fails a ${ABILITY_NAMES[ability]} saving throw${roll}. Use Legendary Resistance (${left} left)?`;
-    return decide({ kind: "legendary_resistance", combatant, question, recommended: true });
+    const question = message("decision.legendary_resistance", {
+      name: combatant.name,
+      ability: message(`ability.${ability}`),
+      rolled: total !== null,
+      total: total ?? 0,
+      dc,
+      left,
+    });
+    return decide(decision("legendary_resistance", combatant, question, true));
   };
   const failing = combatant.condition_rolls.fail_saves[ability];
   if (failing) {
@@ -714,16 +738,20 @@ export function rollSavingThrow(
   const resolved = resolveMode(mode, saveModes(combatant, ability));
   let roll = rollD20({ mode: resolved.mode, rng });
   let total = roll.d20 + bonus;
-  const what = `${ABILITY_NAMES[ability]} saving throw`;
+  const what = message("roll.save", { ability: message(`ability.${ability}`) });
   // Indomitable: "If you fail a saving throw, you can reroll it with a bonus equal to your
   // Fighter level. You must use the new roll."
   let indomitable = false;
   const reroll = combatant.indomitable ?? null;
   if (total < dc && reroll !== null) {
-    const question = `${combatant.name} fails a ${what} (${total} vs DC ${dc}). Reroll it with Indomitable (+${reroll})?`;
-    if (
-      decide({ kind: "indomitable", combatant, question, recommended: dc - bonus - reroll <= 20 })
-    ) {
+    const question = message("decision.indomitable", {
+      name: combatant.name,
+      what,
+      total,
+      dc,
+      bonus: reroll,
+    });
+    if (decide(decision("indomitable", combatant, question, dc - bonus - reroll <= 20))) {
       indomitable = true;
       roll = rollD20({ mode: resolved.mode, rng });
       total = roll.d20 + bonus + reroll;
@@ -886,7 +914,9 @@ export function rollD20Test(
   const line = combatant.attacks.find((a) => a.name === request.attack);
   if (!line) {
     const known = combatant.attacks.map((a) => a.name).join(", ");
-    throw new RangeError(`${combatant.name} has no attack '${request.attack}' (${known})`);
+    throw new RuleError(
+      message("rule.no_attack", { combatant: combatant.name, attack: request.attack, known }),
+    );
   }
   const moded = attackMode(combatant, null, {
     mode,
@@ -978,9 +1008,9 @@ export function rollAbilityCheck(
     resolved.reason_messages.push(why);
   }
   let total = roll.d20 + bonus;
-  const label = skill ? skillName(skill) : ABILITY_NAMES[ability];
-  const inspiration =
-    dc === null ? null : inspire(combatant, total, dc, `${label} check`, decide, rng);
+  const label = message(skill ? `skill.${skill}` : `ability.${ability}`);
+  const rolled = message("roll.check", { label });
+  const inspiration = dc === null ? null : inspire(combatant, total, dc, rolled, decide, rng);
   total += inspiration ?? 0;
   return {
     name: combatant.name,

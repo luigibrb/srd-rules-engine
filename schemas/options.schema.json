@@ -187,6 +187,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -483,6 +494,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -494,7 +516,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -507,6 +530,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -581,6 +605,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -877,6 +912,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -888,7 +934,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -901,6 +948,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -975,6 +1023,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -1271,6 +1330,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1282,7 +1352,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -1295,6 +1366,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -1369,6 +1441,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -1665,6 +1748,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -1676,7 +1770,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -1689,6 +1784,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -1763,6 +1859,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -2059,6 +2166,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -2070,7 +2188,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -2083,6 +2202,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -2157,6 +2277,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -2453,6 +2584,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -2464,7 +2606,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -2477,6 +2620,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -2551,6 +2695,17 @@
                   }
                 ]
               },
+              "reason_message": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Message"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "targets": {
                 "anyOf": [
                   {
@@ -2847,6 +3002,17 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "reason_message": {
+                      "default": null,
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -2858,7 +3024,8 @@
                     "action",
                     "available",
                     "reason",
-                    "code"
+                    "code",
+                    "reason_message"
                   ],
                   "additionalProperties": false
                 }
@@ -2871,6 +3038,7 @@
               "available",
               "reason",
               "code",
+              "reason_message",
               "targets",
               "slot_levels",
               "pact_slot",
@@ -6059,6 +6227,54 @@
             "changes"
           ],
           "additionalProperties": false
+        }
+      ]
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "params",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Message"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
         }
       ]
     }

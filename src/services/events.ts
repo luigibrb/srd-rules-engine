@@ -181,6 +181,9 @@ export function encounterEvents(
       combatant: after.pending.combatant,
       kind: after.pending.kind,
       question: after.pending.question,
+      ...(after.pending.question_message
+        ? { question_message: after.pending.question_message }
+        : {}),
     });
   }
   return events;

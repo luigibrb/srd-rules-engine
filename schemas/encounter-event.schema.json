@@ -545,6 +545,9 @@
             },
             "question": {
               "type": "string"
+            },
+            "question_message": {
+              "$ref": "#/$defs/Message"
             }
           },
           "required": [
@@ -554,6 +557,54 @@
             "question"
           ],
           "additionalProperties": false
+        }
+      ]
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "params",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/Message"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
         }
       ]
     }

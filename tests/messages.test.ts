@@ -6,10 +6,15 @@ import {
   createEncounter,
   createState,
   type EncounterAction,
+  EncounterError,
+  encounterCombatant,
   formatMessage,
   MESSAGES_EN,
   type Message,
+  makeAttack,
   type PlayAction,
+  PlayError,
+  type RuleError,
   renderMessage,
   seededRng,
 } from "../src/index";
@@ -165,5 +170,70 @@ describe("play results", () => {
     expect(renderMessage(attack.reason_messages[0] as Message, it)).toBe(
       "Vantaggio: Goblin Warrior è Prone",
     );
+  });
+});
+
+describe("refusals", () => {
+  const it_ = {
+    "refusal.isnt_turn_reaction": "Non è il turno di {name}: solo una reazione può {what}",
+    "refusal.no_level_spell_slots": "Nessuno slot di livello {level} rimasto",
+  };
+
+  it("an encounter refusal has a code, its parameters and the English text", () => {
+    let e = createEncounter();
+    for (const action of [
+      { type: "add_monster", monster: "ogre" },
+      { type: "add_monster", monster: "goblin-warrior" },
+      { type: "set_initiative", id: "ogre", value: 20 },
+      { type: "set_initiative", id: "goblin-warrior", value: 10 },
+      { type: "start" },
+    ] as EncounterAction[]) {
+      e = applyEncounterAction(e, action, { catalog }).encounter;
+    }
+    try {
+      applyEncounterAction(e, { type: "dodge", id: "goblin-warrior" }, { catalog });
+      expect.unreachable();
+    } catch (error) {
+      if (!(error instanceof EncounterError)) throw error;
+      expect(error.codes).toEqual(["not_your_turn"]);
+      const [detail] = error.details;
+      expect(detail).toMatchObject({
+        code: "refusal.isnt_turn_reaction",
+        params: { name: "Goblin Warrior", what: "Dodge" },
+      });
+      expect(detail?.text).toBe(error.messages[0]);
+      expect(renderMessage(detail as Message, it_)).toBe(
+        "Non è il turno di Goblin Warrior: solo una reazione può Dodge",
+      );
+    }
+  });
+
+  it("a play refusal too", () => {
+    const build = fighterBuild();
+    try {
+      applyAction(build, createState(build, catalog), catalog, { type: "spend_slot", level: 3 });
+      expect.unreachable();
+    } catch (error) {
+      if (!(error instanceof PlayError)) throw error;
+      expect(renderMessage(error.details[0] as Message, it_)).toBe(
+        "Nessuno slot di livello 3 rimasto",
+      );
+    }
+  });
+
+  it("a rule's refusal is a RuleError (a RangeError) with its reason as a message", () => {
+    let e = createEncounter();
+    e = applyEncounterAction(e, { type: "add_monster", monster: "ogre" }, { catalog }).encounter;
+    const ogre = encounterCombatant(e, "ogre", { catalog });
+    try {
+      makeAttack(ogre, "Bite", ogre);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(RangeError);
+      expect((error as RuleError).detail).toMatchObject({
+        code: "rule.no_attack_named",
+        params: { name: "Ogre", attack: "Bite" },
+      });
+    }
   });
 });

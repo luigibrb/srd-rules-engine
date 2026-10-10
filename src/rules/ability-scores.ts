@@ -9,6 +9,7 @@ import {
   type PointBuyRules,
 } from "../models/content";
 import { abilityModifier, signed } from "./dice";
+import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 export interface AbilityRoll {
@@ -55,8 +56,12 @@ function costTable(rules: PointBuyRules, score: number): number | undefined {
 export function pointBuyCost(score: number, rules: PointBuyRules): number {
   const cost = costTable(rules, score);
   if (cost === undefined) {
-    throw new RangeError(
-      `Point buy scores must be between ${rules.min_score} and ${rules.max_score}, got ${score}`,
+    throw new RuleError(
+      message("rule.point_buy_scores_must", {
+        min_score: rules.min_score,
+        max_score: rules.max_score,
+        score,
+      }),
     );
   }
   return cost;

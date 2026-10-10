@@ -231,6 +231,13 @@ describe("HTTP play state", () => {
     });
     expect(refused.status).toBe(400);
     expect(refused.body.detail).toEqual(["No level 1 spell slots left"]);
+    expect(refused.body.details).toEqual([
+      {
+        code: "refusal.no_level_spell_slots",
+        params: { level: 1 },
+        text: "No level 1 spell slots left",
+      },
+    ]);
     const bad = await api.post("/v1/state/apply", { build, state, action: { type: "fly" } });
     expect(bad.status).toBe(422);
   });
@@ -308,16 +315,17 @@ describe("encounter options over HTTP", () => {
       characters,
       action: sword.action,
     });
-    expect(ok.body).toEqual({ ok: true, reasons: [], codes: [] });
+    expect(ok.body).toEqual({ ok: true, reasons: [], codes: [], reason_messages: [] });
     const refused = await api.post("/v1/encounters/check", {
       encounter,
       characters,
       action: { type: "dodge", id: "goblin-warrior" },
     });
-    expect(refused.body).toEqual({
+    expect(refused.body).toMatchObject({
       ok: false,
       reasons: ["It isn't Goblin Warrior's turn: only a reaction can Dodge"],
       codes: ["not_your_turn"],
+      reason_messages: [{ code: "refusal.isnt_turn_reaction" }],
     });
     const unknown = await api.post("/v1/encounters/options", { encounter, characters, id: "x" });
     expect(unknown.status).toBe(400);

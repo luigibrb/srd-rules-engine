@@ -8,6 +8,7 @@ import { z } from "zod";
 import { SpellAreaSchema } from "./content";
 import { EncounterActionSchema } from "./encounter";
 import { REFUSAL_CODES } from "./events";
+import { MessageSchema } from "./messages";
 
 /**
  * What an option spends: an action, a Bonus Action or a reaction; `attack`, one of the Attack
@@ -65,6 +66,8 @@ export const StrikeOptionSchema = z.object({
   available: z.boolean(),
   reason: z.string().nullable(),
   code: z.enum(REFUSAL_CODES).nullable().default(null),
+  /** `reason` as a message (for translation). */
+  reason_message: MessageSchema.nullable().default(null),
 });
 export type StrikeOption = z.infer<typeof StrikeOptionSchema>;
 
@@ -83,6 +86,8 @@ export const OptionEntrySchema = z.object({
   reason: z.string().nullable(),
   /** Why not, as a code (`REFUSAL_CODES`); `null` when available. */
   code: z.enum(REFUSAL_CODES).nullable().default(null),
+  /** Why not, as a message (for translation); `null` when available. */
+  reason_message: MessageSchema.nullable().default(null),
   targets: TargetSpecSchema.nullable(),
   /** A spell: the slot levels it can be cast with now (empty for a cantrip). */
   slot_levels: z.array(z.int()).default([]),
@@ -162,5 +167,7 @@ export const ActionCheckSchema = z.object({
   reasons: z.array(z.string()),
   /** A code per reason (`REFUSAL_CODES`). */
   codes: z.array(z.enum(REFUSAL_CODES)),
+  /** `reasons` as messages (for translation). */
+  reason_messages: z.array(MessageSchema).default([]),
 });
 export type ActionCheck = z.infer<typeof ActionCheckSchema>;

@@ -747,9 +747,16 @@ translation rephrases every part. An app renders them with its own catalog
 
 Internally the services collect `Message`s, not strings (`run()` in the encounter,
 `applyAction`), and derive `notes` with `texts()`, so the compiler refuses an uncoded sentence.
-Code `text` (`params.text`) is left for decision questions, which come next with refusals, and
-for a reason an app passes as a plain string. `message()` throws on a missing parameter or a
-message pasted into a string.
+Refusals are messages as well: the services' `fail` takes a `Message` only, the error classes
+(`EncounterError`, `PlayError`, `BuildError`) keep `messages` (English) and add `details`, and a
+rule refusing a roll throws `RuleError`, a `RangeError` whose `detail` the encounter passes on
+(`ruleReason`). Refusal codes (`REFUSAL_CODES`) still come from the English text's patterns
+(`services/refusals.ts`), which the templates keep. Decision questions (`Decision.message`,
+`pending.question_message`) are messages too.
+
+Code `text` (`params.text`) is left for the builder's validation errors and labels (the next
+stage), option labels, and a reason an app passes as a plain string. `message()` throws on a
+missing parameter or a message pasted into a string.
 
 ### Events, refusal codes and undo
 

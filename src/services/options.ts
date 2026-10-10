@@ -8,6 +8,8 @@
 import { lookup } from "../content/catalog";
 import type { SpellDef } from "../models/content";
 import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
+import type { RefusalCode } from "../models/events";
+import type { Message } from "../models/messages";
 import type {
   ActionCheck,
   CombatantOptions,
@@ -19,6 +21,7 @@ import type {
 import { monsterSpells } from "../rules/combatant";
 import { type DamagePart, formatDamage } from "../rules/damage";
 import { spaceCorners } from "../rules/grid";
+import { message } from "../rules/messages";
 import { attackOdds, averageDamage, failOdds } from "../rules/odds";
 import type { Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
@@ -69,11 +72,17 @@ function dryRun(
 ): { check: ActionCheck; result: EncounterResult["result"] } {
   try {
     const r = applyEncounterAction(encounter, action, { ...ctx, rng: middle }, { events: false });
-    return { check: { ok: true, reasons: [], codes: [] }, result: r.result };
+    const check = { ok: true, reasons: [], codes: [], reason_messages: [] };
+    return { check, result: r.result };
   } catch (error) {
     if (error instanceof EncounterError) {
       return {
-        check: { ok: false, reasons: [...error.messages], codes: [...error.codes] },
+        check: {
+          ok: false,
+          reasons: [...error.messages],
+          codes: [...error.codes],
+          reason_messages: [...error.details],
+        },
         result: null,
       };
     }
@@ -111,7 +120,7 @@ export function combatantOptions(
   const c =
     e.combatants.find((x) => x.id === id) ??
     (() => {
-      throw new EncounterError([`No combatant '${id}' in the encounter`]);
+      throw new EncounterError([message("refusal.no_combatant_encounter", { id })]);
     })();
   const view = encounterCombatant(e, id, ctx);
   const turn = e.round > 0 && currentCombatant(e)?.id === c.id;
@@ -125,7 +134,7 @@ export function combatantOptions(
     cost: OptionCost,
     targets: TargetSpec | null,
     extra: Partial<OptionEntry> = {},
-    why: string | null = null,
+    why: Message | null = null,
   ): OptionEntry => {
     let reason = why;
     let odds: OptionEntry["odds"] = null;
@@ -139,25 +148,28 @@ export function combatantOptions(
         "target" in action && action.target === "" && fallback
           ? ({ ...action, target: fallback } as EncounterAction)
           : action;
-      if ("target" in probe && probe.target === "") reason = "No creature to target";
+      if ("target" in probe && probe.target === "") reason = message("refusal.no_creature_target");
       else {
         const run = dryRun(e, probe, ctx);
-        reason = run.check.ok ? null : run.check.reasons.join("; ");
+        reason = run.check.ok ? null : joined(run.check.reason_messages);
         if (run.check.ok && probe === action) odds = oddsOf(e, ctx, c, action, run.result);
       }
     }
     // Allowed, but there's no one in range to aim it at.
     if (reason === null && targets?.kind === "creature" && !targets.ids.length) {
       reason =
-        targets.range === null ? "No creature to target" : `No creature within ${targets.range} ft`;
+        targets.range === null
+          ? message("refusal.no_creature_target")
+          : message("refusal.no_creature_within", { feet: targets.range });
     }
     return {
       action,
       label,
       cost,
       available: reason === null,
-      reason,
-      code: reason === null ? null : refusalCode(reason.split("; ")[0] as string),
+      reason: reason?.text ?? null,
+      code: reason === null ? null : firstCode(reason),
+      reason_message: reason,
       targets,
       slot_levels: [],
       pact_slot: null,
@@ -307,11 +319,11 @@ export function combatantOptions(
             d.send === "cunning"
               ? { ...a, riders: [...(a.riders ?? []), { rider: "sneak-attack" }], cunning: [d.id] }
               : { ...a, brutal: [d.id] };
-          let reason: string | null = null;
+          let reason: Message | null = null;
           if (check && a.target !== "") {
             const run = dryRun(e, action, ctx).check;
-            reason = run.ok ? null : run.reasons.join("; ");
-          } else if (check) reason = option.reason ?? "No creature to target";
+            reason = run.ok ? null : joined(run.reason_messages);
+          } else if (check) reason = option.reason_message ?? message("refusal.no_creature_target");
           return {
             send: d.send,
             id: d.id,
@@ -320,8 +332,9 @@ export function combatantOptions(
             sneak_attack_dice: d.send === "cunning" ? 1 : 0,
             action,
             available: reason === null,
-            reason,
-            code: reason === null ? null : refusalCode(reason.split("; ")[0] as string),
+            reason: reason?.text ?? null,
+            code: reason === null ? null : firstCode(reason),
+            reason_message: reason,
           };
         });
     }
@@ -473,7 +486,8 @@ export function combatantOptions(
       const made = entry(action, f.name, cost, targets, { uses });
       // "hasn't hit X this turn" said of its placeholder target: no hit at all.
       if (f.after_hit && !c.hits.length && made.reason?.includes("hasn't hit")) {
-        made.reason = `${c.name} hasn't hit a creature this turn`;
+        made.reason_message = message("refusal.hasnt_hit_creature", { name: c.name });
+        made.reason = made.reason_message.text;
       }
       features.push(made);
     }
@@ -520,7 +534,7 @@ export function combatantOptions(
           "action",
           null,
           {},
-          `${c.name}'s ${name} hasn't recharged`,
+          message("refusal.hasnt_recharged_2", { name: c.name, action: name }),
         ),
       );
     }
@@ -660,7 +674,9 @@ export function combatantOptions(
       "movement",
       c.position ? { kind: "point", count: null, range: movement, ids: [], area: null } : null,
       {},
-      turn && movement === 0 && !c.defeated ? `${c.name} has no movement left this turn` : null,
+      turn && movement === 0 && !c.defeated
+        ? message("refusal.no_movement_left", { name: c.name })
+        : null,
     ),
   );
 
@@ -862,3 +878,16 @@ function coverBonus(
 }
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
+
+/** Several reasons as one message ("a; b"), one as itself. */
+function joined(reasons: readonly Message[]): Message {
+  return reasons.length === 1
+    ? (reasons[0] as Message)
+    : message("refusal.all", { reasons: [...reasons] });
+}
+
+/** A reason's code: its first part's, when it joins several. */
+function firstCode(reason: Message): RefusalCode {
+  const first = reason.code === "refusal.all" ? (reason.params.reasons as Message[])[0] : reason;
+  return refusalCode((first ?? reason).text);
+}

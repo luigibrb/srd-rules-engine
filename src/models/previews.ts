@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import { REFUSAL_CODES } from "./events";
+import { MessageSchema } from "./messages";
 
 const square = z.object({ x: z.int(), y: z.int() });
 
@@ -27,6 +28,8 @@ export const MovePreviewSchema = z
     ok: z.boolean(),
     reasons: z.array(z.string()),
     codes: z.array(z.enum(REFUSAL_CODES)),
+    /** `reasons` as messages (for translation). */
+    reason_messages: z.array(MessageSchema).default([]),
     /** The squares it would go through, the destination last (empty without positions). */
     path: z.array(square),
     /** Feet it would cost, and the movement left after it. */
@@ -64,6 +67,8 @@ export const AreaPreviewSchema = z
     ok: z.boolean(),
     reasons: z.array(z.string()),
     codes: z.array(z.enum(REFUSAL_CODES)),
+    /** `reasons` as messages (for translation). */
+    reason_messages: z.array(MessageSchema).default([]),
     /** Its squares, with a clear line from its point of origin. */
     squares: z.array(square),
     /** The creatures in it, with their cover from the point of origin (Dexterity saves). */

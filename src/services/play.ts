@@ -35,7 +35,7 @@ import { coinsFor, formatCp, pay, priceInCp, purseValue } from "../rules/currenc
 import { type Defenses, isBloodied, rollDamage, takeDamage } from "../rules/damage";
 import { roll } from "../rules/dice";
 import { spaceForSize } from "../rules/grid";
-import { message, texts } from "../rules/messages";
+import { message, texts, toMessage } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import {
   type CarriedItem,
@@ -43,15 +43,19 @@ import {
   type DerivedSheet,
   type PlayContext,
 } from "../rules/sheet";
-import { setChoice } from "./builder";
+import { BuildError, setChoice } from "./builder";
 
 export class PlayError extends Error {
   override name = "PlayError";
   readonly messages: readonly string[];
+  /** The same as `messages`, as data to translate: a code, its parameters and the English text. */
+  readonly details: readonly Message[];
 
-  constructor(messages: readonly string[]) {
-    super(messages.join("; "));
-    this.messages = messages;
+  constructor(messages: readonly (Message | string)[]) {
+    const details = messages.map(toMessage);
+    super(texts(details).join("; "));
+    this.details = details;
+    this.messages = texts(details);
   }
 }
 
@@ -542,7 +546,7 @@ export function validateState(
     if (i.attuned && !magic?.attunement) error(`${carried.name} doesn't need Attunement`);
     if (i.attuned && magic) {
       const reason = attunementBlocker(res, magic);
-      if (reason) error(`${carried.name}: ${reason}`);
+      if (reason) error(`${carried.name}: ${reason.text}`);
     }
   }
   if (state.inventory.filter((i) => i.attuned).length > MAX_ATTUNED) {
@@ -678,18 +682,18 @@ function wornKind(catalog: Catalog, base: string | null): "armor" | "shield" | n
 }
 
 /** Why this character can't attune to an item, or `null`. */
-function attunementBlocker(res: Resolution, magic: MagicItemDef): string | null {
+function attunementBlocker(res: Resolution, magic: MagicItemDef): Message | null {
   if (magic.attunement_classes.length) {
     const classes = res.classLevels();
     if (!magic.attunement_classes.some((c) => classes.has(c))) {
-      return `Attunement requires ${magic.attunement_by}`;
+      return message("refusal.attunement_requires", { by: magic.attunement_by ?? "" });
     }
   }
   if (
     magic.attunement_spellcaster &&
     !res.sources.some((s) => s.grants.spellcasting?.progression)
   ) {
-    return "Attunement requires a spellcaster";
+    return message("refusal.attunement_spellcaster");
   }
   return null;
 }
@@ -711,11 +715,11 @@ export function applyAction(
   const p = sheet.play;
   const s = structuredClone(state) as CharacterState;
   const notes: Message[] = [];
-  const fail = (text: string): never => {
-    throw new PlayError([text]);
+  const fail = (reason: Message): never => {
+    throw new PlayError([reason]);
   };
   const needItem = (id: string) =>
-    s.inventory.find((i) => i.id === id) ?? fail(`No item '${id}' in the inventory`);
+    s.inventory.find((i) => i.id === id) ?? fail(message("refusal.no_item_inventory", { id }));
   const conditionsNow = new Set(p.conditions.map((c) => c.id));
   const dropConcentration = (why: Message) => {
     if (s.concentration) {
@@ -727,9 +731,9 @@ export function applyAction(
 
   switch (action.type) {
     case "damage": {
-      if (s.dead) fail("The character is dead");
+      if (s.dead) fail(message("refusal.character_dead"));
       if ((action.amount === undefined) === (action.instances === undefined)) {
-        fail("Give either an amount or a list of damage instances");
+        fail(message("refusal.give_either_amount_list"));
       }
       const hit = takeDamage(
         { hp: current, temp: s.hp.temp, max: p.hp.max },
@@ -764,7 +768,7 @@ export function applyAction(
       break;
     }
     case "heal": {
-      if (s.dead) fail("The character is dead");
+      if (s.dead) fail(message("refusal.character_dead"));
       const amount = Math.max(0, Math.floor(action.amount));
       s.hp.current = Math.min(p.hp.max, current + amount);
       if (s.hp.current >= p.hp.max) s.hp.current = null;
@@ -773,7 +777,7 @@ export function applyAction(
     }
     case "set_hp": {
       if (action.current < 0 || action.current > p.hp.max)
-        fail(`Hit Points go from 0 to ${p.hp.max}`);
+        fail(message("refusal.hit_points_go", { max: p.hp.max }));
       s.hp.current = action.current >= p.hp.max ? null : action.current;
       if (current === 0 && action.current > 0) regainConsciousness(s, notes);
       break;
@@ -785,8 +789,7 @@ export function applyAction(
       break;
     }
     case "death_save": {
-      if (current !== 0 || s.stable || s.dead)
-        fail("Death Saving Throws are made at 0 Hit Points, while dying");
+      if (current !== 0 || s.stable || s.dead) fail(message("refusal.death_saving_throws_are"));
       const d20 = action.roll ?? rng.int(1, 20);
       if (d20 === 20) {
         s.hp.current = 1;
@@ -815,21 +818,22 @@ export function applyAction(
       break;
     }
     case "stabilize": {
-      if (current !== 0 || s.dead) fail("Only a dying character can be stabilized");
+      if (current !== 0 || s.dead) fail(message("refusal.dying_character_stabilized"));
       s.stable = true;
       s.death_saves = { successes: 0, failures: 0 };
       break;
     }
     case "short_rest": {
-      if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Short Rest");
+      if (s.dead || current < 1) fail(message("refusal.you_need_least_hit"));
       endToggles(s, sheet, notes, message("why.rest"));
       let hp = current;
       for (const spend of action.hit_dice ?? []) {
         const pool = p.hit_dice.find((d) => d.die === spend.die);
         const spent = s.hit_dice_spent[String(spend.die)] ?? 0;
-        if (!pool || spent >= pool.total) fail(`No d${spend.die} Hit Point Dice left`);
+        if (!pool || spent >= pool.total)
+          fail(message("refusal.no_hit_point_dice", { die: spend.die }));
         const d = spend.roll ?? rng.int(1, spend.die);
-        if (d < 1 || d > spend.die) fail(`A d${spend.die} roll is between 1 and ${spend.die}`);
+        if (d < 1 || d > spend.die) fail(message("refusal.roll_between", { die: spend.die }));
         const gained = Math.max(1, d + sheet.modifiers.con);
         hp = Math.min(p.hp.max, hp + gained);
         s.hit_dice_spent[String(spend.die)] = spent + 1;
@@ -848,7 +852,7 @@ export function applyAction(
       break;
     }
     case "long_rest": {
-      if (s.dead || current < 1) fail("You need at least 1 Hit Point to start a Long Rest");
+      if (s.dead || current < 1) fail(message("refusal.you_need_least_hit_2"));
       endToggles(s, sheet, notes, message("why.rest"));
       s.hp = { current: null, temp: 0 };
       s.hit_dice_spent = {};
@@ -871,48 +875,58 @@ export function applyAction(
     }
     case "spend_slot": {
       const slot = p.spell_slots.find((x) => x.level === action.level);
-      if (!slot || slot.spent >= slot.total) fail(`No level ${action.level} spell slots left`);
+      if (!slot || slot.spent >= slot.total)
+        fail(message("refusal.no_level_spell_slots", { level: action.level }));
       s.spell_slots_spent[action.level - 1] = (s.spell_slots_spent[action.level - 1] ?? 0) + 1;
       for (let i = 0; i < s.spell_slots_spent.length; i++) s.spell_slots_spent[i] ??= 0;
       break;
     }
     case "restore_slot": {
       if (!(s.spell_slots_spent[action.level - 1] ?? 0))
-        fail(`No spent level ${action.level} slot to restore`);
+        fail(message("refusal.no_spent_level_slot", { level: action.level }));
       s.spell_slots_spent[action.level - 1] = (s.spell_slots_spent[action.level - 1] ?? 1) - 1;
       break;
     }
     case "spend_pact_slot": {
       if (!p.pact_magic || p.pact_magic.spent >= p.pact_magic.slots)
-        fail("No Pact Magic slots left");
+        fail(message("refusal.no_pact_magic_slots"));
       s.pact_slots_spent += 1;
       break;
     }
     case "restore_pact_slot": {
-      if (!s.pact_slots_spent) fail("No spent Pact Magic slot to restore");
+      if (!s.pact_slots_spent) fail(message("refusal.no_spent_pact_magic"));
       s.pact_slots_spent -= 1;
       break;
     }
     case "use": {
       const use =
-        p.uses.find((u) => u.key === action.key) ?? fail(`No limited use '${action.key}'`);
+        p.uses.find((u) => u.key === action.key) ??
+        fail(message("refusal.no_limited_use", { key: action.key }));
       const amount = action.amount ?? 1;
-      if (use.spent + amount > use.max) fail(`${use.name}: ${use.max - use.spent} left`);
+      if (use.spent + amount > use.max)
+        fail(message("refusal.uses_left_count", { name: use.name, left: use.max - use.spent }));
       s.uses_spent[use.key] = use.spent + amount;
       break;
     }
     case "use_feature": {
       const feature =
-        sheet.actions.find((a) => a.key === action.key) ?? fail(`No feature '${action.key}'`);
-      if (feature.pool && action.amount === undefined) fail(`${feature.name}: how much? (amount)`);
+        sheet.actions.find((a) => a.key === action.key) ??
+        fail(message("refusal.no_feature_2", { key: action.key }));
+      if (feature.pool && action.amount === undefined)
+        fail(message("refusal.how_much_amount", { feature: feature.name }));
       const amount = feature.pool ? (action.amount as number) : feature.cost;
       if (feature.uses) {
-        const use = p.uses.find((u) => u.key === feature.uses) ?? fail(`${feature.name}: no uses`);
-        if (use.spent + amount > use.max) fail(`${feature.name}: ${use.max - use.spent} left`);
+        const use =
+          p.uses.find((u) => u.key === feature.uses) ??
+          fail(message("refusal.no_uses", { feature: feature.name }));
+        if (use.spent + amount > use.max)
+          fail(
+            message("refusal.uses_left_count", { name: feature.name, left: use.max - use.spent }),
+          );
         s.uses_spent[use.key] = use.spent + amount;
       }
       if (feature.heal && feature.target === "self") {
-        if (s.dead) fail("The character is dead");
+        if (s.dead) fail(message("refusal.character_dead"));
         const healed = feature.heal.pooled
           ? amount
           : rollDamage([{ dice: feature.heal.dice, bonus: feature.heal.bonus, type: "healing" }], {
@@ -934,27 +948,29 @@ export function applyAction(
     }
     case "restore_use": {
       const use =
-        p.uses.find((u) => u.key === action.key) ?? fail(`No limited use '${action.key}'`);
+        p.uses.find((u) => u.key === action.key) ??
+        fail(message("refusal.no_limited_use", { key: action.key }));
       s.uses_spent[use.key] = Math.max(0, use.spent - (action.amount ?? 1));
       break;
     }
     case "add_condition": {
       const def =
         lookup(catalog.conditions, action.condition) ??
-        fail(`Unknown condition '${action.condition}'`);
-      if (def.levels) fail("Use set_exhaustion for Exhaustion levels");
+        fail(message("refusal.unknown_condition", { condition: action.condition }));
+      if (def.levels) fail(message("refusal.use_set_exhaustion_exhaustion_levels"));
       if (!s.conditions.includes(def.id)) s.conditions.push(def.id);
       const incapacitated = def.id === "incapacitated" || def.implies.includes("incapacitated");
       if (incapacitated) dropConcentration(message("why.condition", { condition: def.name }));
       break;
     }
     case "remove_condition": {
-      if (!s.conditions.includes(action.condition)) fail(`Not ${action.condition}`);
+      if (!s.conditions.includes(action.condition))
+        fail(message("refusal.not", { condition: action.condition }));
       s.conditions = s.conditions.filter((c) => c !== action.condition);
       break;
     }
     case "set_exhaustion": {
-      if (action.level < 0 || action.level > 6) fail("Exhaustion levels go from 0 to 6");
+      if (action.level < 0 || action.level > 6) fail(message("refusal.exhaustion_levels_go"));
       s.exhaustion = action.level;
       if (action.level === 6) {
         s.dead = true;
@@ -964,9 +980,10 @@ export function applyAction(
     }
     case "set_concentration": {
       if (action.spell && conditionsNow.has("incapacitated"))
-        fail("You can't concentrate while Incapacitated");
+        fail(message("refusal.you_cant_concentrate_while"));
       const blocking = sheet.toggles.find((t) => t.active && t.no_spells);
-      if (action.spell && blocking) fail(`You can't concentrate during ${blocking.name}`);
+      if (action.spell && blocking)
+        fail(message("refusal.you_cant_concentrate_during", { blocking: blocking.name }));
       if (action.spell && s.concentration) {
         notes.push(message("concentration.ends", { spell: s.concentration }));
       }
@@ -975,13 +992,21 @@ export function applyAction(
     }
     case "activate": {
       const toggle =
-        sheet.toggles.find((t) => t.key === action.key) ?? fail(`No feature '${action.key}'`);
-      if (toggle.active) fail(`${toggle.name} is already active`);
+        sheet.toggles.find((t) => t.key === action.key) ??
+        fail(message("refusal.no_feature_2", { key: action.key }));
+      if (toggle.active) fail(message("refusal.already_active", { toggle: toggle.name }));
       if (toggle.blocked)
-        fail(`${toggle.name} can't start: ${toggle.blocked.replaceAll("_", " ")}`);
+        fail(
+          message("refusal.toggle_blocked", {
+            toggle: toggle.name,
+            blocked: toggle.blocked,
+            label: toggle.blocked.replaceAll("_", " "),
+          }),
+        );
       if (toggle.uses) {
         const use = p.uses.find((u) => u.key === toggle.uses);
-        if (!use || use.spent >= use.max) fail(`No uses of ${toggle.name} left`);
+        if (!use || use.spent >= use.max)
+          fail(message("refusal.no_uses_left", { toggle: toggle.name }));
         s.uses_spent[toggle.uses] = (use?.spent ?? 0) + 1;
       }
       s.active.push(toggle.key);
@@ -989,7 +1014,7 @@ export function applyAction(
       break;
     }
     case "deactivate": {
-      if (!s.active.includes(action.key)) fail(`'${action.key}' isn't active`);
+      if (!s.active.includes(action.key)) fail(message("refusal.isnt_active", { key: action.key }));
       s.active = s.active.filter((k) => k !== action.key);
       break;
     }
@@ -1001,15 +1026,13 @@ export function applyAction(
       const res = resolve(build, catalog);
       const choice = res.choice(action.key);
       if (!choice?.definition.rest_change)
-        fail(`'${action.key}' isn't a choice you can change after a rest`);
+        fail(message("refusal.isnt_choice_you_change", { key: action.key }));
       // Check the picks the way the builder would, against the build as played today.
       const played = playBuild(build, state, catalog);
       try {
         setChoice(played, catalog, action.key, action.values);
       } catch (error) {
-        if (error instanceof Error && "messages" in error) {
-          throw new PlayError((error as { messages: string[] }).messages);
-        }
+        if (error instanceof BuildError) throw new PlayError(error.details);
         throw error;
       }
       s.choices[action.key] = [...action.values];
@@ -1020,9 +1043,9 @@ export function applyAction(
       break;
     }
     case "take_starting_equipment": {
-      if (startingEquipmentTaken(s)) fail("The starting equipment is already in the inventory");
+      if (startingEquipmentTaken(s)) fail(message("refusal.starting_equipment_already_inventory"));
       const kit = startingKit(build, catalog, s.next_item);
-      if (!kit.inventory.length && !kit.gp) fail("The build has no starting equipment yet");
+      if (!kit.inventory.length && !kit.gp) fail(message("refusal.build_no_starting_equipment"));
       s.inventory.push(...kit.inventory);
       s.next_item += kit.inventory.length;
       s.currency.gp += kit.gp;
@@ -1037,18 +1060,30 @@ export function applyAction(
     case "add_item": {
       const qty = Math.max(1, Math.floor(action.qty ?? 1));
       const magic = lookup(catalog.magic_items, action.item);
-      if (!magic && !mundaneName(catalog, action.item)) fail(`Unknown item '${action.item}'`);
+      if (!magic && !mundaneName(catalog, action.item))
+        fail(message("refusal.unknown_item", { item: action.item }));
       let base: string | null = null;
       if (magic?.base) {
         const allowed = allowedBases(catalog, magic);
         base = action.base ?? (allowed.length === 1 ? (allowed[0] as string) : null);
-        if (!base) fail(`${magic.name}: say which ${magic.base.kind} it is (base)`);
+        if (!base)
+          fail(message("refusal.say_which_base", { item: magic.name, kind: magic.base.kind }));
         if (!allowed.includes(base as string))
-          fail(`${magic.name} can't be a ${mundaneName(catalog, base as string) ?? base}`);
+          fail(
+            message("refusal.item_cant_be", {
+              item: magic.name,
+              base: mundaneName(catalog, base as string) ?? (base as string),
+            }),
+          );
       }
       const variant = magic?.variants.length ? (action.variant ?? null) : null;
       if (magic?.variants.length && !magic.variants.some((v) => v.id === variant)) {
-        fail(`${magic.name}: choose its kind (${magic.variants.map((v) => v.id).join(", ")})`);
+        fail(
+          message("refusal.item_choose_variant", {
+            item: magic.name,
+            variants: magic.variants.map((v) => v.id),
+          }),
+        );
       }
       const same = !magic && s.inventory.find((i) => i.item === action.item && !i.equipped);
       if (same) same.qty += qty;
@@ -1102,11 +1137,13 @@ export function applyAction(
       const item = needItem(action.id);
       const magic = lookup(catalog.magic_items, item.item);
       if (action.attuned) {
-        if (!magic?.attunement) fail(`${magic?.name ?? item.item} doesn't require Attunement`);
+        if (!magic?.attunement)
+          fail(message("refusal.no_attunement", { item: magic?.name ?? item.item }));
         const reason = attunementBlocker(resolve(build, catalog), magic as MagicItemDef);
         if (reason) fail(reason);
         const count = s.inventory.filter((i) => i.attuned && i.id !== item.id).length;
-        if (count >= MAX_ATTUNED) fail(`You can be attuned to at most ${MAX_ATTUNED} magic items`);
+        if (count >= MAX_ATTUNED)
+          fail(message("refusal.you_attuned_most_magic", { max_attuned: MAX_ATTUNED }));
         notes.push(message("play.attuning"));
       }
       item.attuned = action.attuned;
@@ -1116,15 +1153,17 @@ export function applyAction(
       const item = needItem(action.id);
       const magic = lookup(catalog.magic_items, item.item);
       if (magic?.charges != null) {
-        if (item.charges_spent >= magic.charges) fail(`${magic.name} has no charges left`);
+        if (item.charges_spent >= magic.charges)
+          fail(message("refusal.no_charges_left", { item: magic.name }));
         item.charges_spent += 1;
         break;
       }
-      if (!magic?.consumable) fail(`${magic?.name ?? item.item} isn't used up`);
+      if (!magic?.consumable)
+        fail(message("refusal.not_consumable", { item: magic?.name ?? item.item }));
       const def = magic as MagicItemDef;
       if (def.heal) {
         const healed = action.roll ?? roll(def.heal, rng).total;
-        if (s.dead) fail("The character is dead");
+        if (s.dead) fail(message("refusal.character_dead"));
         s.hp.current = Math.min(p.hp.max, current + healed);
         if (s.hp.current >= p.hp.max) s.hp.current = null;
         if (current === 0 && healed > 0) regainConsciousness(s, notes);
@@ -1137,9 +1176,9 @@ export function applyAction(
     case "set_charges": {
       const item = needItem(action.id);
       const magic = lookup(catalog.magic_items, item.item);
-      if (magic?.charges == null) fail("This item has no charges");
+      if (magic?.charges == null) fail(message("refusal.item_no_charges"));
       if (action.spent < 0 || action.spent > (magic?.charges ?? 0))
-        fail(`Charges go from 0 to ${magic?.charges}`);
+        fail(message("refusal.charges_range", { max: magic?.charges ?? 0 }));
       item.charges_spent = action.spent;
       break;
     }
@@ -1148,12 +1187,16 @@ export function applyAction(
       const def = itemPrice(catalog, action.item);
       const each = action.price !== undefined ? priceInCp(action.price) : def.cp;
       if (each === null) {
-        fail(`${def.name} has no listed price: give one (\`price\`, like "10 GP")`);
+        fail(message("refusal.no_listed_price_give", { item: def.name }));
       }
       const paid = pay(s.currency, (each as number) * qty);
       if (!paid) {
         fail(
-          `${def.name} costs ${formatCp((each as number) * qty)}: not enough coins (${formatCp(purseValue(s.currency))})`,
+          message("refusal.not_enough_coins", {
+            item: def.name,
+            price: formatCp((each as number) * qty),
+            purse: formatCp(purseValue(s.currency)),
+          }),
         );
       }
       s.currency = paid as typeof s.currency;
@@ -1175,13 +1218,15 @@ export function applyAction(
       return { state: bought.state, notes: texts(all), messages: all };
     }
     case "sell": {
-      const entry = s.inventory.find((i) => i.id === action.id) ?? fail(`No item '${action.id}'`);
+      const entry =
+        s.inventory.find((i) => i.id === action.id) ??
+        fail(message("refusal.no_item", { id: action.id }));
       const qty = action.qty ?? entry.qty;
-      if (qty > entry.qty) fail(`Only ${entry.qty} to sell`);
+      if (qty > entry.qty) fail(message("refusal.sell", { qty: entry.qty }));
       const def = itemPrice(catalog, entry.item);
       // "Equipment fetches half its cost when sold."
       const listed = action.price !== undefined ? priceInCp(action.price) : def.cp;
-      if (listed === null) fail(`${def.name} has no listed price: give one (\`price\`)`);
+      if (listed === null) fail(message("refusal.no_listed_price_give_2", { item: def.name }));
       const worth =
         action.price !== undefined
           ? (listed as number)
@@ -1197,13 +1242,14 @@ export function applyAction(
     case "adjust_currency": {
       for (const c of CURRENCIES) {
         const next = s.currency[c] + (action.changes[c] ?? 0);
-        if (next < 0) fail(`Not enough ${c.toUpperCase()} (${s.currency[c]})`);
+        if (next < 0)
+          fail(message("refusal.not_enough_currency", { coin: c, amount: s.currency[c] }));
         s.currency[c] = next;
       }
       break;
     }
     default:
-      fail(`Unknown action '${(action as { type: string }).type}'`);
+      fail(message("refusal.unknown_action", { type: (action as { type: string }).type }));
   }
   const repaired = reconcileState(build, parseState(s), catalog);
   const all = [...notes, ...repaired.messages];
@@ -1248,7 +1294,7 @@ function itemPrice(
   if (priced) return { name: priced.name, cp: priceInCp(priced.cost), bundle: 1 };
   const magic = lookup(catalog.magic_items, id);
   if (magic) return { name: magic.name, cp: null, bundle: 1 };
-  throw new PlayError([`Unknown item '${id}'`]);
+  throw new PlayError([message("refusal.unknown_item", { item: id })]);
 }
 
 /** Pounds in a listed weight: `8 lb.`, `1/2 lb.`, `58½ lb.`, `5 lb. (full)`; `null` if none. */
