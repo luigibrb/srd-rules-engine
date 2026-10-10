@@ -8,6 +8,11 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Manual play: `manual: true` on `attack`, `unarmed`, `cast`, `feature`, `save_action` and
+  `legendary` checks the action and spends its costs (economy, slot, uses, Concentration, daily
+  uses, Recharge) without rolling or applying an outcome; the result is a `DeclaredResult` (who,
+  what, slot level, target ids), and `use_feature` takes `manual` to spend a feature's uses
+  without its healing.
 - `encounter.positions` (`optional` by default, or `required`), set by the GM with
   `{ type: "set_positions", mode }`: when required and anyone is on the map, an attack, spell,
   save effect, Help, Grapple, Shove or feature that checks reach or range is refused if the actor

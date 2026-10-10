@@ -753,6 +753,9 @@ export const MESSAGES_EN = {
   "label.move": "Move",
   "label.move_zone": "Move {label} ({id})",
   "label.end_zone": "End {label} ({id})",
+  // Manual play.
+  "manual.declared":
+    "{name} declares {what}{level, plural, =0 {} other { at level #}}{count, plural, =0 {} other { on {targets}}}, by hand.",
 } as const;
 
 export type MessageCode = keyof typeof MESSAGES_EN;

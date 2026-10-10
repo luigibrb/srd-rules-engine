@@ -940,7 +940,7 @@ export function applyAction(
           );
         s.uses_spent[use.key] = use.spent + amount;
       }
-      if (feature.heal && feature.target === "self") {
+      if (feature.heal && feature.target === "self" && !action.manual) {
         if (s.dead) fail(message("refusal.character_dead"));
         const healed = feature.heal.pooled
           ? amount

@@ -795,7 +795,7 @@ function oddsOf(
   action: EncounterAction,
   result: EncounterResult["result"],
 ): OptionEntry["odds"] {
-  if (!result) return null;
+  if (!result || "manual" in result) return null;
   const target =
     "target" in action && action.target
       ? action.target

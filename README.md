@@ -291,7 +291,9 @@ so the player or GM can choose (`decide`), with `"auto"` the engine uses them on
 change the outcome (`cast`), once-per-turn riders (Sneak Attack), recharges (a
 breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10 }` or
 `{ until: { at: "end" } }`), Concentration saves when damaged, a Concentration spell's
-conditions ending with it, and Rage ending when it isn't extended.
+conditions ending with it, and Rage ending when it isn't extended. A table that rolls its own
+dice declares an action by hand (`manual: true`): the engine checks it and spends its costs, and
+the outcome is applied with `effects`.
 
 What a combatant can do now, for a UI's buttons: `combatantOptions(encounter, id, ctx)` lists
 every attack, spell, feature, monster ability, legendary action and standard action as an

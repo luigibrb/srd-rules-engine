@@ -447,6 +447,13 @@ export function parseEncounter(input: unknown): Encounter {
 }
 
 const n = z.int();
+/**
+ * `manual` on an action that resolves an effect: the engine checks it's allowed and spends its
+ * costs (economy, slot, uses, Concentration, daily uses, Recharge) as usual, rolls nothing and
+ * applies no outcome; the result is a `DeclaredResult` and the table applies the outcome with
+ * `effects`.
+ */
+const manual = z.boolean().optional();
 export const ECONOMY = ["action", "bonus_action", "reaction"] as const;
 
 const AttackActionSchema = z.object({
@@ -475,6 +482,7 @@ const AttackActionSchema = z.object({
   cunning: z.array(z.enum(["poison", "trip", "withdraw"])).optional(),
   /** Brutal Strike effects: Advantage forgone while Reckless, for 1d10 and an effect. */
   brutal: z.array(z.enum(["forceful", "hamstring", "staggering", "sundering"])).optional(),
+  manual,
 });
 
 const UnarmedActionSchema = z.object({
@@ -485,6 +493,7 @@ const UnarmedActionSchema = z.object({
   shove: z.enum(["push", "prone"]).optional(),
   save: z.enum(["str", "dex"]).optional(),
   reaction: z.boolean().optional(),
+  manual,
 });
 
 const CastActionSchema = z.object({
@@ -527,6 +536,7 @@ const CastActionSchema = z.object({
   damage_type: z.enum(DAMAGE_TYPES).optional(),
   /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
   unaffected: z.array(z.string()).optional(),
+  manual,
 });
 
 const MoveActionSchema = z.object({
@@ -830,6 +840,7 @@ export const EncounterActionSchema = z
       amount: n.min(1).optional(),
       /** The damage type, for a feature that offers a choice (Divine Spark). */
       damage_type: z.enum(DAMAGE_TYPES).optional(),
+      manual,
     }),
     /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
     z.object({
@@ -847,6 +858,7 @@ export const EncounterActionSchema = z
         .optional(),
       /** Targets' cover, by id: +2 or +5 to Dexterity saves; Total Cover can't be targeted. */
       cover: z.record(z.string(), z.enum(["half", "three_quarters", "total"])).optional(),
+      manual,
     }),
     /**
      * Cast a catalog spell (`castSpell`): uses the action, Bonus Action or reaction its casting
@@ -920,6 +932,7 @@ export const EncounterActionSchema = z
       attack: z.string().optional(),
       mode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
       within_5ft: z.boolean().optional(),
+      manual,
     }),
   ])
   .meta({ id: "EncounterAction" });

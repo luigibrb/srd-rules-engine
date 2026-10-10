@@ -522,6 +522,9 @@
                                             "sundering"
                                           ]
                                         }
+                                      },
+                                      "manual": {
+                                        "type": "boolean"
                                       }
                                     },
                                     "required": [
@@ -566,6 +569,9 @@
                                         ]
                                       },
                                       "reaction": {
+                                        "type": "boolean"
+                                      },
+                                      "manual": {
                                         "type": "boolean"
                                       }
                                     },
@@ -754,6 +760,9 @@
                                         "items": {
                                           "type": "string"
                                         }
+                                      },
+                                      "manual": {
+                                        "type": "boolean"
                                       }
                                     },
                                     "required": [
@@ -3194,6 +3203,9 @@
             },
             "reaction": {
               "type": "boolean"
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -3517,6 +3529,9 @@
                           "sundering"
                         ]
                       }
+                    },
+                    "manual": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -3561,6 +3576,9 @@
                       ]
                     },
                     "reaction": {
+                      "type": "boolean"
+                    },
+                    "manual": {
                       "type": "boolean"
                     }
                   },
@@ -3749,6 +3767,9 @@
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "manual": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -4066,6 +4087,9 @@
                   "sundering"
                 ]
               }
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -4119,6 +4143,9 @@
                 "slashing",
                 "thunder"
               ]
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -4202,6 +4229,9 @@
                   "total"
                 ]
               }
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -4388,6 +4418,9 @@
               "items": {
                 "type": "string"
               }
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -4653,6 +4686,9 @@
               ]
             },
             "within_5ft": {
+              "type": "boolean"
+            },
+            "manual": {
               "type": "boolean"
             }
           },
@@ -4958,6 +4994,9 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
+            },
+            "manual": {
+              "type": "boolean"
             }
           },
           "required": [

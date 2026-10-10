@@ -786,6 +786,13 @@ missing parameter or a message pasted into a string.
   same encounter and states (`replayHistory`); `undoAction` replays all but the last action, so
   undoing a `decide` brings its question back. `POST /v1/encounters/apply` returns the steps in
   `log`. The fight CLI keeps one for `undo`.
+- **Manual play.** `manual: true` on `attack`, `unarmed`, `cast`, `feature`, `save_action` or
+  `legendary` declares the action by hand: the same code path checks it (the rules run with dice
+  that don't count, `unrolled`, and no decision asked, so `rng` draws nothing) and spends its
+  costs (economy, slot or Pact slot, feature uses, Concentration, a monster's daily uses and
+  Recharge), then stops before any outcome. The result is a `DeclaredResult` (actor, action,
+  name, slot level, target ids) with a `manual.declared` note; the table applies the outcome with
+  `effects`, so Resistance, Concentration saves and HP limits stay the engine's.
 
 ### Previews
 
@@ -1033,6 +1040,13 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Encounters**
 
+- **What an action declared by hand (manual) still does.** Its costs, and what doesn't depend on
+  the roll: an attack extends Rage and ends hiding, and the Help, Vex, Sap or mark its roll would
+  use is used (the table rolled it); a spell with a Verbal component ends hiding. A feature keeps
+  what it does to the turn and that `effects` can't express (Action Surge's action, Cunning
+  Action's Dash, Flurry of Blows' attacks, a Bardic Inspiration die) and leaves healing, removed
+  conditions and saves to the table. Unknown outcomes aren't recorded: a declared attack isn't a
+  hit, so Cleave, Divine Smite and once-per-turn riders (Sneak Attack) don't follow from it.
 - Initiative ties go to the higher Initiative bonus, then the order combatants joined (the SRD
   leaves ties to the GM and players: `set_order`).
 - Dash uses the walking Speed.

@@ -452,6 +452,7 @@ export {
   combatantPassivePerception,
   createEncounter,
   currentCombatant,
+  type DeclaredResult,
   type EncounterContext,
   EncounterError,
   type EncounterResult,
