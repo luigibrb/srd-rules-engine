@@ -2,9 +2,11 @@
 
 import { type Catalog, lookup, type Table } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
-import { ABILITIES, ABILITY_NAMES, type Step } from "../models/content";
-import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "./ability-scores";
+import { ABILITIES, type Step } from "../models/content";
+import type { Message } from "../models/messages";
+import { backgroundBonusMessages, baseScoreMessages, definedEntries } from "./ability-scores";
 import { type ActiveChoice, type Resolution, resolve } from "./build-resolution";
+import { message, texts } from "./messages";
 
 export const SEVERITIES = [
   "error", // an illegal choice that must be changed
@@ -17,6 +19,8 @@ export interface Issue {
   readonly step: Step;
   readonly severity: Severity;
   readonly message: string;
+  /** `message` as a message (for translation). */
+  readonly detail: Message;
   readonly choice_key: string | null;
   /** The character level the issue belongs to (1 for character creation). */
   readonly level: number;
@@ -31,11 +35,18 @@ export interface ValidationReport {
 function issue(
   step: Step,
   severity: Severity,
-  message: string,
+  detail: Message,
   choiceKey: string | null = null,
   level = 1,
 ) {
-  return { step, severity, message, choice_key: choiceKey, level } satisfies Issue;
+  return {
+    step,
+    severity,
+    message: detail.text,
+    detail,
+    choice_key: choiceKey,
+    level,
+  } satisfies Issue;
 }
 
 /** Issues of character creation (level 1) in a step. */
@@ -62,10 +73,10 @@ export function validateBuild(
   const issues: Issue[] = [
     ...(build.packs ?? [])
       .filter((id) => !loaded.has(id))
-      .map((id) => issue("class", "error", `Needs content pack '${id}', which isn't loaded`)),
-    ...checkEntity("class", "class", build.class_id, catalog.classes),
-    ...checkEntity("species", "species", build.species_id, catalog.species),
-    ...checkEntity("background", "background", build.background_id, catalog.backgrounds),
+      .map((id) => issue("class", "error", message("issue.pack_missing", { pack: id }))),
+    ...checkEntity("class", build.class_id, catalog.classes),
+    ...checkEntity("species", build.species_id, catalog.species),
+    ...checkEntity("background", build.background_id, catalog.backgrounds),
     ...checkAbilities(build, catalog),
   ];
   const missing = (
@@ -79,7 +90,7 @@ export function validateBuild(
     .map(([what]) => what);
   if (missing.length) {
     for (const step of ["equipment", "features", "spells", "proficiencies"] as const) {
-      issues.push(issue(step, "pending", `Choose your ${missing.join(", ")} first`));
+      issues.push(issue(step, "pending", message("issue.choose_first", { missing })));
     }
   }
   issues.push(...checkLevels(res, catalog));
@@ -89,23 +100,33 @@ export function validateBuild(
   for (const src of res.featSources()) {
     if (src.feat.unsupported) {
       issues.push(
-        issue("features", "note", `${src.name}: ${src.feat.unsupported}`, null, src.level),
+        issue(
+          "features",
+          "note",
+          message("issue.unsupported", { name: src.name, text: src.feat.unsupported }),
+          null,
+          src.level,
+        ),
       );
     }
   }
-  if (!build.name.trim()) issues.push(issue("details", "pending", "Choose a name"));
-  if (build.alignment === null) issues.push(issue("details", "pending", "Choose an alignment"));
+  if (!build.name.trim()) issues.push(issue("details", "pending", message("issue.choose_name")));
+  if (build.alignment === null) {
+    issues.push(issue("details", "pending", message("issue.choose_alignment")));
+  }
   return { issues, is_complete: issues.every((i) => i.severity === "note") };
 }
 
 function checkEntity(
-  step: Step,
-  what: string,
+  step: "class" | "species" | "background",
   value: string | null,
   table: Table<unknown>,
 ): Issue[] {
-  if (value === null) return [issue(step, "pending", `Choose a ${what}`)];
-  if (!lookup(table, value)) return [issue(step, "error", `Unknown ${what} '${value}'`)];
+  if (value === null)
+    return [issue(step, "pending", message("issue.choose_entity", { what: step }))];
+  if (!lookup(table, value)) {
+    return [issue(step, "error", message("issue.unknown_entity", { what: step, id: value }))];
+  }
   return [];
 }
 
@@ -113,27 +134,29 @@ function checkAbilities(build: CharacterBuild, catalog: Catalog): Issue[] {
   const step = "abilities";
   const rules = catalog.creation;
   if (build.ability_method === null) {
-    return [issue(step, "pending", "Choose how to generate ability scores")];
+    return [issue(step, "pending", message("issue.choose_method"))];
   }
-  const issues = baseScoreErrors(
+  const issues = baseScoreMessages(
     build.ability_method,
     build.base_scores,
     rules,
     build.rolled_pool,
   ).map((e) => issue(step, "error", e));
-  const missing = ABILITIES.filter((a) => build.base_scores[a] === undefined).map(
-    (a) => ABILITY_NAMES[a],
+  const missing = ABILITIES.filter((a) => build.base_scores[a] === undefined).map((a) =>
+    message(`ability.${a}`),
   );
   if (missing.length) {
-    issues.push(issue(step, "pending", `Assign a score to ${missing.join(", ")}`));
+    issues.push(issue(step, "pending", message("issue.assign_scores", { missing })));
   }
   const background = lookup(catalog.backgrounds, build.background_id);
   if (!background) {
-    issues.push(issue(step, "pending", "Choose a background to apply its bonuses"));
+    issues.push(issue(step, "pending", message("issue.background_for_bonuses")));
   } else if (!definedEntries(build.background_bonus).length) {
-    issues.push(issue(step, "pending", `Apply your ${background.name} bonuses`));
+    issues.push(
+      issue(step, "pending", message("issue.apply_bonuses", { background: background.name })),
+    );
   } else {
-    for (const e of backgroundBonusErrors(
+    for (const e of backgroundBonusMessages(
       build.background_bonus,
       background.ability_scores,
       build.base_scores,
@@ -154,7 +177,7 @@ function checkLevels(res: Resolution, catalog: Catalog): Issue[] {
       issue(
         "class",
         "error",
-        `Characters can't go past level ${rules.max_level}`,
+        message("issue.max_level", { level: rules.max_level }),
         null,
         res.characterLevel,
       ),
@@ -168,7 +191,8 @@ function checkLevels(res: Resolution, catalog: Catalog): Issue[] {
       continue;
     }
     if (!cls) {
-      issues.push(issue("class", "error", `Unknown class '${l.class_id}'`, null, l.level));
+      const unknown = message("issue.unknown_entity", { what: "class", id: l.class_id });
+      issues.push(issue("class", "error", unknown, null, l.level));
       continue;
     }
     if (l.hp !== null && l.hp > cls.hit_die) {
@@ -176,20 +200,20 @@ function checkLevels(res: Resolution, catalog: Catalog): Issue[] {
         issue(
           "class",
           "error",
-          `Hit Die roll ${l.hp} is higher than a d${cls.hit_die}`,
+          message("issue.hp_roll_too_high", { hp: l.hp, die: cls.hit_die }),
           null,
           l.level,
         ),
       );
     }
     if (l.class_level === 1) {
-      const unmet = multiclassBlockers(res, catalog, [...taken, l.class_id], l.level);
+      const unmet = multiclassBlockerMessages(res, catalog, [...taken, l.class_id], l.level);
       if (unmet.length) {
         issues.push(
           issue(
             "class",
             "error",
-            `Can't multiclass into ${cls.name}: ${unmet.join("; ")}`,
+            message("issue.multiclass", { class: cls.name, unmet }),
             null,
             l.level,
           ),
@@ -212,9 +236,19 @@ export function multiclassBlockers(
   classIds: readonly string[],
   level: number,
 ): string[] {
+  return texts(multiclassBlockerMessages(res, catalog, classIds, level));
+}
+
+/** `multiclassBlockers` as messages. */
+export function multiclassBlockerMessages(
+  res: Resolution,
+  catalog: Catalog,
+  classIds: readonly string[],
+  level: number,
+): Message[] {
   const min = catalog.creation.multiclass_min_score;
   const scores = res.abilityScores(level);
-  const out: string[] = [];
+  const out: Message[] = [];
   for (const id of new Set(classIds)) {
     const cls = lookup(catalog.classes, id);
     if (!cls) continue;
@@ -224,10 +258,14 @@ export function multiclassBlockers(
         ? cls.primary_abilities.every(meets)
         : cls.primary_abilities.some(meets);
     if (!ok) {
-      const names = cls.primary_abilities
-        .map((a) => ABILITY_NAMES[a])
-        .join(cls.primary_mode === "all" ? " and " : " or ");
-      out.push(`${cls.name} needs ${names} ${min}+`);
+      out.push(
+        message("issue.multiclass_needs", {
+          class: cls.name,
+          all: cls.primary_mode === "all",
+          abilities: cls.primary_abilities.map((a) => message(`ability.${a}`)),
+          min,
+        }),
+      );
     }
   }
   return out;
@@ -239,24 +277,40 @@ export function replaceErrors(
   choice: ActiveChoice,
   picked: readonly string[] = res.selected(choice),
 ): string[] {
+  return texts(replaceErrorMessages(res, choice, picked));
+}
+
+/** `replaceErrors` as messages. */
+export function replaceErrorMessages(
+  res: Resolution,
+  choice: ActiveChoice,
+  picked: readonly string[] = res.selected(choice),
+): Message[] {
   if (!picked.length) return [];
-  if (picked.length !== 2) return ["choose what to replace and its replacement"];
+  if (picked.length !== 2) return [message("issue.replace_pair")];
   const [oldId, newId] = picked as [string, string];
-  const errors: string[] = [];
+  const errors: Message[] = [];
   const old = res.replaceOld(choice).find((o) => o.id === oldId);
-  if (!old) errors.push(`you don't have '${oldId}' to replace`);
-  else if (old.unavailable) errors.push(`${old.name} can't be replaced: ${old.unavailable}`);
+  if (!old) errors.push(message("issue.replace_missing", { id: oldId }));
+  else if (old.unavailable_message) {
+    errors.push(message("issue.replace_blocked", { name: old.name, why: old.unavailable_message }));
+  }
   const replacement = res.replaceNew(choice, oldId).find((o) => o.id === newId);
-  if (!replacement) errors.push(`'${newId}' can't replace ${old?.name ?? oldId}`);
-  else if (replacement.unavailable) errors.push(`${replacement.name}: ${replacement.unavailable}`);
+  if (!replacement) {
+    errors.push(message("issue.replace_invalid", { id: newId, old: old?.name ?? oldId }));
+  } else if (replacement.unavailable_message) {
+    errors.push(
+      message("issue.option_why", { name: replacement.name, why: replacement.unavailable_message }),
+    );
+  }
   return errors;
 }
 
 export function choiceIssues(res: Resolution, choice: ActiveChoice): Issue[] {
   const { step, key, label, level } = choice;
   if (choice.replaces) {
-    return replaceErrors(res, choice).map((e) =>
-      issue(step, "error", `${label}: ${e}`, key, level),
+    return replaceErrorMessages(res, choice).map((e) =>
+      issue(step, "error", message("issue.choice", { choice: label, issue: e }), key, level),
     );
   }
   const { kind } = choice.definition;
@@ -264,8 +318,10 @@ export function choiceIssues(res: Resolution, choice: ActiveChoice): Issue[] {
   const selected = res.selected(choice);
   const views = new Map(res.options(choice).map((v) => [v.id, v]));
   const issues: Issue[] = [];
-  const add = (severity: Severity, message: string) =>
-    issues.push(issue(step, severity, message, key, level));
+  const add = (severity: Severity, detail: Message) =>
+    issues.push(
+      issue(step, severity, message("issue.choice", { choice: label, issue: detail }), key, level),
+    );
   const counts = new Map<string, number>();
   for (const value of selected) counts.set(value, (counts.get(value) ?? 0) + 1);
   if (kind === "ability_increase") {
@@ -276,25 +332,31 @@ export function choiceIssues(res: Resolution, choice: ActiveChoice): Issue[] {
       if (Object.hasOwn(before, ability) && before[ability] + n > choice.definition.max_score) {
         add(
           "error",
-          `${label}: ${ABILITY_NAMES[ability]} can't exceed ${choice.definition.max_score}`,
+          message("scores.cap", {
+            ability: message(`ability.${ability}`),
+            cap: choice.definition.max_score,
+          }),
         );
       }
     }
   } else {
     for (const [value, n] of counts) {
-      if (n > 1) add("error", `${label}: ${value} chosen twice`);
+      if (n > 1) add("error", message("issue.chosen_twice", { value }));
     }
   }
   for (const value of counts.keys()) {
     const view = views.get(value);
-    if (!view) add("error", `${label}: '${value}' isn't an option`);
-    else if (view.unavailable && kind !== "ability_increase") {
-      add("error", `${label}: ${view.name} — ${view.unavailable}`);
+    if (!view) add("error", message("issue.not_an_option", { value }));
+    else if (view.unavailable_message && kind !== "ability_increase") {
+      add(
+        "error",
+        message("issue.option_unavailable", { name: view.name, why: view.unavailable_message }),
+      );
     }
   }
   const required = res.required(choice);
   if (selected.length < required) {
-    add("pending", `${label}: choose ${required - selected.length} more`);
-  } else if (selected.length > count) add("error", `${label}: choose only ${count}`);
+    add("pending", message("issue.choose_more", { count: required - selected.length }));
+  } else if (selected.length > count) add("error", message("issue.choose_only", { count }));
   return issues;
 }

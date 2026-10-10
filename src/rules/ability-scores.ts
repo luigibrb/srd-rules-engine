@@ -8,8 +8,9 @@ import {
   type CreationRules,
   type PointBuyRules,
 } from "../models/content";
+import type { Message } from "../models/messages";
 import { abilityModifier, signed } from "./dice";
-import { message, RuleError } from "./messages";
+import { message, RuleError, texts } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 export interface AbilityRoll {
@@ -102,29 +103,43 @@ export function baseScoreErrors(
   rules: CreationRules,
   rolledPool: readonly number[] = [],
 ): string[] {
-  const errors: string[] = [];
+  return texts(baseScoreMessages(method, scores, rules, rolledPool));
+}
+
+/** `baseScoreErrors` as messages. */
+export function baseScoreMessages(
+  method: AbilityMethod,
+  scores: AbilityMap,
+  rules: CreationRules,
+  rolledPool: readonly number[] = [],
+): Message[] {
+  const errors: Message[] = [];
   const entries = definedEntries(scores);
   const values = entries.map(([, s]) => s);
   if (method === "point_buy") {
     const pb = rules.point_buy;
     const bad = entries
       .filter(([, s]) => costTable(pb, s) === undefined)
-      .map(([a, s]) => `${ABILITY_NAMES[a]} ${s}`);
+      .map(([a, s]) => message("ability.score", { ability: message(`ability.${a}`), score: s }));
     if (bad.length) {
-      errors.push(`Point buy scores must be ${pb.min_score}-${pb.max_score}: ${bad.join(", ")}`);
+      errors.push(message("scores.point_buy_range", { min: pb.min_score, max: pb.max_score, bad }));
     } else {
       const { spent } = pointBuyStatus(scores, pb);
-      if (spent > pb.budget) errors.push(`Point buy overspent: ${spent} of ${pb.budget} points`);
+      if (spent > pb.budget) {
+        errors.push(message("scores.point_buy_overspent", { spent, budget: pb.budget }));
+      }
     }
   } else {
     const pool = method === "standard_array" ? rules.standard_array : rolledPool;
     if (method === "roll" && pool.length !== 6) {
-      errors.push("Roll six ability scores before assigning them");
+      errors.push(message("scores.roll_first"));
     } else if (multisetDifference(values, pool).length) {
-      const label = method === "standard_array" ? "the standard array" : "your rolls";
       errors.push(
-        `Scores ${pyList(descending(values))} don't come from ${label} ` +
-          `${pyList(descending(pool))} (each value can be used once)`,
+        message("scores.not_from_pool", {
+          scores: pyList(descending(values)),
+          method,
+          pool: pyList(descending(pool)),
+        }),
       );
     }
   }
@@ -149,24 +164,36 @@ export function backgroundBonusErrors(
   baseScores: AbilityMap,
   cap: number,
 ): string[] {
-  const errors: string[] = [];
+  return texts(backgroundBonusMessages(bonus, allowed, baseScores, cap));
+}
+
+/** `backgroundBonusErrors` as messages. */
+export function backgroundBonusMessages(
+  bonus: AbilityMap,
+  allowed: readonly Ability[],
+  baseScores: AbilityMap,
+  cap: number,
+): Message[] {
+  const errors: Message[] = [];
   const entries = definedEntries(bonus);
-  const notAllowed = entries.filter(([a]) => !allowed.includes(a)).map(([a]) => ABILITY_NAMES[a]);
+  const ability = (a: Ability) => message(`ability.${a}`);
+  const notAllowed = entries.filter(([a]) => !allowed.includes(a)).map(([a]) => ability(a));
   if (notAllowed.length) {
-    const names = allowed.map((a) => ABILITY_NAMES[a]).join(", ");
-    errors.push(`Your background can only increase ${names}, not ${notAllowed.join(", ")}`);
+    errors.push(
+      message("scores.background_only", { allowed: allowed.map(ability), not: notAllowed }),
+    );
   }
   const pattern = entries
     .map(([, v]) => v)
     .sort((a, b) => a - b)
     .join(",");
   if (pattern !== "1,2" && pattern !== "1,1,1") {
-    errors.push("Increase one score by 2 and another by 1, or three scores by 1");
+    errors.push(message("scores.background_pattern"));
   }
   for (const [ability, inc] of entries) {
     const base = baseScores[ability];
     if (base !== undefined && base + inc > cap) {
-      errors.push(`${ABILITY_NAMES[ability]} can't exceed ${cap}`);
+      errors.push(message("scores.cap", { ability: message(`ability.${ability}`), cap }));
     }
   }
   return errors;

@@ -4,8 +4,8 @@
  *
  * - `{name}`: a parameter (a nested message is rendered with the same catalog; a list is joined
  *   with ", ");
- * - `{name, list}` / `{name, list, plus}` / `{name, list, semicolon}` / `{name, list, or}`: a list
- *   joined with ", ", " + ", "; " or " or ";
+ * - `{name, list}` / `{name, list, plus}` / `{name, list, semicolon}` / `{name, list, or}` /
+ *   `{name, list, and}`: a list joined with ", ", " + ", "; ", " or " or " and ";
  * - `{n, plural, one {…} other {…}}` (also `=0 {…}`): by the number, `#` standing for it;
  * - `{key, select, a {…} b {…} other {…}}`: by the value (`true`/`false` for a boolean).
  */
@@ -21,7 +21,12 @@ type Node =
   | { arg: string; kind: "plural" | "select"; options: Record<string, Node[]> }
   | { hash: true };
 
-const LIST_JOINERS: Readonly<Record<string, string>> = { plus: " + ", semicolon: "; ", or: " or " };
+const LIST_JOINERS: Readonly<Record<string, string>> = {
+  plus: " + ",
+  semicolon: "; ",
+  or: " or ",
+  and: " and ",
+};
 
 const parsed = new Map<string, Node[]>();
 

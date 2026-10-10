@@ -18,7 +18,11 @@ import {
 } from "../models/build";
 import { ABILITIES, ABILITY_NAMES, STEPS, type Step } from "../models/content";
 import type { Message } from "../models/messages";
-import { backgroundBonusErrors, baseScoreErrors, definedEntries } from "../rules/ability-scores";
+import {
+  backgroundBonusMessages,
+  baseScoreMessages,
+  definedEntries,
+} from "../rules/ability-scores";
 import {
   type ActiveChoice,
   answers,
@@ -27,10 +31,11 @@ import {
   resolve,
 } from "../rules/build-resolution";
 import {
+  type Issue,
   issuesForLevel,
   issuesForStep,
-  multiclassBlockers,
-  replaceErrors,
+  multiclassBlockerMessages,
+  replaceErrorMessages,
   reportErrors,
   type ValidationReport,
   validateBuild,
@@ -69,6 +74,14 @@ export interface BuildResult {
   readonly build: CharacterBuild;
   /** What was changed or reset as a side effect, for the player to read. */
   readonly notes: readonly string[];
+  /** The same as `notes`, as data to translate: a code, its parameters and the English text. */
+  readonly messages: readonly Message[];
+}
+
+/** A setter's result: the build and what it changed or reset. */
+function built(build: CharacterBuild, ...notes: (readonly Message[])[]): BuildResult {
+  const messages = notes.flat();
+  return { build, notes: texts(messages), messages };
 }
 
 export interface Evaluation {
@@ -124,14 +137,14 @@ export function setBackground(
   if (!lookup(catalog.backgrounds, backgroundId)) {
     throw new BuildError([message("builder.unknown_background", { background: backgroundId })]);
   }
-  const notes: string[] = [];
+  const notes: Message[] = [];
   let update: Partial<CharacterBuild> = { background_id: backgroundId };
   if (build.background_id !== backgroundId && definedEntries(build.background_bonus).length) {
     update = { ...update, background_bonus: {} };
-    notes.push("Background ability bonuses were reset: re-apply them for the new background.");
+    notes.push(message("builder.bonuses_reset_background"));
   }
   const result = normalize(updateBuild(build, update), catalog);
-  return commit(build, catalog, { build: result.build, notes: [...notes, ...result.notes] });
+  return commit(build, catalog, built(result.build, notes, result.messages));
 }
 
 export function setAbilityMethod(
@@ -160,19 +173,24 @@ export function setBaseScores(
   if (build.ability_method === null) {
     throw new BuildError([message("builder.method_first")]);
   }
-  const errors = baseScoreErrors(build.ability_method, scores, catalog.creation, build.rolled_pool);
+  const errors = baseScoreMessages(
+    build.ability_method,
+    scores,
+    catalog.creation,
+    build.rolled_pool,
+  );
   if (errors.length) throw new BuildError(errors);
-  const notes: string[] = [];
+  const notes: Message[] = [];
   let update: Partial<CharacterBuild> = { base_scores: { ...scores } };
   if (
     definedEntries(build.background_bonus).length &&
     bonusErrors(build, catalog, build.background_bonus, scores).length
   ) {
     update = { ...update, background_bonus: {} };
-    notes.push("Background bonuses were reset because they no longer fit your scores.");
+    notes.push(message("builder.bonuses_reset_scores"));
   }
   const result = normalize(updateBuild(build, update), catalog);
-  return commit(build, catalog, { build: result.build, notes: [...notes, ...result.notes] });
+  return commit(build, catalog, built(result.build, notes, result.messages));
 }
 
 export function setBackgroundBonus(
@@ -204,9 +222,9 @@ export function setChoice(
       message("builder.choice_fixed", { choice: choice.label, source: choice.source.name }),
     ]);
   }
-  const errors: string[] = [];
+  const errors: Message[] = [];
   if (choice.replaces) {
-    const errors = replaceErrors(res, choice, values);
+    const errors = replaceErrorMessages(res, choice, values);
     if (errors.length)
       throw new BuildError(
         errors.map((e) => message("builder.choice_error", { choice: choice.label, error: e })),
@@ -216,15 +234,19 @@ export function setChoice(
   }
   const repeats = choice.definition.kind === "ability_increase";
   if (!repeats && new Set(values).size !== values.length) {
-    errors.push("Each option can be chosen only once");
+    errors.push(message("builder.once_each"));
   }
   const count = res.countOf(choice);
-  if (values.length > count) errors.push(`${choice.label}: choose at most ${count}`);
+  if (values.length > count) {
+    errors.push(message("builder.choose_at_most", { choice: choice.label, count }));
+  }
   const views = new Map(res.options(choice).map((v) => [v.id, v]));
   for (const value of values) {
     const view = views.get(value);
-    if (!view) errors.push(`'${value}' isn't an option for ${choice.label}`);
-    else if (view.unavailable) errors.push(`${view.name}: ${view.unavailable}`);
+    if (!view) errors.push(message("builder.not_option_for", { value, choice: choice.label }));
+    else if (view.unavailable_message) {
+      errors.push(message("issue.option_why", { name: view.name, why: view.unavailable_message }));
+    }
   }
   if (repeats && !errors.length) {
     const before = res.abilityScores(choice.level) as Record<string, number>;
@@ -232,7 +254,10 @@ export function setChoice(
       const n = values.filter((v) => v === value).length;
       if ((before[value] ?? 0) + n > choice.definition.max_score) {
         errors.push(
-          `${views.get(value)?.name ?? value} can't exceed ${choice.definition.max_score}`,
+          message("scores.cap", {
+            ability: views.get(value)?.name ?? value,
+            cap: choice.definition.max_score,
+          }),
         );
       }
     }
@@ -254,6 +279,8 @@ export interface LevelUpOption {
   /** Fixed Hit Points for the level (before your Constitution modifier). */
   readonly fixed_hp: number;
   readonly unavailable: string | null;
+  /** `unavailable` as a message (for translation). */
+  readonly unavailable_message: Message | null;
 }
 
 /** Fixed Hit Points gained per level after 1: half the hit die, plus 1. */
@@ -269,12 +296,13 @@ export function levelUpOptions(build: CharacterBuild, catalog: Catalog): LevelUp
   const atMax = res.characterLevel >= catalog.creation.max_level;
   return Object.values(catalog.classes).map((cls) => {
     const have = current.get(cls.id) ?? 0;
-    let unavailable: string | null = null;
-    if (build.class_id === null) unavailable = "choose your first class during character creation";
-    else if (atMax) unavailable = `already level ${catalog.creation.max_level}`;
-    else if (have === 0) {
-      const blockers = multiclassBlockers(res, catalog, [...current.keys(), cls.id], next);
-      if (blockers.length) unavailable = blockers.join("; ");
+    let unavailable: Message | null = null;
+    if (build.class_id === null) unavailable = message("builder.first_class_at_creation");
+    else if (atMax) {
+      unavailable = message("builder.already_max_level", { level: catalog.creation.max_level });
+    } else if (have === 0) {
+      const blockers = multiclassBlockerMessages(res, catalog, [...current.keys(), cls.id], next);
+      if (blockers.length) unavailable = message("refusal.all", { reasons: blockers });
     }
     return {
       class_id: cls.id,
@@ -282,7 +310,8 @@ export function levelUpOptions(build: CharacterBuild, catalog: Catalog): LevelUp
       class_level: have + 1,
       hit_die: cls.hit_die,
       fixed_hp: fixedHitPoints(cls.hit_die),
-      unavailable,
+      unavailable: unavailable?.text ?? null,
+      unavailable_message: unavailable,
     };
   });
 }
@@ -299,9 +328,12 @@ export function levelUp(
 ): BuildResult {
   const option = levelUpOptions(build, catalog).find((o) => o.class_id === classId);
   if (!option) throw new BuildError([message("builder.unknown_class", { class: classId })]);
-  if (option.unavailable)
+  if (option.unavailable_message)
     throw new BuildError([
-      message("builder.class_unavailable", { class: option.name, why: option.unavailable }),
+      message("builder.class_unavailable", {
+        class: option.name,
+        why: option.unavailable_message,
+      }),
     ]);
   checkRoll(hp, option.hit_die);
   const levels = [...build.levels, { class_id: classId, hp }];
@@ -320,7 +352,7 @@ export function setLevelHp(
   const cls = lookup(catalog.classes, entry.class_id);
   if (cls) checkRoll(hp, cls.hit_die);
   const levels = build.levels.map((l, i) => (i === level - 2 ? { ...l, hp } : l));
-  return commit(build, catalog, { build: updateBuild(build, { levels }), notes: [] });
+  return commit(build, catalog, built(updateBuild(build, { levels })));
 }
 
 /** Undo the last level-up, dropping the choices it made. */
@@ -328,10 +360,11 @@ export function removeLastLevel(build: CharacterBuild, catalog: Catalog): BuildR
   if (!build.levels.length) throw new BuildError([message("builder.level_1")]);
   const level = characterLevel(build);
   const result = normalize(updateBuild(build, { levels: build.levels.slice(0, -1) }), catalog);
-  return commit(build, catalog, {
-    build: result.build,
-    notes: [`Removed level ${level}.`, ...result.notes],
-  });
+  return commit(
+    build,
+    catalog,
+    built(result.build, [message("builder.level_removed", { level })], result.messages),
+  );
 }
 
 function checkRoll(hp: number | null, hitDie: number): void {
@@ -361,17 +394,15 @@ export function setLevelClass(
   if (!entry) throw new BuildError([message("builder.no_level", { level })]);
   const cls = lookup(catalog.classes, classId);
   if (!cls) throw new BuildError([message("builder.unknown_class", { class: classId })]);
-  const notes: string[] = [];
+  const notes: Message[] = [];
   let hp = entry.hp;
   if (hp !== null && hp > cls.hit_die) {
     hp = null;
-    notes.push(
-      `Level ${level}: the Hit Die roll doesn't fit a d${cls.hit_die}; using the fixed value.`,
-    );
+    notes.push(message("builder.hp_roll_reset", { level, die: cls.hit_die }));
   }
   const levels = build.levels.map((l, i) => (i === level - 2 ? { class_id: classId, hp } : l));
   const result = normalize(updateBuild(build, { levels }), catalog);
-  return commit(build, catalog, { build: result.build, notes: [...notes, ...result.notes] });
+  return commit(build, catalog, built(result.build, notes, result.messages));
 }
 
 // --- override mode: change the past safely -----------------------------------------------
@@ -384,12 +415,12 @@ export function setLevelClass(
  * and the build stays as it was. No per-case rules: whatever the validator checks, this enforces.
  */
 function commit(before: CharacterBuild, catalog: Catalog, result: BuildResult): BuildResult {
-  const describe = (i: { level: number; message: string }) =>
-    i.level > 1 ? `Level ${i.level}: ${i.message}` : i.message;
-  const known = new Set(reportErrors(validateBuild(before, catalog)).map(describe));
+  const describe = (i: Issue): Message =>
+    i.level > 1 ? message("builder.at_level", { level: i.level, issue: i.detail }) : i.detail;
+  const known = new Set(reportErrors(validateBuild(before, catalog)).map((i) => describe(i).text));
   const fresh = reportErrors(validateBuild(result.build, catalog))
     .map(describe)
-    .filter((m) => !known.has(m));
+    .filter((m) => !known.has(m.text));
   if (fresh.length) throw new BuildError(fresh);
   return result;
 }
@@ -398,7 +429,7 @@ export interface ChangePreview extends BuildResult {
   /** Picks the change would drop (other than the one being edited). */
   readonly removed: readonly { level: number; key: string; label: string; values: string[] }[];
   /** New questions the change creates (e.g. the new subclass's choices). */
-  readonly pending: readonly { level: number; message: string }[];
+  readonly pending: readonly { level: number; message: string; detail: Message }[];
 }
 
 /** A sheet number an option would change (`previewOption`). */
@@ -488,7 +519,7 @@ export function previewChange(
   const was = new Set(pendingOf(build).map((i) => `${i.level}|${i.message}`));
   const pending = pendingOf(result.build)
     .filter((i) => !was.has(`${i.level}|${i.message}`))
-    .map((i) => ({ level: i.level, message: i.message }));
+    .map((i) => ({ level: i.level, message: i.message, detail: i.detail }));
   removed.sort((a, b) => a.level - b.level);
   return { ...result, removed, pending };
 }
@@ -496,7 +527,7 @@ export function previewChange(
 export function setName(build: CharacterBuild, _catalog: Catalog, name: string): BuildResult {
   const trimmed = name.trim();
   if (!trimmed) throw new BuildError([message("builder.empty_name")]);
-  return { build: updateBuild(build, { name: trimmed }), notes: [] };
+  return built(updateBuild(build, { name: trimmed }));
 }
 
 export function setAlignment(
@@ -504,11 +535,11 @@ export function setAlignment(
   _catalog: Catalog,
   alignment: Alignment,
 ): BuildResult {
-  const notes: string[] = [];
+  const notes: Message[] = [];
   if (alignment === "LE" || alignment === "NE" || alignment === "CE") {
-    notes.push("The game assumes heroes aren't evil — check with your GM.");
+    notes.push(message("builder.evil_alignment"));
   }
-  return { build: updateBuild(build, { alignment }), notes };
+  return built(updateBuild(build, { alignment }), notes);
 }
 
 // --- normalization ------------------------------------------------------------------------
@@ -520,7 +551,7 @@ export function setAlignment(
  * choices conflict only one of them loses the value.
  */
 export function normalize(build: CharacterBuild, catalog: Catalog): BuildResult {
-  const notes: string[] = [];
+  const notes: Message[] = [];
   let current = build;
   for (;;) {
     const res = resolve(current, catalog);
@@ -534,7 +565,7 @@ export function normalize(build: CharacterBuild, catalog: Catalog): BuildResult 
       continue;
     }
     const fix = firstInvalidValue(res);
-    if (fix === null) return { build: current, notes };
+    if (fix === null) return built(current, notes);
     const [key, index, note] = fix;
     const remaining = index < 0 ? [] : answers(current, key).filter((_, i) => i !== index);
     current = updateBuild(current, { choices: { ...current.choices, [key]: remaining } });
@@ -543,14 +574,19 @@ export function normalize(build: CharacterBuild, catalog: Catalog): BuildResult 
 }
 
 /** Find the first illegal answer as [choice key, index in its answer list, note]. */
-function firstInvalidValue(res: Resolution): [string, number, string] | null {
+function firstInvalidValue(res: Resolution): [string, number, Message] | null {
+  const repaired = (choice: ActiveChoice, note: Message) =>
+    message("builder.repaired", { choice: choice.label, note });
   // Earlier levels first: when two picks conflict, the later one gives way.
   const ordered = [...res.choices].sort((a, b) => a.level - b.level);
   for (const choice of ordered) {
     if (choice.fixed !== null || !Object.hasOwn(res.build.choices, choice.key)) continue;
     if (choice.replaces) {
-      const errors = replaceErrors(res, choice);
-      if (errors.length) return [choice.key, -1, `${choice.label}: removed (${errors[0]}).`];
+      const errors = replaceErrorMessages(res, choice);
+      const first = errors[0];
+      if (first) {
+        return [choice.key, -1, repaired(choice, message("builder.removed_why", { why: first }))];
+      }
       continue;
     }
     const views = new Map(res.options(choice).map((v) => [v.id, v]));
@@ -564,9 +600,10 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
         choice.definition.max_score,
         choice.level,
       );
-      if (fix) return [choice.key, fix[0], `${choice.label}: ${fix[1]}`];
+      if (fix) return [choice.key, fix[0], repaired(choice, fix[1])];
       if (values.length > choice.definition.count) {
-        return [choice.key, values.length - 1, `${choice.label}: removed an extra increase.`];
+        const note = repaired(choice, message("builder.removed_extra_increase"));
+        return [choice.key, values.length - 1, note];
       }
       continue;
     }
@@ -575,18 +612,23 @@ function firstInvalidValue(res: Resolution): [string, number, string] | null {
       if (!view && !seen.has(value)) {
         const name = entityName(res.catalog, value);
         const note = name
-          ? `${choice.label}: removed ${name} (no longer available).`
-          : `${choice.label}: removed invalid choice '${value}'.`;
-        return [choice.key, i, note];
+          ? message("builder.removed_unavailable", { name })
+          : message("builder.removed_invalid", { value });
+        return [choice.key, i, repaired(choice, note)];
       }
       if (seen.has(value) || !view) {
-        return [choice.key, i, `${choice.label}: removed invalid choice '${value}'.`];
+        return [choice.key, i, repaired(choice, message("builder.removed_invalid", { value }))];
       }
-      if (view.unavailable) {
-        return [choice.key, i, `${choice.label}: removed ${view.name} (${view.unavailable}).`];
+      if (view.unavailable_message) {
+        const note = message("builder.removed_because", {
+          name: view.name,
+          why: view.unavailable_message,
+        });
+        return [choice.key, i, repaired(choice, note)];
       }
       if (i >= res.countOf(choice)) {
-        return [choice.key, i, `${choice.label}: removed extra choice ${view.name}.`];
+        const note = message("builder.removed_extra", { name: view.name });
+        return [choice.key, i, repaired(choice, note)];
       }
       seen.add(value);
     }
@@ -601,14 +643,14 @@ function invalidIncrease(
   values: readonly string[],
   max: number,
   level: number,
-): [number, string] | null {
+): [number, Message] | null {
   const scores = res.abilityScores(level) as Record<string, number>;
   const running: Record<string, number> = {};
   for (const [i, value] of values.entries()) {
-    if (!Object.hasOwn(scores, value)) return [i, `removed invalid choice '${value}'.`];
+    if (!Object.hasOwn(scores, value)) return [i, message("builder.removed_invalid", { value })];
     running[value] = (running[value] ?? scores[value] ?? 0) + 1;
     if ((running[value] ?? 0) > max) {
-      return [i, `removed an increase to ${value.toUpperCase()} (it can't exceed ${max}).`];
+      return [i, message("builder.removed_increase", { ability: value.toUpperCase(), max })];
     }
   }
   return null;
@@ -619,10 +661,10 @@ function bonusErrors(
   catalog: Catalog,
   bonus: AbilityMap,
   base: AbilityMap,
-): string[] {
+): Message[] {
   const background = lookup(catalog.backgrounds, build.background_id);
-  if (!background) return ["Choose a background first"];
-  return backgroundBonusErrors(
+  if (!background) return [message("builder.background_first")];
+  return backgroundBonusMessages(
     bonus,
     background.ability_scores,
     base,

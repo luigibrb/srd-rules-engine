@@ -21,7 +21,10 @@ migrated when it's loaded.
   `BuildError` have `details` next to `messages`; `checkAction` and the move and area previews
   have `reason_messages`, options `reason_message`; the rules throw `RuleError` (a `RangeError`
   with `detail`). Decisions have `message` next to `question`, and `encounter.pending` and its
-  event `question_message`. Builder validation errors and option labels still have code `text`.
+  event `question_message`. The builder too: `Issue.detail`, `OptionView.unavailable_message`,
+  `LevelUpOption.unavailable_message`, `BuildResult.messages`, `ChangePreview.pending[].detail`,
+  the play sheet's `StateIssue.detail`; options have `label_message`, `note_message` and (Cunning
+  and Brutal Strike) `cost_message`.
 - `unassignedValues(method, scores, rules, pool)` is public: the standard array's or rolled pool's
   values not assigned to an ability yet.
 - `builder.previewOption(build, catalog, choiceKey, value)`: the sheet numbers an option would

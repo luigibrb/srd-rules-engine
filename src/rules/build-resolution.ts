@@ -40,7 +40,9 @@ import {
   type SubclassDef,
   skillName,
 } from "../models/content";
+import type { Message } from "../models/messages";
 import { finalScores } from "./ability-scores";
+import { message } from "./messages";
 import { isWeaponProficient } from "./weapons";
 
 /** Ability score used when none has been assigned yet. */
@@ -107,6 +109,8 @@ export interface OptionView {
   readonly name: string;
   readonly description: string;
   readonly unavailable: string | null;
+  /** `unavailable` as a message (for translation). */
+  readonly unavailable_message: Message | null;
 }
 
 function source(
@@ -144,8 +148,14 @@ function activeChoice(src: ActiveSource, definition: ChoiceDef): ActiveChoice {
   };
 }
 
-function view(id: string, name: string, description = "", unavailable: string | null = null) {
-  return { id, name, description, unavailable } satisfies OptionView;
+function view(id: string, name: string, description = "", why: Message | null = null) {
+  return {
+    id,
+    name,
+    description,
+    unavailable: why?.text ?? null,
+    unavailable_message: why,
+  } satisfies OptionView;
 }
 
 /** Combine two grants (a class's core traits and its level 1 features) into one. */
@@ -202,7 +212,7 @@ export class Resolution {
     return values.map((id) => {
       const name = entityName(this.catalog, id) ?? id;
       const needed = required.get(id);
-      return view(id, name, "", needed ? `${needed} requires it` : null);
+      return view(id, name, "", needed ? message("option.required_by", { source: needed }) : null);
     });
   }
 
@@ -385,23 +395,36 @@ export class Resolution {
     level: number,
     excludeChoice?: string,
   ): string | null {
+    return this.unmetPrerequisiteMessage(pre, level, excludeChoice)?.text ?? null;
+  }
+
+  /** `unmetPrerequisite` as a message. */
+  unmetPrerequisiteMessage(
+    pre: Prerequisite | null,
+    level: number,
+    excludeChoice?: string,
+  ): Message | null {
     if (!pre) return null;
-    if (pre.level !== null && level < pre.level) return `requires level ${pre.level}+`;
+    if (pre.level !== null && level < pre.level) {
+      return message("option.requires_level", { level: pre.level });
+    }
     if (pre.class_level) {
       const have = this.classLevels(level).get(pre.class_level.class) ?? 0;
       if (have < pre.class_level.level) {
         const name =
           lookup(this.catalog.classes, pre.class_level.class)?.name ?? pre.class_level.class;
         return pre.class_level.level > 1
-          ? `requires ${name} level ${pre.class_level.level}+`
-          : `requires ${name}`;
+          ? message("option.requires_class_level", { class: name, level: pre.class_level.level })
+          : message("option.requires", { name });
       }
     }
     if (pre.abilities) {
       const scores = this.abilityScores(level);
       if (!pre.abilities.any_of.some((a) => scores[a] >= (pre.abilities?.min ?? 0))) {
-        const names = pre.abilities.any_of.map((a) => ABILITY_NAMES[a]).join(" or ");
-        return `requires ${names} ${pre.abilities.min}+`;
+        return message("option.requires_ability", {
+          abilities: pre.abilities.any_of.map((a) => message(`ability.${a}`)),
+          min: pre.abilities.min,
+        });
       }
     }
     const owned = new Set(
@@ -414,25 +437,25 @@ export class Resolution {
       if (!owned.has(id)) {
         const name =
           lookup(this.catalog.features, id)?.name ?? lookup(this.catalog.feats, id)?.name ?? id;
-        return `requires ${name}`;
+        return message("option.requires", { name });
       }
     }
     if (pre.trait) {
       const has = this.sources.some(
         (s) => s.level <= level && s.grants.traits.some((t) => t.name === pre.trait),
       );
-      if (!has) return `requires the ${pre.trait} feature`;
+      if (!has) return message("option.requires_feature", { feature: pre.trait });
     }
     if (pre.spells.length) {
       const known = this.spells(new Set(excludeChoice ? [excludeChoice] : []), level);
       if (!pre.spells.some((id) => known.has(id))) {
         const names = pre.spells.map((id) => lookup(this.catalog.spells, id)?.name ?? id);
-        return `requires knowing ${names.join(" or ")}`;
+        return message("option.requires_spell", { spells: names });
       }
     }
     if (pre.spellcasting) {
       const has = this.sources.some((s) => s.level <= level && s.grants.spellcasting?.progression);
-      if (!has) return "requires the Spellcasting or Pact Magic feature";
+      if (!has) return message("option.requires_spellcasting");
     }
     return null;
   }
@@ -933,7 +956,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
           o.id,
           o.name,
           o.description,
-          taken.has(o.id) ? `already chosen for ${taken.get(o.id)}` : null,
+          taken.has(o.id) ? message("option.chosen_for", { source: taken.get(o.id) ?? "" }) : null,
         ),
       );
     }
@@ -946,7 +969,7 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
           a,
           ABILITY_NAMES[a],
           `currently ${scores[a]}`,
-          scores[a] >= d.max_score ? `already at ${d.max_score}` : null,
+          scores[a] >= d.max_score ? message("option.already_at", { max: d.max_score }) : null,
         ),
       );
     }
@@ -976,13 +999,13 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
       return Object.values(isFeat ? cat.feats : cat.features)
         .filter((feat) => ok(feat.id) && inCategory(feat.category))
         .map((feat) => {
-          let reason: string | null = null;
+          let reason: Message | null = null;
           if (owned.has(feat.id) && !feat.repeatable) {
-            reason = isFeat ? "you already have this feat" : "you already have this";
+            reason = message(isFeat ? "option.have_feat" : "option.have_it");
           } else if (repeatsExhausted(res, feat, choice.key)) {
-            reason = "you already have it with every option";
+            reason = message("option.have_every_option");
           } else {
-            reason = res.unmetPrerequisite(feat.prerequisite, choice.level, choice.key);
+            reason = res.unmetPrerequisiteMessage(feat.prerequisite, choice.level, choice.key);
           }
           return view(feat.id, feat.name, feat.description, reason);
         });
@@ -1000,7 +1023,9 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
         .map((w) => {
           const mastery = cat.masteries[w.mastery];
           const name = mastery?.name ?? w.mastery;
-          const unavailable = isWeaponProficient(w, proficiencies) ? null : "not proficient";
+          const unavailable = isWeaponProficient(w, proficiencies)
+            ? null
+            : message("option.not_proficient");
           return view(
             w.id,
             `${w.name} (${name})`,
@@ -1015,9 +1040,11 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
       const proficient = res.skills(undefined, at(choice));
       const expert = res.expertise(choice.key, at(choice));
       return SKILLS.filter(ok).map((s) => {
-        let reason: string | null = null;
-        if (!proficient.has(s)) reason = "not proficient";
-        else if (expert.has(s)) reason = `already have Expertise from ${expert.get(s)}`;
+        let reason: Message | null = null;
+        if (!proficient.has(s)) reason = message("option.not_proficient");
+        else if (expert.has(s)) {
+          reason = message("option.expertise_from", { source: expert.get(s) ?? "" });
+        }
         return view(s, skillName(s), `${ABILITY_NAMES[SKILL_ABILITY[s]]} skill`, reason);
       });
     }
@@ -1061,29 +1088,21 @@ function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
   if (d.known_only) {
     return spells.filter((s) => known.has(s.id)).map((s) => view(s.id, s.name, s.description));
   }
-  return spells.map((s) =>
-    view(
-      s.id,
-      s.name,
-      s.description,
-      known.has(s.id) ? `already known from ${known.get(s.id)}` : null,
-    ),
-  );
+  return spells.map((s) => view(s.id, s.name, s.description, knownFrom(known.get(s.id))));
 }
 
-function knownFrom(src: string | undefined): string | null {
-  return src ? `already known from ${src}` : null;
+function knownFrom(src: string | undefined): Message | null {
+  return src ? message("option.known_from", { source: src }) : null;
+}
+
+function proficientFrom(src: string | undefined): Message | null {
+  return src ? message("option.proficient_from", { source: src }) : null;
 }
 
 function skillViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => boolean) {
   const owned = res.skills(choice.key, at(choice));
   return SKILLS.filter(ok).map((s) =>
-    view(
-      s,
-      skillName(s),
-      `${ABILITY_NAMES[SKILL_ABILITY[s]]} skill`,
-      owned.has(s) ? `already proficient from ${owned.get(s)}` : null,
-    ),
+    view(s, skillName(s), `${ABILITY_NAMES[SKILL_ABILITY[s]]} skill`, proficientFrom(owned.get(s))),
   );
 }
 
@@ -1093,12 +1112,7 @@ function toolViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => bo
   return Object.values(res.catalog.tools)
     .filter((t) => ok(t.id) && (category === null || category.includes(t.category)))
     .map((t) =>
-      view(
-        t.id,
-        t.name,
-        t.category.replaceAll("-", " "),
-        owned.has(t.id) ? `already proficient from ${owned.get(t.id)}` : null,
-      ),
+      view(t.id, t.name, t.category.replaceAll("-", " "), proficientFrom(owned.get(t.id))),
     );
 }
 

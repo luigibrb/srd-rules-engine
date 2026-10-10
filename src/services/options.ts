@@ -130,7 +130,7 @@ export function combatantOptions(
   /** An option, judged by a dry run unless `why` already says why not. */
   const entry = (
     action: EncounterAction,
-    label: string,
+    label: Message,
     cost: OptionCost,
     targets: TargetSpec | null,
     extra: Partial<OptionEntry> = {},
@@ -164,7 +164,8 @@ export function combatantOptions(
     }
     return {
       action,
-      label,
+      label: label.text,
+      label_message: label,
       cost,
       available: reason === null,
       reason: reason?.text ?? null,
@@ -176,6 +177,7 @@ export function combatantOptions(
       uses: null,
       odds: reason === null ? odds : null,
       note: null,
+      note_message: null,
       strikes: [],
       ...extra,
     };
@@ -241,7 +243,11 @@ export function combatantOptions(
       attacks.push(
         entry(
           { ...base, target: far[0] ?? "", thrown: true },
-          `${label} (thrown, ${line.range.normal}/${line.range.long} ft)`,
+          message("label.attack_thrown", {
+            attack: label,
+            normal: line.range.normal,
+            long: line.range.long,
+          }),
           "attack",
           creature(line.range.long, far),
         ),
@@ -251,7 +257,7 @@ export function combatantOptions(
       attacks.push(
         entry(
           { ...base, target: first, opportunity: true },
-          `${label} (Opportunity Attack)`,
+          message("label.attack_opportunity", { attack: label }),
           "reaction",
           creature(reach, ids),
         ),
@@ -263,7 +269,7 @@ export function combatantOptions(
       attacks.push(
         entry(
           { ...base, target: first, light_extra: true },
-          `${label} (Light extra attack)`,
+          message("label.attack_light", { attack: label }),
           nick ? "attack" : "bonus_action",
           creature(reach, ids),
         ),
@@ -277,7 +283,7 @@ export function combatantOptions(
       attacks.push(
         entry(
           { ...base, target: cleaved[0] ?? "", cleave: true },
-          `${label} (Cleave)`,
+          message("label.attack_cleave", { attack: label }),
           "free",
           creature(reach, cleaved),
         ),
@@ -287,7 +293,7 @@ export function combatantOptions(
       attacks.push(
         entry(
           { ...base, target: first, granted: true },
-          `${label} (granted)`,
+          message("label.attack_granted", { attack: label }),
           "free",
           creature(reach, ids),
           {
@@ -315,6 +321,9 @@ export function combatantOptions(
       option.strikes = strikeDefs
         .filter((d) => d.send === "brutal" || sneak)
         .map((d): StrikeOption => {
+          const strikeCost = message(
+            d.send === "cunning" ? "label.cost_sneak_die" : "label.cost_reckless",
+          );
           const action: EncounterAction =
             d.send === "cunning"
               ? { ...a, riders: [...(a.riders ?? []), { rider: "sneak-attack" }], cunning: [d.id] }
@@ -328,7 +337,8 @@ export function combatantOptions(
             send: d.send,
             id: d.id,
             name: d.name,
-            cost: d.send === "cunning" ? "1d6 of Sneak Attack" : "Reckless Attack's Advantage",
+            cost: strikeCost.text,
+            cost_message: strikeCost,
             sneak_attack_dice: d.send === "cunning" ? 1 : 0,
             action,
             available: reason === null,
@@ -346,7 +356,7 @@ export function combatantOptions(
     c.monster !== null ? c.concentration : characterRef(ctx, c).state.concentration;
   const spellNote = (spell: SpellDef) =>
     spell.concentration && concentrating
-      ? `Casting it ends Concentration on ${concentrating}`
+      ? message("label.ends_concentration", { spell: concentrating })
       : null;
   const spellTargets = (spell: SpellDef): TargetSpec => {
     const m = spell.mechanics;
@@ -402,7 +412,7 @@ export function combatantOptions(
           spellLabel(spell),
           spellCost(spell),
           targets,
-          { slot_levels, pact_slot, note: spellNote(spell) },
+          { slot_levels, pact_slot, ...noted(spellNote(spell)) },
         ),
       );
     }
@@ -435,7 +445,6 @@ export function combatantOptions(
           : line.section === "reactions"
             ? "reaction"
             : "action";
-      const via = line.action === "Spellcasting" ? "" : ` via ${line.action}`;
       spells.push(
         entry(
           {
@@ -446,10 +455,12 @@ export function combatantOptions(
             targets: spellAim(targets),
             ...(fixed === null ? {} : { slot_level: fixed }),
           },
-          `${spellLabel(spell, fixed)}${via}`,
+          line.action === "Spellcasting"
+            ? spellLabel(spell, fixed)
+            : message("label.spell_via", { spell: spellLabel(spell, fixed), via: line.action }),
           economy,
           targets,
-          { slot_levels: fixed === null ? [] : [fixed], uses, note: spellNote(spell) },
+          { slot_levels: fixed === null ? [] : [fixed], uses, ...noted(spellNote(spell)) },
         ),
       );
     }
@@ -483,7 +494,7 @@ export function combatantOptions(
         ...(target !== undefined ? { target } : {}),
         ...(f.pool ? { amount: 1 } : {}),
       };
-      const made = entry(action, f.name, cost, targets, { uses });
+      const made = entry(action, named(f.name), cost, targets, { uses });
       // "hasn't hit X this turn" said of its placeholder target: no hit at all.
       if (f.after_hit && !c.hits.length && made.reason?.includes("hasn't hit")) {
         made.reason_message = message("refusal.hasnt_hit_creature", { name: c.name });
@@ -516,7 +527,11 @@ export function combatantOptions(
             ability: line.name,
             targets: targets.kind === "creature" && targets.ids[0] ? [targets.ids[0]] : [],
           },
-          `${line.name}: DC ${line.dc} ${line.ability.toUpperCase()} save`,
+          message("label.save_action", {
+            action: line.name,
+            dc: line.dc,
+            ability: line.ability.toUpperCase(),
+          }),
           "action",
           targets,
           { uses: daily(line.name) },
@@ -530,7 +545,7 @@ export function combatantOptions(
       save_actions.push(
         entry(
           { type: "save_action", id: c.id, ability: name, targets: [] },
-          name,
+          named(name),
           "action",
           null,
           {},
@@ -568,9 +583,9 @@ export function combatantOptions(
         action = { ...action, targets: spellAim(targets) };
       }
       legendary.push(
-        entry(action, line.name, "legendary", targets, {
+        entry(action, named(line.name), "legendary", targets, {
           uses: { left: Math.max(0, legendaryMax - c.legendary_used), max: legendaryMax },
-          note: line.once_per_round ? "Once per round" : null,
+          ...noted(line.once_per_round ? message("label.once_per_round") : null),
         }),
       );
     }
@@ -583,30 +598,30 @@ export function combatantOptions(
     (x) => !(c.side && e.combatants.find((y) => y.id === x)?.side === c.side),
   );
   standard.push(
-    entry({ type: "dash", id: c.id }, "Dash", "action", null),
-    entry({ type: "disengage", id: c.id }, "Disengage", "action", null),
-    entry({ type: "dodge", id: c.id }, "Dodge", "action", null),
+    entry({ type: "dash", id: c.id }, message("label.dash"), "action", null),
+    entry({ type: "disengage", id: c.id }, message("label.disengage"), "action", null),
+    entry({ type: "dodge", id: c.id }, message("label.dodge"), "action", null),
     entry(
       { type: "help", id: c.id, target: enemiesNear[0] ?? "" },
-      "Help (an ally's attack against an enemy)",
+      message("label.help"),
       "action",
       creature(5, enemiesNear),
     ),
     entry(
       { type: "unarmed", id: c.id, target: near[0] ?? "", option: "grapple" },
-      "Grapple",
+      message("label.grapple"),
       "attack",
       creature(5, near),
     ),
     entry(
       { type: "unarmed", id: c.id, target: near[0] ?? "", option: "shove", shove: "prone" },
-      "Shove (Prone)",
+      message("label.shove_prone"),
       "attack",
       creature(5, near),
     ),
     entry(
       { type: "unarmed", id: c.id, target: near[0] ?? "", option: "shove", shove: "push" },
-      "Shove (push 5 ft)",
+      message("label.shove_push"),
       "attack",
       creature(5, near),
     ),
@@ -615,23 +630,23 @@ export function combatantOptions(
     standard.push(
       entry(
         { type: "escape", id: c.id, effect: hold.id },
-        `Escape ${hold.label} (DC ${hold.escape_dc})`,
+        message("label.escape", { label: hold.label, dc: hold.escape_dc ?? 0 }),
         "action",
         null,
       ),
     );
   }
   standard.push(
-    entry({ type: "hide", id: c.id }, "Hide", "action", null),
-    entry({ type: "search", id: c.id }, "Search", "action", null),
-    entry({ type: "study", id: c.id }, "Study", "action", null),
+    entry({ type: "hide", id: c.id }, message("label.hide"), "action", null),
+    entry({ type: "search", id: c.id }, message("label.search"), "action", null),
+    entry({ type: "study", id: c.id }, message("label.study"), "action", null),
     entry(
       { type: "influence", id: c.id, skill: "persuasion", target: enemiesNear[0] },
-      "Influence",
+      message("label.influence"),
       "action",
       null,
     ),
-    entry({ type: "utilize", id: c.id }, "Utilize", "action", null),
+    entry({ type: "utilize", id: c.id }, message("label.utilize"), "action", null),
   );
   // Ready: a template with its first attack (any action it lists can be readied instead).
   const readyAttack = attacks.find((x) => x.action.type === "attack" && x.cost === "attack");
@@ -646,23 +661,28 @@ export function combatantOptions(
             ? { ...readyAttack.action }
             : { type: "move", id: c.id, ...(c.position ? { to: { ...c.position } } : { feet: 0 }) },
       },
-      "Ready (an attack, a spell, a move or Help, on a trigger)",
+      message("label.ready"),
       "action",
       null,
     ),
   );
   if (c.readied) {
     standard.push(
-      entry({ type: "release", id: c.id }, `Readied: ${c.readied.trigger}`, "reaction", null),
+      entry(
+        { type: "release", id: c.id },
+        message("label.release", { trigger: c.readied.trigger }),
+        "reaction",
+        null,
+      ),
     );
   }
   if (c.hidden !== null) {
     standard.push(
-      entry({ type: "reveal", id: c.id }, `Stop hiding (DC ${c.hidden})`, "free", null),
+      entry({ type: "reveal", id: c.id }, message("label.reveal", { dc: c.hidden }), "free", null),
     );
   }
   if (conditionsOf(ctx, c).has("prone")) {
-    standard.push(entry({ type: "stand", id: c.id }, "Stand up", "movement", null));
+    standard.push(entry({ type: "stand", id: c.id }, message("label.stand"), "movement", null));
   }
   const move: EncounterAction = c.position
     ? { type: "move", id: c.id, to: { ...c.position } }
@@ -670,7 +690,7 @@ export function combatantOptions(
   standard.push(
     entry(
       move,
-      "Move",
+      message("label.move"),
       "movement",
       c.position ? { kind: "point", count: null, range: movement, ids: [], area: null } : null,
       {},
@@ -687,13 +707,20 @@ export function combatantOptions(
       zones.push(
         entry(
           { type: "move_zone", zone: z.id, point: { ...z.point } },
-          `Move ${z.label} (${z.id})`,
+          message("label.move_zone", { label: z.label, id: z.id }),
           "free",
           { kind: "point", count: null, range: null, ids: [], area: z.area },
         ),
       );
     }
-    zones.push(entry({ type: "end_zone", zone: z.id }, `End ${z.label} (${z.id})`, "free", null));
+    zones.push(
+      entry(
+        { type: "end_zone", zone: z.id },
+        message("label.end_zone", { label: z.label, id: z.id }),
+        "free",
+        null,
+      ),
+    );
   }
 
   return {
@@ -734,15 +761,30 @@ function legendaryUses(
 }
 
 /** `Longsword +5 · 1d8+3 slashing`. */
-function attackLabel(line: AttackLine): string {
+function attackLabel(line: AttackLine): Message {
   const bonus = line.attack_bonus >= 0 ? `+${line.attack_bonus}` : `${line.attack_bonus}`;
-  const damage = line.damage_parts.map((p) => `${formatDamage([p])} ${p.type}`).join(" + ");
-  return `${line.name} ${bonus} · ${damage}`;
+  const damage = line.damage_parts.map((p) =>
+    message("label.damage", { dice: formatDamage([p]), type: p.type }),
+  );
+  return message("label.attack", { attack: line.name, bonus, damage });
 }
 
 /** `Fireball (level 3)`, `Fire Bolt (cantrip)`. */
-function spellLabel(spell: SpellDef, level: number | null = spell.level): string {
-  return `${spell.name} (${spell.level === 0 ? "cantrip" : `level ${level ?? spell.level}`})`;
+function spellLabel(spell: SpellDef, level: number | null = spell.level): Message {
+  return message("label.spell", {
+    spell: spell.name,
+    level: spell.level === 0 ? 0 : (level ?? spell.level),
+  });
+}
+
+/** A name from the content as a label (a feature, a stat block's action). */
+function named(name: string): Message {
+  return message("label.name", { name });
+}
+
+/** An option's note, as text and as a message. */
+function noted(note: Message | null): Pick<OptionEntry, "note" | "note_message"> {
+  return { note: note?.text ?? null, note_message: note };
 }
 
 /** The odds of an allowed option against its target, from what its dry run computed. */

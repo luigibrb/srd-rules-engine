@@ -159,8 +159,8 @@ describe("HTTP API", () => {
       values: [],
     });
     expect(preview.status).toBe(200);
-    expect(preview.body.pending).toEqual([
-      { level: 3, message: "Fighter subclass: choose 1 more" },
+    expect(preview.body.pending).toMatchObject([
+      { level: 3, message: "Fighter subclass: choose 1 more", detail: { code: "issue.choice" } },
     ]);
     const moved = await api.post("/v1/builds/set-level-class", {
       build,

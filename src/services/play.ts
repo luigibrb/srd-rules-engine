@@ -479,6 +479,8 @@ function startingKit(
 export interface StateIssue {
   readonly severity: "error" | "warning";
   readonly message: string;
+  /** `message` as a message (for translation). */
+  readonly detail: Message;
 }
 
 /** Everything in a state that doesn't fit the build or the rules. */
@@ -488,74 +490,87 @@ export function validateState(
   catalog: Catalog,
 ): StateIssue[] {
   const issues: StateIssue[] = [];
-  const error = (message: string) => issues.push({ severity: "error", message });
+  const error = (detail: Message) =>
+    issues.push({ severity: "error", message: detail.text, detail });
   const res = resolve(build, catalog);
   const restKeys = restChoiceKeys(res);
   const played = playBuild(build, state, catalog);
   const playedRes = resolve(played, catalog);
   for (const key of Object.keys(state.choices)) {
     if (!restKeys.has(key)) {
-      error(`'${key}' isn't a choice you can change after a rest`);
+      error(message("state.isnt_choice_you_change", { key }));
       continue;
     }
     const choice = playedRes.choice(key);
     if (choice) {
-      for (const i of choiceIssues(playedRes, choice)) if (i.severity === "error") error(i.message);
+      for (const i of choiceIssues(playedRes, choice)) if (i.severity === "error") error(i.detail);
     }
   }
   const sheet = computePlaySheet(build, state, catalog);
   const p = sheet.play;
   if ((state.hp.current ?? 0) > p.hp.max)
-    error(`Hit Points ${state.hp.current} are above the maximum ${p.hp.max}`);
+    error(message("state.hit_points_are_above", { current: state.hp.current ?? 0, max: p.hp.max }));
   for (const d of p.hit_dice)
-    if (d.spent > d.total) error(`${d.spent} d${d.die} Hit Dice spent, only ${d.total}`);
+    if (d.spent > d.total)
+      error(message("state.hit_dice_spent", { spent: d.spent, die: d.die, total: d.total }));
   for (const [die, spent] of Object.entries(state.hit_dice_spent)) {
     if (spent && !p.hit_dice.some((d) => String(d.die) === die))
-      error(`No d${die} Hit Dice to spend`);
+      error(message("state.no_hit_dice_spend", { die }));
   }
   state.spell_slots_spent.forEach((spent, i) => {
     const total = sheet.spell_slots[i] ?? 0;
-    if (spent > total) error(`${spent} level ${i + 1} slots spent, only ${total}`);
+    if (spent > total) error(message("state.slots_spent", { spent, level: i + 1, total }));
   });
   if (state.pact_slots_spent > (sheet.pact_magic?.slots ?? 0))
-    error("More Pact Magic slots spent than you have");
+    error(message("state.more_pact_magic_slots"));
   for (const [key, spent] of Object.entries(state.uses_spent)) {
     const use = p.uses.find((u) => u.key === key);
-    if (!use) error(`No limited use '${key}'`);
-    else if (spent > use.max) error(`${use.name}: ${spent} used, only ${use.max}`);
+    if (!use) error(message("state.no_limited_use", { key }));
+    else if (spent > use.max) error(message("state.used", { use: use.name, spent, max: use.max }));
   }
   for (const id of state.conditions)
-    if (!lookup(catalog.conditions, id)) error(`Unknown condition '${id}'`);
+    if (!lookup(catalog.conditions, id)) error(message("state.unknown_condition", { id }));
   const items = carriedItems(state, catalog);
   for (const [n, i] of state.inventory.entries()) {
     const carried = items[n] as CarriedItem;
     const magic = carried.magic;
-    if (!magic && !mundaneName(catalog, i.item)) error(`Unknown item '${i.item}'`);
+    if (!magic && !mundaneName(catalog, i.item))
+      error(message("state.unknown_item", { item: i.item }));
     if (magic) {
       if (magic.base && !carried.base)
-        error(`${magic.name}: choose which ${magic.base.kind} it is`);
+        error(message("state.choose_which", { item: magic.name, kind: magic.base.kind }));
       if (magic.base && carried.base && !allowedBases(catalog, magic).includes(carried.base)) {
-        error(`${magic.name} can't be a ${mundaneName(catalog, carried.base) ?? carried.base}`);
+        error(
+          message("state.item_cant_be", {
+            item: magic.name,
+            base: mundaneName(catalog, carried.base) ?? carried.base,
+          }),
+        );
       }
       if (magic.variants.length && !magic.variants.some((v) => v.id === i.variant)) {
-        error(`${magic.name}: choose its kind (${magic.variants.map((v) => v.name).join(", ")})`);
+        error(
+          message("state.item_choose_variant", {
+            item: magic.name,
+            variants: magic.variants.map((v) => v.name),
+          }),
+        );
       }
       if (magic.charges !== null && i.charges_spent > magic.charges)
-        error(`${carried.name}: too many charges spent`);
+        error(message("state.too_many_charges_spent", { carried: carried.name }));
     }
-    if (i.attuned && !magic?.attunement) error(`${carried.name} doesn't need Attunement`);
+    if (i.attuned && !magic?.attunement)
+      error(message("state.doesnt_need_attunement", { carried: carried.name }));
     if (i.attuned && magic) {
       const reason = attunementBlocker(res, magic);
-      if (reason) error(`${carried.name}: ${reason.text}`);
+      if (reason) error(message("state.item_why", { item: carried.name, why: reason }));
     }
   }
   if (state.inventory.filter((i) => i.attuned).length > MAX_ATTUNED) {
-    error(`Attuned to more than ${MAX_ATTUNED} magic items`);
+    error(message("state.attuned_more_than_magic", { max_attuned: MAX_ATTUNED }));
   }
   for (const kind of ["armor", "shield"] as const) {
     const worn = items.filter((i) => i.equipped && wornKind(catalog, i.base) === kind);
-    if (worn.length > 1)
-      error(`Wearing more than one ${kind === "armor" ? "suit of armor" : "Shield"}`);
+    if (worn.length > 1) error(message("state.worn_twice", { kind }));
   }
   return issues;
 }

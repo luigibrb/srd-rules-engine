@@ -3,6 +3,10 @@ import {
   type AttackResult,
   applyAction,
   applyEncounterAction,
+  type BuildError,
+  builder,
+  combatantOptions,
+  createBuild,
   createEncounter,
   createState,
   type EncounterAction,
@@ -16,7 +20,9 @@ import {
   PlayError,
   type RuleError,
   renderMessage,
+  resolve,
   seededRng,
+  validateBuild,
 } from "../src/index";
 import { message } from "../src/rules/messages";
 import { catalog, fighterBuild } from "./helpers";
@@ -235,5 +241,64 @@ describe("refusals", () => {
         params: { name: "Ogre", attack: "Bite" },
       });
     }
+  });
+});
+
+describe("the builder and options", () => {
+  /** Every message in a value (nested too), by walking it. */
+  const messagesIn = (value: unknown, out: Message[] = []): Message[] => {
+    if (Array.isArray(value)) for (const v of value) messagesIn(v, out);
+    else if (value && typeof value === "object") {
+      const v = value as Record<string, unknown>;
+      if (typeof v.code === "string" && typeof v.text === "string" && "params" in v) {
+        out.push(v as unknown as Message);
+      }
+      for (const x of Object.values(v)) messagesIn(x, out);
+    }
+    return out;
+  };
+
+  it("validation issues, option reasons and repairs are coded messages", () => {
+    const empty = createBuild();
+    const report = validateBuild(empty, catalog);
+    expect(report.issues.length).toBeGreaterThan(0);
+    for (const i of report.issues) expect(i.detail.text).toBe(i.message);
+    const build = fighterBuild();
+    const res = resolve(build, catalog);
+    const views = res.choices.flatMap((c) => res.options(c));
+    const reasons = views.filter((v) => v.unavailable_message);
+    expect(reasons.length).toBeGreaterThan(0);
+    for (const v of reasons) expect(v.unavailable_message?.text).toBe(v.unavailable);
+    const all = messagesIn([report, reasons, validateBuild(build, catalog)]);
+    expect(all.filter((m) => m.code === "text")).toEqual([]);
+    // A setter's refusal and its repair notes.
+    try {
+      builder.setChoice(build, catalog, "class:fighter#skills", ["athletics", "athletics"]);
+      expect.unreachable();
+    } catch (error) {
+      expect((error as BuildError).details.map((d) => d.code)).toContain("builder.once_each");
+    }
+    const evil = builder.setAlignment(build, catalog, "CE");
+    expect(evil.messages.map((m) => m.code)).toEqual(["builder.evil_alignment"]);
+  });
+
+  it("every option label, note and reason of a fighter's turn is a coded message", () => {
+    let e = createEncounter();
+    const build = fighterBuild();
+    const characters = { brakka: { build, state: createState(build, catalog) } };
+    for (const action of [
+      { type: "add_character", character: "brakka" },
+      { type: "add_monster", monster: "goblin-warrior" },
+      { type: "set_initiative", id: "brakka", value: 20 },
+      { type: "set_initiative", id: "goblin-warrior", value: 10 },
+      { type: "start" },
+    ] as EncounterAction[]) {
+      e = applyEncounterAction(e, action, { catalog, characters }).encounter;
+    }
+    const options = combatantOptions(e, "brakka", { catalog, characters });
+    const all = messagesIn(options);
+    expect(all.length).toBeGreaterThan(20);
+    expect(all.filter((m) => m.code === "text")).toEqual([]);
+    for (const m of all) expect(renderMessage(m)).toBe(m.text);
   });
 });

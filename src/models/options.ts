@@ -58,6 +58,8 @@ export const StrikeOptionSchema = z.object({
   name: z.string(),
   /** What it costs: Sneak Attack dice forgone (`1d6`), or Reckless Attack's Advantage. */
   cost: z.string(),
+  /** `cost` as a message (for translation). */
+  cost_message: MessageSchema,
   /** Sneak Attack dice it forgoes (Cunning Strike); 0 for Brutal Strike. */
   sneak_attack_dice: z.int().min(0),
   /** The attack action with this effect, ready to send. */
@@ -79,6 +81,8 @@ export const OptionEntrySchema = z.object({
   action: EncounterActionSchema,
   /** `Longsword +5 · 1d8+3 slashing`, `Fireball (level 3)`, `Second Wind`. */
   label: z.string(),
+  /** `label` as a message (for translation). */
+  label_message: MessageSchema,
   cost: z.enum(OPTION_COSTS),
   /** The engine would take `action` now (a dry run with fixed dice: `checkAction`). */
   available: z.boolean(),
@@ -113,6 +117,8 @@ export const OptionEntrySchema = z.object({
     .default(null),
   /** Something to know before choosing it ("Casting it ends Concentration on Bless"). */
   note: z.string().nullable().default(null),
+  /** `note` as a message (for translation). */
+  note_message: MessageSchema.nullable().default(null),
   /**
    * An attack: the Cunning Strike / Brutal Strike effects its attacker has, each judged on its own
    * (at level 11 or 17 two can go on one attack: merge their lists).

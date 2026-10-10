@@ -754,8 +754,14 @@ rule refusing a roll throws `RuleError`, a `RangeError` whose `detail` the encou
 (`services/refusals.ts`), which the templates keep. Decision questions (`Decision.message`,
 `pending.question_message`) are messages too.
 
-Code `text` (`params.text`) is left for the builder's validation errors and labels (the next
-stage), option labels, and a reason an app passes as a plain string. `message()` throws on a
+The builder's validation (`Issue.detail`), option reasons (`OptionView.unavailable_message`),
+repairs and setter notes (`BuildResult.messages`), the play sheet's state issues and the
+encounter options' labels and notes are messages as well; the string-returning helpers
+(`baseScoreErrors`, `multiclassBlockers`, `replaceErrors`) wrap message versions.
+
+Code `text` (`params.text`) is left only for a reason an app passes as a plain string. Content
+(names, choice labels, descriptions) and the sheet's number breakdowns ("AC 17 = 16 Chain Mail +
+1 Defense") aren't messages: translating content is a separate topic. `message()` throws on a
 missing parameter or a message pasted into a string.
 
 ### Events, refusal codes and undo

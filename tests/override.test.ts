@@ -51,7 +51,20 @@ describe("changing the subclass at level 3 on a level 7 Fighter", () => {
     expect(preview.removed.map((r) => [r.level, r.key])).toEqual([
       [7, "subclass:champion:7#style"],
     ]);
-    expect(preview.pending).toEqual([{ level: 7, message: "Knight skill: choose 1 more" }]);
+    expect(preview.pending).toEqual([
+      {
+        level: 7,
+        message: "Knight skill: choose 1 more",
+        detail: {
+          code: "issue.choice",
+          params: {
+            choice: "Knight skill",
+            issue: { code: "issue.choose_more", params: { count: 1 }, text: "choose 1 more" },
+          },
+          text: "Knight skill: choose 1 more",
+        },
+      },
+    ]);
     expect(preview.build.choices[key]).toEqual(["test-knight"]);
   });
 
