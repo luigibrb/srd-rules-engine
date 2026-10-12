@@ -28191,7 +28191,42 @@
             "components": "",
             "duration": "1 minute",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "1d6",
+                        "type": "fire",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "fire"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": true,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "shield",
@@ -29636,7 +29671,42 @@
             "components": "",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "2d6",
+                        "type": "radiant",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d6",
+                            "type": "radiant"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": true,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null
+            }
         },
         {
             "id": "silence",

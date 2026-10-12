@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Spell mechanics for Searing Smite and Shining Smite: cast right after a melee hit, their
+  extra damage from the attack (doubled on a Critical Hit) and its upcast. Searing Smite's damage
+  at the start of each turn and Shining Smite's light and Advantage stay text.
 - The play sheet's spells say which slots each can be cast with now (`PlaySheet.spells`:
   `PlaySpellLine`): `slot_levels` (levels with a slot left; empty for a cantrip), `pact_slot`
   (the Pact Magic slot's level while one is left), and `slots` (`SpellSlotChoice`: every level it

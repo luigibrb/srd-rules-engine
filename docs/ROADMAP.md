@@ -109,7 +109,7 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
 
 ### Content coverage
 
-- **Spells left as text (L, ongoing).** 51 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 49 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
   first.

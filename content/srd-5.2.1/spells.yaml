@@ -2084,6 +2084,16 @@
 
     _Using a Higher-Level Spell Slot._ All the damage increases by 1d6 for each spell slot level
     above 1.
+  mechanics:
+    damage:
+      - dice: 1d6
+        type: fire
+    targets: 1
+    after_hit: true
+    upcast:
+      damage:
+        - dice: 1d6
+          type: fire
 - id: shield
   name: Shield
   level: 1
@@ -3696,6 +3706,16 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     2.
+  mechanics:
+    damage:
+      - dice: 2d6
+        type: radiant
+    targets: 1
+    after_hit: true
+    upcast:
+      damage:
+        - dice: 1d6
+          type: radiant
 - id: silence
   name: Silence
   level: 2

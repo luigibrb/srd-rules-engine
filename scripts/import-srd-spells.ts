@@ -37,6 +37,22 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     bonus_vs: { creature_types: ["fiend", "undead"], dice: "1d8" },
     upcast: { damage: [{ dice: "1d8", type: "radiant" }] },
   },
+  "searing-smite": {
+    // "As you hit the target, it takes an extra 1d6 Fire damage from the attack." The 1d6 Fire
+    // and the Constitution save at the start of each of its turns stay text.
+    damage: [{ dice: "1d6", type: "fire" }],
+    targets: 1,
+    after_hit: true,
+    upcast: { damage: [{ dice: "1d6", type: "fire" }] },
+  },
+  "shining-smite": {
+    // "The target hit by the strike takes an extra 2d6 Radiant damage from the attack." Its Bright
+    // Light, Advantage on attack rolls against it and no Invisible condition stay text.
+    damage: [{ dice: "2d6", type: "radiant" }],
+    targets: 1,
+    after_hit: true,
+    upcast: { damage: [{ dice: "1d6", type: "radiant" }] },
+  },
   // Level 5
   "flame-strike": {
     save: { ability: "dex", on_success: "half" },

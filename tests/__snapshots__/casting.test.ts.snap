@@ -2429,6 +2429,42 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "wall": null,
     "zone": null,
   },
+  "searing-smite": {
+    "after_hit": true,
+    "area": null,
+    "attack": null,
+    "bonus_vs": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "1d6",
+        "type": "fire",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "mark": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "fire",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "wall": null,
+    "zone": null,
+  },
   "shatter": {
     "after_hit": false,
     "area": {
@@ -2464,6 +2500,42 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         {
           "dice": "1d8",
           "type": "thunder",
+        },
+      ],
+      "heal": null,
+      "targets": 0,
+    },
+    "wall": null,
+    "zone": null,
+  },
+  "shining-smite": {
+    "after_hit": true,
+    "area": null,
+    "attack": null,
+    "bonus_vs": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [
+      {
+        "add_modifier": false,
+        "bonus": 0,
+        "dice": "2d6",
+        "type": "radiant",
+      },
+    ],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "mark": null,
+    "on_hit": [],
+    "projectiles": null,
+    "save": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [
+        {
+          "dice": "1d6",
+          "type": "radiant",
         },
       ],
       "heal": null,
