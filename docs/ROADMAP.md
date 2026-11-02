@@ -79,19 +79,20 @@ or invented homebrew in its tests.
 
 ### Priority 1: now
 
-- **Two layers (M).** Pure rules over plain inputs for clients with their own data (a bot, another
-  tabletop): a `Combatant` and what the rules need to know (a slot left, a use spent) in;
-  rolls, costs and reasons out (`makeAttack`, `takeDamage`, `castSpell`, `rollByHand` already
-  work this way). The documents (`CharacterState`, `Encounter`) and their reducers as an optional
-  state manager on top. Make the boundary explicit: what each layer exports, which rules still
-  need a document to run, and a separate entry point for the first layer if it helps.
+- **Split the encounter reducer by area (M, alongside features).** `applyEncounterAction` runs
+  every action in one closure whose helpers share and change the document: turn timing, effects
+  and Concentration, action economy, attack situation, spells' targets, zones, monster traits in
+  turns. Move each area into its own module of functions that take plain facts and return what
+  happens (effects that end, saves due, refusals with their reasons), applied by the reducer,
+  with direct tests; no change in behavior (the seeded demo and the history replays keep the
+  dice in the same order). Done area by area, when a feature touches it (summons: turn timing
+  and effects first). The new functions stay internal.
 - **Table settings out of the encounter (M).** Some `Encounter` fields are a table's policy,
   not state the rules read: `positions`, `decisions`, `auto_death_saves`, `notice_stops`. Audit
   every field, move the policy ones to per-call options (`EncounterContext`), and migrate saved
   encounters through `DOCUMENT_VERSION`.
 
-  Both change the public API or the saved format, so they come before more clients depend on
-  either.
+  It changes the saved format, so it comes before more clients depend on it.
 - **Summons and companions (L).** Creatures a spell or a feature brings that act with their
   creator: Find Familiar, Find Steed, Giant Insect, Animate Objects. Their stat blocks scale with
   the caster (spell level, Proficiency Bonus, spell attack modifier), they join the encounter on
@@ -145,6 +146,11 @@ or invented homebrew in its tests.
 
 ### Priority 4: when needed
 
+- **Public rules layer (M).** For clients with their own data (a bot, another tabletop): the
+  functions split out of the encounter reducer, exported as a documented layer under the
+  documents and their reducers (`makeAttack`, `takeDamage`, `castSpell`, `rollByHand` already
+  work this way), possibly with its own entry point. When a client needs a rule without the
+  `Encounter` document.
 - **Views for one viewer (M).** An encounter and query results as one participant may see them
   (hidden creatures, what only the GM knows), for shared play.
 - **Authoring toolkit (M).** Shared helpers in `scripts/lib/` for the importers (slugs, Markdown
