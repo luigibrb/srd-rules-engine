@@ -8,6 +8,17 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Summoned creatures: a spell's `mechanics.summon` (forms, count, turn, endings) and the
+  `summons` table of stat blocks that scale with the spell and the caster (`SummonSchema`;
+  expressions like `"=11 + spell_level"` and parts kept `only` for some choices, checked for every
+  choice and level when the catalog loads; `summonMonster`, `instantiateTemplate`,
+  `evaluateExpression`). The SRD's Find Familiar, Find Steed, Giant Insect, Summon Dragon,
+  Animate Objects, Animate Dead and Create Undead: `cast` with `summon: { forms, choices,
+  creature_type }` adds the creatures on the caster's side (combatant `summon`), their turns right
+  after the caster's or on their own Initiative; they disappear at 0 Hit Points, when the spell's
+  Concentration ends, or when the caster dies, as each spell says (`summon.disappears`).
+- An encounter `cast` outside a fight (`round: 0`) takes no turn and no action economy, whatever
+  its casting time: Find Familiar's hour, a ritual.
 - `EncounterSettingsSchema` and `legacyEncounterSettings` (see Changed), and the encounter event
   `noticed` (`{ id, point }`): a creature noticed a hidden point of interest.
 - Spell mechanics for Searing Smite and Shining Smite: cast right after a melee hit, their

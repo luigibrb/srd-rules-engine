@@ -25802,7 +25802,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -25848,7 +25849,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -25930,7 +25932,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -25995,7 +25998,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26167,7 +26171,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26251,7 +26256,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26317,7 +26323,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26380,7 +26387,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26462,7 +26470,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26548,7 +26557,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26621,7 +26631,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26721,7 +26732,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26777,7 +26789,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26850,7 +26863,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -26958,7 +26972,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27099,7 +27114,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27176,7 +27192,8 @@
                     "dice": "1d8"
                 },
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27243,7 +27260,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27340,7 +27358,154 @@
             "components": "V, S, M (burning incense worth 10+ GP, which the spell consumes)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "bat",
+                            "name": "Bat",
+                            "summon": null,
+                            "monster": "bat",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "cat",
+                            "name": "Cat",
+                            "summon": null,
+                            "monster": "cat",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "frog",
+                            "name": "Frog",
+                            "summon": null,
+                            "monster": "frog",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "hawk",
+                            "name": "Hawk",
+                            "summon": null,
+                            "monster": "hawk",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "lizard",
+                            "name": "Lizard",
+                            "summon": null,
+                            "monster": "lizard",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "octopus",
+                            "name": "Octopus",
+                            "summon": null,
+                            "monster": "octopus",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "owl",
+                            "name": "Owl",
+                            "summon": null,
+                            "monster": "owl",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "rat",
+                            "name": "Rat",
+                            "summon": null,
+                            "monster": "rat",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "raven",
+                            "name": "Raven",
+                            "summon": null,
+                            "monster": "raven",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "spider",
+                            "name": "Spider",
+                            "summon": null,
+                            "monster": "spider",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "weasel",
+                            "name": "Weasel",
+                            "summon": null,
+                            "monster": "weasel",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": false,
+                    "turn": "own",
+                    "ends": [
+                        "zero_hp"
+                    ],
+                    "unique": true,
+                    "creature_types": [
+                        "celestial",
+                        "fey",
+                        "fiend"
+                    ],
+                    "cannot_attack": true
+                }
+            }
         },
         {
             "id": "floating-disk",
@@ -27465,7 +27630,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27520,7 +27686,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27566,7 +27733,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27622,7 +27790,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27681,7 +27850,8 @@
                     "dice": "1d6",
                     "type": "necrotic"
                 },
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27742,7 +27912,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27782,7 +27953,8 @@
                     "dice": "1d6",
                     "type": "force"
                 },
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27846,7 +28018,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -27941,7 +28114,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28050,7 +28224,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28154,7 +28329,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28225,7 +28401,8 @@
                 "after_hit": true,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28337,7 +28514,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28421,7 +28599,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -28836,7 +29015,51 @@
             "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "steed",
+                            "name": "Otherworldly Steed",
+                            "summon": "otherworldly-steed",
+                            "monster": null,
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": false,
+                    "turn": "after_caster",
+                    "ends": [
+                        "zero_hp",
+                        "caster_dies"
+                    ],
+                    "unique": true,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "find-traps",
@@ -28950,7 +29173,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29067,7 +29291,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29290,7 +29515,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29406,7 +29632,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29570,7 +29797,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29652,7 +29880,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29705,7 +29934,8 @@
                 "after_hit": true,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29808,7 +30038,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29877,7 +30108,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -29964,7 +30196,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30004,7 +30237,58 @@
             "components": "V, S, M (a drop of blood, a piece of flesh, and a pinch of bone dust)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "skeleton",
+                            "name": "Skeleton",
+                            "summon": null,
+                            "monster": "skeleton",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "zombie",
+                            "name": "Zombie",
+                            "summon": null,
+                            "monster": "zombie",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 2,
+                    "count_ability": false,
+                    "turn": "own",
+                    "ends": [],
+                    "unique": false,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "beacon-of-hope",
@@ -30116,7 +30400,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30213,7 +30498,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30381,7 +30667,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30522,7 +30809,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30583,7 +30871,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30670,7 +30959,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -30903,7 +31193,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31041,7 +31332,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31111,7 +31403,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31262,7 +31555,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31395,7 +31689,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31454,7 +31749,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31510,7 +31806,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31558,7 +31855,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31674,7 +31972,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -31870,7 +32169,77 @@
             "components": "V, S",
             "duration": "Concentration, up to 10 minutes",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "centipede",
+                            "name": "Giant Centipede",
+                            "summon": "giant-insect",
+                            "monster": null,
+                            "choices": {
+                                "form": "centipede"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "spider",
+                            "name": "Giant Spider",
+                            "summon": "giant-insect",
+                            "monster": null,
+                            "choices": {
+                                "form": "spider"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "wasp",
+                            "name": "Giant Wasp",
+                            "summon": "giant-insect",
+                            "monster": null,
+                            "choices": {
+                                "form": "wasp"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": false,
+                    "turn": "after_caster",
+                    "ends": [
+                        "zero_hp",
+                        "spell"
+                    ],
+                    "unique": false,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "greater-invisibility",
@@ -31996,7 +32365,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32076,7 +32446,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32293,7 +32664,8 @@
                     "side": 10,
                     "later": "damage",
                     "later_type": null
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -32314,7 +32686,101 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "tiny",
+                            "name": "Tiny Object",
+                            "summon": "animated-object",
+                            "monster": null,
+                            "choices": {
+                                "size": "Tiny"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "small",
+                            "name": "Small Object",
+                            "summon": "animated-object",
+                            "monster": null,
+                            "choices": {
+                                "size": "Small"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "medium",
+                            "name": "Medium Object",
+                            "summon": "animated-object",
+                            "monster": null,
+                            "choices": {
+                                "size": "Medium"
+                            },
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "large",
+                            "name": "Large Object",
+                            "summon": "animated-object",
+                            "monster": null,
+                            "choices": {
+                                "size": "Large"
+                            },
+                            "weight": 2,
+                            "min_level": null,
+                            "count_by_level": null
+                        },
+                        {
+                            "id": "huge",
+                            "name": "Huge Object",
+                            "summon": "animated-object",
+                            "monster": null,
+                            "choices": {
+                                "size": "Huge"
+                            },
+                            "weight": 3,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": true,
+                    "turn": "after_caster",
+                    "ends": [
+                        "zero_hp",
+                        "spell"
+                    ],
+                    "unique": false,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "antilife-shell",
@@ -32445,7 +32911,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32544,7 +33011,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32749,7 +33217,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32866,7 +33335,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -32943,7 +33413,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33013,7 +33484,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33191,7 +33663,51 @@
             "components": "V, S, M (an object with the image of a dragon engraved on it worth 500+ GP)",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "spirit",
+                            "name": "Draconic Spirit",
+                            "summon": "draconic-spirit",
+                            "monster": null,
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": null
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": false,
+                    "turn": "after_caster",
+                    "ends": [
+                        "zero_hp",
+                        "spell"
+                    ],
+                    "unique": false,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "telekinesis",
@@ -33314,7 +33830,8 @@
                     "side": null,
                     "later": "save",
                     "later_type": null
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -33362,7 +33879,8 @@
                     "side": null,
                     "later": "save",
                     "later_type": null
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -33433,7 +33951,8 @@
                     "side": null,
                     "later": "save",
                     "later_type": null
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -33485,7 +34004,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33547,7 +34067,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33604,7 +34125,91 @@
             "components": "V, S, M (one 150+ GP black onyx stone for each corpse)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": null,
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": {
+                    "forms": [
+                        {
+                            "id": "ghoul",
+                            "name": "Ghoul",
+                            "summon": null,
+                            "monster": "ghoul",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": null,
+                            "count_by_level": {
+                                "6": 3,
+                                "7": 4,
+                                "8": 5,
+                                "9": 6
+                            }
+                        },
+                        {
+                            "id": "ghast",
+                            "name": "Ghast",
+                            "summon": null,
+                            "monster": "ghast",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": 8,
+                            "count_by_level": {
+                                "8": 2,
+                                "9": 3
+                            }
+                        },
+                        {
+                            "id": "wight",
+                            "name": "Wight",
+                            "summon": null,
+                            "monster": "wight",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": 8,
+                            "count_by_level": {
+                                "8": 2,
+                                "9": 3
+                            }
+                        },
+                        {
+                            "id": "mummy",
+                            "name": "Mummy",
+                            "summon": null,
+                            "monster": "mummy",
+                            "choices": {},
+                            "weight": 1,
+                            "min_level": 9,
+                            "count_by_level": {
+                                "9": 2
+                            }
+                        }
+                    ],
+                    "count": 1,
+                    "count_per_level": 0,
+                    "count_ability": false,
+                    "turn": "own",
+                    "ends": [],
+                    "unique": false,
+                    "creature_types": [],
+                    "cannot_attack": false
+                }
+            }
         },
         {
             "id": "disintegrate",
@@ -33660,7 +34265,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33751,7 +34357,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33830,7 +34437,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -33915,7 +34523,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -34059,7 +34668,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -34178,7 +34788,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -34264,7 +34875,8 @@
                     "side": null,
                     "later": "save",
                     "later_type": null
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -34344,7 +34956,8 @@
                     "side": null,
                     "later": "save",
                     "later_type": "slashing"
-                }
+                },
+                "summon": null
             }
         },
         {
@@ -34525,7 +35138,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -34574,7 +35188,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -34937,7 +35552,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -35141,7 +35757,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -35261,7 +35878,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -35436,7 +36054,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -35650,7 +36269,8 @@
                 "after_hit": false,
                 "bonus_vs": null,
                 "mark": null,
-                "wall": null
+                "wall": null,
+                "summon": null
             }
         },
         {
@@ -114358,6 +114978,513 @@
             "legendary_uses": null,
             "legendary_resistance": null,
             "legendary_actions": []
+        }
+    ],
+    "summons": [
+        {
+            "id": "otherworldly-steed",
+            "name": "Otherworldly Steed",
+            "source": "srd-5.2.1",
+            "description": "Find Steed's steed. Its creature type, chosen when it's summoned, decides its slam's damage type and its Bonus Action.",
+            "choices": {
+                "creature_type": [
+                    "Celestial",
+                    "Fey",
+                    "Fiend"
+                ]
+            },
+            "stat_block": {
+                "size": "Large",
+                "creature_type": "{creature_type}",
+                "alignment": "Neutral",
+                "armor_class": "=10 + spell_level",
+                "initiative": 1,
+                "hit_points": "=5 + 10 * spell_level",
+                "hit_dice": "{spell_level}d10",
+                "speed": {
+                    "walk": 60,
+                    "fly": {
+                        "only": "spell_level >= 4",
+                        "value": 60
+                    }
+                },
+                "abilities": {
+                    "str": 18,
+                    "dex": 12,
+                    "con": 14,
+                    "int": 6,
+                    "wis": 12,
+                    "cha": 8
+                },
+                "saving_throws": {
+                    "str": 4,
+                    "dex": 1,
+                    "con": 2,
+                    "int": -2,
+                    "wis": 1,
+                    "cha": -1
+                },
+                "senses": "Passive Perception 11",
+                "passive_perception": 11,
+                "languages": "Telepathy 1 mile (works only with you)",
+                "cr": "None",
+                "xp": 0,
+                "proficiency_bonus": "=pb",
+                "traits": [
+                    {
+                        "name": "Life Bond",
+                        "text": "When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it."
+                    }
+                ],
+                "actions": [
+                    {
+                        "only": "creature_type == 'Celestial'",
+                        "name": "Otherworldly Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 + {spell_level}) Radiant damage.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": "=4 + spell_level",
+                                    "dice": "1d8",
+                                    "bonus": "=spell_level",
+                                    "type": "radiant"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "only": "creature_type == 'Fey'",
+                        "name": "Otherworldly Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 + {spell_level}) Psychic damage.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": "=4 + spell_level",
+                                    "dice": "1d8",
+                                    "bonus": "=spell_level",
+                                    "type": "psychic"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "only": "creature_type == 'Fiend'",
+                        "name": "Otherworldly Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 + {spell_level}) Necrotic damage.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": "=4 + spell_level",
+                                    "dice": "1d8",
+                                    "bonus": "=spell_level",
+                                    "type": "necrotic"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "bonus_actions": [
+                    {
+                        "only": "creature_type == 'Fiend'",
+                        "name": "Fell Glare",
+                        "text": "_Wisdom Saving Throw:_ DC {spell_dc}, one creature within 60 feet the steed can see. _Failure:_ The target has the Frightened condition until the end of your next turn. Recharges after a Long Rest.",
+                        "per_day": 1,
+                        "save": {
+                            "ability": "wis",
+                            "dc": "=spell_dc",
+                            "conditions": [
+                                "frightened"
+                            ],
+                            "range": 60
+                        }
+                    },
+                    {
+                        "only": "creature_type == 'Fey'",
+                        "name": "Fey Step",
+                        "text": "The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself. Recharges after a Long Rest.",
+                        "per_day": 1
+                    },
+                    {
+                        "only": "creature_type == 'Celestial'",
+                        "name": "Healing Touch",
+                        "text": "One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 + {spell_level}. Recharges after a Long Rest.",
+                        "per_day": 1
+                    }
+                ]
+            }
+        },
+        {
+            "id": "giant-insect",
+            "name": "Giant Insect",
+            "source": "srd-5.2.1",
+            "description": "Giant Insect's creature. Its form, chosen when it's summoned, decides its speeds and which actions it has.",
+            "choices": {
+                "form": [
+                    "centipede",
+                    "spider",
+                    "wasp"
+                ]
+            },
+            "stat_block": {
+                "size": "Large",
+                "creature_type": "Beast",
+                "alignment": "Unaligned",
+                "armor_class": "=11 + spell_level",
+                "initiative": 1,
+                "hit_points": "=30 + 10 * (spell_level - 4)",
+                "speed": {
+                    "walk": 40,
+                    "climb": 40,
+                    "fly": {
+                        "only": "form == 'wasp'",
+                        "value": 40
+                    }
+                },
+                "abilities": {
+                    "str": 17,
+                    "dex": 13,
+                    "con": 15,
+                    "int": 4,
+                    "wis": 14,
+                    "cha": 3
+                },
+                "saving_throws": {
+                    "str": 3,
+                    "dex": 1,
+                    "con": 2,
+                    "int": -3,
+                    "wis": 2,
+                    "cha": -4
+                },
+                "senses": "Darkvision 60 ft.; Passive Perception 12",
+                "passive_perception": 12,
+                "languages": "Understands the languages you know",
+                "cr": "None",
+                "xp": 0,
+                "proficiency_bonus": "=pb",
+                "multiattack": "=floor(spell_level / 2)",
+                "traits": [
+                    {
+                        "name": "Spider Climb",
+                        "text": "The insect can climb difficult surfaces, including along ceilings, without needing to make an ability check."
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "Multiattack",
+                        "text": "The insect makes {floor(spell_level / 2)} attacks (half this spell's level, round down)."
+                    },
+                    {
+                        "name": "Poison Jab",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 10 ft. _Hit:_ {6 + spell_level} (1d6 + {3 + spell_level}) Piercing damage plus 2 (1d4) Poison damage.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 10,
+                            "damage": [
+                                {
+                                    "average": "=6 + spell_level",
+                                    "dice": "1d6",
+                                    "bonus": "=3 + spell_level",
+                                    "type": "piercing"
+                                },
+                                {
+                                    "average": 2,
+                                    "dice": "1d4",
+                                    "type": "poison"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "only": "form == 'spider'",
+                        "name": "Web Bolt",
+                        "text": "_Ranged Attack Roll:_ +{spell_attack}, range 60 ft. _Hit:_ {8 + spell_level} (1d10 + {3 + spell_level}) Bludgeoning damage, and the target's Speed is reduced to 0 until the start of the insect's next turn.",
+                        "attack": {
+                            "kind": "ranged",
+                            "bonus": "=spell_attack",
+                            "range": "60",
+                            "damage": [
+                                {
+                                    "average": "=8 + spell_level",
+                                    "dice": "1d10",
+                                    "bonus": "=3 + spell_level",
+                                    "type": "bludgeoning"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "bonus_actions": [
+                    {
+                        "only": "form == 'centipede'",
+                        "name": "Venomous Spew",
+                        "text": "_Constitution Saving Throw:_ DC {spell_dc}, one creature the insect can see within 10 feet. _Failure:_ The target has the Poisoned condition until the start of the insect's next turn.",
+                        "save": {
+                            "ability": "con",
+                            "dc": "=spell_dc",
+                            "conditions": [
+                                "poisoned"
+                            ],
+                            "range": 10
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "draconic-spirit",
+            "name": "Draconic Spirit",
+            "source": "srd-5.2.1",
+            "description": "Summon Dragon's spirit. The damage type of its Breath Weapon is chosen when it's summoned, among its Resistances.",
+            "choices": {
+                "resistance": [
+                    "acid",
+                    "cold",
+                    "fire",
+                    "lightning",
+                    "poison"
+                ]
+            },
+            "stat_block": {
+                "size": "Large",
+                "creature_type": "Dragon",
+                "alignment": "Neutral",
+                "armor_class": "=14 + spell_level",
+                "initiative": 2,
+                "hit_points": "=50 + 10 * (spell_level - 5)",
+                "speed": {
+                    "walk": 30,
+                    "fly": 60,
+                    "swim": 30
+                },
+                "abilities": {
+                    "str": 19,
+                    "dex": 14,
+                    "con": 17,
+                    "int": 10,
+                    "wis": 14,
+                    "cha": 14
+                },
+                "saving_throws": {
+                    "str": 4,
+                    "dex": 2,
+                    "con": 3,
+                    "int": 0,
+                    "wis": 2,
+                    "cha": 2
+                },
+                "resistances": [
+                    "acid",
+                    "cold",
+                    "fire",
+                    "lightning",
+                    "poison"
+                ],
+                "condition_immunities": [
+                    "charmed",
+                    "frightened",
+                    "poisoned"
+                ],
+                "senses": "Blindsight 30 ft., Darkvision 60 ft.; Passive Perception 12",
+                "passive_perception": 12,
+                "languages": "Draconic, understands the languages you know",
+                "cr": "None",
+                "xp": 0,
+                "proficiency_bonus": "=pb",
+                "multiattack": "=floor(spell_level / 2)",
+                "traits": [
+                    {
+                        "name": "Shared Resistances",
+                        "text": "When you summon the spirit, choose one of its Resistances. You have Resistance to the chosen damage type until the spell ends."
+                    }
+                ],
+                "actions": [
+                    {
+                        "name": "Multiattack",
+                        "text": "The spirit makes {floor(spell_level / 2)} Rend attacks (half the spell's level, round down), and it uses Breath Weapon."
+                    },
+                    {
+                        "name": "Rend",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 10 ft. _Hit:_ {7 + spell_level} (1d6 + {4 + spell_level}) Piercing damage.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 10,
+                            "damage": [
+                                {
+                                    "average": "=7 + spell_level",
+                                    "dice": "1d6",
+                                    "bonus": "=4 + spell_level",
+                                    "type": "piercing"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "Breath Weapon",
+                        "text": "_Dexterity Saving Throw:_ DC {spell_dc}, each creature in a 30-foot Cone. _Failure:_ 7 (2d6) {resistance} damage. _Success:_ Half damage.",
+                        "save": {
+                            "ability": "dex",
+                            "dc": "=spell_dc",
+                            "damage": [
+                                {
+                                    "average": 7,
+                                    "dice": "2d6",
+                                    "type": "{resistance}"
+                                }
+                            ],
+                            "on_success": "half",
+                            "area": {
+                                "shape": "cone",
+                                "size": 30
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "animated-object",
+            "name": "Animated Object",
+            "source": "srd-5.2.1",
+            "description": "Animate Objects' creatures. Its size, chosen when it's animated, decides its Hit Points and its Slam's damage.",
+            "choices": {
+                "size": [
+                    "Tiny",
+                    "Small",
+                    "Medium",
+                    "Large",
+                    "Huge"
+                ]
+            },
+            "stat_block": {
+                "size": "{size}",
+                "creature_type": "Construct",
+                "alignment": "Unaligned",
+                "armor_class": 15,
+                "initiative": 0,
+                "hit_points": "=if(size == 'Huge', 40, if(size == 'Large', 20, 10))",
+                "speed": {
+                    "walk": 30
+                },
+                "abilities": {
+                    "str": 16,
+                    "dex": 10,
+                    "con": 10,
+                    "int": 3,
+                    "wis": 3,
+                    "cha": 1
+                },
+                "saving_throws": {
+                    "str": 3,
+                    "dex": 0,
+                    "con": 0,
+                    "int": -4,
+                    "wis": -4,
+                    "cha": -5
+                },
+                "immunities": [
+                    "poison",
+                    "psychic"
+                ],
+                "condition_immunities": [
+                    "charmed",
+                    "exhaustion",
+                    "frightened",
+                    "paralyzed",
+                    "poisoned"
+                ],
+                "senses": "Blindsight 30 ft.; Passive Perception 6",
+                "passive_perception": 6,
+                "languages": "Understands the languages you know",
+                "cr": "None",
+                "xp": 0,
+                "proficiency_bonus": "=pb",
+                "actions": [
+                    {
+                        "only": "size != 'Large' and size != 'Huge'",
+                        "name": "Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ 5 (1d4 + 3) Force damage, plus 1d4 for each spell slot level above 5.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": 5,
+                                    "dice": "1d4",
+                                    "bonus": 3,
+                                    "type": "force"
+                                },
+                                {
+                                    "only": "spell_level > 5",
+                                    "average": "=floor(2.5 * (spell_level - 5))",
+                                    "dice": "{spell_level - 5}d4",
+                                    "type": "force"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "only": "size == 'Large'",
+                        "name": "Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {10 + ability_mod} (2d6 + {3 + ability_mod}) Force damage, plus 1d6 for each spell slot level above 5.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": "=10 + ability_mod",
+                                    "dice": "2d6",
+                                    "bonus": "=3 + ability_mod",
+                                    "type": "force"
+                                },
+                                {
+                                    "only": "spell_level > 5",
+                                    "average": "=floor(3.5 * (spell_level - 5))",
+                                    "dice": "{spell_level - 5}d6",
+                                    "type": "force"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "only": "size == 'Huge'",
+                        "name": "Slam",
+                        "text": "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {16 + ability_mod} (2d12 + {3 + ability_mod}) Force damage, plus 1d12 for each spell slot level above 5.",
+                        "attack": {
+                            "kind": "melee",
+                            "bonus": "=spell_attack",
+                            "reach": 5,
+                            "damage": [
+                                {
+                                    "average": "=16 + ability_mod",
+                                    "dice": "2d12",
+                                    "bonus": "=3 + ability_mod",
+                                    "type": "force"
+                                },
+                                {
+                                    "only": "spell_level > 5",
+                                    "average": "=floor(6.5 * (spell_level - 5))",
+                                    "dice": "{spell_level - 5}d12",
+                                    "type": "force"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
         }
     ]
 }

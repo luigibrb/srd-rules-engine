@@ -158,6 +158,8 @@ export {
   type Step,
   type SubclassDef,
   SubclassSchema,
+  type SummonDef,
+  SummonSchema,
   skillName,
   type ToggleDef,
   type ToolDef,
@@ -438,6 +440,14 @@ export {
   type TraitLine,
   type UsesLine,
 } from "./rules/sheet";
+export { type SummonVars, summonMonster } from "./rules/summons";
+export {
+  evaluateExpression,
+  instantiateTemplate,
+  TemplateError,
+  type TemplateValue,
+  type TemplateVars,
+} from "./rules/templates";
 // Workflows
 export * as builder from "./services/builder";
 export {

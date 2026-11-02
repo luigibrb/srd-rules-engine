@@ -97,6 +97,8 @@ import {
 import { message, plainMessage, ruleReason, texts, toMessage } from "../rules/messages";
 import { mathRng, type Rng } from "../rules/rng";
 import type { AttackLine } from "../rules/sheet";
+import { type SummonVars, summonLimit, summonMonster } from "../rules/summons";
+import { TemplateError } from "../rules/templates";
 import {
   type ByHandRoll,
   type CheckedCost,
@@ -107,6 +109,14 @@ import {
   strikeDice,
 } from "./by-hand";
 import { encounterEvents } from "./events";
+import {
+  countDown,
+  effectEnding,
+  type SweepCombatant,
+  type SweepReason,
+  summonEnding,
+  sweepOutcome,
+} from "./lifetimes";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
 import { refusalCode } from "./refusals";
 
@@ -720,36 +730,18 @@ function run(
     }
     return null;
   };
-  /** Count down effects that end at the start or end of `c`'s turn. */
+  /** Count down effects, mastery effects, marks and zones that end at the start or end of `c`'s turn. */
   const tick = (c: EncounterCombatant, at: "start" | "end"): void => {
-    for (const effect of [...e.effects]) {
-      const ends = effect.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) {
-        ends.skip_current = false;
-        continue;
-      }
-      ends.count -= 1;
-      if (ends.count <= 0) endEffect(effect, message("why.duration_over"));
-    }
-    for (const mark of [...e.masteries]) {
-      const ends = mark.ends;
-      if (ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) e.masteries = e.masteries.filter((m) => m !== mark);
-    }
-    for (const mark of [...e.marks]) {
-      const ends = mark.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) e.marks = e.marks.filter((m) => m !== mark);
-    }
-    for (const zone of [...e.zones]) {
-      const ends = zone.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) endZone(zone, message("why.duration_over"));
-    }
+    const effects = countDown(e.effects, at, c.id);
+    e.effects = effects.items;
+    for (const effect of effects.expired) endEffect(effect, message("why.duration_over"));
+    const masteries = countDown(e.masteries, at, c.id);
+    e.masteries = masteries.items.filter((m) => !masteries.expired.includes(m));
+    const marks = countDown(e.marks, at, c.id);
+    e.marks = marks.items.filter((m) => !marks.expired.includes(m));
+    const zones = countDown(e.zones, at, c.id);
+    e.zones = zones.items;
+    for (const zone of zones.expired) endZone(zone, message("why.duration_over"));
   };
   /**
    * The squares' origin of a zone: its point, or for an Emanation its caster's space, or the
@@ -2299,64 +2291,210 @@ function run(
     if (used >= perDay) fail(message("refusal.used_today", { name: c.name, what, count: perDay }));
     c.daily_used[key] = used + 1;
   };
-  /** After every action: Concentration effects whose source stopped concentrating end. */
-  const sweep = (): void => {
-    const present = (id: string) => e.combatants.some((c) => c.id === id);
-    for (const c of e.combatants) {
-      // Its Invisible condition from hiding was removed some other way: not hidden any more.
-      if (c.hidden !== null && !e.effects.some((x) => x.target === c.id && x.label === "Hidden")) {
-        c.hidden = null;
+  /** A creature leaves the encounter (removed by the GM, or a summoned one that ends). */
+  const leave = (c: EncounterCombatant): void => {
+    const index = e.order.indexOf(c.id);
+    e.combatants = e.combatants.filter((x) => x.id !== c.id);
+    if (index >= 0) {
+      e.order.splice(index, 1);
+      if (index < e.turn) e.turn -= 1;
+      if (e.turn >= e.order.length) e.turn = 0;
+    }
+  };
+  const dismiss = (c: EncounterCombatant, why: Message): void => {
+    leave(c);
+    notes.push(message("summon.disappears", { name: c.name, why }));
+  };
+  /**
+   * A summoning spell's creatures (`mechanics.summon`): the forms asked for (one each), within
+   * the count at this slot level, with the stat block's choices and the caster's values; on the
+   * caster's side, after the caster in the order or rolling their own Initiative.
+   */
+  const summonCreatures = (
+    c: EncounterCombatant,
+    spell: SpellDef,
+    cast: SpellCastResult,
+    request: Extract<EncounterAction, { type: "cast" }>["summon"],
+  ): void => {
+    const spec = spell.mechanics?.summon;
+    if (!spec) return;
+    const slot = cast.slot_level ?? spell.level;
+    const view = encounterCombatant(e, c.id, ctx);
+    const casting =
+      view.spellcasting.find((x) => x.source === cast.spellcasting) ?? view.spellcasting[0];
+    const abilityMod = casting?.modifier ?? 0;
+    const formIds = request?.forms ?? [spec.forms[0]?.id as string];
+    const forms = formIds.map(
+      (id) =>
+        spec.forms.find((f) => f.id === id) ??
+        fail(
+          message("refusal.unknown_summon_form", {
+            spell: spell.name,
+            form: id,
+            forms: spec.forms.map((f) => f.id).join(", "),
+          }),
+        ),
+    );
+    for (const f of forms) {
+      if (f.min_level !== null && slot < f.min_level) {
+        fail(message("refusal.summon_form_level", { form: f.name, level: f.min_level }));
       }
-      // "If your Concentration is broken, the spell dissipates without taking effect."
-      const held = c.readied?.held && c.readied.action.type === "cast" ? c.readied.action : null;
-      if (held?.type === "cast") {
-        const name = lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell;
-        if (concentrationOf(c) !== name) {
-          c.readied = null;
-          notes.push(message("readied.dissipates", { name: c.name, spell: name }));
+    }
+    if (forms.some((f) => f.count_by_level) && new Set(formIds).size > 1) {
+      fail(message("refusal.summon_one_form", { spell: spell.name }));
+    }
+    const limit = summonLimit(spec, spell.level, slot, abilityMod, forms);
+    if (forms.reduce((n, f) => n + f.weight, 0) > limit) {
+      refuse(message("refusal.summon_too_many", { spell: spell.name, count: limit }));
+    }
+    let creatureType: string | null = null;
+    if (spec.creature_types.length) {
+      const pick = request?.creature_type;
+      if (!pick || !spec.creature_types.includes(pick)) {
+        fail(
+          message("refusal.summon_creature_type", {
+            spell: spell.name,
+            types: spec.creature_types.join(", "),
+          }),
+        );
+      }
+      creatureType = pick.charAt(0).toUpperCase() + pick.slice(1);
+    } else if (request?.creature_type) {
+      fail(message("refusal.summon_no_creature_type", { spell: spell.name }));
+    }
+    // One at a time (a familiar, a steed): a new one replaces the one there.
+    if (spec.unique) {
+      for (const old of e.combatants.filter(
+        (x) => x.summon?.by === c.id && x.summon.spell === spell.id,
+      )) {
+        dismiss(old, message("why.replaced"));
+      }
+    }
+    const vars = {
+      spell_level: slot,
+      pb: view.proficiency_bonus,
+      spell_attack: cast.attack_bonus ?? casting?.attack_bonus ?? 0,
+      spell_dc: cast.save_dc ?? casting?.save_dc ?? 0,
+      ability_mod: abilityMod,
+    };
+    for (const form of forms) {
+      const template = form.summon ? lookup(ctx.catalog.summons, form.summon) : undefined;
+      // The stat block's choices: the form's, then the caster's (`{ resistance: fire }`).
+      const choices = Object.fromEntries(
+        Object.keys(template?.choices ?? {}).flatMap((key) => {
+          const value = form.choices[key] ?? request?.choices?.[key];
+          return value === undefined ? [] : [[key, value]];
+        }),
+      );
+      const summon = {
+        by: c.id,
+        spell: spell.id,
+        label: spell.name,
+        form: form.id,
+        template: form.summon,
+        vars: form.summon ? vars : {},
+        choices,
+        creature_type: creatureType,
+        turn: spec.turn,
+        ends: spec.ends,
+        concentration: spell.concentration && spec.ends.includes("spell"),
+        cannot_attack: spec.cannot_attack,
+      };
+      let def: MonsterDef;
+      try {
+        def = monsterDef(
+          ctx,
+          combatant({ id: "new", name: form.name, monster: form.monster ?? form.summon, summon }),
+        );
+      } catch (error) {
+        if (error instanceof TemplateError) {
+          fail(message("refusal.summon_choice", { spell: spell.name, detail: error.message }));
         }
+        throw error;
       }
+      const id = freeId(e, def.id);
+      const name = id === def.id ? def.name : `${def.name} ${id.slice(def.id.length + 1)}`;
+      e.combatants.push(
+        combatant({
+          id,
+          name,
+          monster: form.monster ?? form.summon,
+          side: c.side,
+          hp: def.hit_points,
+          summon,
+        }),
+      );
+      notes.push(message("summon.appears", { name, by: c.name, spell: spell.name }));
     }
-    e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
-    // A spell's mark stays when its caster leaves: the light is on the target. A mark tied to
-    // Concentration (Hunter's Mark) ends with it.
-    e.marks = e.marks.filter((m) => {
-      if (!present(m.on)) return false;
-      if (m.kind !== "quarry") return true;
-      const by = e.combatants.find((x) => x.id === m.by);
-      return !!by && concentrationOf(by) === m.label;
+    reorder(e, ctx);
+  };
+  /** What the sweep knows about a combatant, as it is now. */
+  const sweepFacts = (c: EncounterCombatant): SweepCombatant => {
+    const held = c.readied?.held && c.readied.action.type === "cast" ? c.readied.action : null;
+    return {
+      id: c.id,
+      hidden: c.hidden !== null,
+      hidden_effect: e.effects.some((x) => x.target === c.id && x.label === "Hidden"),
+      holding:
+        held?.type === "cast" ? (lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell) : null,
+      concentration: concentrationOf(c),
+      conditions: conditionsOf(ctx, c),
+      out: outOfFight(ctx, c),
+    };
+  };
+  const sweepWhy = (reason: SweepReason): Message =>
+    reason.why === "source_incapacitated"
+      ? message("why.source_incapacitated", { name: find(reason.name).name })
+      : message(`why.${reason.why}`);
+  /** After every action: what ended because something changed (`sweepOutcome`, `effectEnding`). */
+  const sweep = (): void => {
+    // Summoned creatures that end disappear first: what targets them ends with them below.
+    for (const x of [...e.combatants]) {
+      if (!x.summon) continue;
+      const caster = e.combatants.find((y) => y.id === x.summon?.by);
+      const ending = summonEnding(
+        {
+          ends: x.summon.ends,
+          concentration: x.summon.concentration,
+          label: x.summon.label,
+          down: x.defeated,
+        },
+        caster ? sweepFacts(caster) : undefined,
+      );
+      if (ending) dismiss(x, message(`why.${ending.why}` as const));
+    }
+    const outcome = sweepOutcome({
+      combatants: e.combatants.map(sweepFacts),
+      masteries: e.masteries,
+      marks: e.marks,
+      zones: e.zones,
     });
-    for (const z of [...e.zones]) {
-      const source = e.combatants.find((c) => c.id === z.by);
-      if (z.concentration && !source) endZone(z, message("why.caster_left"));
-      else if (z.concentration && source && concentrationOf(source) !== z.label) {
-        endZone(z, message("why.concentration_ended"));
+    for (const x of outcome.combatants) {
+      const c = find(x.id);
+      // Its Invisible condition from hiding was removed some other way: not hidden any more.
+      if (x.unhide) c.hidden = null;
+      // "If your Concentration is broken, the spell dissipates without taking effect."
+      if (x.dissipates) {
+        c.readied = null;
+        notes.push(message("readied.dissipates", { name: c.name, spell: x.dissipates }));
       }
     }
+    e.masteries = outcome.masteries.map((i) => e.masteries[i] as MasteryMark);
+    e.marks = outcome.marks.map((i) => e.marks[i] as SpellMark);
+    for (const z of outcome.zones) {
+      const zone = e.zones.find((x) => x.id === z.id);
+      if (zone) endZone(zone, sweepWhy(z.reason));
+    }
+    // One at a time: ending one can remove a condition the next one depends on.
     for (const effect of [...e.effects]) {
-      const target = e.combatants.find((c) => c.id === effect.target);
-      const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
-      if (!target) endEffect(effect, message("why.target_left"));
-      else if (!conditionsOf(ctx, target).has(effect.condition)) {
-        // The condition was removed some other way (remove_condition, a rest): forget it.
-        e.effects = e.effects.filter((x) => x.id !== effect.id);
-      } else if (effect.source && !source) endEffect(effect, message("why.source_left"));
-      else if (
-        effect.condition === "grappled" &&
-        source &&
-        conditionsOf(ctx, source).has("incapacitated")
-      ) {
-        // SRD "Grappling": the condition ends if the grappler has the Incapacitated condition.
-        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
-      } else if (
-        effect.ends_on.includes("source_incapacitated") &&
-        source &&
-        (conditionsOf(ctx, source).has("incapacitated") || outOfFight(ctx, source))
-      ) {
-        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
-      } else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
-        endEffect(effect, message("why.concentration_ended"));
-      }
+      const at = (id: string | null) => {
+        const x = id ? e.combatants.find((c) => c.id === id) : undefined;
+        return x ? sweepFacts(x) : undefined;
+      };
+      const ending = effectEnding(effect, at(effect.target), at(effect.source));
+      if (!ending) continue;
+      if (ending.why === "forget") e.effects = e.effects.filter((x) => x.id !== effect.id);
+      else endEffect(effect, sweepWhy(ending));
     }
   };
   /** Why an attack roll has Advantage from a spell's mark: `Guiding Bolt (Ilse's hit on Goblin)`. */
@@ -2508,18 +2646,15 @@ function run(
       return fail(message("refusal.there_no_decision_make"));
     case "remove": {
       const c = find(action.id);
-      const index = e.order.indexOf(c.id);
-      e.combatants = e.combatants.filter((x) => x.id !== c.id);
-      if (index >= 0) {
-        e.order.splice(index, 1);
-        if (index < e.turn) e.turn -= 1;
-        if (e.turn >= e.order.length) e.turn = 0;
-      }
+      leave(c);
       notes.push(message("combatant.leaves", { name: c.name }));
       break;
     }
     case "roll_initiative": {
-      const ids = action.ids ?? e.combatants.filter((c) => c.initiative === null).map((c) => c.id);
+      // A creature that follows its caster shares the caster's Initiative: it doesn't roll.
+      const ids =
+        action.ids ??
+        e.combatants.filter((c) => c.initiative === null && !followsCaster(e, c)).map((c) => c.id);
       const surprised = new Set(action.surprised ?? []);
       const groupRolls = new Map<string, number>();
       for (const id of ids) {
@@ -2582,7 +2717,9 @@ function run(
     case "start": {
       if (e.round > 0) fail(message("refusal.fight_already_started"));
       if (!e.combatants.length) fail(message("refusal.no_combatants"));
-      const missing = e.combatants.filter((c) => c.initiative === null).map((c) => c.name);
+      const missing = e.combatants
+        .filter((c) => c.initiative === null && !followsCaster(e, c))
+        .map((c) => c.name);
       if (missing.length) fail(message("refusal.roll_initiative_first", { names: missing }));
       e.round = 1;
       e.order = [];
@@ -3294,6 +3431,8 @@ function run(
     case "attack": {
       const c = find(action.id);
       canAct(c);
+      // "A familiar can't attack."
+      if (c.summon?.cannot_attack) fail(message("refusal.summon_cant_attack", { name: c.name }));
       const t = find(action.target);
       const attacker = encounterCombatant(e, c.id, ctx);
       const line = attacker.attacks.find((a) => a.name === action.attack);
@@ -3746,6 +3885,9 @@ function run(
         lookup(ctx.catalog.spells, action.spell) ??
         fail(message("refusal.unknown_spell", { spell: action.spell }));
       let what: "action" | "bonus_action" | "reaction" = "action";
+      // Outside a fight there are no turns: any casting time, no action economy (a ritual, Find
+      // Familiar's hour).
+      const outside = e.round === 0;
       let slot_level = action.slot_level;
       let spellcasting: string | undefined;
       let line: ReturnType<typeof monsterSpells>[number] | undefined;
@@ -3754,7 +3896,7 @@ function run(
         const known = computePlaySheet(ref.build, ref.state, ctx.catalog).spells;
         if (!known.some((x) => x.id === spell.id))
           fail(message("refusal.cant_cast", { name: c.name, spell: spell.name }));
-        what = castingEconomy(spell);
+        what = outside ? "action" : castingEconomy(spell);
       } else {
         // A monster casts it through an action that lists it (legendary ones: `legendary`).
         try {
@@ -3783,14 +3925,14 @@ function run(
         }
       }
       const released = releasing?.id === c.id;
-      if (what === "reaction") {
-        if (e.round === 0) fail(message("refusal.fight_hasnt_started"));
-      } else onTurn(c, "cast");
-      if (!released && c.used[what]) {
-        fail(message("refusal.economy_used", { name: c.name, what }));
-      }
-      if (what === "action" && c.surged) {
-        fail(message("refusal.action_surge_additional_action"));
+      if (!outside) {
+        if (what !== "reaction") onTurn(c, "cast");
+        if (!released && c.used[what]) {
+          fail(message("refusal.economy_used", { name: c.name, what }));
+        }
+        if (what === "action" && c.surged) {
+          fail(message("refusal.action_surge_additional_action"));
+        }
       }
       if (action.area && action.targets?.length) fail(message("refusal.give_targets_area_not"));
       // A wall: placed from point to point; the creatures in its squares are its targets.
@@ -3843,7 +3985,12 @@ function run(
         unaffected: action.unaffected,
         held: released && releasing?.held,
       });
-      if (!released) c.used[what] = true;
+      if (spell.mechanics?.summon) {
+        summonCreatures(c, spell, result as SpellCastResult, action.summon);
+      } else if (action.summon) {
+        fail(message("refusal.summon_choice", { spell: spell.name, detail: "it summons nothing" }));
+      }
+      if (!released && !outside) c.used[what] = true;
       // A refused action throws, and the working copy of the encounter is dropped.
       if (line && !(released && releasing?.held)) {
         spendDaily(c, line.action, line.action_per_day, line.action);
@@ -3903,10 +4050,33 @@ function signedText(n: number): string {
 }
 
 export function monsterDef(ctx: EncounterContext, c: EncounterCombatant): MonsterDef {
-  return (
-    lookup(ctx.catalog.monsters, c.monster) ??
-    fail(message("refusal.unknown_monster", { monster: c.monster ?? "" }))
-  );
+  const s = c.summon;
+  const def = s?.template
+    ? summonedDef(ctx, s.template, s.vars, s.choices)
+    : (lookup(ctx.catalog.monsters, c.monster) ??
+      fail(message("refusal.unknown_monster", { monster: c.monster ?? "" })));
+  return s?.creature_type ? { ...def, creature_type: s.creature_type } : def;
+}
+
+/** Summoned stat blocks, made once per template and values (the reducer asks for them often). */
+const SUMMONED = new Map<string, MonsterDef>();
+function summonedDef(
+  ctx: EncounterContext,
+  template: string,
+  vars: Readonly<Record<string, number | string>>,
+  choices: Readonly<Record<string, string>>,
+): MonsterDef {
+  const summon =
+    lookup(ctx.catalog.summons, template) ??
+    fail(message("refusal.unknown_summon", { summon: template }));
+  const key = JSON.stringify([summon, vars, choices]);
+  let def = SUMMONED.get(key);
+  if (!def) {
+    def = summonMonster(summon, vars as unknown as SummonVars, choices);
+    if (SUMMONED.size > 500) SUMMONED.clear();
+    SUMMONED.set(key, def);
+  }
+  return def;
 }
 
 export function characterRef(ctx: EncounterContext, c: EncounterCombatant): CharacterRef {
@@ -3999,7 +4169,12 @@ function reorder(e: Encounter, ctx: EncounterContext): void {
     const i = e.order.indexOf(id);
     return i >= 0 ? i : e.order.length + e.combatants.findIndex((c) => c.id === id);
   };
-  const ready = e.combatants.filter((c) => c.initiative !== null);
+  // A creature that takes its turn right after its caster's shares the caster's Initiative.
+  const followers = e.combatants.filter((c) => followsCaster(e, c));
+  for (const f of followers) {
+    f.initiative = e.combatants.find((c) => c.id === f.summon?.by)?.initiative ?? null;
+  }
+  const ready = e.combatants.filter((c) => c.initiative !== null && !followers.includes(c));
   const bonus = new Map(ready.map((c) => [c.id, initiativeBonus(ctx, c)]));
   e.order = ready
     .map((c) => c.id)
@@ -4011,7 +4186,19 @@ function reorder(e: Encounter, ctx: EncounterContext): void {
         place(a) - place(b)
       );
     });
+  for (const f of followers) {
+    if (f.initiative === null) continue;
+    // After the caster and the creatures already following it.
+    let at = e.order.indexOf(f.summon?.by as string);
+    while (at + 1 < e.order.length && followers.some((x) => x.id === e.order[at + 1])) at++;
+    e.order.splice(at + 1, 0, f.id);
+  }
   if (now) e.turn = Math.max(0, e.order.indexOf(now));
+}
+
+/** A summoned creature whose turn comes right after its caster's (the caster still there). */
+function followsCaster(e: Encounter, c: EncounterCombatant): boolean {
+  return c.summon?.turn === "after_caster" && e.combatants.some((x) => x.id === c.summon?.by);
 }
 
 /**

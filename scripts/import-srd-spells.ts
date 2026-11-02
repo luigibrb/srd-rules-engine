@@ -26,7 +26,124 @@ const maxLevel = maxLevelArg >= 0 ? Number(process.argv[maxLevelArg + 1]) : 9;
 // --- mechanics overlay ------------------------------------------------------------------------
 // Each entry is checked by hand against the spell's SRD text (golden spells: tests/casting.test.ts).
 
+const familiarForms = [
+  "bat",
+  "cat",
+  "frog",
+  "hawk",
+  "lizard",
+  "octopus",
+  "owl",
+  "rat",
+  "raven",
+  "spider",
+  "weasel",
+];
+const title = (id: string) => id.charAt(0).toUpperCase() + id.slice(1);
+
 const MECHANICS: Record<string, Record<string, unknown>> = {
+  // Summons: the creatures a spell brings (`mechanics.summon`; their stat blocks in summons.yaml).
+  "find-familiar": {
+    // "the statistics of the chosen form … though it is a Celestial, Fey, or Fiend"; "It rolls
+    // its own Initiative"; "A familiar can't attack"; "You can't have more than one familiar".
+    // The other CR 0 Beasts the spell allows aren't listed: a pack can add forms.
+    summon: {
+      forms: familiarForms.map((id) => ({ id, name: title(id), monster: id })),
+      turn: "own",
+      ends: ["zero_hp"],
+      unique: true,
+      creature_types: ["celestial", "fey", "fiend"],
+      cannot_attack: true,
+    },
+  },
+  "find-steed": {
+    // "shares your Initiative count"; "disappears if it drops to 0 Hit Points or if you die";
+    // "If you already have a steed from this spell, the steed is replaced".
+    summon: {
+      forms: [{ id: "steed", name: "Otherworldly Steed", summon: "otherworldly-steed" }],
+      ends: ["zero_hp", "caster_dies"],
+      unique: true,
+    },
+  },
+  "giant-insect": {
+    summon: {
+      forms: ["centipede", "spider", "wasp"].map((form) => ({
+        id: form,
+        name: `Giant ${title(form)}`,
+        summon: "giant-insect",
+        choices: { form },
+      })),
+    },
+  },
+  "summon-dragon": {
+    // The Breath Weapon's damage type is the caster's choice (`choices: { resistance }`).
+    summon: { forms: [{ id: "spirit", name: "Draconic Spirit", summon: "draconic-spirit" }] },
+  },
+  "animate-objects": {
+    // "The maximum number of objects is equal to your spellcasting ability modifier; … a Medium
+    // or smaller target counts as one object, a Large target counts as two, and a Huge target
+    // counts as three."
+    summon: {
+      forms: [
+        ["tiny", 1],
+        ["small", 1],
+        ["medium", 1],
+        ["large", 2],
+        ["huge", 3],
+      ].map(([size, weight]) => ({
+        id: size,
+        name: `${title(size as string)} Object`,
+        summon: "animated-object",
+        choices: { size: title(size as string) },
+        weight,
+      })),
+      count_ability: true,
+    },
+  },
+  "animate-dead": {
+    // One creature, two more per slot level above 3; under the caster's control for 24 hours
+    // (not tracked), so nothing ends it but its Hit Points.
+    summon: {
+      forms: [
+        { id: "skeleton", name: "Skeleton", monster: "skeleton" },
+        { id: "zombie", name: "Zombie", monster: "zombie" },
+      ],
+      count_per_level: 2,
+      turn: "own",
+      ends: [],
+    },
+  },
+  "create-undead": {
+    // Three Ghouls (four at level 7, five at 8, six at 9); at level 8, two Ghasts or Wights instead
+    // (three at 9); at level 9, two Mummies.
+    summon: {
+      forms: [
+        {
+          id: "ghoul",
+          name: "Ghoul",
+          monster: "ghoul",
+          count_by_level: { 6: 3, 7: 4, 8: 5, 9: 6 },
+        },
+        {
+          id: "ghast",
+          name: "Ghast",
+          monster: "ghast",
+          min_level: 8,
+          count_by_level: { 8: 2, 9: 3 },
+        },
+        {
+          id: "wight",
+          name: "Wight",
+          monster: "wight",
+          min_level: 8,
+          count_by_level: { 8: 2, 9: 3 },
+        },
+        { id: "mummy", name: "Mummy", monster: "mummy", min_level: 9, count_by_level: { 9: 2 } },
+      ],
+      turn: "own",
+      ends: [],
+    },
+  },
   // Marks and smites: extra damage on the caster's attacks.
   "hunters-mark": { mark: { dice: "1d6", type: "force" }, targets: 1 }, // the Perception edge is text
   hex: { mark: { dice: "1d6", type: "necrotic" }, targets: 1 }, // the chosen ability's checks: text

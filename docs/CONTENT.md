@@ -426,6 +426,57 @@ mechanics:
 A spell has an attack roll or a save, not both; a `follow_up` save comes after an attack. Damage from a save is rolled once for every
 target; each damage type is halved separately on a successful save (`on_success: half`).
 
+### Summoned creatures
+
+A spell that brings creatures has `mechanics.summon`: the forms the caster picks from, how many,
+where their turns go and what ends them. A form is either a monster's stat block as it is (a
+familiar's animal, a Skeleton) or a template in the `summons` table, for a stat block that
+scales:
+
+```yaml
+# summons.yaml
+- id: giant-insect
+  name: Giant Insect
+  choices:
+    form: [centipede, spider, wasp]   # picked when it's summoned
+  stat_block:                         # a monster's stat block, without id/name/source
+    size: Large
+    armor_class: "=11 + spell_level"  # "=…": an expression
+    hit_points: "=30 + 10 * (spell_level - 4)"
+    speed:
+      walk: 40
+      fly: { only: "form == 'wasp'", value: 40 }   # kept only when the condition holds
+    multiattack: "=floor(spell_level / 2)"
+    actions:
+      - name: Poison Jab
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 10 ft. …"   # {…}: a value in text
+        attack: { kind: melee, bonus: "=spell_attack", reach: 10, damage: [...] }
+      - only: "form == 'spider'"
+        name: Web Bolt
+        # …
+```
+
+Expressions use `spell_level` (the slot's level), `spell_attack`, `spell_dc`, `pb` and
+`ability_mod` (the caster's spellcasting modifier), the template's choices, numbers, `'text'`,
+`+ - * /`, comparisons, `and`/`or`/`not`, `floor`, `ceil`, `min`, `max` and `if(condition, a,
+b)`. When the catalog loads, every template is made for every combination of its choices and
+every spell level a spell summons it at, and must give a valid stat block.
+
+```yaml
+# a spell's mechanics
+summon:
+  forms:
+    - { id: spider, name: Giant Spider, summon: giant-insect, choices: { form: spider } }
+    - { id: skeleton, name: Skeleton, monster: skeleton }
+  count: 1                 # or count_ability: true (the spellcasting modifier, forms by `weight`)
+  count_per_level: 0       # more per slot level above the spell's
+  turn: after_caster       # or own (rolls its own Initiative)
+  ends: [zero_hp, spell]   # and caster_dies; [] when nothing but its Hit Points ends it
+  unique: false            # true: a new one replaces the caster's earlier one
+  creature_types: []       # the caster picks one (a familiar: celestial, fey, fiend)
+  cannot_attack: false
+```
+
 ### Monsters
 
 A stat block keeps the SRD's layout: `armor_class`, `initiative`, `hit_points` and `hit_dice`

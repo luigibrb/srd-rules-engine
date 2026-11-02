@@ -19,12 +19,14 @@ src/
                    #   srd.ts (bundled SRD), split.ts (splitPack/loadPack: per-table JSON)
   content/data/    # GENERATED srd-5.2.1.json — do not edit, run `npm run content`
   rules/           # pure logic: dice, rng, ability-scores, casting, combat, combatant, damage, spells,
-                   #   areas, grid (map: steps, walls, paths), build-resolution, build-validation, sheet
+                   #   areas, grid (map: steps, walls, paths), build-resolution, build-validation, sheet,
+                   #   templates (scaling stat blocks: expressions, `only`), summons
   services/        # builder.ts (setters + normalize + evaluate), play.ts (play state actions),
                    #   encounter.ts (initiative, turns, action economy, effects on combatants),
                    #   options.ts (what a combatant can do now: combatantOptions, checkAction),
                    #   previews.ts (reachableSquares, previewMove, previewArea), events.ts
                    #   (result events by diffing), refusals.ts (refusal codes), history.ts (undo),
+                   #   lifetimes.ts (what ends effects, marks, zones, summons: pure),
                    #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
   cli/             # srd-rules bin: build (interactive builder), play, fight, serve, validate
@@ -81,7 +83,9 @@ tests/             # vitest; classes.test.ts: every class × species × backgrou
   via `applyEncounterAction` (JSON actions, `EncounterError`); character changes come back in
   `states` and go through `applyAction`. A table's policy (decisions, automatic Death Saving
   Throws, positions) is `EncounterContext.settings`, given with each call, never stored in the
-  encounter; a history records it per step. Turn hooks (`endTurn`/`startTurn` in
+  encounter; a history records it per step. Summoned creatures are combatants with a `summon`
+  record (from a spell's `mechanics.summon`; a `summons` template's stat block is made by
+  `monsterDef`, never stored). Turn hooks (`endTurn`/`startTurn` in
   `services/encounter.ts`) run timed effects, Rage's extension, recharges and once-per-turn
   resets; `sweep()` ends Concentration effects after every action. Choices made after a roll
   (Bardic Inspiration, Legendary Resistance, Uncanny Dodge) go through the `decide` callback

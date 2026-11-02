@@ -40,6 +40,8 @@ import {
   SpellDefSchema,
   type SubclassDef,
   SubclassSchema,
+  type SummonDef,
+  SummonSchema,
   type ToolDef,
   ToolSchema,
   type WeaponDef,
@@ -52,6 +54,7 @@ import {
   PatchError,
   PatchSchema,
 } from "../models/pack";
+import { summonErrors } from "../rules/summons";
 
 export type Table<T> = Readonly<Record<string, T>>;
 type Entity = { id: string; source: string };
@@ -77,6 +80,8 @@ export interface Catalog {
   readonly conditions: Table<ConditionDef>;
   /** Monster and animal stat blocks. */
   readonly monsters: Table<MonsterDef>;
+  /** Summoned creatures' stat blocks, which scale with the spell (`mechanics.summon`). */
+  readonly summons: Table<SummonDef>;
   /** The loaded packs, in load order (a pack without `pack.yaml` gets a minimal manifest). */
   readonly packs: readonly PackManifest[];
 }
@@ -109,6 +114,7 @@ export interface ContentPack {
   magic_items?: unknown[];
   conditions?: unknown[];
   monsters?: unknown[];
+  summons?: unknown[];
 }
 
 export const TABLE_SCHEMAS = {
@@ -128,6 +134,7 @@ export const TABLE_SCHEMAS = {
   magic_items: MagicItemSchema,
   conditions: ConditionSchema,
   monsters: MonsterSchema,
+  summons: SummonSchema,
 } as const;
 
 export type TableName = keyof typeof TABLE_SCHEMAS;
@@ -470,6 +477,34 @@ export function validateReferences(full: Catalog): void {
     "mastery",
     "weapons",
   );
+  // Summons: the forms' templates and monsters exist, their choices are the template's, and
+  // every template makes a valid stat block for every choice and spell level.
+  for (const spell of Object.values(catalog.spells)) {
+    for (const form of spell.mechanics?.summon?.forms ?? []) {
+      const where = `${spell.id}.summon.${form.id}`;
+      if (form.monster) check([form.monster], view.monsters, "monster", where);
+      if (!form.summon) continue;
+      check([form.summon], view.summons, "summon", where);
+      const template = view.summons ? lookup(view.summons, form.summon) : undefined;
+      for (const [key, value] of Object.entries(form.choices)) {
+        if (template && !template.choices[key]?.includes(value)) {
+          errors.push(`${where}: '${key}: ${value}' isn't one of ${form.summon}'s choices`);
+        }
+      }
+    }
+  }
+  const lowest = new Map<string, number>();
+  for (const spell of Object.values(catalog.spells)) {
+    for (const form of spell.mechanics?.summon?.forms ?? []) {
+      if (form.summon) {
+        const level = Math.max(spell.level, form.min_level ?? 1);
+        lowest.set(form.summon, Math.min(lowest.get(form.summon) ?? 9, level));
+      }
+    }
+  }
+  for (const summon of Object.values(catalog.summons)) {
+    errors.push(...summonErrors(summon, lowest.get(summon.id) ?? 1));
+  }
   if (errors.length) throw new ContentError(errors.join("\n"));
 }
 

@@ -1,0 +1,264 @@
+# yaml-language-server: $schema=../../schemas/summons.schema.json
+# SRD 5.2.1 — the stat blocks of summoning spells ("Spells" > "Spell Descriptions": Find Steed,
+# Giant Insect, Summon Dragon, Animate Objects). Values that scale are expressions
+# (`rules/templates.ts`): `spell_level` is the spell slot's level, `spell_attack` and `spell_dc` the
+# caster's, `pb` the caster's Proficiency Bonus, `ability_mod` its spellcasting ability modifier.
+
+- id: otherworldly-steed
+  name: Otherworldly Steed
+  description: Find Steed's steed. Its creature type, chosen when it's summoned, decides its slam's
+    damage type and its Bonus Action.
+  choices:
+    creature_type: [Celestial, Fey, Fiend]
+  stat_block:
+    size: Large
+    creature_type: "{creature_type}"
+    alignment: Neutral
+    armor_class: "=10 + spell_level"
+    initiative: 1
+    hit_points: "=5 + 10 * spell_level"
+    hit_dice: "{spell_level}d10"
+    speed:
+      walk: 60
+      fly: { only: "spell_level >= 4", value: 60 }
+    abilities: { str: 18, dex: 12, con: 14, int: 6, wis: 12, cha: 8 }
+    saving_throws: { str: 4, dex: 1, con: 2, int: -2, wis: 1, cha: -1 }
+    senses: Passive Perception 11
+    passive_perception: 11
+    languages: Telepathy 1 mile (works only with you)
+    cr: None
+    xp: 0
+    proficiency_bonus: "=pb"
+    traits:
+      - name: Life Bond
+        text: When you regain Hit Points from a level 1+ spell, the steed regains the same number of
+          Hit Points if you're within 5 feet of it.
+    actions:
+      - only: "creature_type == 'Celestial'"
+        name: Otherworldly Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 +
+          {spell_level}) Radiant damage."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage: [{ average: "=4 + spell_level", dice: 1d8, bonus: "=spell_level", type: radiant }]
+      - only: "creature_type == 'Fey'"
+        name: Otherworldly Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 +
+          {spell_level}) Psychic damage."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage: [{ average: "=4 + spell_level", dice: 1d8, bonus: "=spell_level", type: psychic }]
+      - only: "creature_type == 'Fiend'"
+        name: Otherworldly Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {4 + spell_level} (1d8 +
+          {spell_level}) Necrotic damage."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage: [{ average: "=4 + spell_level", dice: 1d8, bonus: "=spell_level", type: necrotic }]
+    bonus_actions:
+      - only: "creature_type == 'Fiend'"
+        name: Fell Glare
+        text: "_Wisdom Saving Throw:_ DC {spell_dc}, one creature within 60 feet the steed can see.
+          _Failure:_ The target has the Frightened condition until the end of your next turn.
+          Recharges after a Long Rest."
+        per_day: 1
+        save: { ability: wis, dc: "=spell_dc", conditions: [frightened], range: 60 }
+      - only: "creature_type == 'Fey'"
+        name: Fey Step
+        text: The steed teleports, along with its rider, to an unoccupied space of your choice up to
+          60 feet away from itself. Recharges after a Long Rest.
+        per_day: 1
+      - only: "creature_type == 'Celestial'"
+        name: Healing Touch
+        text: "One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 +
+          {spell_level}. Recharges after a Long Rest."
+        per_day: 1
+
+- id: giant-insect
+  name: Giant Insect
+  description: Giant Insect's creature. Its form, chosen when it's summoned, decides its speeds and
+    which actions it has.
+  choices:
+    form: [centipede, spider, wasp]
+  stat_block:
+    size: Large
+    creature_type: Beast
+    alignment: Unaligned
+    armor_class: "=11 + spell_level"
+    initiative: 1
+    hit_points: "=30 + 10 * (spell_level - 4)"
+    speed:
+      walk: 40
+      climb: 40
+      fly: { only: "form == 'wasp'", value: 40 }
+    abilities: { str: 17, dex: 13, con: 15, int: 4, wis: 14, cha: 3 }
+    saving_throws: { str: 3, dex: 1, con: 2, int: -3, wis: 2, cha: -4 }
+    senses: Darkvision 60 ft.; Passive Perception 12
+    passive_perception: 12
+    languages: Understands the languages you know
+    cr: None
+    xp: 0
+    proficiency_bonus: "=pb"
+    multiattack: "=floor(spell_level / 2)"
+    traits:
+      - name: Spider Climb
+        text: The insect can climb difficult surfaces, including along ceilings, without needing to
+          make an ability check.
+    actions:
+      - name: Multiattack
+        text: "The insect makes {floor(spell_level / 2)} attacks (half this spell's level, round down)."
+      - name: Poison Jab
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 10 ft. _Hit:_ {6 + spell_level} (1d6 +
+          {3 + spell_level}) Piercing damage plus 2 (1d4) Poison damage."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 10
+          damage:
+            - { average: "=6 + spell_level", dice: 1d6, bonus: "=3 + spell_level", type: piercing }
+            - { average: 2, dice: 1d4, type: poison }
+      - only: "form == 'spider'"
+        name: Web Bolt
+        text: "_Ranged Attack Roll:_ +{spell_attack}, range 60 ft. _Hit:_ {8 + spell_level} (1d10 +
+          {3 + spell_level}) Bludgeoning damage, and the target's Speed is reduced to 0 until the
+          start of the insect's next turn."
+        attack:
+          kind: ranged
+          bonus: "=spell_attack"
+          range: "60"
+          damage:
+            - { average: "=8 + spell_level", dice: 1d10, bonus: "=3 + spell_level", type: bludgeoning }
+    bonus_actions:
+      - only: "form == 'centipede'"
+        name: Venomous Spew
+        text: "_Constitution Saving Throw:_ DC {spell_dc}, one creature the insect can see within 10
+          feet. _Failure:_ The target has the Poisoned condition until the start of the insect's
+          next turn."
+        save: { ability: con, dc: "=spell_dc", conditions: [poisoned], range: 10 }
+
+- id: draconic-spirit
+  name: Draconic Spirit
+  description: Summon Dragon's spirit. The damage type of its Breath Weapon is chosen when it's
+    summoned, among its Resistances.
+  choices:
+    resistance: [acid, cold, fire, lightning, poison]
+  stat_block:
+    size: Large
+    creature_type: Dragon
+    alignment: Neutral
+    armor_class: "=14 + spell_level"
+    initiative: 2
+    hit_points: "=50 + 10 * (spell_level - 5)"
+    speed: { walk: 30, fly: 60, swim: 30 }
+    abilities: { str: 19, dex: 14, con: 17, int: 10, wis: 14, cha: 14 }
+    saving_throws: { str: 4, dex: 2, con: 3, int: 0, wis: 2, cha: 2 }
+    resistances: [acid, cold, fire, lightning, poison]
+    condition_immunities: [charmed, frightened, poisoned]
+    senses: Blindsight 30 ft., Darkvision 60 ft.; Passive Perception 12
+    passive_perception: 12
+    languages: Draconic, understands the languages you know
+    cr: None
+    xp: 0
+    proficiency_bonus: "=pb"
+    multiattack: "=floor(spell_level / 2)"
+    traits:
+      - name: Shared Resistances
+        text: When you summon the spirit, choose one of its Resistances. You have Resistance to the
+          chosen damage type until the spell ends.
+    actions:
+      - name: Multiattack
+        text: "The spirit makes {floor(spell_level / 2)} Rend attacks (half the spell's level, round
+          down), and it uses Breath Weapon."
+      - name: Rend
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 10 ft. _Hit:_ {7 + spell_level} (1d6 +
+          {4 + spell_level}) Piercing damage."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 10
+          damage: [{ average: "=7 + spell_level", dice: 1d6, bonus: "=4 + spell_level", type: piercing }]
+      - name: Breath Weapon
+        text: "_Dexterity Saving Throw:_ DC {spell_dc}, each creature in a 30-foot Cone. _Failure:_
+          7 (2d6) {resistance} damage. _Success:_ Half damage."
+        save:
+          ability: dex
+          dc: "=spell_dc"
+          damage: [{ average: 7, dice: 2d6, type: "{resistance}" }]
+          on_success: half
+          area: { shape: cone, size: 30 }
+
+- id: animated-object
+  name: Animated Object
+  description: Animate Objects' creatures. Its size, chosen when it's animated, decides its Hit
+    Points and its Slam's damage.
+  choices:
+    size: [Tiny, Small, Medium, Large, Huge]
+  stat_block:
+    size: "{size}"
+    creature_type: Construct
+    alignment: Unaligned
+    armor_class: 15
+    initiative: 0
+    hit_points: "=if(size == 'Huge', 40, if(size == 'Large', 20, 10))"
+    speed: { walk: 30 }
+    abilities: { str: 16, dex: 10, con: 10, int: 3, wis: 3, cha: 1 }
+    saving_throws: { str: 3, dex: 0, con: 0, int: -4, wis: -4, cha: -5 }
+    immunities: [poison, psychic]
+    condition_immunities: [charmed, exhaustion, frightened, paralyzed, poisoned]
+    senses: Blindsight 30 ft.; Passive Perception 6
+    passive_perception: 6
+    languages: Understands the languages you know
+    cr: None
+    xp: 0
+    proficiency_bonus: "=pb"
+    actions:
+      # The Slam: 1d4 + 3 (Medium or smaller), 2d6 + 3 + ability_mod (Large), 2d12 + 3 +
+      # ability_mod (Huge); 1d4, 1d6 or 1d12 more for each slot level above 5.
+      - only: "size != 'Large' and size != 'Huge'"
+        name: Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ 5 (1d4 + 3) Force damage,
+          plus 1d4 for each spell slot level above 5."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage:
+            - { average: 5, dice: 1d4, bonus: 3, type: force }
+            - only: "spell_level > 5"
+              average: "=floor(2.5 * (spell_level - 5))"
+              dice: "{spell_level - 5}d4"
+              type: force
+      - only: "size == 'Large'"
+        name: Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {10 + ability_mod} (2d6 +
+          {3 + ability_mod}) Force damage, plus 1d6 for each spell slot level above 5."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage:
+            - { average: "=10 + ability_mod", dice: 2d6, bonus: "=3 + ability_mod", type: force }
+            - only: "spell_level > 5"
+              average: "=floor(3.5 * (spell_level - 5))"
+              dice: "{spell_level - 5}d6"
+              type: force
+      - only: "size == 'Huge'"
+        name: Slam
+        text: "_Melee Attack Roll:_ +{spell_attack}, reach 5 ft. _Hit:_ {16 + ability_mod} (2d12 +
+          {3 + ability_mod}) Force damage, plus 1d12 for each spell slot level above 5."
+        attack:
+          kind: melee
+          bonus: "=spell_attack"
+          reach: 5
+          damage:
+            - { average: "=16 + ability_mod", dice: 2d12, bonus: "=3 + ability_mod", type: force }
+            - only: "spell_level > 5"
+              average: "=floor(6.5 * (spell_level - 5))"
+              dice: "{spell_level - 5}d12"
+              type: force
