@@ -134,6 +134,7 @@ grants:
 | `hp_per_class_level` | `add` | Draconic Resilience: `1` × Sorcerer level |
 | `checks` | `add` | Stone of Good Luck: `1` (ability checks) |
 | `score.<ability>` | `max` | Gauntlets of Ogre Power: Strength `19` |
+| `attunement` | `max`, `add`, `set` | a feature that lets you attune to `4` items (3 otherwise) |
 
 Conditions for `when`: `wearing_armor`, `wielding_shield`, `wearing_heavy_armor`,
 `not_wearing_heavy_armor`, `unarmored` (no armor and no Shield). Armor Class alternatives such as
@@ -182,8 +183,9 @@ on (Frenzy), and `damage: {progression: Rage Damage, die: 6}` rolls that many di
 with the same `id` replaces an earlier one (Divine Strike at Cleric 14: `at_class_level` gives the
 2d8 version).
 
-`spell_damage` adds an ability modifier to the damage of matching spells (every filter given must
-match), to each damage roll or, with `one_roll`, to the first:
+`spell_damage` adds an ability modifier, dice of the spell's damage type (`dice: 1d8`), or both
+to the damage of matching spells (every filter given must match), to each damage roll or, with
+`one_roll`, to the first:
 
 ```yaml
 spell_damage:
@@ -331,6 +333,20 @@ A subclass lists its features by class level, and `at_class_level` switches gran
       at_class_level:
         - {level: 5, grants: {spells: [mass-healing-word, revivify]}}
 ```
+
+A source without a class (a species, a feat, a background) switches grants on at a character
+level with `at_level`, the character's total level:
+
+```yaml
+# Elven Lineage: Drow
+at_level:
+  - {level: 3, grants: {spells: [faerie-fire], resources: [{id: free-cast-faerie-fire,
+      name: Faerie Fire (once without a slot), max: {value: 1}, recharge: long}]}}
+```
+
+A feat with `exclusive: true` can't be taken with another feat of its `category` (the option
+says which one the character has). A subclass that casts spells from a third of its class levels
+uses `spellcasting: {progression: third}`.
 
 Spell choices grow with the class: `max_spell_level` (spells of level 1 up to it), `spell_list`
 (one list or several: Magical Secrets), `tag` and `subset_of` (the Wizard's spellbook: every

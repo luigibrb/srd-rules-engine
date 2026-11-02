@@ -544,6 +544,7 @@ function* allGrants(catalog: Catalog, creation: CreationRules): Generator<[strin
 function* walk(where: string, grants: Grants): Generator<[string, Grants]> {
   yield [where, grants];
   for (const gate of grants.at_class_level) yield* walk(`${where}@${gate.level}`, gate.grants);
+  for (const gate of grants.at_level) yield* walk(`${where}@level${gate.level}`, gate.grants);
   for (const choice of grants.choices) {
     for (const option of choice.options) {
       yield* walk(`${where}.${choice.id}.${option.id}`, option.grants);

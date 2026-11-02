@@ -619,8 +619,9 @@ export function validateState(
       if (reason) error(message("state.item_why", { item: carried.name, why: reason }));
     }
   }
-  if (state.inventory.filter((i) => i.attuned).length > MAX_ATTUNED) {
-    error(message("state.attuned_more_than_magic", { max_attuned: MAX_ATTUNED }));
+  const maxAttuned = computeSheet(build, catalog, res).attunement_max;
+  if (state.inventory.filter((i) => i.attuned).length > maxAttuned) {
+    error(message("state.attuned_more_than_magic", { max_attuned: maxAttuned }));
   }
   for (const kind of ["armor", "shield"] as const) {
     const worn = items.filter((i) => i.equipped && wornKind(catalog, i.base) === kind);
@@ -693,11 +694,12 @@ export function reconcileState(
     if (s.uses_spent[u.key]) uses[u.key] = Math.min(s.uses_spent[u.key] ?? 0, u.max);
   s.uses_spent = uses;
   let attuned = 0;
+  const maxAttuned = computeSheet(build, catalog, res).attunement_max;
   for (const i of s.inventory) {
     const magic = lookup(catalog.magic_items, i.item);
     const blocked =
       i.attuned &&
-      (!magic?.attunement || (magic && attunementBlocker(res, magic)) || attuned >= MAX_ATTUNED);
+      (!magic?.attunement || (magic && attunementBlocker(res, magic)) || attuned >= maxAttuned);
     if (blocked) {
       i.attuned = false;
       notes.push(message("play.unattuned", { item: magic?.name ?? i.item }));
@@ -1208,11 +1210,13 @@ export function applyAction(
       if (action.attuned) {
         if (!magic?.attunement)
           fail(message("refusal.no_attunement", { item: magic?.name ?? item.item }));
-        const reason = attunementBlocker(resolve(build, catalog), magic as MagicItemDef);
+        const res = resolve(build, catalog);
+        const reason = attunementBlocker(res, magic as MagicItemDef);
         if (reason) fail(reason);
         const count = s.inventory.filter((i) => i.attuned && i.id !== item.id).length;
-        if (count >= MAX_ATTUNED)
-          fail(message("refusal.you_attuned_most_magic", { max_attuned: MAX_ATTUNED }));
+        const maxAttuned = computeSheet(build, catalog, res).attunement_max;
+        if (count >= maxAttuned)
+          fail(message("refusal.you_attuned_most_magic", { max_attuned: maxAttuned }));
         notes.push(message("play.attuning"));
       }
       item.attuned = action.attuned;

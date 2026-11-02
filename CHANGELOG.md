@@ -8,6 +8,12 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Content can say more as data: `at_level` grants (from a character level on, for a species,
+  feat or background; the SRD Elven Lineages' and Fiendish Legacies' spells at levels 3 and 5, each
+  castable once per Long Rest without a slot), the effect target `attunement` (the sheet's
+  `attunement_max`, 3 by default, used by `attune` and the state checks), feats with `exclusive:
+  true` (one per category; the option says which), spellcasting `progression: third` (a third of
+  the class levels, rounded up), and `dice` in `spell_damage` (with or without an `ability`).
 - Summons from features: a feature action's `cast` (a spell cast without a spell slot,
   spending the feature's uses, with `summon` overrides) and `summon` (creatures it brings
   itself; templates can use `class_level`); the encounter `feature` action takes `summon` like
@@ -261,6 +267,7 @@ migrated when it's loaded.
   reason when the engine would refuse it.
 
 ### Fixed
+- An `at_class_level` grant on a feat taken with a class level counted the feat twice.
 - The descriptions of Commune and Contact Other Plane began with their header lines (Range,
   Components, Duration).
 - Spell components for the 12 SRD spells whose entry reads "Component:" (Barkskin, Guidance,

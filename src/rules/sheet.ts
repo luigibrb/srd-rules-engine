@@ -30,6 +30,7 @@ import {
   type SummonSpec,
   type WeaponDef,
 } from "../models/content";
+import { MAX_ATTUNED } from "../models/state";
 import { finalScores } from "./ability-scores";
 import { type ActiveSource, mergeGrants, type Resolution, resolve } from "./build-resolution";
 import { type DamagePart, formatDamage } from "./damage";
@@ -265,6 +266,8 @@ export interface DerivedSheet {
   readonly speed: Stat;
   readonly size: Size | null;
   readonly darkvision: number;
+  /** How many magic items it can attune to (3, or more from a feature). */
+  readonly attunement_max: number;
   readonly saving_throws: Readonly<Record<Ability, SaveLine>>;
   /** Ability check bonuses without a skill (the modifier, `checks` effects, Exhaustion). */
   readonly ability_checks: Readonly<Record<Ability, number>>;
@@ -358,7 +361,7 @@ export interface SpellcastingLine {
   readonly save_dc: number | null;
   readonly attack_bonus: number | null;
   /** How the class's levels count toward spell slots (`full`, `half`, `pact`), if at all. */
-  readonly progression: "full" | "half" | "pact" | null;
+  readonly progression: "full" | "half" | "third" | "pact" | null;
 }
 
 export interface SpellLine {
@@ -567,6 +570,13 @@ export function computeSheet(
   else if (speedSoFar < 0) speedParts.push({ source: "minimum 0", value: -speedSoFar });
 
   const darkvision = Math.max(0, ...effects("darkvision").map(([, v]) => v));
+  // Attunement: three items (SRD "Attunement"), unless a feature raises it.
+  let attunement = MAX_ATTUNED;
+  for (const [op, value] of effects("attunement")) {
+    if (op === "set") attunement = value;
+    else if (op === "max") attunement = Math.max(attunement, value);
+    else if (op === "add") attunement += value;
+  }
 
   // Saves and skills
   const saveProfs = res.savingThrows();
@@ -728,6 +738,7 @@ export function computeSheet(
     speed: stat(speedParts),
     size,
     darkvision,
+    attunement_max: attunement,
     saving_throws: savingThrows,
     ability_checks: mapAbilities((a) => mod[a] + checks + d20Penalty),
     skills,
@@ -843,7 +854,7 @@ export function computeSheet(
     spell_damage: [...res.sources, ...itemSources].flatMap((src) =>
       src.grants.spell_damage.map((d) => ({
         ...d,
-        bonus: mod[d.ability],
+        bonus: d.ability ? mod[d.ability] : 0,
         // `$cantrip`: the spell picked in the source's choice (Agonizing Blast).
         spell: d.spell === null ? null : (res.resolveRef(src, d.spell) ?? d.spell),
       })),
@@ -1144,6 +1155,8 @@ function spellcastingSummary(
     const classLevel = src.class_id ? (classLevels.get(src.class_id) ?? 0) : 0;
     if (sc.progression === "full") casterLevel += classLevel;
     else if (sc.progression === "half") casterLevel += Math.ceil(classLevel / 2);
+    // A third, rounded up: what the one-third casters' own slot tables give at every level.
+    else if (sc.progression === "third") casterLevel += Math.ceil(classLevel / 3);
     else if (sc.progression === "pact") {
       const row = sc.pact_slots[classLevel - 1];
       if (row) pact = { slots: row.count, slot_level: row.level };

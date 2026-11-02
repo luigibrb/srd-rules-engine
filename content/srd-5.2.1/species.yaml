@@ -94,6 +94,11 @@
             grants:
               cantrips: [dancing-lights]
               effects: [{target: darkvision, op: max, value: 120}]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [faerie-fire], resources: [{id: free-cast-faerie-fire, name: "Faerie Fire (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [darkness], resources: [{id: free-cast-darkness, name: "Darkness (once without a slot)", max: {value: 1}, recharge: long}]}}
           - id: high-elf
             name: High Elf
             description: >-
@@ -101,12 +106,22 @@
               Detect Magic (lvl 3), Misty Step (lvl 5).
             grants:
               cantrips: [prestidigitation]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [detect-magic], resources: [{id: free-cast-detect-magic, name: "Detect Magic (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [misty-step], resources: [{id: free-cast-misty-step, name: "Misty Step (once without a slot)", max: {value: 1}, recharge: long}]}}
           - id: wood-elf
             name: Wood Elf
             description: Speed 35 ft; Druidcraft cantrip. Longstrider (lvl 3), Pass without Trace (lvl 5).
             grants:
               cantrips: [druidcraft]
               effects: [{target: speed, op: max, value: 35}]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [longstrider], resources: [{id: free-cast-longstrider, name: "Longstrider (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [pass-without-trace], resources: [{id: free-cast-pass-without-trace, name: "Pass without Trace (once without a slot)", max: {value: 1}, recharge: long}]}}
       - id: spellcasting_ability
         label: Lineage spellcasting ability
         kind: ability
@@ -298,17 +313,38 @@
           - id: abyssal
             name: Abyssal
             description: Resistance to Poison; Poison Spray cantrip. Ray of Sickness (lvl 3), Hold Person (lvl 5).
-            grants: {resistances: [poison], cantrips: [poison-spray]}
+            grants:
+              resistances: [poison]
+              cantrips: [poison-spray]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [ray-of-sickness], resources: [{id: free-cast-ray-of-sickness, name: "Ray of Sickness (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [hold-person], resources: [{id: free-cast-hold-person, name: "Hold Person (once without a slot)", max: {value: 1}, recharge: long}]}}
           - id: chthonic
             name: Chthonic
             description: >-
               Resistance to Necrotic; Chill Touch cantrip. False Life (lvl 3),
               Ray of Enfeeblement (lvl 5).
-            grants: {resistances: [necrotic], cantrips: [chill-touch]}
+            grants:
+              resistances: [necrotic]
+              cantrips: [chill-touch]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [false-life], resources: [{id: free-cast-false-life, name: "False Life (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [ray-of-enfeeblement], resources: [{id: free-cast-ray-of-enfeeblement, name: "Ray of Enfeeblement (once without a slot)", max: {value: 1}, recharge: long}]}}
           - id: infernal
             name: Infernal
             description: Resistance to Fire; Fire Bolt cantrip. Hellish Rebuke (lvl 3), Darkness (lvl 5).
-            grants: {resistances: [fire], cantrips: [fire-bolt]}
+            grants:
+              resistances: [fire]
+              cantrips: [fire-bolt]
+              # "When you reach character levels 3 and 5, you learn a higher-level spell … You always have
+              # that spell prepared. You can cast it once without a spell slot" (per Long Rest).
+              at_level:
+                - {level: 3, grants: {spells: [hellish-rebuke], resources: [{id: free-cast-hellish-rebuke, name: "Hellish Rebuke (once without a slot)", max: {value: 1}, recharge: long}]}}
+                - {level: 5, grants: {spells: [darkness], resources: [{id: free-cast-darkness, name: "Darkness (once without a slot)", max: {value: 1}, recharge: long}]}}
       - id: spellcasting_ability
         label: Legacy spellcasting ability
         kind: ability

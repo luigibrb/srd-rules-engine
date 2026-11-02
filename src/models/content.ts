@@ -153,6 +153,8 @@ const EFFECT_TARGET_NAMES = [
   "speed",
   "spell.save_dc",
   "attack.weapon",
+  /** How many magic items the character can attune to (3; `max` raises it). */
+  "attunement",
 ] as const;
 export type EffectTarget =
   | (typeof EFFECT_TARGET_NAMES)[number]
@@ -312,19 +314,30 @@ export type FeatureRule = (typeof FEATURE_RULES)[number];
  * Empowered Evocation: Intelligence to Wizard evocation spells), to the spells matching every
  * filter given.
  */
-export const SpellDamageSchema = z.strictObject({
-  name: z.string(),
-  ability: z.enum(ABILITIES),
-  cantrip: z.boolean().default(false),
-  list: z.string().nullable().default(null),
-  school: z.string().nullable().default(null),
-  /** Spells dealing this damage type (Elemental Affinity). */
-  damage_type: z.enum(DAMAGE_TYPES).nullable().default(null),
-  /** To "one damage roll of that spell" (the first beam), not to each. */
-  one_roll: z.boolean().default(false),
-  /** Only this spell (an id, or `$<choice id>`: Agonizing Blast's cantrip). */
-  spell: z.string().nullable().default(null),
-});
+export const SpellDamageSchema = z
+  .strictObject({
+    name: z.string(),
+    /** The ability whose modifier it adds, and/or `dice` it adds (a d8 to one damage roll). */
+    ability: z.enum(ABILITIES).nullable().default(null),
+    dice: z
+      .string()
+      .regex(/^\d+d\d+$/, "dice like 1d8")
+      .nullable()
+      .default(null),
+    cantrip: z.boolean().default(false),
+    list: z.string().nullable().default(null),
+    school: z.string().nullable().default(null),
+    /** Spells dealing this damage type (Elemental Affinity). */
+    damage_type: z.enum(DAMAGE_TYPES).nullable().default(null),
+    /** To "one damage roll of that spell" (the first beam), not to each. */
+    one_roll: z.boolean().default(false),
+    /** Only this spell (an id, or `$<choice id>`: Agonizing Blast's cantrip). */
+    spell: z.string().nullable().default(null),
+  })
+  .refine(
+    (d) => d.ability !== null || d.dice !== null,
+    "a spell damage bonus adds an ability or dice",
+  );
 export type SpellDamage = z.infer<typeof SpellDamageSchema>;
 
 /** An Advantage, unless the character has one of these conditions (Danger Sense: Incapacitated). */
@@ -548,10 +561,11 @@ export const SpellcastingSchema = z.strictObject({
   ability: z.string(),
   /**
    * How class levels turn into spell slots: `full` (each level counts), `half` (half, rounded
-   * up), both through the Multiclass Spellcaster table in the creation rules; `pact` (Warlock
-   * Pact Magic, from `pact_slots`); `null` for spells cast without class slots.
+   * up), `third` (a third, rounded up: spellcasting from a subclass), all through the Multiclass
+   * Spellcaster table in the creation rules; `pact` (Warlock Pact Magic, from `pact_slots`);
+   * `null` for spells cast without class slots.
    */
-  progression: z.enum(["full", "half", "pact"]).nullable().default(null),
+  progression: z.enum(["full", "half", "third", "pact"]).nullable().default(null),
   /** Pact Magic by class level (20 entries): number of slots and their level. */
   pact_slots: z.array(z.strictObject({ count: z.int(), level: z.int() })).default([]),
 });
@@ -738,6 +752,11 @@ export interface Grants {
    * class levels 5, 7 and 9, or what a Land type gives at level 10.
    */
   at_class_level: { level: number; grants: Grants }[];
+  /**
+   * More grants from a character level on, for a source without a class (a species' lineage
+   * spells at levels 3 and 5, a feat's): the character's total level.
+   */
+  at_level: { level: number; grants: Grants }[];
 }
 
 /** Grants fields that are plain lists of ids, usable with `Resolution.granted()`. */
@@ -862,6 +881,9 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       at_class_level: z
         .array(z.strictObject({ level: z.int().min(1).max(20), grants: GrantsSchema }))
         .default([]),
+      at_level: z
+        .array(z.strictObject({ level: z.int().min(1).max(20), grants: GrantsSchema }))
+        .default([]),
     }),
   )
   .meta({ id: "Grants" });
@@ -963,6 +985,8 @@ export const FeatSchema = z.strictObject({
   category: z.string(),
   prerequisite: PrerequisiteSchema.nullable().default(null),
   repeatable: z.boolean().default(false),
+  /** A character can have only one feat of this feat's category. */
+  exclusive: z.boolean().default(false),
   /** For repeatable feats: each instance must pick a different value for this choice id. */
   repeat_requires_different: z.string().nullable().default(null),
   grants: GrantsSchema.prefault({}),
