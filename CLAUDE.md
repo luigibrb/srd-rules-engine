@@ -35,7 +35,8 @@ scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homeb
                    #   drafts is spell-mechanics.ts);
                    #   import-srd-items.ts (→ magic-items.yaml, conditions.yaml);
                    #   import-srd-gear.ts (→ gear.yaml, prices in tools.yaml);
-                   #   import-srd-monsters.ts (→ monsters.yaml; FIXES for garbled values);
+                   #   import-srd-monsters.ts (→ monsters.yaml; FIXES for garbled values; its action
+                   #   parser is monster-actions.ts);
                    #   import-srd-classes.py (Python: class levels 2–20, subclasses, features, feats;
                    #   level-2+ mechanics live in its OVERLAY tables, not in the generated YAML)
 examples/          # homebrew-pack (tested in tests/content.test.ts); battle-demo.ts (`npm run demo`,
