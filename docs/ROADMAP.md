@@ -71,11 +71,13 @@ Taken with the P0–P7 plan; they still hold.
 
 ## Next steps
 
-Grouped by area, roughly in order of value for a VTT. Sizes are rough: S (a day or less), M (a
-few days), L (a week or more). "Flagged" items are interpretations listed in
-[ARCHITECTURE.md](ARCHITECTURE.md#interpretations-flagged-not-invented) that a rule could replace.
+In priority order: each tier before the next, items within a tier in any order. Sizes are rough:
+S (a day or less), M (a few days), L (a week or more). "Flagged" items are interpretations listed
+in [ARCHITECTURE.md](ARCHITECTURE.md#interpretations-flagged-not-invented) that a rule could
+replace. A feature asked for by non-SRD content is built as a general rule, with an SRD example
+or invented homebrew in its tests.
 
-### Architecture
+### Priority 1: now
 
 - **Two layers (M).** Pure rules over plain inputs for clients with their own data (a bot, another
   tabletop): a `Combatant` and what the rules need to know (a slot left, a use spent) in;
@@ -88,10 +90,38 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   every field, move the policy ones to per-call options (`EncounterContext`), and migrate saved
   encounters through `DOCUMENT_VERSION`.
 
-### Combat rules
+  Both change the public API or the saved format, so they come before more clients depend on
+  either.
+- **Summons and companions (L).** Creatures a spell or a feature brings that act with their
+  creator: Find Familiar, Find Steed, Giant Insect, Animate Objects. Their stat blocks scale with
+  the caster (spell level, Proficiency Bonus, spell attack modifier), they join the encounter on
+  the creator's turn, and they go away when the spell or feature ends.
 
-- **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
-  Ice's frigid air, walls that cut through a creature's space.
+### Priority 2: next
+
+- **Content schema gaps (S each).** Small additions so content can say more as data: an
+  attunement limit set by a feature (instead of the fixed three); spells a feat or feature adds
+  to its owner's class spell lists; feat categories you can take only one feat of; a tool
+  proficiency that becomes another of your choice when you already have it; dice in
+  `spell_damage`; a saving throw by the creature hit and those around it, after a weapon hit.
+- **Reactions to another creature's roll (M).** A reaction after someone else's d20 roll, by a
+  third party (Cutting Words): through the `decide` callback, like Bardic Inspiration.
+- **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
+  reactions (Shocking Grasp), less Speed (Ray of Frost), no healing (Chill Touch), Dim Light
+  (Starry Wisp); a damage type chosen when casting and the leap on doubles (Chromatic Orb).
+- **Spells left as text (L, ongoing).** 49 spells have effects the parser doesn't read
+  (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
+  or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
+  ongoing area effects, first.
+- **Class features used in turns, what's left (M).** Devious Strikes, Deflect Attacks'
+  redirect, Wild Shape, Metamagic and Sorcery Points in turns, the other subclass features.
+
+### Priority 3: later
+
+- **Created items that expire (M).** Items a spell or feature creates for a while (Goodberry's
+  berries): in the inventory with their duration, gone when it ends.
+- **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
+  tracked, their effects aren't.
 - **Monster traits, what's left (M).** Traits worded differently from the four read so far
   (Sunlight Sensitivity, Engulf, Magic Resistance…).
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
@@ -101,31 +131,23 @@ few days), L (a week or more). "Flagged" items are interpretations listed in
   Spellcasting"; spells with a casting time of a minute or more (the Magic action on each turn,
   with Concentration); the two casting actions left as text (Pit Fiend, Unicorn); restrictions
   such as "self only".
+- **Monster save effects left as text (M).** 23 effects without plain damage or conditions
+  (swallowing, slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
+- **Lair actions (M).** Actions a creature takes in its lair, on Initiative count 20, for packs
+  whose monsters have them (the SRD gives only extra legendary uses in a lair).
 - **Light and obscurement (M).** Bright Light, Dim Light and Darkness on the map, Darkvision and
   Heavily Obscured areas: noticing points of interest, hiding and attacking see only walls today
   (flagged).
+- **Walls, what's left (M).** Ringed walls, domes and globes, breaking a wall's sections, Wall of
+  Ice's frigid air, walls that cut through a creature's space.
 - **Smaller flagged items (S each).** Which attacks a Multiattack allows; Dash with a Fly or Swim
   Speed (movement modes).
 
-### Content coverage
+### Priority 4: when needed
 
-- **Spells left as text (L, ongoing).** 49 spells have effects the parser doesn't read
-  (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
-  or new parser patterns, each reviewed against the SRD text. Many need ongoing area effects
-  first.
-- **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
-  reactions (Shocking Grasp), less Speed (Ray of Frost), no healing (Chill Touch), Dim Light
-  (Starry Wisp); a damage type chosen when casting and the leap on doubles (Chromatic Orb).
-- **Monster save effects left as text (M).** 23 effects without plain damage or conditions
-  (swallowing, slowing, weakening, curses), listed by `import-srd-monsters.ts --report`.
-- **Class features used in turns, what's left (M).** Devious Strikes, Deflect Attacks'
-  redirect, Wild Shape, Metamagic and Sorcery Points in turns, the other subclass features.
-- **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
-  tracked, their effects aren't.
-
-### Tools
-
+- **Views for one viewer (M).** An encounter and query results as one participant may see them
+  (hidden creatures, what only the GM knows), for shared play.
 - **Authoring toolkit (M).** Shared helpers in `scripts/lib/` for the importers (slugs, Markdown
   sections and tables, overlay merge, YAML output) and a documented "transcribe → draft → review →
   golden test" recipe, also for private packs. Optionally port `import-srd-classes.py` to
-  TypeScript so every importer can use them.
+  TypeScript so every importer can use them. Grown from the importers as they need it.
