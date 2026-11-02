@@ -312,6 +312,11 @@ OVERLAY = {
              "grants": POTENT_SPELLCASTING("cleric")}]}]},
     },
     "druid": {
+        # Wild Companion: Find Familiar with a use of Wild Shape instead of a slot; the familiar is
+        # Fey (it disappears on a Long Rest: text). Casting it with a slot instead is by hand.
+        2: {"actions": [{"id": "wild-companion", "name": "Wild Companion", "economy": "action",
+                         "uses": "wild-shape",
+                         "cast": {"spell": "find-familiar", "summon": {"creature_types": ["fey"]}}}]},
         7: {"choices": [{"id": "elemental_fury", "label": "Elemental Fury", "kind": "option", "options": [
             {"id": "potent-spellcasting", "name": "Potent Spellcasting",
              "description": "Add your Wisdom modifier to the damage of your Druid cantrips.",

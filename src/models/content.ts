@@ -338,6 +338,77 @@ export const AdvantageGrantSchema = z.union([
 export type AdvantageGrant = AdvantageTarget | { target: AdvantageTarget; unless: string[] };
 
 /**
+ * Creatures a spell or a feature brings (`mechanics.summon`, `FeatureAction.summon`): the forms
+ * picked from (a `summons` template, or a monster's stat block as it is), how many, where their
+ * turns go, and what ends them.
+ */
+export const SummonSpecSchema = z.strictObject({
+  forms: z
+    .array(
+      z
+        .strictObject({
+          id: z.string(),
+          name: z.string(),
+          /** A `summons` template (its stat block scales with the spell). */
+          summon: z.string().nullable().default(null),
+          /** Or a monster's stat block as it is (a familiar's animal form, a Skeleton). */
+          monster: z.string().nullable().default(null),
+          /** The template's choices this form decides (`{ form: spider }`). */
+          choices: z.record(z.string(), z.string()).default({}),
+          /** How much of `count` one creature of this form takes (a Huge object: 3). */
+          weight: z.int().min(1).default(1),
+          /** The lowest spell slot that can make it (Create Undead's Mummies: 9). */
+          min_level: z.int().min(1).max(9).nullable().default(null),
+          /**
+           * How many of this form one cast makes, by spell slot level (Create Undead: three
+           * Ghouls, four at level 7…); a cast makes only one form then. Overrides `count`.
+           */
+          count_by_level: z
+            .record(z.string().regex(/^[1-9]$/), z.int().min(1))
+            .nullable()
+            .default(null),
+        })
+        .refine(
+          (f) => (f.summon === null) !== (f.monster === null),
+          "a form uses a `summon` template or a `monster`, one of them",
+        ),
+    )
+    .min(1),
+  /** How many it makes at the spell's level (the forms' weights add up to it at most). */
+  count: z.int().min(1).default(1),
+  /** More for each spell slot level above the spell's (Animate Dead: 2). */
+  count_per_level: z.int().min(0).default(0),
+  /** The count is the caster's spellcasting ability modifier (Animate Objects). */
+  count_ability: z.boolean().default(false),
+  /**
+   * `after_caster`: it shares the caster's Initiative count and takes its turn right after
+   * the caster's; `own`: it rolls its own Initiative (Find Familiar).
+   */
+  turn: z.enum(["after_caster", "own"]).default("after_caster"),
+  /**
+   * It disappears when it drops to 0 Hit Points, when the spell ends (Concentration), or when
+   * its caster dies (Find Steed).
+   */
+  ends: z.array(z.enum(["zero_hp", "spell", "caster_dies"])).default(["zero_hp", "spell"]),
+  /** One at a time per caster: a new cast replaces the one there (a familiar, a steed). */
+  unique: z.boolean().default(false),
+  /** Creature types the caster picks from instead of the stat block's (a familiar's). */
+  creature_types: z.array(z.string()).default([]),
+  /** It can't attack ("A familiar can't attack"). */
+  cannot_attack: z.boolean().default(false),
+});
+export type SummonSpec = z.infer<typeof SummonSpecSchema>;
+
+/** Changes to a spell's `summon` when a feature casts it (Wild Companion: the familiar is Fey). */
+export const SummonOverridesSchema = z.strictObject({
+  creature_types: z.array(z.string()).optional(),
+  ends: z.array(z.enum(["zero_hp", "spell", "caster_dies"])).optional(),
+  unique: z.boolean().optional(),
+  cannot_attack: z.boolean().optional(),
+});
+export type SummonOverrides = z.infer<typeof SummonOverridesSchema>;
+
+/**
  * A feature you use in a turn (Second Wind, Action Surge, Flurry of Blows): its economy, the
  * resource it spends, and what it does. The encounter action `feature` resolves it; the play
  * action `use_feature` spends it (and heals you, for a self-healing feature).
@@ -432,6 +503,20 @@ export const FeatureActionSchema = z.strictObject({
   inspiration: z.strictObject({ progression: z.string() }).nullable().default(null),
   /** Your reaction when an attack hits you: halve its damage (Uncanny Dodge). */
   halves_attack_damage: z.boolean().default(false),
+  /**
+   * It casts a spell without a spell slot, spending its `uses` instead (Wild Companion: Find
+   * Familiar with a use of Wild Shape), at the spell's level; `summon` changes what the spell
+   * brings (the familiar is Fey).
+   */
+  cast: z
+    .strictObject({ spell: z.string(), summon: SummonOverridesSchema.optional() })
+    .nullable()
+    .default(null),
+  /**
+   * It brings creatures itself, no spell (a companion): their stat blocks scale with the class
+   * level (`class_level` in the template) and the class's spellcasting.
+   */
+  summon: SummonSpecSchema.nullable().default(null),
 });
 export type FeatureActionDef = z.infer<typeof FeatureActionSchema>;
 
@@ -1140,67 +1225,9 @@ export const SpellMechanicsSchema = z
       .default(null),
     /**
      * Creatures the spell brings (Find Familiar, Giant Insect, Animate Dead): the forms the
-     * caster picks from (a `summons` template, or a monster's stat block), how many, where their
-     * turns go, and what ends them.
+     * caster picks from, how many, where their turns go, and what ends them.
      */
-    summon: z
-      .strictObject({
-        forms: z
-          .array(
-            z
-              .strictObject({
-                id: z.string(),
-                name: z.string(),
-                /** A `summons` template (its stat block scales with the spell). */
-                summon: z.string().nullable().default(null),
-                /** Or a monster's stat block as it is (a familiar's animal form, a Skeleton). */
-                monster: z.string().nullable().default(null),
-                /** The template's choices this form decides (`{ form: spider }`). */
-                choices: z.record(z.string(), z.string()).default({}),
-                /** How much of `count` one creature of this form takes (a Huge object: 3). */
-                weight: z.int().min(1).default(1),
-                /** The lowest spell slot that can make it (Create Undead's Mummies: 9). */
-                min_level: z.int().min(1).max(9).nullable().default(null),
-                /**
-                 * How many of this form one cast makes, by spell slot level (Create Undead: three
-                 * Ghouls, four at level 7…); a cast makes only one form then. Overrides `count`.
-                 */
-                count_by_level: z
-                  .record(z.string().regex(/^[1-9]$/), z.int().min(1))
-                  .nullable()
-                  .default(null),
-              })
-              .refine(
-                (f) => (f.summon === null) !== (f.monster === null),
-                "a form uses a `summon` template or a `monster`, one of them",
-              ),
-          )
-          .min(1),
-        /** How many it makes at the spell's level (the forms' weights add up to it at most). */
-        count: z.int().min(1).default(1),
-        /** More for each spell slot level above the spell's (Animate Dead: 2). */
-        count_per_level: z.int().min(0).default(0),
-        /** The count is the caster's spellcasting ability modifier (Animate Objects). */
-        count_ability: z.boolean().default(false),
-        /**
-         * `after_caster`: it shares the caster's Initiative count and takes its turn right after
-         * the caster's; `own`: it rolls its own Initiative (Find Familiar).
-         */
-        turn: z.enum(["after_caster", "own"]).default("after_caster"),
-        /**
-         * It disappears when it drops to 0 Hit Points, when the spell ends (Concentration), or when
-         * its caster dies (Find Steed).
-         */
-        ends: z.array(z.enum(["zero_hp", "spell", "caster_dies"])).default(["zero_hp", "spell"]),
-        /** One at a time per caster: a new cast replaces the one there (a familiar, a steed). */
-        unique: z.boolean().default(false),
-        /** Creature types the caster picks from instead of the stat block's (a familiar's). */
-        creature_types: z.array(z.string()).default([]),
-        /** It can't attack ("A familiar can't attack"). */
-        cannot_attack: z.boolean().default(false),
-      })
-      .nullable()
-      .default(null),
+    summon: SummonSpecSchema.nullable().default(null),
   })
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
   .refine((m) => !m.follow_up || m.attack, "a follow-up saving throw comes after a spell attack")

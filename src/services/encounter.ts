@@ -16,6 +16,8 @@ import type {
   Skill,
   SpellArea,
   SpellDef,
+  SummonOverrides,
+  SummonSpec,
 } from "../models/content";
 import {
   type EffectEnd,
@@ -32,6 +34,7 @@ import {
   type Pending,
   type PointOfInterest,
   type SpellMark,
+  type SummonRequest,
   type Zone,
 } from "../models/encounter";
 import { type EncounterEvent, FORCEABLE_REFUSALS, type RefusalCode } from "../models/events";
@@ -1944,6 +1947,8 @@ function run(
       wall?: PlacedWall;
       /** A smite riding a Critical Hit: its dice are doubled. */
       critical?: boolean;
+      /** Cast through a feature that spends its own uses: no spell slot. */
+      no_slot?: boolean;
     },
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
@@ -2306,80 +2311,105 @@ function run(
     notes.push(message("summon.disappears", { name: c.name, why }));
   };
   /**
-   * A summoning spell's creatures (`mechanics.summon`): the forms asked for (one each), within
-   * the count at this slot level, with the stat block's choices and the caster's values; on the
-   * caster's side, after the caster in the order or rolling their own Initiative.
+   * A summoning spell's creatures (`mechanics.summon`, with a feature's `overrides` when a
+   * feature casts it): their values come from the cast (the slot's level, the caster's spell
+   * attack and DC).
    */
   const summonCreatures = (
     c: EncounterCombatant,
     spell: SpellDef,
     cast: SpellCastResult,
-    request: Extract<EncounterAction, { type: "cast" }>["summon"],
+    request: SummonRequest | undefined,
+    overrides: SummonOverrides | null = null,
   ): void => {
-    const spec = spell.mechanics?.summon;
-    if (!spec) return;
+    const base = spell.mechanics?.summon;
+    if (!base) return;
+    const spec = { ...base, ...overrides };
     const slot = cast.slot_level ?? spell.level;
     const view = encounterCombatant(e, c.id, ctx);
     const casting =
       view.spellcasting.find((x) => x.source === cast.spellcasting) ?? view.spellcasting[0];
-    const abilityMod = casting?.modifier ?? 0;
+    const vars: SummonVars = {
+      spell_level: slot,
+      class_level: 0,
+      pb: view.proficiency_bonus,
+      spell_attack: cast.attack_bonus ?? casting?.attack_bonus ?? 0,
+      spell_dc: cast.save_dc ?? casting?.save_dc ?? 0,
+      ability_mod: casting?.modifier ?? 0,
+    };
+    const origin = {
+      source: spell.id,
+      label: spell.name,
+      concentration: spell.concentration && spec.ends.includes("spell"),
+      level: spell.level,
+    };
+    bringCreatures(c, spec, origin, vars, request);
+  };
+  /**
+   * Creatures a spell or a feature brings: the forms asked for (one each), within the count, with
+   * the stat block's choices and the summoner's values; on the summoner's side, after it in the
+   * order or rolling their own Initiative.
+   */
+  const bringCreatures = (
+    c: EncounterCombatant,
+    spec: SummonSpec,
+    origin: { source: string; label: string; concentration: boolean; level: number },
+    vars: SummonVars,
+    request: SummonRequest | undefined,
+  ): void => {
     const formIds = request?.forms ?? [spec.forms[0]?.id as string];
     const forms = formIds.map(
       (id) =>
         spec.forms.find((f) => f.id === id) ??
         fail(
           message("refusal.unknown_summon_form", {
-            spell: spell.name,
+            spell: origin.label,
             form: id,
             forms: spec.forms.map((f) => f.id).join(", "),
           }),
         ),
     );
     for (const f of forms) {
-      if (f.min_level !== null && slot < f.min_level) {
+      if (f.min_level !== null && vars.spell_level < f.min_level) {
         fail(message("refusal.summon_form_level", { form: f.name, level: f.min_level }));
       }
     }
     if (forms.some((f) => f.count_by_level) && new Set(formIds).size > 1) {
-      fail(message("refusal.summon_one_form", { spell: spell.name }));
+      fail(message("refusal.summon_one_form", { spell: origin.label }));
     }
-    const limit = summonLimit(spec, spell.level, slot, abilityMod, forms);
+    const limit = summonLimit(spec, origin.level, vars.spell_level, vars.ability_mod, forms);
     if (forms.reduce((n, f) => n + f.weight, 0) > limit) {
-      refuse(message("refusal.summon_too_many", { spell: spell.name, count: limit }));
+      refuse(message("refusal.summon_too_many", { spell: origin.label, count: limit }));
     }
     let creatureType: string | null = null;
     if (spec.creature_types.length) {
-      const pick = request?.creature_type;
+      // One possible type is chosen by itself (Wild Companion: Fey).
+      const pick =
+        request?.creature_type ??
+        (spec.creature_types.length === 1 ? spec.creature_types[0] : undefined);
       if (!pick || !spec.creature_types.includes(pick)) {
         fail(
           message("refusal.summon_creature_type", {
-            spell: spell.name,
+            spell: origin.label,
             types: spec.creature_types.join(", "),
           }),
         );
       }
       creatureType = pick.charAt(0).toUpperCase() + pick.slice(1);
     } else if (request?.creature_type) {
-      fail(message("refusal.summon_no_creature_type", { spell: spell.name }));
+      fail(message("refusal.summon_no_creature_type", { spell: origin.label }));
     }
     // One at a time (a familiar, a steed): a new one replaces the one there.
     if (spec.unique) {
       for (const old of e.combatants.filter(
-        (x) => x.summon?.by === c.id && x.summon.spell === spell.id,
+        (x) => x.summon?.by === c.id && x.summon.source === origin.source,
       )) {
         dismiss(old, message("why.replaced"));
       }
     }
-    const vars = {
-      spell_level: slot,
-      pb: view.proficiency_bonus,
-      spell_attack: cast.attack_bonus ?? casting?.attack_bonus ?? 0,
-      spell_dc: cast.save_dc ?? casting?.save_dc ?? 0,
-      ability_mod: abilityMod,
-    };
     for (const form of forms) {
       const template = form.summon ? lookup(ctx.catalog.summons, form.summon) : undefined;
-      // The stat block's choices: the form's, then the caster's (`{ resistance: fire }`).
+      // The stat block's choices: the form's, then the summoner's (`{ resistance: fire }`).
       const choices = Object.fromEntries(
         Object.keys(template?.choices ?? {}).flatMap((key) => {
           const value = form.choices[key] ?? request?.choices?.[key];
@@ -2388,16 +2418,16 @@ function run(
       );
       const summon = {
         by: c.id,
-        spell: spell.id,
-        label: spell.name,
+        source: origin.source,
+        label: origin.label,
         form: form.id,
         template: form.summon,
-        vars: form.summon ? vars : {},
+        vars: form.summon ? { ...vars } : {},
         choices,
         creature_type: creatureType,
         turn: spec.turn,
         ends: spec.ends,
-        concentration: spell.concentration && spec.ends.includes("spell"),
+        concentration: origin.concentration,
         cannot_attack: spec.cannot_attack,
       };
       let def: MonsterDef;
@@ -2408,7 +2438,7 @@ function run(
         );
       } catch (error) {
         if (error instanceof TemplateError) {
-          fail(message("refusal.summon_choice", { spell: spell.name, detail: error.message }));
+          fail(message("refusal.summon_choice", { spell: origin.label, detail: error.message }));
         }
         throw error;
       }
@@ -2424,7 +2454,7 @@ function run(
           summon,
         }),
       );
-      notes.push(message("summon.appears", { name, by: c.name, spell: spell.name }));
+      notes.push(message("summon.appears", { name, by: c.name, spell: origin.label }));
     }
     reorder(e, ctx);
   };
@@ -3690,6 +3720,9 @@ function run(
       if (f.halves_attack_damage || f.reduces_attack_damage) {
         fail(message("refusal.offered_when_attack_hits", { feature: f.name, name: c.name }));
       }
+      if (action.summon && !f.summon && !f.cast) {
+        fail(message("refusal.summon_choice", { spell: f.name, detail: "it summons nothing" }));
+      }
       const damageType =
         f.save?.damage &&
         (action.damage_type ??
@@ -3766,6 +3799,28 @@ function run(
       );
       play(c, { type: "use_feature", key: f.key, amount: action.amount });
       if (f.once_per_turn) c.features_used.push(f.key);
+      // A spell cast through the feature, its uses spent instead of a slot (Wild Companion).
+      if (f.cast) {
+        const spell =
+          lookup(ctx.catalog.spells, f.cast.spell) ??
+          fail(message("refusal.unknown_spell", { spell: f.cast.spell }));
+        const cast = castBy(c, spell, action.targets ?? [], { no_slot: true });
+        result = cast;
+        if (spell.mechanics?.summon) {
+          summonCreatures(c, spell, cast, action.summon, f.cast.summon);
+        }
+      }
+      // Creatures the feature brings itself (a companion).
+      if (f.summon) {
+        bringCreatures(
+          c,
+          f.summon.spec,
+          { source: f.key, label: f.name, concentration: false, level: 0 },
+          f.summon.vars,
+          action.summon,
+        );
+      }
+
       if (f.heal && f.target !== "self") {
         const amount = f.heal.pooled
           ? (action.amount as number)

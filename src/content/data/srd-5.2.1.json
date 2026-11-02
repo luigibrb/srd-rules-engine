@@ -1990,7 +1990,9 @@
                             "inspiration": {
                                 "progression": "Bardic Die"
                             },
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -4075,7 +4077,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         },
                         {
                             "id": "divine-spark",
@@ -4128,7 +4132,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         },
                         {
                             "id": "turn-undead",
@@ -4167,7 +4173,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -5584,7 +5592,40 @@
                     "advantages": [],
                     "rules": [],
                     "spell_damage": [],
-                    "actions": [],
+                    "actions": [
+                        {
+                            "id": "wild-companion",
+                            "name": "Wild Companion",
+                            "economy": "action",
+                            "uses": "wild-shape",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "halves_attack_damage": false,
+                            "cast": {
+                                "spell": "find-familiar",
+                                "summon": {
+                                    "creature_types": [
+                                        "fey"
+                                    ]
+                                }
+                            },
+                            "summon": null
+                        }
+                    ],
                     "toggles": [],
                     "items": [],
                     "gp": 0,
@@ -6820,7 +6861,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -6981,7 +7024,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -8228,7 +8273,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         },
                         {
                             "id": "patient-defense",
@@ -8254,7 +8301,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         },
                         {
                             "id": "step-of-the-wind",
@@ -8280,7 +8329,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -8358,7 +8409,9 @@
                                 ]
                             },
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -8542,7 +8595,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -9640,7 +9695,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         },
                         {
                             "id": "lay-on-hands-cure",
@@ -9665,7 +9722,9 @@
                             ],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": false
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],
@@ -12793,7 +12852,9 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
-                            "halves_attack_damage": true
+                            "halves_attack_damage": true,
+                            "cast": null,
+                            "summon": null
                         }
                     ],
                     "toggles": [],

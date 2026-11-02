@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   applyEncounterAction,
+  type Catalog,
   type CharacterBuild,
   type CharacterState,
+  createCatalog,
   createEncounter,
   createState,
   type Encounter,
@@ -15,7 +17,8 @@ import {
 } from "../src/index";
 import * as svc from "../src/services/builder";
 import { monsterDef } from "../src/services/encounter";
-import { autocomplete, catalog, classBuild, levelUpIn } from "./helpers";
+import { srdPack } from "../src/srd";
+import { apply, autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 // Creatures a spell brings (SRD 5.2.1 "Spells": Find Familiar, Find Steed, Giant Insect, Summon
 // Dragon, Animate Objects, Animate Dead, Create Undead): their stat blocks scale with the spell
@@ -51,16 +54,16 @@ function caster(classId: string, level: number, name: string, spells: string[]):
 function session(
   builds: Record<string, CharacterBuild>,
   monsters: string[] = [],
-  { start = true }: { start?: boolean } = {},
+  { start = true, cat = catalog }: { start?: boolean; cat?: Catalog } = {},
 ) {
   const states: Record<string, CharacterState> = Object.fromEntries(
-    Object.entries(builds).map(([k, b]) => [k, createState(b, catalog)]),
+    Object.entries(builds).map(([k, b]) => [k, createState(b, cat)]),
   );
   let encounter: Encounter = createEncounter();
   const notes: string[] = [];
   let last: EncounterResult | null = null;
   const ctx = () => ({
-    catalog,
+    catalog: cat,
     characters: Object.fromEntries(
       Object.entries(builds).map(([k, build]) => [
         k,
@@ -244,7 +247,7 @@ describe("Animate Objects", () => {
       ),
     ).toThrow(`Animate Objects makes up to ${mod} creatures at this level`);
     s.act([], cast("lute", "animate-objects", { summon: { forms: ["large", ...small] } }));
-    const objects = s.encounter().combatants.filter((c) => c.summon?.spell === "animate-objects");
+    const objects = s.encounter().combatants.filter((c) => c.summon?.source === "animate-objects");
     expect(objects.map((c) => c.hp)).toEqual([20, ...small.map(() => 10)]);
     expect(s.view("animated-object").attacks[0]?.damage_parts).toEqual([
       { dice: "2d6", bonus: 3 + mod, type: "force" },
@@ -313,5 +316,110 @@ describe("summons in the documents", () => {
         cast("wren", "moonbeam", { summon: {} }),
       ),
     ).toThrow();
+  });
+});
+
+describe("summons from features", () => {
+  it("Wild Companion: Find Familiar with a use of Wild Shape, no spell slot; the familiar is Fey", () => {
+    const wren = levelUpIn(autocomplete(classBuild("druid", { name: "Wren" })), "druid", 1);
+    const s = session({ wren });
+    const slots = s.states.wren?.spell_slots_spent;
+    s.act([], {
+      type: "feature",
+      id: "wren",
+      feature: "Wild Companion",
+      summon: { forms: ["owl"] },
+    });
+    expect(s.def("owl").creature_type).toBe("Fey");
+    expect(s.get("owl")?.summon).toMatchObject({ by: "wren", source: "find-familiar" });
+    expect(s.states.wren?.spell_slots_spent).toEqual(slots);
+    expect(s.states.wren?.uses_spent["druid:wild-shape"]).toBe(1);
+    expect(s.notes).toContain("Owl appears (Wren's Find Familiar).");
+  });
+
+  // An invented companion feat: its stat block scales with the character's level.
+  const homebrew = createCatalog(srdPack, {
+    name: "homebrew",
+    summons: [
+      {
+        id: "clockwork-hound",
+        name: "Clockwork Hound",
+        stat_block: {
+          size: "Medium",
+          creature_type: "Construct",
+          alignment: "Unaligned",
+          armor_class: "=13 + floor(class_level / 4)",
+          initiative: 2,
+          hit_points: "=5 * class_level",
+          speed: { walk: 40 },
+          abilities: { str: 14, dex: 14, con: 12, int: 4, wis: 12, cha: 4 },
+          saving_throws: { str: 2, dex: 2, con: 1, int: -3, wis: 1, cha: -3 },
+          passive_perception: 11,
+          cr: "None",
+          xp: 0,
+          proficiency_bonus: "=pb",
+          actions: [
+            {
+              name: "Bite",
+              text: "_Melee Attack Roll:_ +{2 + pb}, reach 5 ft. _Hit:_ 1d8 + 2 Piercing damage.",
+              attack: {
+                kind: "melee",
+                bonus: "=2 + pb",
+                reach: 5,
+                damage: [{ average: 6, dice: "1d8", bonus: 2, type: "piercing" }],
+              },
+            },
+          ],
+        },
+      },
+    ],
+    feats: [
+      {
+        id: "hound-keeper",
+        name: "Hound Keeper",
+        category: "general",
+        grants: {
+          actions: [
+            {
+              id: "call-hound",
+              name: "Call Hound",
+              economy: "action",
+              summon: {
+                forms: [{ id: "hound", name: "Clockwork Hound", summon: "clockwork-hound" }],
+                ends: ["zero_hp", "caster_dies"],
+                unique: true,
+              },
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  it("a feature's own creature scales with the level; a new one replaces it", () => {
+    let b = levelUpIn(fighterBuild(), "fighter", 7, null, homebrew);
+    b = svc.setChoice(b, homebrew, "class:fighter:4#feat", ["hound-keeper"]).build;
+    b = autocomplete(b, homebrew);
+    const s = session({ brakka: b }, [], { cat: homebrew });
+    s.act([], { type: "feature", id: "brakka", feature: "Call Hound" });
+    expect(s.get("clockwork-hound")).toMatchObject({ hp: 40, initiative: 20 });
+    expect(s.view("clockwork-hound").armor_class).toBe(15);
+    expect(s.view("clockwork-hound").attacks[0]?.attack_bonus).toBe(5); // 2 + PB 3
+    s.act([], { type: "next_turn" }, { type: "next_turn" });
+    s.act([], { type: "feature", id: "brakka", feature: "Call Hound" });
+    expect(s.notes).toContain("Clockwork Hound disappears: a new one replaces it.");
+    expect(s.encounter().combatants.filter((c) => c.monster === "clockwork-hound")).toHaveLength(1);
+  });
+
+  it("a feature that summons nothing refuses `summon`", () => {
+    const s = session({ brakka: fighterBuild() });
+    expect(() =>
+      s.act([], {
+        type: "feature",
+        id: "brakka",
+        feature: "Second Wind",
+        summon: { forms: ["x"] },
+      }),
+    ).toThrow("Second Wind: it summons nothing");
   });
 });

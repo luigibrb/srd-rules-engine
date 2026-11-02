@@ -17,7 +17,8 @@ const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs");
 
 const SummonedSchema = z.object({
   by: z.string(),
-  spell: z.string(),
+  /** The spell's id, or the feature's key, that brought it. */
+  source: z.string(),
   label: z.string(),
   form: z.string(),
   /** A `summons` template; `null`: the `monster`'s stat block as it is. */
@@ -627,6 +628,19 @@ const UnarmedActionSchema = z.object({
   reaction: z.boolean().optional(),
 });
 
+/**
+ * What to summon (a spell's or a feature's `summon`): one form id per creature (default: one of
+ * the first form), the stat block's choices (`{ resistance: fire }`), and a creature type when
+ * the caster picks it (a familiar).
+ */
+export const SummonRequestSchema = z.object({
+  forms: z.array(z.string()).min(1).optional(),
+  choices: z.record(z.string(), z.string()).optional(),
+  creature_type: z.string().optional(),
+});
+
+export type SummonRequest = z.infer<typeof SummonRequestSchema>;
+
 const CastActionSchema = z.object({
   type: z.literal("cast"),
   force,
@@ -668,18 +682,8 @@ const CastActionSchema = z.object({
   damage_type: z.enum(DAMAGE_TYPES).optional(),
   /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
   unaffected: z.array(z.string()).optional(),
-  /**
-   * A summoning spell's creatures (`mechanics.summon`): one form id per creature (default: one
-   * of the first form), the stat block's choices (`{ resistance: fire }`), and a creature type
-   * when the spell lets the caster pick (a familiar).
-   */
-  summon: z
-    .object({
-      forms: z.array(z.string()).min(1).optional(),
-      choices: z.record(z.string(), z.string()).optional(),
-      creature_type: z.string().optional(),
-    })
-    .optional(),
+  /** A summoning spell's creatures (`mechanics.summon`). */
+  summon: SummonRequestSchema.optional(),
 });
 
 const MoveActionSchema = z.object({
@@ -989,6 +993,8 @@ export const EncounterActionSchema = z
       amount: n.min(1).optional(),
       /** The damage type, for a feature that offers a choice (Divine Spark). */
       damage_type: z.enum(DAMAGE_TYPES).optional(),
+      /** The creatures a feature brings, or the spell it casts brings (`SummonRequest`). */
+      summon: SummonRequestSchema.optional(),
     }),
     /** A saving throw effect (a monster's breath weapon) against targets; uses the action. */
     z.object({

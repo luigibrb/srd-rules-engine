@@ -4,7 +4,7 @@
  * the caster and the choices made, and how many creatures one cast makes.
  */
 
-import type { MonsterDef, SpellDef, SummonDef } from "../models/content";
+import type { MonsterDef, SummonDef, SummonSpec } from "../models/content";
 import { MonsterSchema } from "../models/content";
 import { instantiateTemplate, TemplateError, type TemplateVars } from "./templates";
 
@@ -18,6 +18,8 @@ export interface SummonVars {
   readonly spell_dc: number;
   /** The caster's spellcasting ability modifier. */
   readonly ability_mod: number;
+  /** The summoner's level in the class whose feature brings it (0 for a spell). */
+  readonly class_level: number;
 }
 
 /** The stat block a template makes with these values and choices (`form: spider`…). */
@@ -62,26 +64,28 @@ export function summonErrors(summon: SummonDef, minLevel = 1): string[] {
   const errors = new Set<string>();
   for (const choices of combinations(summon.choices)) {
     for (let spell_level = minLevel; spell_level <= 9; spell_level++) {
-      const vars = {
-        spell_level,
-        pb: 2 + Math.floor(spell_level / 4),
-        spell_attack: 5,
-        spell_dc: 13,
-        ability_mod: 3,
-      };
-      try {
-        summonMonster(summon, vars, choices);
-      } catch (error) {
-        const what = error instanceof Error ? error.message.split("\n")[0] : String(error);
-        errors.add(`summons/${summon.id} (${JSON.stringify(choices)}): ${what}`);
+      for (const class_level of [1, 3, 5, 10, 15, 20]) {
+        const vars = {
+          spell_level,
+          class_level,
+          pb: 2 + Math.floor((class_level - 1) / 4),
+          spell_attack: 5,
+          spell_dc: 13,
+          ability_mod: 3,
+        };
+        try {
+          summonMonster(summon, vars, choices);
+        } catch (error) {
+          const what = error instanceof Error ? error.message.split("\n")[0] : String(error);
+          errors.add(`summons/${summon.id} (${JSON.stringify(choices)}): ${what}`);
+        }
       }
     }
   }
   return [...errors];
 }
 
-type SummonMechanics = NonNullable<NonNullable<SpellDef["mechanics"]>["summon"]>;
-type SummonForm = SummonMechanics["forms"][number];
+type SummonForm = SummonSpec["forms"][number];
 
 /**
  * How many creatures a cast can make: the forms' weights add up to this at most. A form with
@@ -90,7 +94,7 @@ type SummonForm = SummonMechanics["forms"][number];
  * the spell's.
  */
 export function summonLimit(
-  summon: SummonMechanics,
+  summon: SummonSpec,
   spellLevel: number,
   slotLevel: number,
   abilityMod: number,

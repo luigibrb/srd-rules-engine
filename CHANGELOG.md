@@ -8,6 +8,11 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Summons from features: a feature action's `cast` (a spell cast without a spell slot,
+  spending the feature's uses, with `summon` overrides) and `summon` (creatures it brings
+  itself; templates can use `class_level`); the encounter `feature` action takes `summon` like
+  `cast` (`FeatureActionLine.cast`, `.summon`; `SummonSpecSchema`, `castSpell`'s `no_slot`). The
+  Druid's Wild Companion casts Find Familiar with a use of Wild Shape; the familiar is Fey.
 - Summoned creatures: a spell's `mechanics.summon` (forms, count, turn, endings) and the
   `summons` table of stat blocks that scale with the spell and the caster (`SummonSchema`;
   expressions like `"=11 + spell_level"` and parts kept `only` for some choices, checked for every
