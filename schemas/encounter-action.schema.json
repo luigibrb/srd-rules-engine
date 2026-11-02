@@ -1829,6 +1829,30 @@
                 "slashing",
                 "thunder"
               ]
+            },
+            "summon": {
+              "type": "object",
+              "properties": {
+                "forms": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "choices": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "creature_type": {
+                  "type": "string"
+                }
+              }
             }
           },
           "required": [

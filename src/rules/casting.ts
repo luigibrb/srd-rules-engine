@@ -51,6 +51,8 @@ export interface CastOptions {
    * has the caster's dice.
    */
   by_hand?: boolean;
+  /** Cast without a spell slot (a feature's free casting: Wild Companion): no slot is spent. */
+  no_slot?: boolean;
   rng?: Rng;
   /** Answers decisions (Bardic Inspiration, Legendary Resistance); default: `recommended`. */
   decide?: Decide;
@@ -194,6 +196,7 @@ export function castSpell(
     nearby = [],
     damage_type,
     critical = false,
+    no_slot = false,
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells)
@@ -233,7 +236,7 @@ export function castSpell(
   }
 
   const casterActions: PlayAction[] = [];
-  if (slot !== null) {
+  if (slot !== null && !no_slot) {
     casterActions.push(pact ? { type: "spend_pact_slot" } : { type: "spend_slot", level: slot });
   }
   if (spell.concentration) casterActions.push({ type: "set_concentration", spell: spell.name });

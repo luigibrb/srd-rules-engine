@@ -477,6 +477,11 @@ summon:
   cannot_attack: false
 ```
 
+A class feature brings creatures through its action (`grants.actions`): `cast: { spell,
+summon }` casts a spell without a spell slot, spending the action's `uses`, with changes to
+what it brings (`summon: { creature_types: [fey] }`); `summon` (as above) brings them itself, and
+its templates can use `class_level`, the summoner's level in that class.
+
 ### Monsters
 
 A stat block keeps the SRD's layout: `armor_class`, `initiative`, `hit_points` and `hit_dice`

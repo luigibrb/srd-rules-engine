@@ -1674,6 +1674,209 @@
               "halves_attack_damage": {
                 "default": false,
                 "type": "boolean"
+              },
+              "cast": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "spell": {
+                        "type": "string"
+                      },
+                      "summon": {
+                        "type": "object",
+                        "properties": {
+                          "creature_types": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "ends": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "zero_hp",
+                                "spell",
+                                "caster_dies"
+                              ]
+                            }
+                          },
+                          "unique": {
+                            "type": "boolean"
+                          },
+                          "cannot_attack": {
+                            "type": "boolean"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "spell"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "summon": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "forms": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "summon": {
+                              "default": null,
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "monster": {
+                              "default": null,
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "choices": {
+                              "default": {},
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {
+                                "type": "string"
+                              }
+                            },
+                            "weight": {
+                              "default": 1,
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "min_level": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 1,
+                                  "maximum": 9
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "count_by_level": {
+                              "default": null,
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "propertyNames": {
+                                    "type": "string",
+                                    "pattern": "^[1-9]$"
+                                  },
+                                  "additionalProperties": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 9007199254740991
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "count": {
+                        "default": 1,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "count_per_level": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "count_ability": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "turn": {
+                        "default": "after_caster",
+                        "type": "string",
+                        "enum": [
+                          "after_caster",
+                          "own"
+                        ]
+                      },
+                      "ends": {
+                        "default": [
+                          "zero_hp",
+                          "spell"
+                        ],
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "zero_hp",
+                            "spell",
+                            "caster_dies"
+                          ]
+                        }
+                      },
+                      "unique": {
+                        "default": false,
+                        "type": "boolean"
+                      },
+                      "creature_types": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "cannot_attack": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "forms"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [

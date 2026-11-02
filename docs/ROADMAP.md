@@ -49,6 +49,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P34 | Monster traits in turns: damage auras, Death Burst and Death Throes, Regeneration, Aura of Authority (14 traits, read from their sentences by the importer) | A regenerating monster at 0 HP is Unconscious until it dies or regenerates (flagged) |
 | P35 | Table settings out of the encounter: `EncounterSettings` (decisions, Death Saving Throws, positions) given with each call, recorded on each history step; document format 2 (version 1 histories migrate, `legacyEncounterSettings` for encounters); the halt on a noticed point removed (event `noticed`) | Per-combatant decisions by combatant id or character key |
 | P36 | Summoned creatures: stat block templates that scale (`summons`, `rules/templates.ts`), `mechanics.summon` for the SRD's seven summoning spells, their turns after the caster's or their own, their endings; casting outside a fight; when things end in pure functions (`services/lifetimes.ts`) | Commands to a summoned creature are the table's; Find Steed's mount rules are text (flagged) |
+| P37 | Summons from features: a feature that casts a spell without a slot, spending its uses (the Druid's Wild Companion), or brings creatures itself, their stat blocks scaling with the class level | Casting Find Familiar through Wild Companion with a spell slot instead is by hand; the familiar leaving on a Long Rest is text |
 
 ## Decisions
 
@@ -93,9 +94,6 @@ or invented homebrew in its tests.
 
 ### Priority 2: next
 
-- **Summons from features (M).** A feature that brings a creature, or casts a summoning spell
-  without a slot (the Druid's Wild Companion: Find Familiar with a use of Wild Shape), with stat
-  blocks that scale with the class level (a `class_level` value for templates).
 - **Content schema gaps (S each).** Small additions so content can say more as data: an
   attunement limit set by a feature (instead of the fixed three); spells a feat or feature adds
   to its owner's class spell lists; feat categories you can take only one feat of; a tool

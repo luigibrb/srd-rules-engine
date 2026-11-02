@@ -26,12 +26,15 @@ import {
   SKILLS,
   type Skill,
   type SpellDamage,
+  type SummonOverrides,
+  type SummonSpec,
   type WeaponDef,
 } from "../models/content";
 import { finalScores } from "./ability-scores";
 import { type ActiveSource, mergeGrants, type Resolution, resolve } from "./build-resolution";
 import { type DamagePart, formatDamage } from "./damage";
 import { abilityModifier, proficiencyBonus } from "./dice";
+import type { SummonVars } from "./summons";
 import { isMonkWeapon, isWeaponProficient, parseRange } from "./weapons";
 
 export interface Contribution {
@@ -154,6 +157,16 @@ export interface FeatureActionLine {
   /** The die it gives (8 for a d8). */
   readonly inspiration_die: number | null;
   readonly halves_attack_damage: boolean;
+  /**
+   * A spell it casts without a spell slot, spending its uses (Wild Companion: Find Familiar),
+   * and changes to what that spell brings.
+   */
+  readonly cast: {
+    readonly spell: string;
+    readonly summon: SummonOverrides | null;
+  } | null;
+  /** Creatures it brings itself, and the values their stat blocks are made with. */
+  readonly summon: { readonly spec: SummonSpec; readonly vars: SummonVars } | null;
 }
 
 export interface ClassLine {
@@ -808,6 +821,22 @@ export function computeSheet(
           },
           inspiration_die: die ? Number(die) : null,
           halves_attack_damage: a.halves_attack_damage,
+          cast: a.cast && { spell: a.cast.spell, summon: a.cast.summon ?? null },
+          summon: a.summon && {
+            spec: a.summon,
+            vars: (() => {
+              // The class's spellcasting, when it has one (a companion's attack and DC).
+              const sc = magic.spellcasting[casting.findIndex((x) => x.class_id === src.class_id)];
+              return {
+                spell_level: 0,
+                class_level: classLevel,
+                pb,
+                spell_attack: sc?.attack_bonus ?? pb,
+                spell_dc: sc?.save_dc ?? 8 + pb,
+                ability_mod: sc?.ability ? mod[sc.ability] : 0,
+              };
+            })(),
+          },
         };
       }),
     ),

@@ -677,7 +677,11 @@ list of actions.
   after every action ends it (`summonEnding`, the note `summon.disappears`): at 0 Hit Points, when
   the spell's Concentration ends or its caster leaves, when its caster dies (Find Steed), as `ends`
   lists; `unique` replaces the caster's earlier one (a familiar, a steed); `cannot_attack`
-  refuses its attacks (a familiar).
+  refuses its attacks (a familiar). A feature brings creatures too, through `feature` with the
+  same `summon` request: a feature action's `cast` casts a spell without a spell slot, spending
+  the feature's uses (Wild Companion: Find Familiar with a use of Wild Shape, the familiar Fey),
+  and its `summon` brings creatures itself, their stat blocks made with the class level
+  (`class_level`) and the class's spellcasting (`FeatureActionLine.summon.vars`).
 - **Zones:** a spell with `mechanics.zone` (Moonbeam, Spirit Guardians, Cloudkill, Insect
   Plague, Incendiary Cloud, Black Tentacles, Web, Grease, Spike Growth, Stinking Cloud, Sleet
   Storm, Flaming Sphere, Conjure Animals, Conjure Woodland Beings) leaves an `encounter.zones`

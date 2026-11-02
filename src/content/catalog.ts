@@ -42,6 +42,7 @@ import {
   SubclassSchema,
   type SummonDef,
   SummonSchema,
+  type SummonSpec,
   type ToolDef,
   ToolSchema,
   type WeaponDef,
@@ -479,9 +480,18 @@ export function validateReferences(full: Catalog): void {
   );
   // Summons: the forms' templates and monsters exist, their choices are the template's, and
   // every template makes a valid stat block for every choice and spell level.
-  for (const spell of Object.values(catalog.spells)) {
-    for (const form of spell.mechanics?.summon?.forms ?? []) {
-      const where = `${spell.id}.summon.${form.id}`;
+  const summoners: [string, SummonSpec][] = Object.values(catalog.spells).flatMap((s) =>
+    s.mechanics?.summon ? [[s.id, s.mechanics.summon] as [string, SummonSpec]] : [],
+  );
+  for (const [where, grants] of allGrants(catalog, creation)) {
+    for (const action of grants.actions) {
+      if (action.cast) check([action.cast.spell], view.spells, "spell", `${where}.${action.id}`);
+      if (action.summon) summoners.push([`${where}.${action.id}`, action.summon]);
+    }
+  }
+  for (const [owner, spec] of summoners) {
+    for (const form of spec.forms) {
+      const where = `${owner}.summon.${form.id}`;
       if (form.monster) check([form.monster], view.monsters, "monster", where);
       if (!form.summon) continue;
       check([form.summon], view.summons, "summon", where);
