@@ -48,6 +48,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P33 | Shopping: SRD prices and weights for 100 items of gear and every tool (`scripts/import-srd-gear.ts`), the play actions `buy` and `sell` with change, carried weight for gear; `buy`/`sell` in `srd-rules play` | Paid with the smallest coins first; sold for half (SRD); magic items need a price |
 | P34 | Monster traits in turns: damage auras, Death Burst and Death Throes, Regeneration, Aura of Authority (14 traits, read from their sentences by the importer) | A regenerating monster at 0 HP is Unconscious until it dies or regenerates (flagged) |
 | P35 | Table settings out of the encounter: `EncounterSettings` (decisions, Death Saving Throws, positions) given with each call, recorded on each history step; document format 2 (version 1 histories migrate, `legacyEncounterSettings` for encounters); the halt on a noticed point removed (event `noticed`) | Per-combatant decisions by combatant id or character key |
+| P36 | Summoned creatures: stat block templates that scale (`summons`, `rules/templates.ts`), `mechanics.summon` for the SRD's seven summoning spells, their turns after the caster's or their own, their endings; casting outside a fight; when things end in pure functions (`services/lifetimes.ts`) | Commands to a summoned creature are the table's; Find Steed's mount rules are text (flagged) |
 
 ## Decisions
 
@@ -86,15 +87,15 @@ or invented homebrew in its tests.
   turns. Move each area into its own module of functions that take plain facts and return what
   happens (effects that end, saves due, refusals with their reasons), applied by the reducer,
   with direct tests; no change in behavior (the seeded demo and the history replays keep the
-  dice in the same order). Done area by area, when a feature touches it (summons: turn timing
-  and effects first). The new functions stay internal.
-- **Summons and companions (L).** Creatures a spell or a feature brings that act with their
-  creator: Find Familiar, Find Steed, Giant Insect, Animate Objects. Their stat blocks scale with
-  the caster (spell level, Proficiency Bonus, spell attack modifier), they join the encounter on
-  the creator's turn, and they go away when the spell or feature ends.
+  dice in the same order). Done area by area, when a feature touches it; what ends effects,
+  marks, zones and summons is done (`services/lifetimes.ts`, P36). The new functions stay
+  internal.
 
 ### Priority 2: next
 
+- **Summons from features (M).** A feature that brings a creature, or casts a summoning spell
+  without a slot (the Druid's Wild Companion: Find Familiar with a use of Wild Shape), with stat
+  blocks that scale with the class level (a `class_level` value for templates).
 - **Content schema gaps (S each).** Small additions so content can say more as data: an
   attunement limit set by a feature (instead of the fixed three); spells a feat or feature adds
   to its owner's class spell lists; feat categories you can take only one feat of; a tool

@@ -164,3 +164,37 @@ export function effectEnding(
   }
   return null;
 }
+
+/** What ends a summoned creature, as the sweep sees it. */
+export interface SummonFacts {
+  readonly ends: readonly ("zero_hp" | "spell" | "caster_dies")[];
+  /** It lasts while its caster concentrates on `label`. */
+  readonly concentration: boolean;
+  readonly label: string;
+  /** At 0 Hit Points (defeated). */
+  readonly down: boolean;
+}
+
+export type SummonReason =
+  | { readonly why: "dropped_to_zero" }
+  | { readonly why: "concentration_ended" }
+  | { readonly why: "caster_left" }
+  | { readonly why: "caster_died" };
+
+/**
+ * Whether a summoned creature disappears now: it dropped to 0 Hit Points ("disappears when it
+ * drops to 0 Hit Points"), its spell's Concentration ended (or its caster left the encounter), or
+ * its caster died (Find Steed). `caster` is `undefined` when the caster isn't in the encounter.
+ */
+export function summonEnding(
+  summon: SummonFacts,
+  caster: SweepCombatant | undefined,
+): SummonReason | null {
+  if (summon.ends.includes("zero_hp") && summon.down) return { why: "dropped_to_zero" };
+  if (summon.ends.includes("spell") && summon.concentration) {
+    if (!caster) return { why: "caster_left" };
+    if (caster.concentration !== summon.label) return { why: "concentration_ended" };
+  }
+  if (summon.ends.includes("caster_dies") && caster?.out) return { why: "caster_died" };
+  return null;
+}

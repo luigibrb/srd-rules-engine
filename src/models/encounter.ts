@@ -15,6 +15,25 @@ import { DocumentVersionSchema } from "./version";
 
 const id = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "ids are lowercase slugs");
 
+const SummonedSchema = z.object({
+  by: z.string(),
+  spell: z.string(),
+  label: z.string(),
+  form: z.string(),
+  /** A `summons` template; `null`: the `monster`'s stat block as it is. */
+  template: z.string().nullable().default(null),
+  /** The values its stat block was made with (`spell_level`, `spell_attack`…) and the choices. */
+  vars: z.record(z.string(), z.union([z.number(), z.string()])).default({}),
+  choices: z.record(z.string(), z.string()).default({}),
+  /** Its creature type instead of the stat block's (a familiar: Celestial, Fey or Fiend). */
+  creature_type: z.string().nullable().default(null),
+  turn: z.enum(["after_caster", "own"]).default("after_caster"),
+  ends: z.array(z.enum(["zero_hp", "spell", "caster_dies"])).default([]),
+  /** Concentration: it ends with the caster's Concentration on `label`. */
+  concentration: z.boolean().default(false),
+  cannot_attack: z.boolean().default(false),
+});
+
 export const EncounterCombatantSchema = z.object({
   id,
   name: z.string(),
@@ -128,6 +147,12 @@ export const EncounterCombatantSchema = z.object({
     .object({ die: z.int().min(2), by: z.string() })
     .nullable()
     .default(null),
+  /**
+   * A creature a spell brought (`mechanics.summon`): who cast it, the spell (and its name, for
+   * Concentration), its form, its stat block's template and the values it was made with, where its
+   * turn goes and what ends it. Its stat block is `monster` (a catalog monster) or `template`.
+   */
+  summon: SummonedSchema.nullable().default(null),
 });
 export type EncounterCombatant = z.infer<typeof EncounterCombatantSchema>;
 
@@ -643,6 +668,18 @@ const CastActionSchema = z.object({
   damage_type: z.enum(DAMAGE_TYPES).optional(),
   /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
   unaffected: z.array(z.string()).optional(),
+  /**
+   * A summoning spell's creatures (`mechanics.summon`): one form id per creature (default: one
+   * of the first form), the stat block's choices (`{ resistance: fire }`), and a creature type
+   * when the spell lets the caster pick (a familiar).
+   */
+  summon: z
+    .object({
+      forms: z.array(z.string()).min(1).optional(),
+      choices: z.record(z.string(), z.string()).optional(),
+      creature_type: z.string().optional(),
+    })
+    .optional(),
 });
 
 const MoveActionSchema = z.object({

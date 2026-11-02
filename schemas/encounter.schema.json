@@ -733,6 +733,30 @@
                             "items": {
                               "type": "string"
                             }
+                          },
+                          "summon": {
+                            "type": "object",
+                            "properties": {
+                              "forms": {
+                                "minItems": 1,
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "choices": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              },
+                              "creature_type": {
+                                "type": "string"
+                              }
+                            }
                           }
                         },
                         "required": [
@@ -888,6 +912,102 @@
                 "required": [
                   "die",
                   "by"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summon": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string"
+                  },
+                  "spell": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "form": {
+                    "type": "string"
+                  },
+                  "template": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "vars": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": [
+                        "number",
+                        "string"
+                      ]
+                    }
+                  },
+                  "choices": {
+                    "default": {},
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  "creature_type": {
+                    "default": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "turn": {
+                    "default": "after_caster",
+                    "type": "string",
+                    "enum": [
+                      "after_caster",
+                      "own"
+                    ]
+                  },
+                  "ends": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "zero_hp",
+                        "spell",
+                        "caster_dies"
+                      ]
+                    }
+                  },
+                  "concentration": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "cannot_attack": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "by",
+                  "spell",
+                  "label",
+                  "form"
                 ]
               },
               {
@@ -3381,6 +3501,30 @@
                       "items": {
                         "type": "string"
                       }
+                    },
+                    "summon": {
+                      "type": "object",
+                      "properties": {
+                        "forms": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "choices": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        },
+                        "creature_type": {
+                          "type": "string"
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -4040,6 +4184,30 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            },
+            "summon": {
+              "type": "object",
+              "properties": {
+                "forms": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "choices": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "creature_type": {
+                  "type": "string"
+                }
               }
             }
           },

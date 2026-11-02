@@ -1441,6 +1441,51 @@
 
     _One Familiar Only._ You can't have more than one familiar at a time. If you cast this spell
     while you have a familiar, you instead cause it to adopt a new eligible form.
+  mechanics:
+    summon:
+      forms:
+        - id: bat
+          name: Bat
+          monster: bat
+        - id: cat
+          name: Cat
+          monster: cat
+        - id: frog
+          name: Frog
+          monster: frog
+        - id: hawk
+          name: Hawk
+          monster: hawk
+        - id: lizard
+          name: Lizard
+          monster: lizard
+        - id: octopus
+          name: Octopus
+          monster: octopus
+        - id: owl
+          name: Owl
+          monster: owl
+        - id: rat
+          name: Rat
+          monster: rat
+        - id: raven
+          name: Raven
+          monster: raven
+        - id: spider
+          name: Spider
+          monster: spider
+        - id: weasel
+          name: Weasel
+          monster: weasel
+      turn: own
+      ends:
+        - zero_hp
+      unique: true
+      creature_types:
+        - celestial
+        - fey
+        - fiend
+      cannot_attack: true
 - id: floating-disk
   name: Floating Disk
   level: 1
@@ -2911,6 +2956,16 @@
 
     **_Healing Touch (Celestial Only; Recharges after a Long Rest)._** One creature within 5 feet of
     the steed regains a number of Hit Points equal to 2d8 plus the spell's level.
+  mechanics:
+    summon:
+      forms:
+        - id: steed
+          name: Otherworldly Steed
+          summon: otherworldly-steed
+      ends:
+        - zero_hp
+        - caster_dies
+      unique: true
 - id: find-traps
   name: Find Traps
   level: 2
@@ -3987,6 +4042,18 @@
     _Using a Higher-Level Spell Slot._ You animate or reassert control over two additional Undead
     creatures for each spell slot level above 3. Each of the creatures must come from a different
     corpse or pile of bones.
+  mechanics:
+    summon:
+      forms:
+        - id: skeleton
+          name: Skeleton
+          monster: skeleton
+        - id: zombie
+          name: Zombie
+          monster: zombie
+      count_per_level: 2
+      turn: own
+      ends: []
 - id: beacon-of-hope
   name: Beacon of Hope
   level: 3
@@ -5962,6 +6029,24 @@
     _Venomous Spew (Centipede Only). Constitution Saving Throw:_ Your spell save DC, one creature
     the insect can see within 10 feet. _Failure:_ The target has the Poisoned condition until the
     start of the insect's next turn.
+  mechanics:
+    summon:
+      forms:
+        - id: centipede
+          name: Giant Centipede
+          summon: giant-insect
+          choices:
+            form: centipede
+        - id: spider
+          name: Giant Spider
+          summon: giant-insect
+          choices:
+            form: spider
+        - id: wasp
+          name: Giant Wasp
+          summon: giant-insect
+          choices:
+            form: wasp
 - id: greater-invisibility
   name: Greater Invisibility
   level: 4
@@ -6495,6 +6580,40 @@
     _Slam._ _Melee Attack Roll:_ Bonus equals your spell attack modifier, reach 5 ft. _Hit:_ Force
     damage equal to 1d4 + 3 (Medium or smaller), 2d6 + 3 + your spellcasting ability modifier
     (Large), or 2d12 + 3 + your spellcasting ability modifier (Huge).
+  mechanics:
+    summon:
+      forms:
+        - id: tiny
+          name: Tiny Object
+          summon: animated-object
+          choices:
+            size: Tiny
+          weight: 1
+        - id: small
+          name: Small Object
+          summon: animated-object
+          choices:
+            size: Small
+          weight: 1
+        - id: medium
+          name: Medium Object
+          summon: animated-object
+          choices:
+            size: Medium
+          weight: 1
+        - id: large
+          name: Large Object
+          summon: animated-object
+          choices:
+            size: Large
+          weight: 2
+        - id: huge
+          name: Huge Object
+          summon: animated-object
+          choices:
+            size: Huge
+          weight: 3
+      count_ability: true
 - id: antilife-shell
   name: Antilife Shell
   level: 5
@@ -7744,6 +7863,12 @@
     _Breath Weapon. Dexterity Saving Throw:_ DC equals your spell save DC, each creature in a
     30-foot Cone. _Failure:_ 2d6 damage of a type this spirit has Resistance to (your choice when
     you cast the spell). _Success:_ Half damage.
+  mechanics:
+    summon:
+      forms:
+        - id: spirit
+          name: Draconic Spirit
+          summon: draconic-spirit
 - id: telekinesis
   name: Telekinesis
   level: 5
@@ -8152,6 +8277,39 @@
     control over five **Ghouls** or two **Ghasts** or **Wights**. If you use a level 9 spell slot,
     you can animate or reassert control over six **Ghouls**, three **Ghasts** or **Wights**, or two
     **Mummies**. See "Monsters" for these stat blocks.
+  mechanics:
+    summon:
+      forms:
+        - id: ghoul
+          name: Ghoul
+          monster: ghoul
+          count_by_level:
+            "6": 3
+            "7": 4
+            "8": 5
+            "9": 6
+        - id: ghast
+          name: Ghast
+          monster: ghast
+          min_level: 8
+          count_by_level:
+            "8": 2
+            "9": 3
+        - id: wight
+          name: Wight
+          monster: wight
+          min_level: 8
+          count_by_level:
+            "8": 2
+            "9": 3
+        - id: mummy
+          name: Mummy
+          monster: mummy
+          min_level: 9
+          count_by_level:
+            "9": 2
+      turn: own
+      ends: []
 - id: disintegrate
   name: Disintegrate
   level: 6

@@ -1138,6 +1138,69 @@ export const SpellMechanicsSchema = z
       })
       .nullable()
       .default(null),
+    /**
+     * Creatures the spell brings (Find Familiar, Giant Insect, Animate Dead): the forms the
+     * caster picks from (a `summons` template, or a monster's stat block), how many, where their
+     * turns go, and what ends them.
+     */
+    summon: z
+      .strictObject({
+        forms: z
+          .array(
+            z
+              .strictObject({
+                id: z.string(),
+                name: z.string(),
+                /** A `summons` template (its stat block scales with the spell). */
+                summon: z.string().nullable().default(null),
+                /** Or a monster's stat block as it is (a familiar's animal form, a Skeleton). */
+                monster: z.string().nullable().default(null),
+                /** The template's choices this form decides (`{ form: spider }`). */
+                choices: z.record(z.string(), z.string()).default({}),
+                /** How much of `count` one creature of this form takes (a Huge object: 3). */
+                weight: z.int().min(1).default(1),
+                /** The lowest spell slot that can make it (Create Undead's Mummies: 9). */
+                min_level: z.int().min(1).max(9).nullable().default(null),
+                /**
+                 * How many of this form one cast makes, by spell slot level (Create Undead: three
+                 * Ghouls, four at level 7…); a cast makes only one form then. Overrides `count`.
+                 */
+                count_by_level: z
+                  .record(z.string().regex(/^[1-9]$/), z.int().min(1))
+                  .nullable()
+                  .default(null),
+              })
+              .refine(
+                (f) => (f.summon === null) !== (f.monster === null),
+                "a form uses a `summon` template or a `monster`, one of them",
+              ),
+          )
+          .min(1),
+        /** How many it makes at the spell's level (the forms' weights add up to it at most). */
+        count: z.int().min(1).default(1),
+        /** More for each spell slot level above the spell's (Animate Dead: 2). */
+        count_per_level: z.int().min(0).default(0),
+        /** The count is the caster's spellcasting ability modifier (Animate Objects). */
+        count_ability: z.boolean().default(false),
+        /**
+         * `after_caster`: it shares the caster's Initiative count and takes its turn right after
+         * the caster's; `own`: it rolls its own Initiative (Find Familiar).
+         */
+        turn: z.enum(["after_caster", "own"]).default("after_caster"),
+        /**
+         * It disappears when it drops to 0 Hit Points, when the spell ends (Concentration), or when
+         * its caster dies (Find Steed).
+         */
+        ends: z.array(z.enum(["zero_hp", "spell", "caster_dies"])).default(["zero_hp", "spell"]),
+        /** One at a time per caster: a new cast replaces the one there (a familiar, a steed). */
+        unique: z.boolean().default(false),
+        /** Creature types the caster picks from instead of the stat block's (a familiar's). */
+        creature_types: z.array(z.string()).default([]),
+        /** It can't attack ("A familiar can't attack"). */
+        cannot_attack: z.boolean().default(false),
+      })
+      .nullable()
+      .default(null),
   })
   .refine((m) => !(m.attack && m.save), "a spell has an attack roll or a saving throw, not both")
   .refine((m) => !m.follow_up || m.attack, "a follow-up saving throw comes after a spell attack")
@@ -1449,6 +1512,21 @@ export const MonsterSchema = z.strictObject({
   legendary_actions: z.array(MonsterActionSchema).default([]),
 });
 export type MonsterDef = z.infer<typeof MonsterSchema>;
+
+/**
+ * A summoned creature's stat block, which scales with the spell or the summoner (`rules/
+ * templates.ts`): a monster's stat block (`MonsterSchema` without `id`, `name`, `source`) whose
+ * values can be expressions over `spell_level`, `pb`, `spell_attack`, `spell_dc`, `ability_mod`
+ * and the `choices` made when summoning. Checked when the catalog loads, for every choice and
+ * spell level.
+ */
+export const SummonSchema = z.strictObject({
+  ...entity,
+  /** Choices made when summoning, with their values (`form: [centipede, spider, wasp]`). */
+  choices: z.record(z.string(), z.array(z.string()).min(1)).default({}),
+  stat_block: z.record(z.string(), z.unknown()),
+});
+export type SummonDef = z.infer<typeof SummonSchema>;
 
 export const PointBuySchema = z.strictObject({
   budget: z.int(),

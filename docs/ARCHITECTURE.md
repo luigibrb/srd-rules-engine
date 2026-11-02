@@ -561,7 +561,8 @@ list of actions.
   (refusal code `off_map`). Cover can be given per attack (`cover`) or per target
   (`cast`, `save_action`): +2 or +5 to AC and Dexterity saves, Total Cover can't be targeted;
   with positions and no cover given, it's worked out from the map (below).
-- **Exploring.** Before the fight starts and after it ends (`round: 0`) a `move` has no turns and
+- **Exploring.** Before the fight starts and after it ends (`round: 0`) a `cast` takes no turn
+  and no action economy, whatever its casting time (Find Familiar's hour), and a `move` has no turns and
   no limit: anyone moves along the planned path (walls, blocked squares, Difficult Terrain and
   other creatures as in a fight, no Opportunity Attacks), and the note and `previewMove`'s
   `turns` say how many turns of Speed it takes (`turnsFor`: about 6 seconds each). The group's
@@ -661,6 +662,22 @@ list of actions.
   Concentration spell's other conditions last while it concentrates. A hold that an action's
   check ends (Black Tentacles, Web) gets an escape DC, and `escape` uses it with the skill the
   spell names.
+- **Summons:** a spell with `mechanics.summon` (Find Familiar, Find Steed, Giant Insect, Summon
+  Dragon, Animate Objects, Animate Dead, Create Undead) brings creatures when it's cast: `cast`
+  `summon: { forms, choices, creature_type }` names one form per creature, the stat block's
+  choices (Giant Insect's form, the Draconic Spirit's damage type) and a familiar's creature type.
+  A form is a `summons` template, whose stat block scales with the slot level and the caster
+  (`spell_level`, `spell_attack`, `spell_dc`, `pb`, `ability_mod`; `rules/templates.ts`), or a
+  monster's stat block as it is (a familiar's animal, a Skeleton). How many: `count` (plus
+  `count_per_level` above the spell's level), the spellcasting ability modifier
+  (`count_ability`, the forms' `weight`s adding up to it: Animate Objects), or a form's
+  `count_by_level` (Create Undead). Each creature joins on the caster's side with a `summon` record
+  (caster, spell, form, the values its stat block was made with); its turn comes right after the
+  caster's, sharing its Initiative (`turn: after_caster`), or it rolls its own (`own`). The sweep
+  after every action ends it (`summonEnding`, the note `summon.disappears`): at 0 Hit Points, when
+  the spell's Concentration ends or its caster leaves, when its caster dies (Find Steed), as `ends`
+  lists; `unique` replaces the caster's earlier one (a familiar, a steed); `cannot_attack`
+  refuses its attacks (a familiar).
 - **Zones:** a spell with `mechanics.zone` (Moonbeam, Spirit Guardians, Cloudkill, Insect
   Plague, Incendiary Cloud, Black Tentacles, Web, Grease, Spike Growth, Stinking Cloud, Sleet
   Storm, Flaming Sphere, Conjure Animals, Conjure Woodland Beings) leaves an `encounter.zones`
@@ -1044,6 +1061,20 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   can" is the GM's to play.
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.
+
+**Summons**
+
+- Find Steed's steed "shares your Initiative count" and acts as a controlled mount: its turn is
+  placed right after the caster's (as for the spells that say so), and mounted combat isn't
+  modelled. Find Familiar's forms are the eleven the SRD names; another CR 0 Beast is a form a
+  pack can add.
+- What a summoned creature does is the caster's to say ("It obeys your verbal commands"; with
+  none, it takes the Dodge action): the table acts for it on its turn. Animate Dead's and Create
+  Undead's 24 hours of control, the Draconic Spirit's Shared Resistances, a familiar's touch
+  spells and telepathy, and an animated object's damage carrying over to its object form are
+  text.
+- A summoned creature that ends leaves the encounter (`summon.disappears`); one whose spell
+  doesn't end it (a Skeleton) stays, and is defeated at 0 Hit Points like a monster.
 
 **Spells**
 
