@@ -104,7 +104,11 @@ or invented homebrew in its tests.
   attunement limit set by a feature (instead of the fixed three); spells a feat or feature adds
   to its owner's class spell lists; feat categories you can take only one feat of; a tool
   proficiency that becomes another of your choice when you already have it; dice in
-  `spell_damage`; a saving throw by the creature hit and those around it, after a weapon hit.
+  `spell_damage`; a saving throw by the creature hit and those around it, after a weapon hit;
+  grants at a character level, for sources without a class (the spells the Elf's and the
+  Tiefling's lineages give at levels 3 and 5, text today: `at_class_level` counts the levels of
+  the source's class, and on a feat taken with a class level it also counts the feat twice); a
+  one-third caster progression, for spellcasting that comes from a subclass.
 - **Reactions to another creature's roll (M).** A reaction after someone else's d20 roll, by a
   third party (Cutting Words): through the `decide` callback, like Bardic Inspiration.
 - **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
