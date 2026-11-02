@@ -470,7 +470,7 @@ for (const section of sections) {
     casting_time: castingTime.replace(/ or Ritual$/, ""),
     ritual: / or Ritual$/.test(castingTime),
     range: field(text, "Range"),
-    components: field(text, "Components"),
+    components: field(text, "Components?"), // 13 spells read "Component:"
     duration,
     concentration: duration.startsWith("Concentration"),
     description,

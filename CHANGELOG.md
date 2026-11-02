@@ -234,6 +234,8 @@ migrated when it's loaded.
   reason when the engine would refuse it.
 
 ### Fixed
+- Spell components for the 12 SRD spells whose entry reads "Component:" (Barkskin, Guidance,
+  Resistance, Divine Smite…): they were empty.
 - An encounter action of an unknown type did nothing; it's refused ("Unknown action").
 
 ### Removed

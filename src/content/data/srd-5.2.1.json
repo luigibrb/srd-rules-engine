@@ -26012,7 +26012,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "Touch",
-            "components": "",
+            "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
             "mechanics": null
@@ -26268,7 +26268,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "Touch",
-            "components": "",
+            "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
             "mechanics": null
@@ -26396,7 +26396,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "120 feet",
-            "components": "",
+            "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
             "mechanics": null
@@ -27133,7 +27133,7 @@
             "casting_time": "Bonus Action, which you take immediately after hitting a target with a Melee weapon or an Unarmed Strike",
             "ritual": false,
             "range": "Self",
-            "components": "",
+            "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
             "mechanics": {
@@ -27960,7 +27960,7 @@
             "casting_time": "Bonus Action",
             "ritual": false,
             "range": "Touch",
-            "components": "",
+            "components": "V, S, M (a grasshopper's hind leg)",
             "duration": "1 minute",
             "concentration": false,
             "mechanics": null
@@ -28188,7 +28188,7 @@
             "casting_time": "Bonus Action, which you take immediately after hitting a target with a Melee weapon or an Unarmed Strike",
             "ritual": false,
             "range": "Self",
-            "components": "",
+            "components": "V",
             "duration": "1 minute",
             "concentration": false,
             "mechanics": {
@@ -28593,7 +28593,7 @@
             "casting_time": "Bonus Action",
             "ritual": false,
             "range": "Touch",
-            "components": "",
+            "components": "V, S, M (a handful of bark)",
             "duration": "1 hour",
             "concentration": false,
             "mechanics": null
@@ -28833,7 +28833,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "30 feet",
-            "components": "",
+            "components": "V, S",
             "duration": "Instantaneous",
             "concentration": false,
             "mechanics": null
@@ -29668,7 +29668,7 @@
             "casting_time": "Bonus Action, which you take immediately after hitting a creature with a Melee weapon or an Unarmed Strike",
             "ritual": false,
             "range": "Self",
-            "components": "",
+            "components": "V",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
             "mechanics": {
@@ -32599,7 +32599,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "Touch",
-            "components": "",
+            "components": "V, S",
             "duration": "7 days",
             "concentration": false,
             "mechanics": null
@@ -35453,7 +35453,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "60 feet",
-            "components": "",
+            "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
             "mechanics": null
@@ -35474,7 +35474,7 @@
             "casting_time": "Action",
             "ritual": false,
             "range": "60 feet",
-            "components": "",
+            "components": "V",
             "duration": "Instantaneous",
             "concentration": false,
             "mechanics": null

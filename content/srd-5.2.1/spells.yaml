@@ -221,7 +221,7 @@
   casting_time: Action
   ritual: false
   range: Touch
-  components: ""
+  components: V, S
   duration: Concentration, up to 1 minute
   concentration: true
   description: You touch a willing creature and choose a skill. Until the spell ends, the creature
@@ -493,7 +493,7 @@
   casting_time: Action
   ritual: false
   range: Touch
-  components: ""
+  components: V, S
   duration: Concentration, up to 1 minute
   concentration: true
   description: "You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire,
@@ -589,7 +589,7 @@
   casting_time: Action
   ritual: false
   range: 120 feet
-  components: ""
+  components: V, S
   duration: Instantaneous
   concentration: false
   description: >-
@@ -1243,7 +1243,7 @@
     an Unarmed Strike
   ritual: false
   range: Self
-  components: ""
+  components: V
   duration: Instantaneous
   concentration: false
   description: >-
@@ -1893,7 +1893,7 @@
   casting_time: Bonus Action
   ritual: false
   range: Touch
-  components: ""
+  components: V, S, M (a grasshopper's hind leg)
   duration: 1 minute
   concentration: false
   description: >-
@@ -2072,7 +2072,7 @@
     an Unarmed Strike
   ritual: false
   range: Self
-  components: ""
+  components: V
   duration: 1 minute
   concentration: false
   description: >-
@@ -2508,7 +2508,7 @@
   casting_time: Bonus Action
   ritual: false
   range: Touch
-  components: ""
+  components: V, S, M (a handful of bark)
   duration: 1 hour
   concentration: false
   description: You touch a willing creature. Until the spell ends, the target's skin assumes a
@@ -2787,7 +2787,7 @@
   casting_time: Action
   ritual: false
   range: 30 feet
-  components: ""
+  components: V, S
   duration: Instantaneous
   concentration: false
   description: >-
@@ -3695,7 +3695,7 @@
     or an Unarmed Strike
   ritual: false
   range: Self
-  components: ""
+  components: V
   duration: Concentration, up to 1 minute
   concentration: true
   description: >-
@@ -6826,7 +6826,7 @@
   casting_time: Action
   ritual: false
   range: Touch
-  components: ""
+  components: V, S
   duration: 7 days
   concentration: false
   description: >-
@@ -10650,7 +10650,7 @@
   casting_time: Action
   ritual: false
   range: 60 feet
-  components: ""
+  components: V
   duration: Instantaneous
   concentration: false
   description: A wave of healing energy washes over one creature you can see within range. The target
@@ -10669,7 +10669,7 @@
   casting_time: Action
   ritual: false
   range: 60 feet
-  components: ""
+  components: V
   duration: Instantaneous
   concentration: false
   description: You compel one creature you can see within range to die. If the target has 100 Hit
