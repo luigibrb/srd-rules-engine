@@ -107,6 +107,13 @@ import {
   strikeDice,
 } from "./by-hand";
 import { encounterEvents } from "./events";
+import {
+  countDown,
+  effectEnding,
+  type SweepCombatant,
+  type SweepReason,
+  sweepOutcome,
+} from "./lifetimes";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
 import { refusalCode } from "./refusals";
 
@@ -720,36 +727,18 @@ function run(
     }
     return null;
   };
-  /** Count down effects that end at the start or end of `c`'s turn. */
+  /** Count down effects, mastery effects, marks and zones that end at the start or end of `c`'s turn. */
   const tick = (c: EncounterCombatant, at: "start" | "end"): void => {
-    for (const effect of [...e.effects]) {
-      const ends = effect.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) {
-        ends.skip_current = false;
-        continue;
-      }
-      ends.count -= 1;
-      if (ends.count <= 0) endEffect(effect, message("why.duration_over"));
-    }
-    for (const mark of [...e.masteries]) {
-      const ends = mark.ends;
-      if (ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) e.masteries = e.masteries.filter((m) => m !== mark);
-    }
-    for (const mark of [...e.marks]) {
-      const ends = mark.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) e.marks = e.marks.filter((m) => m !== mark);
-    }
-    for (const zone of [...e.zones]) {
-      const ends = zone.ends;
-      if (!ends || ends.at !== at || ends.of !== c.id) continue;
-      if (ends.skip_current) ends.skip_current = false;
-      else if (--ends.count <= 0) endZone(zone, message("why.duration_over"));
-    }
+    const effects = countDown(e.effects, at, c.id);
+    e.effects = effects.items;
+    for (const effect of effects.expired) endEffect(effect, message("why.duration_over"));
+    const masteries = countDown(e.masteries, at, c.id);
+    e.masteries = masteries.items.filter((m) => !masteries.expired.includes(m));
+    const marks = countDown(e.marks, at, c.id);
+    e.marks = marks.items.filter((m) => !marks.expired.includes(m));
+    const zones = countDown(e.zones, at, c.id);
+    e.zones = zones.items;
+    for (const zone of zones.expired) endZone(zone, message("why.duration_over"));
   };
   /**
    * The squares' origin of a zone: its point, or for an Emanation its caster's space, or the
@@ -2299,64 +2288,58 @@ function run(
     if (used >= perDay) fail(message("refusal.used_today", { name: c.name, what, count: perDay }));
     c.daily_used[key] = used + 1;
   };
-  /** After every action: Concentration effects whose source stopped concentrating end. */
+  /** What the sweep knows about a combatant, as it is now. */
+  const sweepFacts = (c: EncounterCombatant): SweepCombatant => {
+    const held = c.readied?.held && c.readied.action.type === "cast" ? c.readied.action : null;
+    return {
+      id: c.id,
+      hidden: c.hidden !== null,
+      hidden_effect: e.effects.some((x) => x.target === c.id && x.label === "Hidden"),
+      holding:
+        held?.type === "cast" ? (lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell) : null,
+      concentration: concentrationOf(c),
+      conditions: conditionsOf(ctx, c),
+      out: outOfFight(ctx, c),
+    };
+  };
+  const sweepWhy = (reason: SweepReason): Message =>
+    reason.why === "source_incapacitated"
+      ? message("why.source_incapacitated", { name: find(reason.name).name })
+      : message(`why.${reason.why}`);
+  /** After every action: what ended because something changed (`sweepOutcome`, `effectEnding`). */
   const sweep = (): void => {
-    const present = (id: string) => e.combatants.some((c) => c.id === id);
-    for (const c of e.combatants) {
-      // Its Invisible condition from hiding was removed some other way: not hidden any more.
-      if (c.hidden !== null && !e.effects.some((x) => x.target === c.id && x.label === "Hidden")) {
-        c.hidden = null;
-      }
-      // "If your Concentration is broken, the spell dissipates without taking effect."
-      const held = c.readied?.held && c.readied.action.type === "cast" ? c.readied.action : null;
-      if (held?.type === "cast") {
-        const name = lookup(ctx.catalog.spells, held.spell)?.name ?? held.spell;
-        if (concentrationOf(c) !== name) {
-          c.readied = null;
-          notes.push(message("readied.dissipates", { name: c.name, spell: name }));
-        }
-      }
-    }
-    e.masteries = e.masteries.filter((m) => present(m.by) && present(m.on));
-    // A spell's mark stays when its caster leaves: the light is on the target. A mark tied to
-    // Concentration (Hunter's Mark) ends with it.
-    e.marks = e.marks.filter((m) => {
-      if (!present(m.on)) return false;
-      if (m.kind !== "quarry") return true;
-      const by = e.combatants.find((x) => x.id === m.by);
-      return !!by && concentrationOf(by) === m.label;
+    const outcome = sweepOutcome({
+      combatants: e.combatants.map(sweepFacts),
+      masteries: e.masteries,
+      marks: e.marks,
+      zones: e.zones,
     });
-    for (const z of [...e.zones]) {
-      const source = e.combatants.find((c) => c.id === z.by);
-      if (z.concentration && !source) endZone(z, message("why.caster_left"));
-      else if (z.concentration && source && concentrationOf(source) !== z.label) {
-        endZone(z, message("why.concentration_ended"));
+    for (const x of outcome.combatants) {
+      const c = find(x.id);
+      // Its Invisible condition from hiding was removed some other way: not hidden any more.
+      if (x.unhide) c.hidden = null;
+      // "If your Concentration is broken, the spell dissipates without taking effect."
+      if (x.dissipates) {
+        c.readied = null;
+        notes.push(message("readied.dissipates", { name: c.name, spell: x.dissipates }));
       }
     }
+    e.masteries = outcome.masteries.map((i) => e.masteries[i] as MasteryMark);
+    e.marks = outcome.marks.map((i) => e.marks[i] as SpellMark);
+    for (const z of outcome.zones) {
+      const zone = e.zones.find((x) => x.id === z.id);
+      if (zone) endZone(zone, sweepWhy(z.reason));
+    }
+    // One at a time: ending one can remove a condition the next one depends on.
     for (const effect of [...e.effects]) {
-      const target = e.combatants.find((c) => c.id === effect.target);
-      const source = effect.source ? e.combatants.find((c) => c.id === effect.source) : null;
-      if (!target) endEffect(effect, message("why.target_left"));
-      else if (!conditionsOf(ctx, target).has(effect.condition)) {
-        // The condition was removed some other way (remove_condition, a rest): forget it.
-        e.effects = e.effects.filter((x) => x.id !== effect.id);
-      } else if (effect.source && !source) endEffect(effect, message("why.source_left"));
-      else if (
-        effect.condition === "grappled" &&
-        source &&
-        conditionsOf(ctx, source).has("incapacitated")
-      ) {
-        // SRD "Grappling": the condition ends if the grappler has the Incapacitated condition.
-        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
-      } else if (
-        effect.ends_on.includes("source_incapacitated") &&
-        source &&
-        (conditionsOf(ctx, source).has("incapacitated") || outOfFight(ctx, source))
-      ) {
-        endEffect(effect, message("why.source_incapacitated", { name: source.name }));
-      } else if (effect.concentration && source && concentrationOf(source) !== effect.label) {
-        endEffect(effect, message("why.concentration_ended"));
-      }
+      const at = (id: string | null) => {
+        const x = id ? e.combatants.find((c) => c.id === id) : undefined;
+        return x ? sweepFacts(x) : undefined;
+      };
+      const ending = effectEnding(effect, at(effect.target), at(effect.source));
+      if (!ending) continue;
+      if (ending.why === "forget") e.effects = e.effects.filter((x) => x.id !== effect.id);
+      else endEffect(effect, sweepWhy(ending));
     }
   };
   /** Why an attack roll has Advantage from a spell's mark: `Guiding Bolt (Ilse's hit on Goblin)`. */
