@@ -31,7 +31,8 @@ src/
 content/srd-5.2.1/ # rules content as YAML (source of truth)
 schemas/           # GENERATED JSON Schemas for content files and builds
 scripts/           # compile-content.ts; check-sources.ts (leak guard: SRD/homebrew only);
-                   #   import-srd-spells.ts (SRD Markdown → spells.yaml);
+                   #   import-srd-spells.ts (SRD Markdown → spells.yaml; its text parser for mechanics
+                   #   drafts is spell-mechanics.ts);
                    #   import-srd-items.ts (→ magic-items.yaml, conditions.yaml);
                    #   import-srd-gear.ts (→ gear.yaml, prices in tools.yaml);
                    #   import-srd-monsters.ts (→ monsters.yaml; FIXES for garbled values);
