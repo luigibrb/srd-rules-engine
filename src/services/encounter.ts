@@ -25,6 +25,8 @@ import {
   EncounterCombatantSchema,
   type EncounterEffect,
   EncounterSchema,
+  type EncounterSettingsInput,
+  EncounterSettingsSchema,
   type Help,
   type MasteryMark,
   type Pending,
@@ -136,6 +138,8 @@ export interface EncounterContext {
   /** Characters by the key their combatants use (`character`). */
   readonly characters?: Readonly<Record<string, CharacterRef>>;
   readonly rng?: Rng;
+  /** The table's settings (decisions, death saves, positions); each one defaults when left out. */
+  readonly settings?: EncounterSettingsInput;
 }
 
 /**
@@ -192,11 +196,9 @@ export interface EncounterResult {
   readonly rolls: readonly number[];
 }
 
-/** A new encounter. `auto_death_saves: false` leaves Death Saving Throws to the players. */
-export function createEncounter(
-  options: { auto_death_saves?: boolean; decisions?: "ask" | "auto" } = {},
-): Encounter {
-  return EncounterSchema.parse(options);
+/** A new, empty encounter. How the table plays it is in each call's `settings`. */
+export function createEncounter(): Encounter {
+  return EncounterSchema.parse({});
 }
 
 /** Whose turn it is, or `null` before the fight starts. */
@@ -461,6 +463,7 @@ function run(
   // A working copy of the characters: several can change in one action (attacker and target).
   const chars: Record<string, CharacterRef> = { ...(outer.characters ?? {}) };
   const ctx: EncounterContext = { ...outer, characters: chars };
+  const settings = EncounterSettingsSchema.parse(outer.settings ?? {});
   const rng = ctx.rng ?? mathRng;
   let result: EncounterResult["result"] = null;
   /** An action played by hand: its note, the dice rolled and their notes. */
@@ -507,7 +510,12 @@ function run(
   let answered = 0;
   const decide: Decide = (d) => {
     const c = d.combatant.id ? e.combatants.find((x) => x.id === d.combatant.id) : undefined;
-    if (!c || (c.decisions ?? e.decisions) === "auto") return d.recommended;
+    if (!c) return d.recommended;
+    const mode =
+      settings.decisions_by[c.id] ??
+      (c.character !== null ? settings.decisions_by[c.character] : undefined) ??
+      settings.decisions;
+    if (mode === "auto") return d.recommended;
     if (answered < answers.length) return answers[answered++] as boolean;
     throw new PendingDecision(c.id, d.kind, d.message, d.recommended);
   };
@@ -1070,7 +1078,7 @@ function run(
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
       const play = computePlaySheet(ref.build, ref.state, ctx.catalog).play;
-      if (play.dying && e.auto_death_saves) applyTo(c, [{ type: "death_save" }]);
+      if (play.dying && settings.auto_death_saves) applyTo(c, [{ type: "death_save" }]);
       else if (play.dying) notes.push(message("turn.death_save", { name: c.name }));
     }
     for (const x of e.combatants) x.riders_used = [];
@@ -1196,13 +1204,7 @@ function run(
     );
     for (const p of found) p.noticed_by.push(c.id);
     if (found.length) notes.push(message("explore.notices", { name: c.name }));
-    halt(found);
     return found;
-  };
-  /** Outside a fight, with `notice_stops: everyone`, a noticed point holds every move. */
-  const halt = (found: readonly PointOfInterest[]): void => {
-    const first = found[0];
-    if (first && e.round === 0 && e.notice_stops === "everyone" && !e.halted) e.halted = first.id;
   };
   const noticeAll = (): void => {
     for (const c of e.combatants) notice(c);
@@ -1220,7 +1222,8 @@ function run(
   const feetBetween = (a: EncounterCombatant, b: EncounterCombatant): number | null =>
     feetApart(ctx, a, b);
   /**
-   * The distance an action checks (reach, range): with `positions: required` and the map in use,
+   * The distance an action checks (reach, range): with the `positions: required` setting and the
+   * map in use,
    * a creature off the map is refused instead of passing as unknown.
    */
   const checkedFeet = (a: EncounterCombatant, b: EncounterCombatant): number | null => {
@@ -1230,7 +1233,7 @@ function run(
   };
   /** With `positions: required` and anyone on the map, a creature off it is refused. */
   const offMap = (...who: EncounterCombatant[]): void => {
-    if (e.positions !== "required" || !e.combatants.some((x) => x.position)) return;
+    if (settings.positions !== "required" || !e.combatants.some((x) => x.position)) return;
     for (const x of who) if (!x.position) refuse(message("refusal.off_map", { name: x.name }));
   };
   const enemiesNear = (c: EncounterCombatant): EncounterCombatant[] => enemiesWithin5(e, ctx, c);
@@ -2475,7 +2478,6 @@ function run(
           hp,
           in_lair: action.in_lair ?? false,
           auto_legendary_resistance: action.auto_legendary_resistance ?? true,
-          decisions: action.decisions ?? null,
         }),
       );
       notes.push(message("combatant.joins_hp", { name: action.name ?? numbered, hp }));
@@ -2497,7 +2499,6 @@ function run(
           name,
           character: action.character,
           side: action.side ?? "party",
-          decisions: action.decisions ?? null,
         }),
       );
       notes.push(message("combatant.joins", { name }));
@@ -2505,11 +2506,6 @@ function run(
     }
     case "decide":
       return fail(message("refusal.there_no_decision_make"));
-    case "set_decisions": {
-      if (action.id !== undefined) find(action.id).decisions = action.mode;
-      else e.decisions = action.mode ?? fail(message("refusal.encounter_mode_ask_auto"));
-      break;
-    }
     case "remove": {
       const c = find(action.id);
       const index = e.order.indexOf(c.id);
@@ -2588,7 +2584,6 @@ function run(
       if (!e.combatants.length) fail(message("refusal.no_combatants"));
       const missing = e.combatants.filter((c) => c.initiative === null).map((c) => c.name);
       if (missing.length) fail(message("refusal.roll_initiative_first", { names: missing }));
-      e.halted = null; // a fight doesn't wait on a noticed point
       e.round = 1;
       e.order = [];
       reorder(e, ctx);
@@ -2640,10 +2635,6 @@ function run(
       if (e.round === 0) {
         // Exploring: no turns and no limit; the engine says how many turns of Speed it takes.
         if (c.defeated) fail(message("refusal.defeated", { name: c.name }));
-        if (e.halted) {
-          const by = e.combatants.find((x) => point(e.halted as string).noticed_by.includes(x.id));
-          fail(message("refusal.everyone_waits", { name: by?.name ?? message("word.someone") }));
-        }
         const speed = speedOf(ctx, c, e);
         if (speed === 0) refuse(message("refusal.cant_move_speed", { name: c.name }));
         if (!action.to && !action.path) {
@@ -2810,7 +2801,6 @@ function run(
       Object.assign(p, structuredClone(changes));
       if (p.revealed && !wasRevealed) {
         notes.push(message("poi.revealed", { title: p.title }));
-        if (e.halted === p.id) e.halted = null;
       } else if (!p.revealed && wasRevealed) {
         p.noticed_by = [];
         notes.push(message("poi.hidden"));
@@ -2821,7 +2811,6 @@ function run(
     case "remove_point": {
       point(action.id);
       e.points = e.points.filter((p) => p.id !== action.id);
-      if (e.halted === action.id) e.halted = null;
       notes.push(message("poi.removed"));
       break;
     }
@@ -2830,23 +2819,7 @@ function run(
         e.pace = action.pace;
         notes.push(message("explore.pace", { pace: action.pace }));
       }
-      if (action.notice_stops) {
-        e.notice_stops = action.notice_stops;
-        if (action.notice_stops === "noticer") e.halted = null;
-        notes.push(message("explore.notice_stops", { who: action.notice_stops }));
-      }
       noticeAll();
-      break;
-    }
-    case "set_positions": {
-      e.positions = action.mode;
-      notes.push(message("positions.set", { mode: action.mode }));
-      break;
-    }
-    case "resume": {
-      if (!e.halted) fail(message("refusal.nobody_waiting"));
-      e.halted = null;
-      notes.push(message("explore.resume"));
       break;
     }
     case "dash": {
@@ -3085,7 +3058,6 @@ function run(
       );
       for (const p of found) p.noticed_by.push(c.id);
       if (found.length) notes.push(message("search.finds", { name: c.name }));
-      halt(found);
       const hidden = e.combatants.filter(
         (x) =>
           x.hidden !== null &&

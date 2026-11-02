@@ -247,7 +247,7 @@ actions:
 `halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, offered when an attack
 hits), as is `reduces_attack_damage: {dice: 1d10, abilities: [dex], class_level: true, types:
 [bludgeoning, piercing, slashing]}` (Deflect Attacks). They're decisions the encounter asks for or
-takes automatically (`decisions`). The effect target `spell.save_dc` and the Advantage target
+takes automatically (the table's setting `decisions`). The effect target `spell.save_dc` and the Advantage target
 `attack.spell` change spells (Innate Sorcery, a toggle).
 
 `rules` switches on a rule written in code, from a closed list: `evasion` (Dexterity saves that

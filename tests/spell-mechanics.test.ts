@@ -47,6 +47,8 @@ function session(
   let encounter: Encounter = createEncounter();
   const notes: string[] = [];
   let last: EncounterResult | null = null;
+  // A monster's `decisions`: the table's setting for it, by the id it gets.
+  const decisions_by: Record<string, "ask" | "auto"> = {};
   const act = (rolls: number[], ...actions: EncounterAction[]) => {
     const rng = scriptedRng(rolls);
     for (const action of actions) {
@@ -56,7 +58,12 @@ function session(
           { build, state: states[k] as CharacterState },
         ]),
       );
-      last = applyEncounterAction(encounter, action, { catalog, characters, rng });
+      last = applyEncounterAction(encounter, action, {
+        catalog,
+        characters,
+        rng,
+        settings: { decisions_by },
+      });
       encounter = last.encounter;
       Object.assign(states, last.states);
       notes.push(...last.notes);
@@ -71,10 +78,13 @@ function session(
       return n === 1 ? monster : `${monster}-${n}`;
     }),
   ];
+  monsters.forEach((m, i) => {
+    if (m.decisions) decisions_by[ids[Object.keys(builds).length + i] as string] = m.decisions;
+  });
   act(
     [],
     ...Object.keys(builds).map((character) => ({ type: "add_character", character }) as const),
-    ...monsters.map((m) => ({ type: "add_monster", ...m }) as const),
+    ...monsters.map(({ monster }) => ({ type: "add_monster", monster }) as const),
     ...ids.map((id, i) => ({ type: "set_initiative", id, value: 20 - i }) as const),
     { type: "start" },
   );

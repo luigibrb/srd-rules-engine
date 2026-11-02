@@ -47,6 +47,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P32 | More spells as data: Hunter's Mark and Hex (marks on the caster's hits, `move_mark`), Divine Smite (after a hit, doubled on a crit, more against Fiends and Undead), Flame Strike, Chain Lightning, Mass Suggestion (Charmed until damaged) | 84 spells with mechanics; the rest of each spell's text (Hex's ability, Chain Lightning's 30 feet) stays the GM's (flagged) |
 | P33 | Shopping: SRD prices and weights for 100 items of gear and every tool (`scripts/import-srd-gear.ts`), the play actions `buy` and `sell` with change, carried weight for gear; `buy`/`sell` in `srd-rules play` | Paid with the smallest coins first; sold for half (SRD); magic items need a price |
 | P34 | Monster traits in turns: damage auras, Death Burst and Death Throes, Regeneration, Aura of Authority (14 traits, read from their sentences by the importer) | A regenerating monster at 0 HP is Unconscious until it dies or regenerates (flagged) |
+| P35 | Table settings out of the encounter: `EncounterSettings` (decisions, Death Saving Throws, positions) given with each call, recorded on each history step; document format 2 (version 1 histories migrate, `legacyEncounterSettings` for encounters); the halt on a noticed point removed (event `noticed`) | Per-combatant decisions by combatant id or character key |
 
 ## Decisions
 
@@ -87,12 +88,6 @@ or invented homebrew in its tests.
   with direct tests; no change in behavior (the seeded demo and the history replays keep the
   dice in the same order). Done area by area, when a feature touches it (summons: turn timing
   and effects first). The new functions stay internal.
-- **Table settings out of the encounter (M).** Some `Encounter` fields are a table's policy,
-  not state the rules read: `positions`, `decisions`, `auto_death_saves`, `notice_stops`. Audit
-  every field, move the policy ones to per-call options (`EncounterContext`), and migrate saved
-  encounters through `DOCUMENT_VERSION`.
-
-  It changes the saved format, so it comes before more clients depend on it.
 - **Summons and companions (L).** Creatures a spell or a feature brings that act with their
   creator: Find Familiar, Find Steed, Giant Insect, Animate Objects. Their stat blocks scale with
   the caster (spell level, Proficiency Bonus, spell attack modifier), they join the encounter on

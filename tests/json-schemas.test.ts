@@ -94,17 +94,22 @@ describe("JSON Schemas", () => {
 
   it("encounters match encounter.schema.json: zones, effects, marks and a pending decision", () => {
     let e: Encounter = createEncounter();
+    const settings = { decisions_by: { "adult-blue-dragon": "ask" } } as const;
     const act = (rolls: number[], ...actions: EncounterAction[]) => {
       for (const action of actions) {
         expect(errors("encounter-action.schema.json", action), action.type).toEqual([]);
-        e = applyEncounterAction(e, action, { catalog, rng: scriptedRng(rolls) }).encounter;
+        e = applyEncounterAction(e, action, {
+          catalog,
+          rng: scriptedRng(rolls),
+          settings,
+        }).encounter;
       }
     };
     act(
       [],
       { type: "add_monster", monster: "druid", side: "party" },
       { type: "add_monster", monster: "ogre", side: "enemies" },
-      { type: "add_monster", monster: "adult-blue-dragon", side: "enemies", decisions: "ask" },
+      { type: "add_monster", monster: "adult-blue-dragon", side: "enemies" },
       { type: "set_initiative", id: "druid", value: 20 },
       { type: "set_initiative", id: "ogre", value: 10 },
       { type: "set_initiative", id: "adult-blue-dragon", value: 5 },

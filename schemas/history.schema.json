@@ -6,10 +6,10 @@
       "type": "object",
       "properties": {
         "version": {
-          "default": 1,
+          "default": 2,
           "type": "integer",
           "minimum": 1,
-          "maximum": 1
+          "maximum": 2
         },
         "start": {
           "type": "object",
@@ -18,10 +18,10 @@
               "type": "object",
               "properties": {
                 "version": {
-                  "default": 1,
+                  "default": 2,
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 1
+                  "maximum": 2
                 },
                 "round": {
                   "default": 0,
@@ -354,21 +354,6 @@
                         "items": {
                           "type": "string"
                         }
-                      },
-                      "decisions": {
-                        "default": null,
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "enum": [
-                              "ask",
-                              "auto"
-                            ]
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
                       },
                       "position": {
                         "default": null,
@@ -1727,14 +1712,6 @@
                     ]
                   }
                 },
-                "decisions": {
-                  "default": "auto",
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "auto"
-                  ]
-                },
                 "pending": {
                   "anyOf": [
                     {
@@ -1796,10 +1773,6 @@
                       "type": "null"
                     }
                   ]
-                },
-                "auto_death_saves": {
-                  "default": true,
-                  "type": "boolean"
                 },
                 "map": {
                   "default": {},
@@ -2012,34 +1985,10 @@
                     "normal",
                     "slow"
                   ]
-                },
-                "notice_stops": {
-                  "default": "noticer",
-                  "type": "string",
-                  "enum": [
-                    "noticer",
-                    "everyone"
-                  ]
-                },
-                "halted": {
-                  "default": null,
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "positions": {
-                  "default": "optional",
-                  "type": "string",
-                  "enum": [
-                    "optional",
-                    "required"
-                  ]
                 }
               }
             },
             "states": {
-              "default": {},
               "type": "object",
               "propertyNames": {
                 "type": "string"
@@ -2048,10 +1997,10 @@
                 "type": "object",
                 "properties": {
                   "version": {
-                    "default": 1,
+                    "default": 2,
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 1
+                    "maximum": 2
                   },
                   "hp": {
                     "default": {},
@@ -2314,6 +2263,9 @@
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991
                 }
+              },
+              "settings": {
+                "$ref": "#/$defs/EncounterSettings"
               }
             },
             "required": [
@@ -2361,13 +2313,6 @@
             },
             "auto_legendary_resistance": {
               "type": "boolean"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -2394,13 +2339,6 @@
             },
             "side": {
               "type": "string"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -2422,36 +2360,6 @@
           "required": [
             "type",
             "use"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_decisions"
-            },
-            "id": {
-              "type": "string"
-            },
-            "mode": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "auto"
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ]
         },
         {
@@ -3033,49 +2941,10 @@
                 "normal",
                 "slow"
               ]
-            },
-            "notice_stops": {
-              "type": "string",
-              "enum": [
-                "noticer",
-                "everyone"
-              ]
             }
           },
           "required": [
             "type"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "resume"
-            }
-          },
-          "required": [
-            "type"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_positions"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "optional",
-                "required"
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ]
         },
         {
@@ -5850,6 +5719,45 @@
           }
         }
       ]
+    },
+    "EncounterSettings": {
+      "type": "object",
+      "properties": {
+        "decisions": {
+          "default": "auto",
+          "type": "string",
+          "enum": [
+            "ask",
+            "auto"
+          ]
+        },
+        "decisions_by": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "ask",
+              "auto"
+            ]
+          }
+        },
+        "auto_death_saves": {
+          "default": true,
+          "type": "boolean"
+        },
+        "positions": {
+          "default": "optional",
+          "type": "string",
+          "enum": [
+            "optional",
+            "required"
+          ]
+        }
+      }
     }
   },
   "title": "Encounter history"

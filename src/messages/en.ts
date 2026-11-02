@@ -165,9 +165,6 @@ export const MESSAGES_EN = {
     "{name} moves {feet} feet: {turns, plural, one {# turn} other {# turns}} at a Speed of {speed} feet (about {seconds} seconds).",
   "explore.pace":
     "Travel pace: {pace, select, fast {Fast} normal {Normal} slow {Slow} other {{pace}}}.",
-  "explore.notice_stops":
-    "When someone notices something, {who, select, everyone {everyone stops} other {only they stop}}.",
-  "explore.resume": "Everyone goes on.",
   "move.stops": "{name} stops at {x},{y}.",
   "move.leaves_reach": "{name} leaves {enemy}'s reach: {enemy} can make an Opportunity Attack.",
   "map.terrain":
@@ -281,8 +278,6 @@ export const MESSAGES_EN = {
   "reason.surprised": "surprised",
   "reason.pace_fast": "a Fast travel pace",
   "reason.pace_slow": "a Slow travel pace",
-  "positions.set":
-    "{mode, select, required {Creatures off the map can't attack, cast or act on others at a distance} other {Creatures off the map act as if in reach and range}}.",
   // Refusals: why an action can't be taken (EncounterError, PlayError).
   "refusal.no_combatant_encounter": "No combatant '{id}' in the encounter",
   "refusal.there_no_decision_make": "There's no decision to make",
@@ -337,7 +332,6 @@ export const MESSAGES_EN = {
   "refusal.already_encounter": "'{id}' is already in the encounter",
   "refusal.no_character_given": "No character '{character}' given",
   "refusal.already_encounter_2": "'{character}' is already in the encounter",
-  "refusal.encounter_mode_ask_auto": "The encounter's mode is ask or auto",
   "refusal.set_order_needs_every_combatant": "set_order needs every combatant's id, once each",
   "refusal.set_order_reorder_tied_initiatives": "set_order can only reorder tied Initiatives",
   "refusal.fight_already_started": "The fight has already started",
@@ -350,7 +344,6 @@ export const MESSAGES_EN = {
   "refusal.wall_goes_one_corner": "A wall goes from one corner to another",
   "refusal.wall_already_there": "That wall is already there",
   "refusal.no_wall": "No wall from {x},{y} to {x2},{y2}",
-  "refusal.nobody_waiting": "Nobody is waiting",
   "refusal.cant_help_itself": "{name} can't Help itself",
   "refusal.isnt_ally": "{target} isn't {name}'s ally",
   "refusal.isnt_proficient_help_assists":
@@ -525,9 +518,6 @@ export const MESSAGES_EN = {
   "refusal.reaction_used":
     "{name} has already used its reaction (it returns at the start of its turn)",
   "refusal.roll_initiative_first": "Roll Initiative first: {names}",
-  "refusal.everyone_waits":
-    "Everyone waits: {name} noticed something (the GM reveals it or lets you go on)",
-  "word.someone": "someone",
   "refusal.choose_escape": "Choose what to escape: {ids}",
   "refusal.escape_skill": "Escaping {label} takes an {skill} check",
   "refusal.not_concentrating": "{name} isn't concentrating",

@@ -3,10 +3,10 @@
   "type": "object",
   "properties": {
     "version": {
-      "default": 1,
+      "default": 2,
       "type": "integer",
       "minimum": 1,
-      "maximum": 1
+      "maximum": 2
     },
     "round": {
       "default": 0,
@@ -339,21 +339,6 @@
             "items": {
               "type": "string"
             }
-          },
-          "decisions": {
-            "default": null,
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "ask",
-                  "auto"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "position": {
             "default": null,
@@ -1712,14 +1697,6 @@
         ]
       }
     },
-    "decisions": {
-      "default": "auto",
-      "type": "string",
-      "enum": [
-        "ask",
-        "auto"
-      ]
-    },
     "pending": {
       "anyOf": [
         {
@@ -1781,10 +1758,6 @@
           "type": "null"
         }
       ]
-    },
-    "auto_death_saves": {
-      "default": true,
-      "type": "boolean"
     },
     "map": {
       "default": {},
@@ -1997,29 +1970,6 @@
         "normal",
         "slow"
       ]
-    },
-    "notice_stops": {
-      "default": "noticer",
-      "type": "string",
-      "enum": [
-        "noticer",
-        "everyone"
-      ]
-    },
-    "halted": {
-      "default": null,
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "positions": {
-      "default": "optional",
-      "type": "string",
-      "enum": [
-        "optional",
-        "required"
-      ]
     }
   },
   "$defs": {
@@ -2058,13 +2008,6 @@
             },
             "auto_legendary_resistance": {
               "type": "boolean"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -2091,13 +2034,6 @@
             },
             "side": {
               "type": "string"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -2119,36 +2055,6 @@
           "required": [
             "type",
             "use"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_decisions"
-            },
-            "id": {
-              "type": "string"
-            },
-            "mode": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "auto"
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ]
         },
         {
@@ -2730,49 +2636,10 @@
                 "normal",
                 "slow"
               ]
-            },
-            "notice_stops": {
-              "type": "string",
-              "enum": [
-                "noticer",
-                "everyone"
-              ]
             }
           },
           "required": [
             "type"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "resume"
-            }
-          },
-          "required": [
-            "type"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_positions"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "optional",
-                "required"
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ]
         },
         {

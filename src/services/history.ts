@@ -1,10 +1,16 @@
 /**
  * Undo and replay for encounters. Every action rolls only through `rng` and its result lists the
- * dice it drew (`EncounterResult.rolls`), so a history (the start and each action with its dice)
- * replays to the same encounter and character states: undo replays all but the last action.
+ * dice it drew (`EncounterResult.rolls`), so a history (the start and each action with its dice
+ * and the table's settings) replays to the same encounter and character states: undo replays all
+ * but the last action.
  */
 
-import type { Encounter, EncounterAction } from "../models/encounter";
+import {
+  type Encounter,
+  type EncounterAction,
+  type EncounterSettingsInput,
+  EncounterSettingsSchema,
+} from "../models/encounter";
 import { type EncounterHistory, EncounterHistorySchema } from "../models/history";
 import type { CharacterState } from "../models/state";
 import { scriptedRng } from "../rules/rng";
@@ -18,19 +24,28 @@ export function createHistory(
   return EncounterHistorySchema.parse({ start: { encounter, states } });
 }
 
-/** The history with one more applied action (the result `applyEncounterAction` returned). */
+/**
+ * The history with one more applied action: the result `applyEncounterAction` returned, and the
+ * settings it was given (`EncounterContext.settings`), which a replay uses again.
+ */
 export function recordAction(
   history: EncounterHistory,
   action: EncounterAction,
   result: Pick<EncounterResult, "rolls">,
+  settings: EncounterSettingsInput = {},
 ): EncounterHistory {
-  return { ...history, steps: [...history.steps, { action, rolls: [...result.rolls] }] };
+  const step = {
+    action,
+    rolls: [...result.rolls],
+    settings: EncounterSettingsSchema.parse(settings),
+  };
+  return { ...history, steps: [...history.steps, step] };
 }
 
 /**
  * The encounter and character states after the first `steps` actions (default: all), replayed
- * with their recorded dice. `ctx` gives the catalog and the characters' builds; their states come
- * from the history.
+ * with their recorded dice and settings. `ctx` gives the catalog and the characters' builds (and
+ * the settings for a step that has none); their states come from the history.
  */
 export function replayHistory(
   history: EncounterHistory,
@@ -53,6 +68,7 @@ export function replayHistory(
       ...ctx,
       characters,
       rng: scriptedRng(step.rolls),
+      settings: step.settings ?? ctx.settings,
     });
     encounter = r.encounter;
     Object.assign(states, r.states);

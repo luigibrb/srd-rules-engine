@@ -9,7 +9,13 @@ import { join } from "node:path";
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import { ABILITIES, type Ability, type DamageType, SKILLS, type Skill } from "../models/content";
-import type { Encounter, EncounterAction, EncounterCombatant } from "../models/encounter";
+import {
+  type Encounter,
+  type EncounterAction,
+  type EncounterCombatant,
+  type EncounterSettings,
+  EncounterSettingsSchema,
+} from "../models/encounter";
 import type { EncounterHistory } from "../models/history";
 import type { OptionEntry } from "../models/options";
 import type { CharacterState } from "../models/state";
@@ -81,7 +87,8 @@ export class FightApp {
   private readonly rng: Rng;
   private readonly saveDir: string;
   private readonly monsters: string[];
-  private readonly ask: boolean;
+  /** The table's settings (`ask on|off` changes who decides after a roll). */
+  private settings: EncounterSettings;
   private dirty = false;
   /** Every action applied since the start, with its dice: `undo` replays all but the last. */
   private history: EncounterHistory;
@@ -100,8 +107,8 @@ export class FightApp {
     this.rng = rng ?? mathRng;
     this.saveDir = saveDir ?? "characters";
     this.monsters = monsters;
-    this.ask = ask;
-    this.encounter = encounter ?? createEncounter({ decisions: ask ? "ask" : "auto" });
+    this.settings = EncounterSettingsSchema.parse({ decisions: ask ? "ask" : "auto" });
+    this.encounter = encounter ?? createEncounter();
     this.history = createHistory(this.encounter, this.states);
   }
 
@@ -541,7 +548,11 @@ export class FightApp {
         if (!mode) return this.con.error("Usage: ask on|off [<target>]");
         const t = args[1] ? this.find(args[1]) : null;
         if (args[1] && !t) return;
-        return this.apply({ type: "set_decisions", id: t?.id, mode });
+        this.settings = t
+          ? { ...this.settings, decisions_by: { ...this.settings.decisions_by, [t.id]: mode } }
+          : { ...this.settings, decisions: mode };
+        this.con.say(`  Decisions after a roll${t ? ` for ${t.name}` : ""}: ${mode}.`);
+        return;
       }
       default:
         this.con.error(`Unknown command '${word}' (try 'help')`);
@@ -798,7 +809,7 @@ export class FightApp {
         { build, state: this.states[k] as CharacterState },
       ]),
     );
-    return { catalog: this.catalog, characters, rng: this.rng };
+    return { catalog: this.catalog, characters, rng: this.rng, settings: this.settings };
   }
 
   /** Apply an action, show its notes, and ask the pending decisions it stops for. */
@@ -817,7 +828,7 @@ export class FightApp {
       }
       this.encounter = result.encounter;
       Object.assign(this.states, result.states);
-      this.history = recordAction(this.history, next, result);
+      this.history = recordAction(this.history, next, result, this.settings);
       this.dirty = true;
       next = null;
       if (result.pending) {

@@ -75,6 +75,11 @@ export const EncounterEventSchema = z
     z.object({ type: z.literal("zone_ended"), zone: z.string() }),
     /** The map changed (walls, terrain). */
     z.object({ type: z.literal("map") }),
+    /**
+     * A creature noticed a hidden point of interest (Passive Perception, or a Search): what a
+     * table that stops everyone on a find needs to know.
+     */
+    z.object({ type: z.literal("noticed"), id: z.string(), point: z.string() }),
     /** The action stopped for a decision (`encounter.pending`). */
     z.object({
       type: z.literal("pending"),
@@ -93,8 +98,6 @@ export type EncounterEvent = z.infer<typeof EncounterEventSchema>;
  */
 export const REFUSAL_CODES = [
   "pending_decision",
-  /** Outside a fight, every move waits on a noticed point (`notice_stops: everyone`). */
-  "halted",
   "not_started",
   "not_your_turn",
   "incapacitated",
@@ -138,7 +141,6 @@ export type RefusalCategory = (typeof REFUSAL_CATEGORY_NAMES)[number];
 /** Each refusal code's category. */
 export const REFUSAL_CATEGORIES: Readonly<Record<RefusalCode, RefusalCategory>> = {
   pending_decision: "turn",
-  halted: "turn",
   not_started: "turn",
   not_your_turn: "turn",
   incapacitated: "state",

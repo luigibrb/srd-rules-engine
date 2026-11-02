@@ -12,6 +12,7 @@ import {
   type Encounter,
   type EncounterAction,
   EncounterError,
+  type EncounterSettingsInput,
   type OptionEntry,
   scriptedRng,
   seededRng,
@@ -47,8 +48,18 @@ function session(
     states[k] = state;
   }
   let encounter: Encounter = createEncounter();
+  /** The table's settings, given with every action; `set` changes them between actions. */
+  let settings: EncounterSettingsInput = {};
+  const set = (change: EncounterSettingsInput) => {
+    settings = {
+      ...settings,
+      ...change,
+      decisions_by: { ...settings.decisions_by, ...change.decisions_by },
+    };
+  };
   const ctx = () => ({
     catalog,
+    settings,
     characters: Object.fromEntries(
       Object.entries(builds).map(([k, build]) => [
         k,
@@ -85,6 +96,7 @@ function session(
     { type: "start" },
   );
   return {
+    set,
     act,
     states,
     ctx,
@@ -393,8 +405,7 @@ describe("combatantOptions: positions", () => {
     } as const;
     // Optional (the default): the distance is unknown and the attack passes.
     expect(checkAction(s.encounter(), attack, s.ctx()).ok).toBe(true);
-    s.act([], { type: "set_positions", mode: "required" });
-    expect(s.encounter().positions).toBe("required");
+    s.set({ positions: "required" });
     const offMap = { code: "refusal.off_map", params: { name: "Brakka" } };
     expect(checkAction(s.encounter(), attack, s.ctx())).toEqual({
       ok: false,
@@ -425,7 +436,7 @@ describe("combatantOptions: positions", () => {
 
   it("positions required with nobody on the map changes nothing", () => {
     const s = session({ brakka: fighterBuild() }, [{ monster: "goblin-warrior" }]);
-    s.act([], { type: "set_positions", mode: "required" });
+    s.set({ positions: "required" });
     const attack = {
       type: "attack",
       id: "brakka",
@@ -499,7 +510,7 @@ describe("checkAction", () => {
 
   it("an action that stops for a decision counts as allowed", () => {
     const s = session({ brakka: fighterBuild() }, [{ monster: "goblin-warrior" }]);
-    s.act([], { type: "set_decisions", mode: "ask" });
+    s.set({ decisions: "ask" });
     // Brakka holds a Bardic Inspiration die: a failed check asks whether to add it.
     const encounter: Encounter = {
       ...s.encounter(),

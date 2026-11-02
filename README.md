@@ -287,7 +287,7 @@ cover and lines of effect worked out from it, and wall spells), exploring outsid
 noticed by Passive Perception or a Search), casting times, monsters' spells (through the action that
 lists them, with daily uses and fixed levels), class features used in turns (`feature`: Second Wind, Action Surge, Flurry of
 Blows, Stunning Strike, Bardic Inspiration…), and decisions after a roll (Bardic Inspiration,
-Legendary Resistance, Uncanny Dodge): with `decisions: "ask"` the action stops and shows the roll
+Legendary Resistance, Uncanny Dodge): with the table's setting `decisions: "ask"` the action stops and shows the roll
 so the player or GM can choose (`decide`), with `"auto"` the engine uses them only when they can
 change the outcome (`cast`), once-per-turn riders (Sneak Attack), recharges (a
 breath weapon on 5–6), conditions with durations (`effects` with `{ rounds: 10 }` or
@@ -419,10 +419,10 @@ export default { fetch: handler };                // Cloudflare Workers
 | `POST /v1/state/attack` | `{ attacker: {build, state}, target: {build, state}, attack, mode?, two_handed?, riders?, ally_adjacent? }` → the attack, and the target's state after the damage |
 | `POST /v1/state/roll` | `{ build, state, what }` → an attack, spell or feature rolled by hand (`rollByHand`): the dice and its costs, each with whether it can be paid now (pay with `/v1/state/apply`) |
 | `POST /v1/state/cast` | `{ caster: {build, state}, spell, targets: [{build, state}], slot_level?, pact? }` → the spell's results, the caster's state (slot spent, Concentration) and the targets' states |
-| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, action }` (one or a list, all or nothing) → `{ encounter, states, notes, messages, events, log, pending, applied }` (`log`: each action with the dice it drew): Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
-| `POST /v1/encounters/options` | `{ encounter, characters, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
-| `POST /v1/encounters/reachable` · `/preview-move` · `/preview-area` | `{ encounter, characters, id }` (+ `to` or `path`; + `area` and `spell`, `ability` or `legendary`) → where it can move, what a move or an area would do (schemas in `schemas/`) |
-| `POST /v1/encounters/check` | `{ encounter, characters, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |
+| `POST /v1/encounters/apply` | `{ encounter, characters: { key: {build, state} }, settings, action }` (one or a list, all or nothing; `settings`: the table's `EncounterSettings`, optional) → `{ encounter, states, notes, messages, events, log, pending, applied }` (`log`: each action with the dice it drew): Initiative, turns, attacks, spells, effects on monsters and characters; a list stops at a decision to make (`pending`), answered with `{ type: "decide", use }` |
+| `POST /v1/encounters/options` | `{ encounter, characters, settings, id }` → what that combatant can do now (`combatantOptions`; schema in `schemas/options.schema.json`) |
+| `POST /v1/encounters/reachable` · `/preview-move` · `/preview-area` | `{ encounter, characters, settings, id }` (+ `to` or `path`; + `area` and `spell`, `ability` or `legendary`) → where it can move, what a move or an area would do (schemas in `schemas/`) |
+| `POST /v1/encounters/check` | `{ encounter, characters, settings, action }` → `{ ok, reasons }`: whether the engine would take the action now, without applying it |
 | `POST /v1/combat/roll` | Roll a dice expression (`{"expression": "2d6+3"}`) |
 
 Routes that take a hand-filled `Character` snapshot (from the earlier Python version):

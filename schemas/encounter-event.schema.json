@@ -535,6 +535,27 @@
           "properties": {
             "type": {
               "type": "string",
+              "const": "noticed"
+            },
+            "id": {
+              "type": "string"
+            },
+            "point": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "point"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
               "const": "pending"
             },
             "combatant": {
