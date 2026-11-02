@@ -6653,15 +6653,6 @@
   duration: 1 minute
   concentration: false
   description: >-
-    or Ritual
-
-    **Range:** Self
-
-    **Components:** V, S, M (incense)
-
-    **Duration:** 1 minute
-
-
     You contact a deity or a divine proxy and ask up to three questions that can be answered with
     yes or no. You must ask your questions before the spell ends. You receive a correct answer for
     each question.
@@ -6796,15 +6787,6 @@
   duration: 1 minute
   concentration: false
   description: >-
-    or Ritual
-
-    **Range:** Self
-
-    **Components:** V
-
-    **Duration:** 1 minute
-
-
     You mentally contact a demigod, the spirit of a long-dead sage, or some other knowledgeable
     entity from another plane. Contacting this otherworldly intelligence can break your mind. When
     you cast this spell, make a DC 15 Intelligence saving throw. On a successful save, you can ask

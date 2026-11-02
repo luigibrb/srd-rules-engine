@@ -457,8 +457,11 @@ for (const section of sections) {
   const lists = (header[4] ?? "").split(",").map((c) => slug(c.trim()));
   const castingTime = field(text, "Casting Time");
   const duration = field(text, "Duration");
+  // After the Duration line (its value can also appear in the casting time: "1 minute or Ritual").
+  const durationLine = /\*\*Duration:\*\* .*/.exec(text);
+  if (!durationLine) throw new Error(`No duration for ${name}`);
   const description = text
-    .slice(text.indexOf(field(text, "Duration")) + duration.length)
+    .slice(durationLine.index + durationLine[0].length)
     .trim()
     .replace(/\n{3,}/g, "\n\n");
   spells.push({
