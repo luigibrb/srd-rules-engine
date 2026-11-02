@@ -650,6 +650,7 @@ export const MESSAGES_EN = {
   "option.chosen_for": "already chosen for {source}",
   "option.already_at": "already at {max}",
   "option.have_feat": "you already have this feat",
+  "option.one_feat_category": "you can have only one feat of this kind ({feat})",
   "option.have_it": "you already have this",
   "option.have_every_option": "you already have it with every option",
   "option.not_proficient": "not proficient",

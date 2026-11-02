@@ -141,6 +141,10 @@
           "default": false,
           "type": "boolean"
         },
+        "exclusive": {
+          "default": false,
+          "type": "boolean"
+        },
         "repeat_requires_different": {
           "default": null,
           "type": [
@@ -303,6 +307,10 @@
             ]
           },
           "repeatable": {
+            "default": false,
+            "type": "boolean"
+          },
+          "exclusive": {
             "default": false,
             "type": "boolean"
           },
@@ -491,6 +499,7 @@
                       "enum": [
                         "full",
                         "half",
+                        "third",
                         "pact"
                       ]
                     },
@@ -755,6 +764,7 @@
                   "speed",
                   "spell.save_dc",
                   "attack.weapon",
+                  "attunement",
                   "skill.acrobatics",
                   "skill.animal-handling",
                   "skill.arcana",
@@ -1128,14 +1138,34 @@
                 "type": "string"
               },
               "ability": {
-                "type": "string",
-                "enum": [
-                  "str",
-                  "dex",
-                  "con",
-                  "int",
-                  "wis",
-                  "cha"
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "str",
+                      "dex",
+                      "con",
+                      "int",
+                      "wis",
+                      "cha"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dice": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d+d\\d+$"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
               "cantrip": {
@@ -1195,8 +1225,7 @@
               }
             },
             "required": [
-              "name",
-              "ability"
+              "name"
             ],
             "additionalProperties": false
           }
@@ -2018,6 +2047,27 @@
           }
         },
         "at_class_level": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20
+              },
+              "grants": {
+                "$ref": "#/$defs/Grants"
+              }
+            },
+            "required": [
+              "level",
+              "grants"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "at_level": {
           "type": "array",
           "items": {
             "type": "object",

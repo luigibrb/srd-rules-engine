@@ -1066,6 +1066,13 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.
 
+**Spellcasting**
+
+- A one-third caster (`progression: third`, spellcasting from a subclass; not in the SRD, whose
+  Multiclass Spellcaster rules name full and half casters) counts a third of its class levels,
+  rounded up, toward the Multiclass Spellcaster table: that gives a one-third caster's own slot
+  table at every level, as half casters' rounding up does.
+
 **Summons**
 
 - Find Steed's steed "shares your Initiative count" and acts as a controlled mount: its turn is

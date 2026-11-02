@@ -130,6 +130,8 @@ export interface Combatant {
 export interface SpellDamageBonus {
   readonly name: string;
   readonly bonus: number;
+  /** Dice it adds, of the spell's (first) damage type; `null`: none. */
+  readonly dice?: string | null;
   readonly cantrip: boolean;
   readonly list: string | null;
   readonly school: string | null;

@@ -320,11 +320,17 @@ export function castSpell(
   );
   const extra = (first: boolean) =>
     matching.reduce((sum, d) => sum + (!d.one_roll || first ? d.bonus : 0), 0);
+  // Dice a feature adds (a d8 to one damage roll), of the spell's first damage type.
+  const extraDice = (first: boolean) =>
+    matching.filter((d) => d.dice && (!d.one_roll || first)).map((d) => d.dice as string);
   const partsFor = (first: boolean): DamagePart[] => {
     const add = extra(first);
-    return add && parts[0]
-      ? [{ ...parts[0], bonus: parts[0].bonus + add }, ...parts.slice(1)]
-      : parts;
+    const withBonus =
+      add && parts[0] ? [{ ...parts[0], bonus: parts[0].bonus + add }, ...parts.slice(1)] : parts;
+    const type = parts[0]?.type;
+    return type
+      ? [...withBonus, ...extraDice(first).map((dice) => ({ dice, bonus: 0, type }))]
+      : withBonus;
   };
   // Potent Cantrip: a cantrip that misses or is saved against still deals half damage.
   const potent = cantrip && caster.rules.includes("potent_cantrip");

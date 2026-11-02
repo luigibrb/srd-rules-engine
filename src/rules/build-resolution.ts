@@ -621,11 +621,28 @@ function resolvePass(build: CharacterBuild, catalog: Catalog, prev: Resolution |
         ? levels.find((l) => l.class_id === src.class_id && l.class_level === gate.level)
         : undefined;
       if (reached) {
+        // The sub-source isn't the feat itself (else the feat would count twice).
         addSource({
           ...src,
           key: `${src.key}+${gate.level}`,
           grants: gate.grants,
           level: reached.level,
+          feat: null,
+          feature: null,
+        });
+      }
+    }
+    // Grants from a character level on (a species' lineage spells at level 3).
+    for (const gate of src.grants.at_level) {
+      const reached = levels.find((l) => l.level === gate.level);
+      if (reached) {
+        addSource({
+          ...src,
+          key: `${src.key}@${gate.level}`,
+          grants: gate.grants,
+          level: reached.level,
+          feat: null,
+          feature: null,
         });
       }
     }
@@ -923,6 +940,7 @@ const EMPTY_GRANTS = Object.freeze({
   traits: [],
   choices: [],
   at_class_level: [],
+  at_level: [],
 }) as Grants;
 
 function expertiseLast(choices: ActiveChoice[]): ActiveChoice[] {
@@ -996,12 +1014,27 @@ function optionViews(res: Resolution, choice: ActiveChoice): OptionView[] {
           .filter(([, s]) => !s.key.endsWith(`@${choice.key}`))
           .map(([id, s]) => [id, s.name]),
       );
+      // The categories of the feats it has (for an exclusive category: one feat only).
+      const ownedCategories = new Map(
+        [...owned.keys()].map((id) => [
+          id,
+          lookup(isFeat ? cat.feats : cat.features, id)?.category,
+        ]),
+      );
       return Object.values(isFeat ? cat.feats : cat.features)
         .filter((feat) => ok(feat.id) && inCategory(feat.category))
         .map((feat) => {
           let reason: Message | null = null;
+          const rival = feat.exclusive
+            ? [...ownedCategories.entries()].find(
+                ([id, c]) => c === feat.category && id !== feat.id,
+              )
+            : undefined;
           if (owned.has(feat.id) && !feat.repeatable) {
             reason = message(isFeat ? "option.have_feat" : "option.have_it");
+          } else if (rival) {
+            // "You can have only one feat of this category."
+            reason = message("option.one_feat_category", { feat: owned.get(rival[0]) ?? rival[0] });
           } else if (repeatsExhausted(res, feat, choice.key)) {
             reason = message("option.have_every_option");
           } else {

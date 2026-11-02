@@ -50,6 +50,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P35 | Table settings out of the encounter: `EncounterSettings` (decisions, Death Saving Throws, positions) given with each call, recorded on each history step; document format 2 (version 1 histories migrate, `legacyEncounterSettings` for encounters); the halt on a noticed point removed (event `noticed`) | Per-combatant decisions by combatant id or character key |
 | P36 | Summoned creatures: stat block templates that scale (`summons`, `rules/templates.ts`), `mechanics.summon` for the SRD's seven summoning spells, their turns after the caster's or their own, their endings; casting outside a fight; when things end in pure functions (`services/lifetimes.ts`) | Commands to a summoned creature are the table's; Find Steed's mount rules are text (flagged) |
 | P37 | Summons from features: a feature that casts a spell without a slot, spending its uses (the Druid's Wild Companion), or brings creatures itself, their stat blocks scaling with the class level | Casting Find Familiar through Wild Companion with a spell slot instead is by hand; the familiar leaving on a Long Rest is text |
+| P38 | Content schema gaps: grants at a character level (the SRD lineages' level 3 and 5 spells), an attunement limit from content, feats exclusive to their category, a one-third caster progression, dice in spell damage bonuses | A one-third caster rounds up (flagged) |
 
 ## Decisions
 
@@ -94,15 +95,9 @@ or invented homebrew in its tests.
 
 ### Priority 2: next
 
-- **Content schema gaps (S each).** Small additions so content can say more as data: an
-  attunement limit set by a feature (instead of the fixed three); spells a feat or feature adds
-  to its owner's class spell lists; feat categories you can take only one feat of; a tool
-  proficiency that becomes another of your choice when you already have it; dice in
-  `spell_damage`; a saving throw by the creature hit and those around it, after a weapon hit;
-  grants at a character level, for sources without a class (the spells the Elf's and the
-  Tiefling's lineages give at levels 3 and 5, text today: `at_class_level` counts the levels of
-  the source's class, and on a feat taken with a class level it also counts the feat twice); a
-  one-third caster progression, for spellcasting that comes from a subclass.
+- **Content schema gaps, what's left (S–M each).** Spells a feat or feature adds to its owner's
+  class spell lists; a tool proficiency that becomes another of your choice when you already have
+  it; a saving throw by the creature hit and those around it, after a weapon hit.
 - **Reactions to another creature's roll (M).** A reaction after someone else's d20 roll, by a
   third party (Cutting Words): through the `decide` callback, like Bardic Inspiration.
 - **Spell riders the schema can't express yet (M).** Hit riders other than Advantage: no
