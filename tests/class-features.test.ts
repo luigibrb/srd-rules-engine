@@ -9,6 +9,7 @@ import {
   createState,
   type Encounter,
   type EncounterAction,
+  type EncounterSettingsInput,
   type SaveResult,
   type SpellCastResult,
   scriptedRng,
@@ -32,8 +33,18 @@ function session(
   let encounter: Encounter = createEncounter();
   const notes: string[] = [];
   let result: unknown = null;
+  /** The table's settings, given with every action; `set` changes them between actions. */
+  let settings: EncounterSettingsInput = {};
+  const set = (change: EncounterSettingsInput) => {
+    settings = {
+      ...settings,
+      ...change,
+      decisions_by: { ...settings.decisions_by, ...change.decisions_by },
+    };
+  };
   const ctx = () => ({
     catalog,
+    settings,
     characters: Object.fromEntries(
       Object.entries(builds).map(([k, build]) => [
         k,
@@ -71,7 +82,7 @@ function session(
     { type: "start" },
   );
   const get = (id: string) => encounter.combatants.find((c) => c.id === id);
-  return { act, notes, get, states, encounter: () => encounter, result: () => result };
+  return { act, set, notes, get, states, encounter: () => encounter, result: () => result };
 }
 const next = { type: "next_turn" } as const;
 const feature = (id: string, name: string, extra: Partial<EncounterAction> = {}) =>
@@ -81,7 +92,8 @@ describe("Fighter: Indomitable", () => {
   it("a failed save rerolled with the Fighter level, a use spent; a decision in ask mode", () => {
     const brakka = level("fighter", 9, "Brakka", fighterBuild());
     const s = session({ brakka }, [{ monster: "goblin-warrior" }]);
-    s.act([], { type: "set_decisions", id: "brakka", mode: "ask" }, next);
+    s.set({ decisions_by: { brakka: "ask" } });
+    s.act([], next);
     // The goblin's shove: Brakka saves (Strength +3 or Dexterity) against DC 12, rolls a 1.
     s.act([1], {
       type: "unarmed",

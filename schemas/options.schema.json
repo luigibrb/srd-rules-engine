@@ -166,7 +166,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -212,7 +211,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -552,7 +550,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -598,7 +595,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -736,7 +732,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -782,7 +777,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -1122,7 +1116,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -1168,7 +1161,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -1306,7 +1298,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -1352,7 +1343,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -1692,7 +1682,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -1738,7 +1727,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -1876,7 +1864,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -1922,7 +1909,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -2262,7 +2248,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -2308,7 +2293,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -2446,7 +2430,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -2492,7 +2475,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -2832,7 +2814,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -2878,7 +2859,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -3016,7 +2996,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -3062,7 +3041,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -3402,7 +3380,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -3448,7 +3425,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -3586,7 +3562,6 @@
                     "type": "string",
                     "enum": [
                       "pending_decision",
-                      "halted",
                       "not_started",
                       "not_your_turn",
                       "incapacitated",
@@ -3632,7 +3607,6 @@
                       "type": "string",
                       "enum": [
                         "pending_decision",
-                        "halted",
                         "not_started",
                         "not_your_turn",
                         "incapacitated",
@@ -3972,7 +3946,6 @@
                           "type": "string",
                           "enum": [
                             "pending_decision",
-                            "halted",
                             "not_started",
                             "not_your_turn",
                             "incapacitated",
@@ -4018,7 +3991,6 @@
                             "type": "string",
                             "enum": [
                               "pending_decision",
-                              "halted",
                               "not_started",
                               "not_your_turn",
                               "incapacitated",
@@ -4165,13 +4137,6 @@
             },
             "auto_legendary_resistance": {
               "type": "boolean"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -4199,13 +4164,6 @@
             },
             "side": {
               "type": "string"
-            },
-            "decisions": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "auto"
-              ]
             }
           },
           "required": [
@@ -4228,37 +4186,6 @@
           "required": [
             "type",
             "use"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_decisions"
-            },
-            "id": {
-              "type": "string"
-            },
-            "mode": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "auto"
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ],
           "additionalProperties": false
         },
@@ -4866,51 +4793,10 @@
                 "normal",
                 "slow"
               ]
-            },
-            "notice_stops": {
-              "type": "string",
-              "enum": [
-                "noticer",
-                "everyone"
-              ]
             }
           },
           "required": [
             "type"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "resume"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "set_positions"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "optional",
-                "required"
-              ]
-            }
-          },
-          "required": [
-            "type",
-            "mode"
           ],
           "additionalProperties": false
         },

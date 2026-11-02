@@ -5,8 +5,10 @@ import {
   type CharacterState,
   createEncounter,
   createState,
-  type Encounter,
   type EncounterAction,
+  type EncounterSettings,
+  type EncounterSettingsInput,
+  EncounterSettingsSchema,
   scriptedRng,
 } from "../src/index";
 import { autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
@@ -22,12 +24,14 @@ const level = (classId: string, n: number, name: string) =>
 function session(
   builds: Record<string, CharacterBuild>,
   monsters: { monster: string; decisions?: "ask" | "auto" }[],
-  start: Encounter = createEncounter(),
+  /** The table's settings; a monster's `decisions` adds to `decisions_by`. */
+  input: EncounterSettingsInput = {},
 ) {
+  let settings: EncounterSettings = EncounterSettingsSchema.parse(input);
   const states: Record<string, CharacterState> = Object.fromEntries(
     Object.entries(builds).map(([k, b]) => [k, createState(b, catalog)]),
   );
-  let encounter = start;
+  let encounter = createEncounter();
   const notes: string[] = [];
   let last: ReturnType<typeof applyEncounterAction> | null = null;
   const act = (rolls: number[], ...actions: EncounterAction[]) => {
@@ -39,7 +43,7 @@ function session(
           { build, state: states[k] as CharacterState },
         ]),
       );
-      last = applyEncounterAction(encounter, action, { catalog, characters, rng });
+      last = applyEncounterAction(encounter, action, { catalog, characters, rng, settings });
       encounter = last.encounter;
       Object.assign(states, last.states);
       notes.push(...last.notes);
@@ -55,15 +59,23 @@ function session(
       return n === 1 ? monster : `${monster}-${n}`;
     }),
   ];
+  monsters.forEach((m, i) => {
+    const id = ids[Object.keys(builds).length + i] as string;
+    if (m.decisions) settings.decisions_by[id] = m.decisions;
+  });
   act(
     [],
     ...Object.keys(builds).map((character) => ({ type: "add_character", character }) as const),
-    ...monsters.map((m) => ({ type: "add_monster", ...m }) as const),
+    ...monsters.map(({ monster }) => ({ type: "add_monster", monster }) as const),
     ...ids.map((id, i) => ({ type: "set_initiative", id, value: 20 - i }) as const),
     { type: "start" },
   );
   const get = (id: string) => encounter.combatants.find((c) => c.id === id);
-  return { act, notes, get, states, encounter: () => encounter, last: () => last };
+  /** Change the settings between actions, as a table would. */
+  const set = (change: EncounterSettingsInput) => {
+    settings = EncounterSettingsSchema.parse({ ...settings, ...change });
+  };
+  return { act, notes, get, states, set, encounter: () => encounter, last: () => last };
 }
 
 describe("Bardic Inspiration", () => {
@@ -72,7 +84,7 @@ describe("Bardic Inspiration", () => {
     const s = session(
       { lute: level("bard", 1, "Lute"), brakka: fighterBuild() },
       [{ monster: "goblin-warrior" }],
-      createEncounter({ decisions }),
+      { decisions },
     );
     s.act([], { type: "feature", id: "lute", feature: "Bardic Inspiration", target: "brakka" });
     return s;
@@ -171,18 +183,17 @@ describe("Legendary Resistance and Uncanny Dodge", () => {
   });
 
   it("Uncanny Dodge is offered once the rogue knows it's hit", () => {
-    const s = session(
-      { pip: level("rogue", 5, "Pip") },
-      [{ monster: "goblin-warrior" }],
-      createEncounter({ decisions: "ask" }),
-    );
+    const s = session({ pip: level("rogue", 5, "Pip") }, [{ monster: "goblin-warrior" }], {
+      decisions: "ask",
+    });
     const swing: EncounterAction = {
       type: "attack",
       id: "goblin-warrior",
       target: "pip",
       attack: "Scimitar",
     };
-    s.act([], { type: "next_turn" }, { type: "set_decisions", id: "goblin-warrior", mode: "auto" });
+    s.act([], { type: "next_turn" });
+    s.set({ decisions_by: { "goblin-warrior": "auto" } });
     s.act([19, 6], swing);
     expect(s.encounter().pending).toMatchObject({ combatant: "pip", kind: "uncanny_dodge" });
     expect(s.encounter().pending?.question).toMatch(

@@ -10,6 +10,7 @@ import {
   type Encounter,
   type EncounterAction,
   EncounterError,
+  type EncounterSettingsInput,
   encounterCombatant,
   makeAttack,
   scriptedRng,
@@ -26,7 +27,8 @@ function run(
   {
     rolls = [],
     state = createState(fighter, catalog),
-  }: { rolls?: number[]; state?: CharacterState } = {},
+    settings = {},
+  }: { rolls?: number[]; state?: CharacterState; settings?: EncounterSettingsInput } = {},
 ) {
   let encounter = start;
   let brakka = state;
@@ -34,7 +36,7 @@ function run(
   const rng = scriptedRng(rolls);
   for (const action of actions) {
     const characters = { brakka: { build: fighter, state: brakka } };
-    const r = applyEncounterAction(encounter, action, { catalog, characters, rng });
+    const r = applyEncounterAction(encounter, action, { catalog, characters, rng, settings });
     encounter = r.encounter;
     brakka = r.states.brakka ?? brakka;
     notes.push(...r.notes);
@@ -262,13 +264,17 @@ describe("attacks in an encounter", () => {
 
   it("reminds a character at 0 HP to make a Death Saving Throw (when not rolled automatically)", () => {
     const { encounter } = fight();
-    const down = run({ ...encounter, auto_death_saves: false }, [
-      { type: "effects", id: "brakka", actions: [{ type: "damage", amount: 12 }] },
-      { type: "next_turn" },
-      { type: "next_turn" },
-      { type: "next_turn" },
-      { type: "next_turn" },
-    ]);
+    const down = run(
+      encounter,
+      [
+        { type: "effects", id: "brakka", actions: [{ type: "damage", amount: 12 }] },
+        { type: "next_turn" },
+        { type: "next_turn" },
+        { type: "next_turn" },
+        { type: "next_turn" },
+      ],
+      { settings: { auto_death_saves: false } },
+    );
     expect(down.notes).toContain("Brakka is at 0 Hit Points: make a Death Saving Throw.");
   });
 });
@@ -378,11 +384,14 @@ describe("POST /v1/encounters/apply", () => {
       );
       return { status: res.status, body: await res.json() };
     };
+    // The table's settings come with each request.
+    const settings = { decisions_by: { "adult-blue-dragon": "ask" } };
     const res = await post({
       encounter: createEncounter(),
+      settings,
       action: [
         { type: "add_monster", monster: "mage" },
-        { type: "add_monster", monster: "adult-blue-dragon", decisions: "ask" },
+        { type: "add_monster", monster: "adult-blue-dragon" },
         { type: "set_initiative", id: "mage", value: 20 },
         { type: "set_initiative", id: "adult-blue-dragon", value: 10 },
         { type: "start" },
@@ -396,6 +405,7 @@ describe("POST /v1/encounters/apply", () => {
     expect(res.body.encounter.round).toBe(1);
     const decided = await post({
       encounter: res.body.encounter,
+      settings,
       action: [{ type: "decide", use: false }, { type: "next_turn" }],
     });
     expect(decided.body).toMatchObject({ applied: 2, pending: null });

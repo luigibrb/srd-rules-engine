@@ -8,6 +8,7 @@ import {
   createState,
   type Encounter,
   type EncounterAction,
+  type EncounterEvent,
   previewMove,
   scriptedRng,
 } from "../src/index";
@@ -36,7 +37,9 @@ function exploring(...setup: EncounterAction[]) {
     );
   let encounter: Encounter = createEncounter();
   const notes: string[] = [];
+  let events: EncounterEvent[] = [];
   const act = (rolls: number[], ...actions: EncounterAction[]) => {
+    events = [];
     for (const action of actions) {
       const r = applyEncounterAction(encounter, action, {
         catalog,
@@ -45,6 +48,7 @@ function exploring(...setup: EncounterAction[]) {
       });
       encounter = r.encounter;
       notes.push(...r.notes);
+      events.push(...r.events);
     }
   };
   act(
@@ -58,6 +62,8 @@ function exploring(...setup: EncounterAction[]) {
   return {
     act,
     notes,
+    /** The events of the last `act`. */
+    events: () => events,
     get e() {
       return encounter;
     },
@@ -151,22 +157,19 @@ describe("points of interest", () => {
     expect(s.e.points[0]?.noticed_by).toEqual(["brakka"]);
   });
 
-  it("with notice_stops: everyone, every move waits until the GM reveals it or resumes", () => {
-    const s = exploring(
-      { type: "set_exploration", notice_stops: "everyone" },
-      { type: "add_point", at: { x: 14, y: 0 }, title: "Tripwire", dc: passive(), within: 15 },
-    );
+  it("noticing a point is reported (event `noticed`); nobody else is held up", () => {
+    const s = exploring({
+      type: "add_point",
+      at: { x: 14, y: 0 },
+      title: "Tripwire",
+      dc: passive(),
+      within: 15,
+    });
     s.act([], { type: "move", id: "brakka", to: { x: 20, y: 0 } });
-    expect(s.e.halted).toBe("poi1");
-    expect(() => s.act([], { type: "move", id: "aerin", to: { x: 5, y: 4 } })).toThrow(
-      "Everyone waits: Brakka noticed something",
-    );
-    s.act([], { type: "update_point", id: "poi1", revealed: true });
-    expect(s.e.halted).toBeNull();
-    expect(s.notes).toContain("Tripwire is revealed.");
+    expect(s.events()).toContainEqual({ type: "noticed", id: "brakka", point: "poi1" });
+    // Whether the others stop is the table's call: the engine lets them move.
     s.act([], { type: "move", id: "aerin", to: { x: 5, y: 4 } });
     expect(s.at("aerin")).toEqual({ x: 5, y: 4 });
-    expect(() => s.act([], { type: "resume" })).toThrow("Nobody is waiting");
   });
 
   it("Search: a Perception check (no action outside a fight) finds hidden points in range", () => {
@@ -188,17 +191,20 @@ describe("points of interest", () => {
     expect(s.notes.join(" ")).not.toMatch(/Secret door/);
   });
 
-  it("hiding a revealed point again forgets who noticed it; removing it ends a halt", () => {
-    const s = exploring(
-      { type: "set_exploration", notice_stops: "everyone" },
-      { type: "add_point", at: { x: 1, y: 0 }, title: "Glint", dc: 0, within: 5, revealed: true },
-    );
+  it("hiding a revealed point again forgets who noticed it; it can be removed", () => {
+    const s = exploring({
+      type: "add_point",
+      at: { x: 1, y: 0 },
+      title: "Glint",
+      dc: 0,
+      within: 5,
+      revealed: true,
+    });
     s.act([], { type: "update_point", id: "poi1", revealed: false });
-    // Hidden again with a DC of 0: Brakka, next to it, notices it at once, and everyone waits.
+    // Hidden again with a DC of 0: Brakka, next to it, notices it at once.
     expect(s.e.points[0]?.noticed_by).toEqual(["brakka"]);
-    expect(s.e.halted).toBe("poi1");
+    expect(s.events()).toContainEqual({ type: "noticed", id: "brakka", point: "poi1" });
     s.act([], { type: "remove_point", id: "poi1" });
-    expect(s.e.halted).toBeNull();
     expect(s.e.points).toEqual([]);
   });
 });

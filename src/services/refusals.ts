@@ -9,7 +9,6 @@ import type { OptionReason } from "../models/options";
 
 const PATTERNS: readonly [RegExp, RefusalCode][] = [
   [/^Waiting for a decision/, "pending_decision"],
-  [/^Everyone waits: /, "halted"],
   [/The fight hasn't started|^Roll Initiative first/, "not_started"],
   [/It isn't .*'s turn|after another creature's turn, not on its own/, "not_your_turn"],
   [/ is Incapacitated$/, "incapacitated"],

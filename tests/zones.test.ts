@@ -7,6 +7,7 @@ import {
   createState,
   type Encounter,
   type EncounterAction,
+  type EncounterSettingsInput,
   scriptedRng,
   zoneSquares,
 } from "../src/index";
@@ -27,6 +28,15 @@ function session(
   );
   let encounter: Encounter = createEncounter();
   const notes: string[] = [];
+  /** The table's settings, given with every action; `set` changes them between actions. */
+  let settings: EncounterSettingsInput = {};
+  const set = (change: EncounterSettingsInput) => {
+    settings = {
+      ...settings,
+      ...change,
+      decisions_by: { ...settings.decisions_by, ...change.decisions_by },
+    };
+  };
   const act = (rolls: number[], ...actions: EncounterAction[]) => {
     const rng = scriptedRng(rolls);
     for (const action of actions) {
@@ -36,7 +46,7 @@ function session(
           { build, state: states[k] as CharacterState },
         ]),
       );
-      const r = applyEncounterAction(encounter, action, { catalog, characters, rng });
+      const r = applyEncounterAction(encounter, action, { catalog, characters, rng, settings });
       encounter = r.encounter;
       Object.assign(states, r.states);
       notes.push(...r.notes);
@@ -61,7 +71,7 @@ function session(
     { type: "start" },
   );
   const get = (id: string) => encounter.combatants.find((c) => c.id === id);
-  return { act, notes, get, states, encounter: () => encounter };
+  return { act, set, notes, get, states, encounter: () => encounter };
 }
 const next = { type: "next_turn" } as const;
 const place = (id: string, x: number, y: number) => ({ type: "place", id, x, y }) as const;
@@ -415,7 +425,8 @@ describe("Conjure Animals and Flaming Sphere", () => {
     expect(s.get("goblin-warrior")?.defeated).toBe(true);
     s.act([], next); // the guard, an ally: not forced
     expect(s.notes.some((n) => n.startsWith("Conjure Animals: Guard"))).toBe(false);
-    s.act([], { type: "set_decisions", id: "wren", mode: "ask" }, next);
+    s.set({ decisions_by: { wren: "ask" } });
+    s.act([], next);
     s.act([], next);
     expect(s.encounter().pending).toMatchObject({
       combatant: "wren",

@@ -101,12 +101,6 @@ export const EncounterCombatantSchema = z.object({
   /** Once-per-turn features used this turn. */
   features_used: z.array(z.string()).default([]),
   /**
-   * Who makes its decisions (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask`
-   * stops for an answer after the roll, `auto` takes the recommended choice; `null`: the
-   * encounter's `decisions`.
-   */
-  decisions: z.enum(["ask", "auto"]).nullable().default(null),
-  /**
    * Its square on a 5-foot grid (the top-left one, for a creature larger than Medium), or `null`
    * when positions aren't used: then the caller says what's within 5 feet or in range.
    */
@@ -408,8 +402,6 @@ export const EncounterSchema = z.object({
   marks: z.array(SpellMarkSchema).default([]),
   /** Spell areas that last (Moonbeam, Spirit Guardians). */
   zones: z.array(ZoneSchema).default([]),
-  /** Decisions after a roll: `ask` the combatant (or its player), or `auto` (the recommendation). */
-  decisions: z.enum(["ask", "auto"]).default("auto"),
   /** An action waiting for a decision (`decide`); nothing else can happen until it's answered. */
   pending: z
     .preprocess(
@@ -418,8 +410,6 @@ export const EncounterSchema = z.object({
       PendingSchema.nullable(),
     )
     .default(null),
-  /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
-  auto_death_saves: z.boolean().default(true),
   /** Walls and terrain on the grid (positions only). */
   map: BattleMapSchema.prefault({}),
   /** Points of interest on the map (`add_point`). */
@@ -431,25 +421,60 @@ export const EncounterSchema = z.object({
    * Wisdom (Perception) checks (−5 to Passive Perception), Slow gives Advantage (+5).
    */
   pace: z.enum(["fast", "normal", "slow"]).default("normal"),
-  /**
-   * When a character notices a hidden point while moving, the GM's choice: `noticer` stops that
-   * character on the square where it noticed; `everyone` also halts every move (`halted`) until
-   * the GM reveals the point or `resume`s.
-   */
-  notice_stops: z.enum(["noticer", "everyone"]).default("noticer"),
-  /** The point every move waits on (`notice_stops: everyone`), until revealed or resumed. */
-  halted: z.string().nullable().default(null),
-  /**
-   * The GM's setting for creatures off the map: `optional`, a distance with an unplaced creature
-   * is unknown and passes; `required`, once anyone is on the map, an action that checks reach or
-   * range is refused when the actor or a target has no position.
-   */
-  positions: z.enum(["optional", "required"]).default("optional"),
 });
 export type Encounter = z.infer<typeof EncounterSchema>;
 
 export function parseEncounter(input: unknown): Encounter {
   return EncounterSchema.parse(input);
+}
+
+const DecisionMode = z.enum(["ask", "auto"]);
+
+/**
+ * A table's settings for an encounter: how it plays, not state the rules keep. They're given with
+ * each call (`EncounterContext.settings`), not stored in the encounter.
+ */
+export const EncounterSettingsSchema = z
+  .object({
+    /**
+     * Decisions after a roll (Bardic Inspiration, Legendary Resistance, Uncanny Dodge): `ask`
+     * stops the action for an answer (`pending`, then `decide`), `auto` takes the recommendation.
+     */
+    decisions: DecisionMode.default("auto"),
+    /** The same, for some combatants: by combatant id, or by a character's key. */
+    decisions_by: z.record(z.string(), DecisionMode).default({}),
+    /** Roll a dying character's Death Saving Throw at the start of its turn (else just a reminder). */
+    auto_death_saves: z.boolean().default(true),
+    /**
+     * Creatures off the map: `optional`, a distance with an unplaced creature is unknown and
+     * passes; `required`, once anyone is on the map, an action that checks reach or range is
+     * refused when the actor or a target has no position.
+     */
+    positions: z.enum(["optional", "required"]).default("optional"),
+  })
+  .meta({ id: "EncounterSettings" });
+export type EncounterSettings = z.infer<typeof EncounterSettingsSchema>;
+export type EncounterSettingsInput = z.input<typeof EncounterSettingsSchema>;
+
+/**
+ * The settings an encounter saved before format 2 kept inside it (`decisions`,
+ * `auto_death_saves`, `positions`, each combatant's `decisions`), for a client that moves them
+ * to its own storage. Settings it doesn't hold get their defaults.
+ */
+export function legacyEncounterSettings(input: unknown): EncounterSettings {
+  const e = (input ?? {}) as Record<string, unknown>;
+  const decisions_by: Record<string, unknown> = {};
+  for (const c of (Array.isArray(e.combatants) ? e.combatants : []) as Record<string, unknown>[]) {
+    if (typeof c?.id === "string" && (c.decisions === "ask" || c.decisions === "auto")) {
+      decisions_by[c.id] = c.decisions;
+    }
+  }
+  return EncounterSettingsSchema.parse({
+    decisions: e.decisions === "ask" ? "ask" : undefined,
+    decisions_by,
+    auto_death_saves: e.auto_death_saves === false ? false : undefined,
+    positions: e.positions === "required" ? "required" : undefined,
+  });
 }
 
 const n = z.int();
@@ -666,7 +691,6 @@ export const EncounterActionSchema = z
       in_lair: z.boolean().optional(),
       /** `false`: don't spend Legendary Resistance automatically on a failed save. */
       auto_legendary_resistance: z.boolean().optional(),
-      decisions: z.enum(["ask", "auto"]).optional(),
     }),
     z.object({
       type: z.literal("add_character"),
@@ -674,16 +698,9 @@ export const EncounterActionSchema = z
       id: id.optional(),
       name: z.string().optional(),
       side: z.string().optional(),
-      decisions: z.enum(["ask", "auto"]).optional(),
     }),
     /** Answer the pending decision. */
     z.object({ type: z.literal("decide"), use: z.boolean() }),
-    /** Change who decides: one combatant's mode (`null`: the encounter's), or the encounter's. */
-    z.object({
-      type: z.literal("set_decisions"),
-      id: z.string().optional(),
-      mode: z.enum(["ask", "auto"]).nullable(),
-    }),
     z.object({ type: z.literal("remove"), id: z.string() }),
     z.object({
       type: z.literal("roll_initiative"),
@@ -756,16 +773,11 @@ export const EncounterActionSchema = z
       within: n.min(0).optional(),
     }),
     z.object({ type: z.literal("remove_point"), id: z.string() }),
-    /** Exploration settings (the GM's): the travel pace, and who stops when a point is noticed. */
+    /** The group's travel pace outside a fight (`Encounter.pace`). */
     z.object({
       type: z.literal("set_exploration"),
       pace: z.enum(["fast", "normal", "slow"]).optional(),
-      notice_stops: z.enum(["noticer", "everyone"]).optional(),
     }),
-    /** Let moves go on after a halt (`notice_stops: everyone`) without revealing the point. */
-    z.object({ type: z.literal("resume") }),
-    /** The GM's setting for creatures off the map (`Encounter.positions`). */
-    z.object({ type: z.literal("set_positions"), mode: z.enum(["optional", "required"]) }),
 
     /**
      * The Dash action: uses the action, adds the combatant's Speed to this turn's movement.

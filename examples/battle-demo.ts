@@ -27,6 +27,7 @@ import {
   type EncounterAction,
   type EncounterCombatant,
   EncounterError,
+  type EncounterSettingsInput,
   explainStat,
   gridDistance,
   inArea,
@@ -101,9 +102,9 @@ export function runDemo(seed = DEMO_SEED): string[] {
   // --- 3. The battle ------------------------------------------------------------------------
   title("3. The battle");
   const fight = new Fight(catalog, party, rng, say);
-  // Players decide after seeing a roll (Bardic Inspiration): the encounter asks them.
+  // Players decide after seeing a roll (Bardic Inspiration): the table's setting asks them.
+  fight.settings = { decisions: "ask" };
   fight.act(
-    { type: "set_decisions", mode: "ask" },
     ...Object.keys(party).map((character) => ({ type: "add_character", character }) as const),
     { type: "add_monster", monster: "red-dragon-wyrmling", side: "enemies" },
     ...[1, 2, 3].map(
@@ -228,6 +229,8 @@ export function levelTo(
 
 class Fight {
   encounter: Encounter = createEncounter();
+  /** The table's settings, given with every action. */
+  settings: EncounterSettingsInput = {};
   readonly states: Record<string, CharacterState>;
   private triedTooFar = false;
 
@@ -258,6 +261,7 @@ class Fight {
               ]),
             ),
             rng: this.rng,
+            settings: this.settings,
           });
         } catch (error) {
           if (!(error instanceof EncounterError)) throw error;

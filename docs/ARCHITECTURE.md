@@ -458,8 +458,12 @@ timed effects. Monsters live in it (catalog id, current HP, Temporary HP, condit
 Concentration, `defeated`); characters are referenced by a key into the caller's characters
 (build + state), so their HP and conditions stay in their `CharacterState`.
 
-`applyEncounterAction(encounter, action, { catalog, characters, rng })` → `{ encounter, states,
-notes, result }`, or `EncounterError`. `states` holds the character states the action changed;
+`applyEncounterAction(encounter, action, { catalog, characters, rng, settings })` → `{ encounter,
+states, notes, result }`, or `EncounterError`. `settings` (`EncounterSettings`) are the table's,
+given with each call and never stored in the encounter: who answers decisions after a roll
+(`decisions`, `decisions_by`), whether Death Saving Throws roll by themselves
+(`auto_death_saves`), and whether creatures off the map can act at a distance (`positions`). A
+history records the settings each action was applied with, and replays with them. `states` holds the character states the action changed;
 `result` is the roll of an `attack`, `save_action`, `cast`, `check`, `unarmed` or `escape`. `POST /v1/encounters/apply` runs a
 list of actions.
 
@@ -550,8 +554,8 @@ list of actions.
   feet", Touch) is checked; Unarmed Strike and Help need 5 ft. Moving to a square costs its
   distance, can't end in another creature's space, and notes the enemies whose reach it leaves
   (an Opportunity Attack, unless the mover Disengaged). Without positions, the caller says what's
-  within 5 feet or in range, as before. That's the default (`positions: optional`); the GM can set
-  `positions: required` (`set_positions`): once anyone is on the map, an action that checks reach
+  within 5 feet or in range, as before. That's the default (the setting `positions: optional`); a
+  table can set `positions: required`: once anyone is on the map, an action that checks reach
   or range (attacks, ranged spells and their area points, save effects with targets, Help,
   Grapple and Shove, features with a range) is refused when the actor or a target isn't on it
   (refusal code `off_map`). Cover can be given per attack (`cover`) or per target
@@ -570,9 +574,8 @@ list of actions.
   within its `within` feet, no Total Cover from walls or blocked squares to its square) when its
   Passive Perception is at least the DC, after a move, a placing, or a change to the points;
   `search` with Perception finds those its check total reaches. Noticing adds it to
-  `noticed_by` and never reveals it: that's the GM's. Outside a fight a move stops where the
-  mover notices one; with `notice_stops: everyone` (the GM's choice) every move then waits
-  (`halted`, refusal code `halted`) until the GM reveals it or `resume`s.
+  `noticed_by` (event `noticed`) and never reveals it: that's the GM's. Outside a fight a move
+  stops where the mover notices one; whether the others stop too is the table's call.
 - **The map.** `encounter.map` holds walls (segments between grid corners: corner `x,y` is the
   top-left corner of square `x,y`), Difficult Terrain squares and blocked squares (a pillar,
   solid rock); `set_terrain`, `add_wall` and `remove_wall` change it (the GM's actions, no
@@ -630,13 +633,14 @@ list of actions.
   `decide` callback that receives a `Decision` (who, what, the question with the roll, and a
   `recommended` answer: only when it can turn the failure into a success; always for Legendary
   Resistance and Uncanny Dodge); without one they follow the recommendation. In an encounter,
-  each combatant's `decisions` (or the encounter's, default `auto`) says who answers: `auto`
+  the table's settings say who answers (`decisions`, default `auto`, and `decisions_by` for a
+  combatant id or a character's key): `auto`
   takes the recommendation; `ask` stops the action before anything is applied, with the question
   in `encounter.pending` and nothing else allowed until `decide` answers it. `applyEncounterAction`
   records the dice an action rolls, so `decide` replays the stopped action with the same dice
   and the answers given so far: an action with several decisions (a Fireball on two dragons)
-  asks them one at a time, and the engine never undoes anything. `set_decisions` changes the
-  mode mid-fight; `POST /v1/encounters/apply` stops a list of actions at the first decision
+  asks them one at a time, and the engine never undoes anything. The settings can change between
+  any two actions; `POST /v1/encounters/apply` stops a list of actions at the first decision
   (`pending`, `applied`).
 - **Weapon Mastery:** an `attack` with a line that has a mastery applies it unless
   `mastery: false`: Graze deals the ability modifier on a miss; Vex (Advantage on the attacker's
@@ -703,7 +707,7 @@ list of actions.
   turn starts, recharge rolls, and once-per-turn riders reset for everyone.
 - A monster dies at 0 Hit Points (SRD "Monster Death") and its turns are skipped, as are a dead
   character's. A dying character's Death Saving Throw is rolled at the start of its turn
-  (`createEncounter({ auto_death_saves: false })` leaves it to the player, with a reminder).
+  (the setting `auto_death_saves: false` leaves it to the player, with a reminder).
 - **Checks:** the `check` action rolls an ability or skill check, with or without a DC; it uses no
   action by itself.
 
@@ -982,8 +986,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   "Finding Hidden Objects"); the engine's reading: only characters notice (monsters don't look
   for the party's clues), seeing a point means no Total Cover from a corner of the space to its
   square (light and obscurement aren't modelled), and the move stops on the square where it was
-  noticed (a free one), so a noticed trap isn't walked into. Who else stops is the GM's
-  `notice_stops`.
+  noticed (a free one), so a noticed trap isn't walked into. Who else stops is the table's call
+  (the `noticed` event says who noticed what).
 - **Walls on the grid.** The SRD doesn't say how walls sit on a grid: a wall is a segment
   between grid corners, so it stands between squares; a step goes from square center to square
   center and is blocked when that line touches a wall, so a diagonal can't cut a wall's corner
@@ -1180,10 +1184,12 @@ builder, a VTT client, an edge function and a server.
 - **Public API.** `tests/api.test.ts` snapshots the names each entry point exports; changing
   the snapshot is a deliberate API change, noted in the CHANGELOG. `src/index.ts` lists every
   export by name, so a new helper stays internal unless it's added there.
-- **Document versions.** Builds, play states and encounters have a `version`
+- **Document versions.** Builds, play states, encounters and histories have a `version`
   (`DOCUMENT_VERSION`, in `models/version.ts`). A document without one is version 1; parsing
   refuses a newer one. A format change raises the version and migrates older documents on
-  parse, so saved documents keep loading.
+  parse (they come out as the current version), so saved documents keep loading. Version 2 took
+  the table's settings out of encounters: a version 1 history's settings move onto its steps
+  (`models/history.ts`), and `legacyEncounterSettings` reads them from a version 1 encounter.
 - **HTTP.** A Web-standard `fetch` handler with no router dependency. Request bodies are
   validated with the same Zod schemas (422 on failure). The Node adapter limits bodies to
   1 MB, and dice expressions are limited to 1000 dice of up to 1000 sides.

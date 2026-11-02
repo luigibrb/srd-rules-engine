@@ -175,6 +175,12 @@ export function encounterEvents(
   for (const z of before.zones)
     if (!zones1.has(z.id)) events.push({ type: "zone_ended", zone: z.id });
   if (JSON.stringify(before.map) !== JSON.stringify(after.map)) events.push({ type: "map" });
+  const noticedBefore = new Map(before.points.map((p) => [p.id, new Set(p.noticed_by)]));
+  for (const p of after.points) {
+    for (const id of p.noticed_by) {
+      if (!noticedBefore.get(p.id)?.has(id)) events.push({ type: "noticed", id, point: p.id });
+    }
+  }
   if (after.pending && !before.pending) {
     events.push({
       type: "pending",

@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- `EncounterSettingsSchema` and `legacyEncounterSettings` (see Changed), and the encounter event
+  `noticed` (`{ id, point }`): a creature noticed a hidden point of interest.
 - Spell mechanics for Searing Smite and Shining Smite: cast right after a melee hit, their
   extra damage from the attack (doubled on a Critical Hit) and its upcast. Searing Smite's damage
   at the start of each turn and Shining Smite's light and Advantage stay text.
@@ -222,6 +224,15 @@ migrated when it's loaded.
   `advantage_aura`, read by `import-srd-monsters.ts`.
 
 ### Changed
+- **Breaking, document format 2:** an encounter's table settings moved out of the `Encounter`
+  into each call: `EncounterContext.settings` (`EncounterSettings`: `decisions`, `decisions_by`
+  for a combatant id or a character's key, `auto_death_saves`, `positions`), and `settings` in the
+  bodies of `/v1/encounters/apply`, `/options`, `/check`, `/reachable`, `/preview-move` and
+  `/preview-area`. `createEncounter()` takes no options. A history records each step's settings
+  (`recordAction(history, action, result, settings)`) and replays with them. Migration:
+  `DOCUMENT_VERSION` is 2; older documents load and come out as version 2. A version 1
+  encounter's settings are dropped on parse: read them first with `legacyEncounterSettings(raw)`
+  to keep them; a version 1 history's settings move onto its steps by themselves.
 - An ammunition magic item (Ammunition, +1) can only be made from ammunition, not from any gear;
   a shield's base respects its `ids` and `except`.
 - Carried weight counts gear and tools.
@@ -241,6 +252,11 @@ migrated when it's loaded.
 - An encounter action of an unknown type did nothing; it's refused ("Unknown action").
 
 ### Removed
+- **Breaking:** the halt on a noticed point (`notice_stops`, `halted`, the `resume` action, refusal
+  code `halted`): whether everyone stops when someone notices something is the table's call; the
+  new `noticed` event says who noticed which point. The actions `set_decisions` and
+  `set_positions` and `add_monster`/`add_character`'s `decisions` (the settings above replace
+  them); `set_exploration` sets only the pace.
 - **Breaking:** public exports nothing used: `baseScoreErrors`, `backgroundBonusErrors` and
   `multiclassBlockers` (English-only twins of the builder's messages); `applyDamage`,
   `applyHealing` (use the play actions `damage` / `heal`, or `takeDamage`); `isAlive`,

@@ -12,6 +12,7 @@ import {
   EncounterError,
   type EncounterEvent,
   type EncounterHistory,
+  type EncounterSettingsInput,
   recordAction,
   refusalCode,
   replayHistory,
@@ -28,8 +29,18 @@ function session(builds: Record<string, CharacterBuild>, rng = seededRng(5)) {
     Object.entries(builds).map(([k, b]) => [k, createState(b, catalog)]),
   );
   let encounter: Encounter = createEncounter();
+  /** The table's settings, given with every action; `set` changes them between actions. */
+  let settings: EncounterSettingsInput = {};
+  const set = (change: EncounterSettingsInput) => {
+    settings = {
+      ...settings,
+      ...change,
+      decisions_by: { ...settings.decisions_by, ...change.decisions_by },
+    };
+  };
   const ctx = () => ({
     catalog,
+    settings,
     characters: Object.fromEntries(
       Object.entries(builds).map(([k, build]) => [
         k,
@@ -45,12 +56,13 @@ function session(builds: Record<string, CharacterBuild>, rng = seededRng(5)) {
       const r = applyEncounterAction(encounter, action, { ...ctx(), rng });
       encounter = r.encounter;
       Object.assign(states, r.states);
-      history = recordAction(history, action, r);
+      history = recordAction(history, action, r, settings);
       events.push(...r.events);
     }
     return events;
   };
   return {
+    settings: set,
     act,
     ctx,
     states,
@@ -154,7 +166,8 @@ describe("events", () => {
 
   it("an action that stops for a decision says so", () => {
     const s = session({ brakka: fighterBuild() }, scriptedRng([1]));
-    s.act(...setup, { type: "start" }, { type: "set_decisions", mode: "ask" });
+    s.act(...setup, { type: "start" });
+    s.settings({ decisions: "ask" });
     const encounter = {
       ...s.encounter(),
       combatants: s
@@ -281,7 +294,9 @@ describe("history: replay and undo", () => {
       { type: "set_initiative", id: "lute", value: 20 },
       { type: "set_initiative", id: "brakka", value: 10 },
       { type: "start" },
-      { type: "set_decisions", mode: "ask" },
+    );
+    s.settings({ decisions: "ask" });
+    s.act(
       { type: "feature", id: "lute", feature: "Bardic Inspiration", target: "brakka" },
       { type: "next_turn" },
     );

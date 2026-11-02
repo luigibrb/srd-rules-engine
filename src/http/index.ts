@@ -12,7 +12,13 @@ import { type Catalog, lookup, TABLE_NAMES, type TableName } from "../content/ca
 import { srdCatalog } from "../content/srd";
 import { parseBuild } from "../models/build";
 import { AbilityFullNameSchema, CharacterSchema } from "../models/character";
-import { EncounterActionSchema, EncounterSchema, RollWhatSchema } from "../models/encounter";
+import {
+  EncounterActionSchema,
+  EncounterSchema,
+  type EncounterSettings,
+  EncounterSettingsSchema,
+  RollWhatSchema,
+} from "../models/encounter";
 import type { Message } from "../models/messages";
 import { type CharacterState, CharacterStateSchema, PlayActionSchema } from "../models/state";
 import { castSpell } from "../rules/casting";
@@ -108,21 +114,26 @@ const StateCastRequest = z.object({
   mode: z.enum(ROLL_MODES).default("normal"),
 });
 const StateRollRequest = StateRequest.extend({ what: RollWhatSchema });
+/** The table's settings for an encounter call (`EncounterContext.settings`). */
+const Settings = EncounterSettingsSchema.default(EncounterSettingsSchema.parse({}));
 const EncounterRequest = z.object({
   encounter: EncounterSchema,
   /** Characters by key (`add_character`'s `character`): their build and play state. */
   characters: z.record(z.string(), StateRequest).default({}),
+  settings: Settings,
   action: z.union([EncounterActionSchema, z.array(EncounterActionSchema)]),
 });
 const OptionsRequest = z.object({
   encounter: EncounterSchema,
   characters: z.record(z.string(), StateRequest).default({}),
+  settings: Settings,
   /** The combatant whose options are listed. */
   id: z.string(),
 });
 const CheckRequest = z.object({
   encounter: EncounterSchema,
   characters: z.record(z.string(), StateRequest).default({}),
+  settings: Settings,
   action: EncounterActionSchema,
 });
 const Square = z.object({ x: z.int(), y: z.int() });
@@ -167,10 +178,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
     catalog ??= srdCatalog();
     return catalog;
   };
-  /** The catalog and characters an encounter route works with. */
+  /** The catalog, characters and settings an encounter route works with. */
   const encounterContext = (
     characters: Readonly<Record<string, { build: unknown; state: CharacterState }>>,
-  ) => ({ catalog: getCatalog(), characters: characterRefs(characters) });
+    settings: EncounterSettings,
+  ) => ({ catalog: getCatalog(), characters: characterRefs(characters), settings });
 
   const routes: Route[] = [
     { method: "GET", pattern: /^\/health$/, handle: () => ({ status: "ok" }) },
@@ -523,7 +535,12 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
         const log: { action: unknown; rolls: readonly number[] }[] = [];
         const events: unknown[] = [];
         for (const action of actions) {
-          const result = applyEncounterAction(encounter, action, { catalog, characters, rng });
+          const result = applyEncounterAction(encounter, action, {
+            catalog,
+            characters,
+            rng,
+            settings: req.settings,
+          });
           encounter = result.encounter;
           log.push({ action, rolls: result.rolls });
           events.push(...result.events);
@@ -550,10 +567,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       handle: ({ body }) => {
         // What one combatant can do now: every option with its cost, targets, and why not.
         const req = OptionsRequest.parse(body);
-        return combatantOptions(req.encounter, req.id, {
-          catalog: getCatalog(),
-          characters: characterRefs(req.characters),
-        });
+        return combatantOptions(
+          req.encounter,
+          req.id,
+          encounterContext(req.characters, req.settings),
+        );
       },
     },
     {
@@ -561,7 +579,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       pattern: /^\/v1\/encounters\/reachable$/,
       handle: ({ body }) => {
         const req = OptionsRequest.parse(body);
-        return reachableSquares(req.encounter, req.id, encounterContext(req.characters));
+        return reachableSquares(
+          req.encounter,
+          req.id,
+          encounterContext(req.characters, req.settings),
+        );
       },
     },
     {
@@ -569,7 +591,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       pattern: /^\/v1\/encounters\/preview-move$/,
       handle: ({ body }) => {
         const req = MovePreviewRequest.parse(body);
-        return previewMove(req.encounter, req, encounterContext(req.characters));
+        return previewMove(req.encounter, req, encounterContext(req.characters, req.settings));
       },
     },
     {
@@ -577,7 +599,7 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       pattern: /^\/v1\/encounters\/preview-area$/,
       handle: ({ body }) => {
         const req = AreaPreviewRequest.parse(body);
-        return previewArea(req.encounter, req, encounterContext(req.characters));
+        return previewArea(req.encounter, req, encounterContext(req.characters, req.settings));
       },
     },
     {
@@ -586,10 +608,11 @@ export function createHandler(options: HandlerOptions = {}): FetchHandler {
       handle: ({ body }) => {
         // Would the engine take this action now? A dry run: nothing is applied.
         const req = CheckRequest.parse(body);
-        return checkAction(req.encounter, req.action, {
-          catalog: getCatalog(),
-          characters: characterRefs(req.characters),
-        });
+        return checkAction(
+          req.encounter,
+          req.action,
+          encounterContext(req.characters, req.settings),
+        );
       },
     },
     {
