@@ -514,6 +514,28 @@ export const FeatureActionSchema = z.strictObject({
     .default(null),
   /** Gives the target a die (a class table column: "Bardic Die") to add to a failed D20 Test. */
   inspiration: z.strictObject({ progression: z.string() }).nullable().default(null),
+  /**
+   * A reaction to another creature's d20 roll (Cutting Words: subtract a Bardic Inspiration die
+   * from a successful attack roll or ability check), offered after the roll and before its
+   * outcome: which rolls, on a success or a failure, a die (a class table column) and/or a flat
+   * bonus added or subtracted, and whose rolls (`ally` includes yourself). `range` is the action's.
+   */
+  modifies_roll: z
+    .strictObject({
+      rolls: z.array(z.enum(["attack", "save", "check"])).min(1),
+      when: z.enum(["success", "failure"]),
+      sign: z.enum(["add", "subtract"]),
+      die: z.strictObject({ progression: z.string() }).nullable().default(null),
+      bonus: z
+        .union([z.int(), z.enum(ABILITIES)])
+        .nullable()
+        .default(null),
+      /** The smallest the bonus can be ("minimum of +1"). */
+      min: z.int().default(0),
+      who: z.enum(["any", "ally", "enemy"]).default("any"),
+    })
+    .nullable()
+    .default(null),
   /** Your reaction when an attack hits you: halve its damage (Uncanny Dodge). */
   halves_attack_damage: z.boolean().default(false),
   /**

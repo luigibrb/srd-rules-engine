@@ -643,6 +643,14 @@ list of actions.
   asks them one at a time, and the engine never undoes anything. The settings can change between
   any two actions; `POST /v1/encounters/apply` stops a list of actions at the first decision
   (`pending`, `applied`).
+- **Reactions to another creature's roll.** A feature action with `modifies_roll` (Cutting
+  Words) is offered after a d20 roll (an attack roll, a saving throw, an ability check against a
+  DC) and before its outcome, as a `roll_reaction` decision to each character that has it, its
+  reaction and a use left, within its range of the roller (or without positions) and on the side
+  it allows: `decide.reactions` (the encounter's) lists the offers, `othersReact` asks them in
+  turn (recommended when it can turn the outcome the reactor's way). Taken, its die and bonus
+  are added or subtracted, and once the action has resolved the reaction and the use are spent
+  (`reaction.roll`).
 - **Weapon Mastery:** an `attack` with a line that has a mastery applies it unless
   `mastery: false`: Graze deals the ability modifier on a miss; Vex (Advantage on the attacker's
   next attack roll against the target, until the end of its next turn), Sap (Disadvantage on the
@@ -1072,6 +1080,12 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Multiclass Spellcaster rules name full and half casters) counts a third of its class levels,
   rounded up, toward the Multiclass Spellcaster table: that gives a one-third caster's own slot
   table at every level, as half casters' rounding up does.
+
+**Reactions to rolls**
+
+- A reaction to another creature's roll is offered only in its user's interest: a subtraction
+  on an enemy's success, an addition on an ally's failure. Cutting Words can be used on "a
+  creature", but spoiling an ally's success isn't offered. Its use on damage rolls is by hand.
 
 **Summons**
 

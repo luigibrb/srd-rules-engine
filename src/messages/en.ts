@@ -601,6 +601,8 @@ export const MESSAGES_EN = {
   "roll.check": "{label} check",
   "decision.inspiration":
     "{name}: {what} {total} vs {target}. Add the Bardic Inspiration die (d{die})?",
+  "decision.roll_reaction": "{name}: use {feature} on {roller}'s {what} ({total} vs {target})?",
+  "reaction.roll": "{name} uses {feature}: {amount} to the roll.",
   "decision.legendary_resistance":
     "{name} fails a {ability} saving throw{rolled, select, true { ({total} vs DC {dc})} other {}}. Use Legendary Resistance ({left} left)?",
   "decision.indomitable":

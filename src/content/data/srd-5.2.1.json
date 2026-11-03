@@ -2018,6 +2018,7 @@
                             "inspiration": {
                                 "progression": "Bardic Die"
                             },
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -4131,6 +4132,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -4186,6 +4188,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -4227,6 +4230,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -5691,6 +5695,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": {
                                 "spell": "find-familiar",
@@ -6960,6 +6965,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -7124,6 +7130,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -8393,6 +8400,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -8421,6 +8429,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -8449,6 +8458,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -8530,6 +8540,7 @@
                                 ]
                             },
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -8718,6 +8729,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -9838,6 +9850,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -9865,6 +9878,7 @@
                             ],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": false,
                             "cast": null,
                             "summon": null
@@ -13043,6 +13057,7 @@
                             "removes": [],
                             "reduces_attack_damage": null,
                             "inspiration": null,
+                            "modifies_roll": null,
                             "halves_attack_damage": true,
                             "cast": null,
                             "summon": null
@@ -37539,7 +37554,47 @@
                     "advantages": [],
                     "rules": [],
                     "spell_damage": [],
-                    "actions": [],
+                    "actions": [
+                        {
+                            "id": "cutting-words",
+                            "name": "Cutting Words",
+                            "economy": "reaction",
+                            "uses": "bardic-inspiration",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": 60,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "modifies_roll": {
+                                "rolls": [
+                                    "attack",
+                                    "check"
+                                ],
+                                "when": "success",
+                                "sign": "subtract",
+                                "die": {
+                                    "progression": "Bardic Die"
+                                },
+                                "bonus": null,
+                                "min": 0,
+                                "who": "any"
+                            },
+                            "halves_attack_damage": false,
+                            "cast": null,
+                            "summon": null
+                        }
+                    ],
                     "toggles": [],
                     "items": [],
                     "gp": 0,

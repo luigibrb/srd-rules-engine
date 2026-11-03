@@ -18,6 +18,7 @@ import {
   type Decide,
   inspire,
   type ModeReason,
+  othersReact,
   type RollMode,
   rollD20,
   rollSavingThrow,
@@ -428,6 +429,14 @@ export function castSpell(
           ? null
           : inspire(caster, total, target.armor_class, what, decide, rng);
       total += inspiration ?? 0;
+      if (roll.d20 !== 20 && !critical_miss) {
+        total += othersReact(
+          { kind: "attack", roller: caster, total, target: target.armor_class },
+          what,
+          decide,
+          rng,
+        );
+      }
       const hit = roll.d20 === 20 || (!critical_miss && total >= target.armor_class);
       const critical_hit = roll.d20 === 20 || (hit && effective.critical_on_hit);
       const { reasons, reason_messages } = effective;

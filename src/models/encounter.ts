@@ -342,6 +342,7 @@ export const PendingSchema = z.object({
     "indomitable",
     "deflect_attacks",
     "relentless_rage",
+    "roll_reaction",
   ]),
   question: z.string(),
   /** `question` as a message (for translation); absent in documents saved before it. */
