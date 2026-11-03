@@ -272,8 +272,9 @@ class Fight {
         Object.assign(this.states, r.states);
         action = null;
         if (r.pending) {
-          // The action stopped after the roll: the player sees it and decides.
-          const use = r.pending.recommended;
+          // The action stopped after the roll: the player sees it and decides (Lute keeps her
+          // Bardic Inspiration for Brakka rather than spend it on Cutting Words).
+          const use = r.pending.kind === "roll_reaction" ? false : r.pending.recommended;
           this.say(`  ? ${r.pending.question} → ${use ? "yes" : "no"}`);
           action = { type: "decide", use };
         } else {

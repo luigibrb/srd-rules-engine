@@ -168,6 +168,16 @@ export interface FeatureActionLine {
   } | null;
   /** Creatures it brings itself, and the values their stat blocks are made with. */
   readonly summon: { readonly spec: SummonSpec; readonly vars: SummonVars } | null;
+  /** A reaction to another creature's d20 roll (Cutting Words), at this level. */
+  readonly modifies_roll: {
+    readonly rolls: readonly ("attack" | "save" | "check")[];
+    readonly when: "success" | "failure";
+    readonly sign: 1 | -1;
+    /** The die rolled (8 for a d8), or `null`. */
+    readonly die: number | null;
+    readonly bonus: number;
+    readonly who: "any" | "ally" | "enemy";
+  } | null;
 }
 
 export interface ClassLine {
@@ -833,6 +843,25 @@ export function computeSheet(
           inspiration_die: die ? Number(die) : null,
           halves_attack_damage: a.halves_attack_damage,
           cast: a.cast && { spell: a.cast.spell, summon: a.cast.summon ?? null },
+          modifies_roll: a.modifies_roll && {
+            rolls: a.modifies_roll.rolls,
+            when: a.modifies_roll.when,
+            sign: a.modifies_roll.sign === "add" ? 1 : -1,
+            die: (() => {
+              const p = a.modifies_roll.die?.progression;
+              const d = p ? /(\d+)$/.exec(String(column(p)))?.[1] : null;
+              return d ? Number(d) : null;
+            })(),
+            bonus: Math.max(
+              a.modifies_roll.min,
+              typeof a.modifies_roll.bonus === "number"
+                ? a.modifies_roll.bonus
+                : a.modifies_roll.bonus
+                  ? mod[a.modifies_roll.bonus]
+                  : 0,
+            ),
+            who: a.modifies_roll.who,
+          },
           summon: a.summon && {
             spec: a.summon,
             vars: (() => {

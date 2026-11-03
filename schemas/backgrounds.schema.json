@@ -1458,6 +1458,114 @@
                   }
                 ]
               },
+              "modifies_roll": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "rolls": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "attack",
+                            "save",
+                            "check"
+                          ]
+                        }
+                      },
+                      "when": {
+                        "type": "string",
+                        "enum": [
+                          "success",
+                          "failure"
+                        ]
+                      },
+                      "sign": {
+                        "type": "string",
+                        "enum": [
+                          "add",
+                          "subtract"
+                        ]
+                      },
+                      "die": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "progression": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "progression"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "bonus": {
+                        "default": null,
+                        "anyOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "str",
+                                  "dex",
+                                  "con",
+                                  "int",
+                                  "wis",
+                                  "cha"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "min": {
+                        "default": 0,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "who": {
+                        "default": "any",
+                        "type": "string",
+                        "enum": [
+                          "any",
+                          "ally",
+                          "enemy"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "rolls",
+                      "when",
+                      "sign"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "halves_attack_damage": {
                 "default": false,
                 "type": "boolean"

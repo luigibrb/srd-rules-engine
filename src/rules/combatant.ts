@@ -155,7 +155,8 @@ export interface Decision {
     | "zone_force"
     | "indomitable"
     | "deflect_attacks"
-    | "relentless_rage";
+    | "relentless_rage"
+    | "roll_reaction";
   /** Who decides. */
   readonly combatant: Combatant;
   /** The question for the table, with the roll: "Brakka: Dexterity saving throw 7 vs 15…". */
@@ -174,8 +175,39 @@ export function decision(
 ): Decision {
   return { kind, combatant, question: message.text, message, recommended };
 }
-/** Answers decisions; without one, the rolls follow each decision's `recommended`. */
-export type Decide = (decision: Decision) => boolean;
+/** A d20 roll others can react to, after the roller's own choices and before its outcome. */
+export interface ReactableRoll {
+  readonly kind: "attack" | "save" | "check";
+  readonly roller: Combatant;
+  readonly total: number;
+  /** The AC or DC it's against. */
+  readonly target: number;
+}
+
+/**
+ * Another creature's reaction to a roll (Cutting Words: subtract a Bardic Inspiration die),
+ * offered as a decision to `by`: `die` rolled (or not) plus `bonus`, added or subtracted
+ * (`sign`); `used` hears how much it changed the roll, when taken.
+ */
+export interface RollReaction {
+  readonly by: Combatant;
+  readonly name: string;
+  readonly sign: 1 | -1;
+  readonly die: number | null;
+  readonly bonus: number;
+  /** Whether the reactor wants this roll to fail (an enemy's) or succeed (an ally's). */
+  readonly against: boolean;
+  readonly used?: (amount: number) => void;
+}
+
+/**
+ * Answers decisions; without one, the rolls follow each decision's `recommended`. It can also
+ * offer other creatures' reactions to a d20 roll (`reactions`: the encounter's, by positions,
+ * reactions and uses left), each asked as a `roll_reaction` decision.
+ */
+export type Decide = ((decision: Decision) => boolean) & {
+  readonly reactions?: (roll: ReactableRoll) => readonly RollReaction[];
+};
 const recommend: Decide = (d) => d.recommended;
 
 /** The Bardic Inspiration die added to a failed roll (`total` short of `target`), if chosen. */
@@ -192,6 +224,37 @@ export function inspire(
   const question = message("decision.inspiration", { name: c.name, what, total, target, die });
   const use = decide(decision("inspiration", c, question, target - total <= die));
   return use ? rng.int(1, die) : null;
+}
+
+/**
+ * Other creatures' reactions to a d20 roll that `decide` offers, each asked in turn: a success
+ * an enemy can spoil (subtract), a failure an ally can save (add). Recommended when it can turn
+ * the outcome the reactor's way. Returns the total change.
+ */
+export function othersReact(roll: ReactableRoll, what: Message, decide: Decide, rng: Rng): number {
+  let total = roll.total;
+  for (const r of decide.reactions?.(roll) ?? []) {
+    const succeeds = total >= roll.target;
+    // Only on the outcome it changes: a subtraction on a success, an addition on a failure.
+    if (r.sign < 0 !== succeeds) continue;
+    const most = (r.die ?? 0) + r.bonus;
+    const flips = r.sign < 0 ? total - most < roll.target : total + most >= roll.target;
+    const question = message("decision.roll_reaction", {
+      name: r.by.name,
+      feature: r.name,
+      roller: roll.roller.name,
+      what,
+      total,
+      target: roll.target,
+    });
+    if (!decide(decision("roll_reaction", r.by, question, flips && r.against === r.sign < 0))) {
+      continue;
+    }
+    const amount = (r.die ? rng.int(1, r.die) : 0) + r.bonus;
+    total += r.sign * amount;
+    r.used?.(amount);
+  }
+  return total - roll.total;
 }
 
 /** A legendary action: an attack it makes, an action it uses, a saving throw effect, or text. */
@@ -650,6 +713,14 @@ export function makeAttack(
           rng,
         );
   total += inspiration ?? 0;
+  if (!criticalRoll && !critical_miss) {
+    total += othersReact(
+      { kind: "attack", roller: attacker, total, target: target.armor_class },
+      message("roll.attack_with", { attack: line.name }),
+      decide,
+      rng,
+    );
+  }
   const hit = criticalRoll || (!critical_miss && total >= target.armor_class);
   const critical_hit = criticalRoll || (hit && effective.critical_on_hit);
   const base = {
@@ -830,6 +901,7 @@ export function rollSavingThrow(
   }
   const inspiration = inspire(combatant, total, dc, what, decide, rng);
   total += inspiration ?? 0;
+  total += othersReact({ kind: "save", roller: combatant, total, target: dc }, what, decide, rng);
   const legendary = total < dc && resist(total);
   return {
     ...base,
@@ -1099,6 +1171,14 @@ export function rollAbilityCheck(
   let total = roll.d20 + bonus;
   const inspiration = dc === null ? null : inspire(combatant, total, dc, rolled, decide, rng);
   total += inspiration ?? 0;
+  if (dc !== null) {
+    total += othersReact(
+      { kind: "check", roller: combatant, total, target: dc },
+      rolled,
+      decide,
+      rng,
+    );
+  }
   return {
     name: combatant.name,
     ability,

@@ -69,7 +69,9 @@ import {
   makeAttack,
   modeReason,
   monsterSpells,
+  type ReactableRoll,
   type RollMode,
+  type RollReaction,
   resolveMode,
   rollAbilityCheck,
   rollD20,
@@ -521,7 +523,7 @@ function run(
   // Decisions after a roll: `auto` takes the recommendation; `ask` uses the next answer given,
   // or stops the action for one.
   let answered = 0;
-  const decide: Decide = (d) => {
+  const answer = (d: Decision): boolean => {
     const c = d.combatant.id ? e.combatants.find((x) => x.id === d.combatant.id) : undefined;
     if (!c) return d.recommended;
     const mode =
@@ -532,6 +534,54 @@ function run(
     if (answered < answers.length) return answers[answered++] as boolean;
     throw new PendingDecision(c.id, d.kind, d.message, d.recommended);
   };
+  // Reactions to another creature's d20 roll (Cutting Words) taken during this action: their
+  // reactions and uses are spent once the action has resolved.
+  const reacted: { by: string; key: string; name: string; amount: number; sign: number }[] = [];
+  /**
+   * The reactions others can take to a roll: a character with a `modifies_roll` reaction for
+   * this kind of roll, its reaction and a use left, not Incapacitated, within range of the roller
+   * (or no positions), on the side it allows, and in its interest (a subtraction on an enemy's
+   * roll, an addition on an ally's). One each per action.
+   */
+  const rollReactions = (roll: ReactableRoll): RollReaction[] => {
+    if (e.round === 0 || !roll.roller.id) return [];
+    const roller = e.combatants.find((x) => x.id === roll.roller.id);
+    if (!roller) return [];
+    const out: RollReaction[] = [];
+    for (const x of e.combatants) {
+      if (x.character === null || outOfFight(ctx, x) || x.used.reaction) continue;
+      if (reacted.some((r) => r.by === x.id) || conditionsOf(ctx, x).has("incapacitated")) continue;
+      const ref = characterRef(ctx, x);
+      const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+      const self = x.id === roller.id;
+      const ally = self || alliesOf(e, x.id, roller);
+      const f = sheet.actions.find((a) => {
+        const m = a.modifies_roll;
+        if (!m || a.economy !== "reaction" || !m.rolls.includes(roll.kind)) return false;
+        if (m.who === "ally" ? !ally : m.who === "enemy" ? ally : self) return false;
+        // Only in the reactor's interest: spoiling an enemy's roll, helping an ally's.
+        if (m.sign < 0 === ally) return false;
+        const use = a.uses ? sheet.play.uses.find((u) => u.key === a.uses) : null;
+        if (a.uses && (!use || use.max - use.spent < a.cost)) return false;
+        const d = a.range === null || self ? null : feetApart(ctx, x, roller);
+        return d === null || d <= (a.range as number);
+      });
+      const m = f?.modifies_roll;
+      if (!f || !m) continue;
+      out.push({
+        by: encounterCombatant(e, x.id, ctx),
+        name: f.name,
+        sign: m.sign,
+        die: m.die,
+        bonus: m.bonus,
+        against: !ally,
+        used: (amount) =>
+          reacted.push({ by: x.id, key: f.key, name: f.name, amount, sign: m.sign }),
+      });
+    }
+    return out;
+  };
+  const decide: Decide = Object.assign(answer, { reactions: rollReactions });
   const play = (c: EncounterCombatant, a: PlayAction): void => {
     const ref = characterRef(ctx, c);
     let r: ReturnType<typeof applyAction>;
@@ -4061,6 +4111,14 @@ function run(
     const c = find(releasing.id);
     c.used.reaction = true;
     c.readied = null;
+  }
+  for (const r of reacted) {
+    const x = find(r.by);
+    x.used.reaction = true;
+    play(x, { type: "use_feature", key: r.key });
+    notes.push(
+      message("reaction.roll", { name: x.name, feature: r.name, amount: r.sign * r.amount }),
+    );
   }
   sweep();
   return {

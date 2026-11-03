@@ -1866,7 +1866,8 @@
                             "zone_force",
                             "indomitable",
                             "deflect_attacks",
-                            "relentless_rage"
+                            "relentless_rage",
+                            "roll_reaction"
                           ]
                         },
                         "question": {

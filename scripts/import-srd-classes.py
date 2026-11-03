@@ -476,7 +476,13 @@ SUBCLASS_OVERLAY = {
                                "while_active": ["rage", "reckless-attack"]}]},
     },
     "college-of-lore": {
-        3: {"choices": [{"id": "bonus_proficiencies", "label": "Bonus Proficiencies (skills)", "kind": "skill", "count": 3}]},
+        3: {"choices": [{"id": "bonus_proficiencies", "label": "Bonus Proficiencies (skills)", "kind": "skill", "count": 3}],
+            # Cutting Words: a creature within 60 feet succeeds on an attack roll or ability check;
+            # a Reaction and a Bardic Inspiration use subtract the die. (Its damage rolls: by hand.)
+            "actions": [{"id": "cutting-words", "name": "Cutting Words", "economy": "reaction",
+                         "uses": "bardic-inspiration", "range": 60,
+                         "modifies_roll": {"rolls": ["attack", "check"], "when": "success",
+                                           "sign": "subtract", "die": {"progression": "Bardic Die"}}}]},
         6: {"choices": [{"id": "magical_discoveries", "label": "Magical Discoveries", "kind": "spell", "count": 2,
                          "tag": "lore-discoveries", "swap": "class_level",
                          "spell_list": ["cleric", "druid", "wizard"], "max_spell_level": 3, "always_prepared": True,

@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Reactions to another creature's d20 roll: a feature action's `modifies_roll` (rolls, on a
+  success or failure, add or subtract a die and/or bonus, whose rolls), offered after the roll as
+  a `roll_reaction` decision (`Decide.reactions`, `othersReact`); the reaction and the use are spent.
+  The SRD College of Lore's Cutting Words (attack rolls and ability checks; damage rolls by hand).
 - Content can say more as data: `at_level` grants (from a character level on, for a species,
   feat or background; the SRD Elven Lineages' and Fiendish Legacies' spells at levels 3 and 5, each
   castable once per Long Rest without a slot), the effect target `attunement` (the sheet's

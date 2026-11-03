@@ -194,6 +194,23 @@ spell_damage:
 - {name: Elemental Affinity, ability: cha, damage_type: fire, one_roll: true}
 ```
 
+A reaction to another creature's d20 roll is an action with `economy: reaction` and
+`modifies_roll` (offered after the roll, before its outcome):
+
+```yaml
+- id: cutting-words
+  name: Cutting Words
+  economy: reaction
+  uses: bardic-inspiration
+  range: 60
+  modifies_roll:
+    rolls: [attack, check]          # and/or save
+    when: success                   # or failure
+    sign: subtract                  # or add
+    die: {progression: Bardic Die}  # and/or bonus: int (an ability or a number), min: 1
+    who: any                        # or ally (yourself included), enemy
+```
+
 A feature used in a turn is an `action` (the encounter action `feature` resolves it; the play
 action `use_feature` spends its resource and heals you, for a self-healing one):
 
