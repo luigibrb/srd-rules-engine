@@ -73,6 +73,15 @@ export interface CastOptions {
   damage_type?: DamageType;
   /** Whether the caster is within 5 feet of each target (default: a melee spell attack is). */
   within_5ft?: readonly (boolean | undefined)[];
+  /**
+   * Levels added to the spell's effective level, not to the slot spent (Twinned Spell: one more
+   * level for a spell whose higher levels target more creatures).
+   */
+  effective_levels?: number;
+  /** Targets (by index) that succeed on the spell's save automatically (Careful Spell). */
+  careful?: readonly number[];
+  /** Targets (by index) with Disadvantage on the spell's save (Heightened Spell). */
+  heightened?: readonly number[];
 }
 
 export interface SpellAttackRoll {
@@ -204,6 +213,9 @@ export function castSpell(
     damage_type,
     critical = false,
     no_slot = false,
+    effective_levels = 0,
+    careful = [],
+    heightened = [],
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells)
@@ -219,7 +231,7 @@ export function castSpell(
       message("rule.needs_spell_slot_level", { spell: spell.name, level: spell.level }),
     );
   }
-  const above = slot === null ? 0 : slot - spell.level;
+  const above = slot === null ? 0 : slot - spell.level + effective_levels;
   const tier = cantripTier(caster.level);
   // Beams (Eldritch Blast), rays or darts: how many, each with its own attack or hit.
   const projectiles = m?.projectiles;
@@ -467,7 +479,10 @@ export function castSpell(
       dc: line?.save_dc ?? 0,
       conditions: conditionsOn(m, "failed_save"),
     };
-    const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent);
+    const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent, {
+      careful,
+      heightened,
+    });
     shared = resolved.damage;
     // Faerie Fire: "Each creature in the Cube is also outlined if it fails".
     const marks = m.on_failed_save;
@@ -660,8 +675,31 @@ function resolveSave(
   rng: Rng,
   decide: Decide,
   potent = false,
+  metamagic: { careful?: readonly number[]; heightened?: readonly number[] } = {},
 ): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
-  const saves = targets.map((t) => rollSavingThrow(t, effect.ability, effect.dc, { rng, decide }));
+  const saves = targets.map((t, i): SaveResult => {
+    // Careful Spell: "A chosen creature automatically succeeds on its saving throw".
+    if (metamagic.careful?.includes(i)) {
+      return {
+        name: t.name,
+        ability: effect.ability,
+        dc: effect.dc,
+        bonus: t.saving_throws[effect.ability],
+        roll: { rolls: [], d20: 0, mode: "normal" },
+        total: 0,
+        success: true,
+        automatic_failure: null,
+        automatic_success: "Careful Spell",
+        legendary_resistance: false,
+        reasons: [],
+        reason_messages: [],
+        inspiration: null,
+      };
+    }
+    // Heightened Spell: "Disadvantage on saves against the spell".
+    const mode = metamagic.heightened?.includes(i) ? "disadvantage" : "normal";
+    return rollSavingThrow(t, effect.ability, effect.dc, { rng, decide, mode });
+  });
   const damage = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
   const results = targets.map((target, i) => {
     const save = saves[i] as SaveResult;
@@ -674,6 +712,8 @@ function resolveSave(
       target.rules.includes("evasion") &&
       !target.conditions.includes("incapacitated");
     if (save.success) instances = effect.on_success === "half" || potent ? half() : [];
+    // "it takes no damage if it would normally take half damage on a successful save"
+    if (save.automatic_success) instances = [];
     if (evasion) instances = save.success ? [] : half();
     const conditions = save.success ? [] : [...effect.conditions];
     return targetResult(i, target, { save, instances, conditions });

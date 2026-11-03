@@ -818,6 +818,8 @@ export interface SaveResult {
   readonly success: boolean;
   /** The condition that made it fail without a roll (Paralyzed: Strength and Dexterity). */
   readonly automatic_failure: string | null;
+  /** What made it succeed without a roll (Careful Spell). */
+  readonly automatic_success?: string;
   /** It failed, and Legendary Resistance made it a success (one use spent). */
   readonly legendary_resistance: boolean;
   /** Why the roll had Advantage or Disadvantage, if it did. */

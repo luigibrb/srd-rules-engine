@@ -1085,7 +1085,18 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Charisma goes to the chosen cantrip's damage like Potent Spellcasting (once per damage roll).
 - Deflect Attacks' redirect can follow until the next action (`deflected` on the monk, cleared by
   any other action): its damage type is the attack's first damage type (a weapon's, not a rider's),
-  and "isn't behind Total Cover" isn't checked. Deflect Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
+  and "isn't behind Total Cover" isn't checked. Deflect Energy's other damage types are text.
+- "One Spell with a Spell Slot per Turn" counts each creature's slot spells on every turn (its own
+  and others'), reset when any turn starts: a reaction spell on another creature's turn is
+  allowed; a readied spell's release doesn't count (its slot was spent when readied); a monster's
+  spells (daily uses, no slots) aren't limited.
+- Metamagic: Careful Spell's creatures take no damage and no conditions from the save; Heightened
+  Spell's Disadvantage is on the casting's saves (a zone's later saves are rolled without it);
+  Extended Spell gives Advantage on the Concentration saves and leaves the doubled duration to
+  the table; Transmuted Spell changes every listed type the spell deals; Subtle Spell keeps a
+  Material component that is consumed or has a cost. Empowered and Seeking Spell, which come
+  after a roll, are by hand (`rollByHand`), as is using two options on one spell. Spell options
+  don't list a variant per Metamagic option: `cast` takes `metamagic`. Turn Undead's "it tries to move as far from you as it
   can" is the GM's to play.
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.
@@ -1208,6 +1219,13 @@ like the Soldier's gaming set.
 ## Named rules in code (documented exceptions)
 
 Most rules are data; these are code, by name:
+
+- Metamagic (`METAMAGIC_OPTIONS`, `METAMAGIC_COST` in `models/encounter.ts`; `checkMetamagic` in
+  `services/encounter.ts`): a `cast` action's `metamagic` names an option the caster has chosen
+  (the feature `<option>-spell`) and spends its Sorcery Points; Careful and Heightened Spell
+  reach `castSpell` (`careful`, `heightened`), Twinned Spell adds an effective level
+  (`effective_levels`), and Distant, Subtle and Transmuted Spell cast a changed copy of the spell
+  (range, components, damage types).
 
 - `rules/sheet.ts`: Martial Arts (Dex and the Martial Arts die for Unarmed Strikes and Monk
   weapons, only without armor or Shield) is triggered by the `martial_arts.die` effect; Great

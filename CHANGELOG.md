@@ -8,6 +8,12 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Metamagic: the encounter action `cast` takes `metamagic` (`{option, targets?, damage_type?}`)
+  for Careful, Distant, Extended, Heightened, Quickened, Subtle, Transmuted and Twinned Spell,
+  spending Sorcery Points (`METAMAGIC_OPTIONS`, `METAMAGIC_COST`); `castSpell` takes `careful`,
+  `heightened` and `effective_levels`; a save can succeed automatically (`automatic_success`).
+- "One Spell with a Spell Slot per Turn": a second spell slot on the same turn is refused
+  (`cast_this_turn` on each combatant, reset when any turn starts).
 - Font of Magic: a feature action's `slot_exchange` (a spell slot for Sorcery Points, no action;
   Sorcery Points for a slot, a Bonus Action, by the Creating Spell Slots table), with `level` on
   the play action `use_feature` and the encounter action `feature`. The play state's
