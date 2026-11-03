@@ -27,6 +27,7 @@ src/
                    #   previews.ts (reachableSquares, previewMove, previewArea), events.ts
                    #   (result events by diffing), refusals.ts (refusal codes), history.ts (undo),
                    #   lifetimes.ts (what ends effects, marks, zones, summons: pure),
+                   #   spell-turn.ts (one slot per turn, Metamagic, Daze: pure),
                    #   combat.ts (HP, attacks, spells)
   http/            # index.ts: fetch handler (platform-neutral); node-server.ts: node:http adapter
   cli/             # srd-rules bin: build (interactive builder), play, fight, serve, validate

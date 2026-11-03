@@ -1220,8 +1220,8 @@ like the Soldier's gaming set.
 
 Most rules are data; these are code, by name:
 
-- Metamagic (`METAMAGIC_OPTIONS`, `METAMAGIC_COST` in `models/encounter.ts`; `checkMetamagic` in
-  `services/encounter.ts`): a `cast` action's `metamagic` names an option the caster has chosen
+- Metamagic (`METAMAGIC_OPTIONS`, `METAMAGIC_COST` in `models/encounter.ts`; `planMetamagic` in
+  `services/spell-turn.ts`, pure, with the turn's spell limits and Daze): a `cast` action's `metamagic` names an option the caster has chosen
   (the feature `<option>-spell`) and spends its Sorcery Points; Careful and Heightened Spell
   reach `castSpell` (`careful`, `heightened`), Twinned Spell adds an effective level
   (`effective_levels`), and Distant, Subtle and Transmuted Spell cast a changed copy of the spell

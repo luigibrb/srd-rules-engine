@@ -98,7 +98,8 @@ or invented homebrew in its tests.
   happens (effects that end, saves due, refusals with their reasons), applied by the reducer,
   with direct tests; no change in behavior (the seeded demo and the history replays keep the
   dice in the same order). Done area by area, when a feature touches it; what ends effects,
-  marks, zones and summons is done (`services/lifetimes.ts`, P36). The new functions stay
+  marks, zones and summons is done (`services/lifetimes.ts`, P36), and a turn's spell limits,
+  Metamagic and Daze (`services/spell-turn.ts`). The new functions stay
   internal.
 
 ### Priority 2: next

@@ -32,7 +32,6 @@ import {
   EncounterSettingsSchema,
   type Help,
   type MasteryMark,
-  METAMAGIC_COST,
   type MetamagicOption,
   type Pending,
   type PointOfInterest,
@@ -129,6 +128,7 @@ import {
 } from "./lifetimes";
 import { applyAction, combatantFromCharacter, computePlaySheet, PlayError } from "./play";
 import { refusalCode } from "./refusals";
+import { afterCast, castTurnRefusals, dazeRefusal, planMetamagic, turnUses } from "./spell-turn";
 
 export class EncounterError extends Error {
   override name = "EncounterError";
@@ -2080,102 +2080,23 @@ function run(
     if (c.character === null) fail(message("refusal.no_class_features", { name: c.name }));
     const ref = characterRef(ctx, c);
     const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
-    const name = message(`metamagic.${meta.option}`);
     // The chosen feature options, by name (`careful-spell`: Careful Spell).
     const known = lookup(ctx.catalog.features, `${meta.option}-spell`)?.name;
-    if (!known || !sheet.features.includes(known))
-      fail(message("refusal.no_metamagic", { name: c.name, option: name }));
-    const pool =
-      sheet.play.uses.find((u) => u.key.endsWith(":sorcery-points")) ??
-      fail(message("refusal.no_metamagic", { name: c.name, option: name }));
-    const cost = METAMAGIC_COST[meta.option];
-    if (pool.max - pool.spent < cost)
-      refuse(message("refusal.uses_left_count", { name: pool.name, left: pool.max - pool.spent }));
-    const m = spell.mechanics;
-    const not = (detail: Message) =>
-      fail(message("refusal.metamagic_spell", { option: name, spell: spell.name, detail }));
-    let changed: SpellDef = spell;
-    let damage_type: DamageType | undefined;
-    const count = meta.targets?.length ?? 0;
-    switch (meta.option) {
-      case "careful": {
-        // "a spell that forces other creatures to make a saving throw … up to your Charisma
-        // modifier (minimum of one creature)"
-        if (!m?.save) not(message("metamagic.needs_save"));
-        const most = Math.max(1, sheet.modifiers.cha);
-        if (!count || count > most)
-          fail(message("refusal.metamagic_count", { option: name, most }));
-        break;
-      }
-      case "heightened":
-        // "give one target of the spell Disadvantage on saves against the spell"
-        if (!m?.save) not(message("metamagic.needs_save"));
-        if (count !== 1) fail(message("refusal.metamagic_count", { option: name, most: 1 }));
-        break;
-      case "distant": {
-        // "a range of at least 5 feet … double the spell's range … Touch … 30 feet"
-        const feet = spellRangeFeet(spell);
-        if (spell.range === "Touch") changed = { ...spell, range: "30 feet" };
-        else if (feet !== null && feet >= 5) changed = { ...spell, range: `${feet * 2} feet` };
-        else not(message("metamagic.needs_range"));
-        break;
-      }
-      case "extended":
-        // "a spell that has a duration of 1 minute or longer"
-        if (!/\b(minute|hour|day)s?\b/i.test(spell.duration))
-          not(message("metamagic.needs_duration"));
-        break;
-      case "quickened":
-        break;
-      case "subtle":
-        // "without any Verbal, Somatic, or Material components, except Material components that
-        // are consumed by the spell or that have a cost specified"
-        changed = {
-          ...spell,
-          components: /\bM \(([^)]*(consume|GP)[^)]*)\)/.test(spell.components)
-            ? `M (${/\bM \(([^)]*)\)/.exec(spell.components)?.[1] ?? ""})`
-            : "",
-        };
-        break;
-      case "transmuted": {
-        // "change that damage type to one of the other listed types"
-        const to = meta.damage_type ?? fail(message("refusal.metamagic_type", { option: name }));
-        if (!TRANSMUTABLE.includes(to)) fail(message("refusal.metamagic_type", { option: name }));
-        const swap = <T extends { type: DamageType }>(x: T): T =>
-          TRANSMUTABLE.includes(x.type) ? { ...x, type: to } : x;
-        const types = [
-          ...(m?.damage ?? []).map((d) => d.type),
-          ...(m?.damage_types ?? []),
-          ...(m?.follow_up?.damage ?? []).map((d) => d.type),
-        ];
-        if (!m || !types.some((t) => TRANSMUTABLE.includes(t)))
-          not(message("metamagic.needs_type"));
-        if (m) {
-          changed = {
-            ...spell,
-            mechanics: {
-              ...m,
-              damage: m.damage.map(swap),
-              damage_types: m.damage_types.map((t) => (TRANSMUTABLE.includes(t) ? to : t)),
-              upcast: m.upcast && { ...m.upcast, damage: m.upcast.damage.map(swap) },
-              follow_up: m.follow_up && {
-                ...m.follow_up,
-                damage: m.follow_up.damage.map(swap),
-                upcast: m.follow_up.upcast.map(swap),
-              },
-            },
-          };
-        }
-        if (chosenType && TRANSMUTABLE.includes(chosenType)) damage_type = to;
-        break;
-      }
-      case "twinned":
-        // "a spell … that can be cast with a higher-level spell slot to target an additional
-        // creature … increase the spell's effective level by 1"
-        if (spell.level === 0 || !m?.upcast?.targets) not(message("metamagic.needs_targets"));
-        break;
-    }
-    return { spell: changed, damage_type, pool: pool.key, cost, name };
+    const pool = sheet.play.uses.find((u) => u.key.endsWith(":sorcery-points"));
+    const plan = planMetamagic(
+      spell,
+      meta,
+      {
+        caster: c.name,
+        known: !!known && sheet.features.includes(known),
+        points: pool ? { key: pool.key, name: pool.name, left: pool.max - pool.spent } : null,
+        cha: sheet.modifiers.cha,
+      },
+      chosenType,
+    );
+    if (!plan.ok) return fail(plan.reason);
+    if (plan.short) refuse(plan.short);
+    return plan;
   };
   const castBy = (
     c: EncounterCombatant,
@@ -2900,8 +2821,6 @@ function run(
   };
 
   // Daze (Devious Strikes): moving, an action and a Bonus Action used on its turn, counted.
-  const turnUses = (x: EncounterCombatant) =>
-    Number(x.used.action) + Number(x.used.bonus_action) + Number(x.moved > 0);
   const dazedNow = (x: EncounterCombatant) =>
     e.marks.some((m) => m.kind === "dazed" && m.on === x.id && !m.ends?.skip_current);
   const turnOf = current()?.id ?? null;
@@ -4286,21 +4205,17 @@ function run(
       const meta = action.metamagic ?? null;
       const metamagic = meta ? checkMetamagic(c, spell, meta, action.damage_type) : null;
       const cast: SpellDef = metamagic?.spell ?? spell;
-      if (meta?.option === "quickened") {
+      const quickened = meta?.option === "quickened";
+      if (quickened) {
         if (what !== "action") fail(message("refusal.quickened_action", { spell: spell.name }));
-        // "You can't modify a spell in this way if you've already cast a level 1+ spell on the
-        // current turn"
-        if (c.cast_this_turn.leveled)
-          refuse(message("refusal.quickened_after_leveled", { name: c.name }));
         what = "bonus_action";
       }
-      // "nor can you cast a level 1+ spell on this turn after modifying a spell in this way"
-      if (!outside && spell.level > 0 && c.cast_this_turn.quickened)
-        refuse(message("refusal.leveled_after_quickened", { name: c.name }));
-      // "On a turn, you can expend only one spell slot to cast a spell."
+      // One spell slot per turn; Quickened Spell and level 1+ spells.
       const slotted = c.character !== null && spell.level > 0 && !(released && releasing?.held);
-      if (!outside && slotted && c.cast_this_turn.slot)
-        refuse(message("refusal.one_slot_per_turn", { name: c.name }));
+      const thisCast = { level: spell.level, slotted, quickened };
+      if (!outside) {
+        for (const why of castTurnRefusals(c.name, c.cast_this_turn, thisCast)) refuse(why);
+      }
       if (!outside) {
         if (what !== "reaction") onTurn(c, "cast");
         if (!released && c.used[what]) {
@@ -4388,17 +4303,14 @@ function run(
           fail(message("refusal.metamagic_target", { name: find(stray).name, spell: spell.name }));
       }
       if (metamagic) {
-        play(c, { type: "use", key: metamagic.pool, amount: metamagic.cost });
+        // Forced past a lack of Sorcery Points (`force`): nothing to spend.
+        if (!metamagic.short) play(c, { type: "use", key: metamagic.pool, amount: metamagic.cost });
         notes.push(
           message("metamagic.used", { name: c.name, option: metamagic.name, cost: metamagic.cost }),
         );
         if (meta?.option === "extended" && spell.concentration) c.extended_spell = spell.name;
       } else if (spell.concentration && c.extended_spell === spell.name) c.extended_spell = null;
-      if (!outside) {
-        if (slotted) c.cast_this_turn.slot = true;
-        if (spell.level > 0) c.cast_this_turn.leveled = true;
-        if (meta?.option === "quickened") c.cast_this_turn.quickened = true;
-      }
+      if (!outside) c.cast_this_turn = afterCast(c.cast_this_turn, thisCast);
       if (spell.mechanics?.summon) {
         summonCreatures(c, spell, result as SpellCastResult, action.summon);
       } else if (action.summon) {
@@ -4428,9 +4340,9 @@ function run(
   }
   // Daze: on its turn, only one of moving, an action and a Bonus Action.
   const turnNow = turnOf ? e.combatants.find((x) => x.id === turnOf) : undefined;
-  if (turnNow && current()?.id === turnNow.id && dazedNow(turnNow)) {
-    const n = turnUses(turnNow);
-    if (n > 1 && n > usesBefore) refuse(message("refusal.dazed", { name: turnNow.name }));
+  if (turnNow && current()?.id === turnNow.id) {
+    const why = dazeRefusal(turnNow.name, dazedNow(turnNow), usesBefore, turnUses(turnNow));
+    if (why) refuse(why);
   }
   for (const r of reacted) {
     const x = find(r.by);
@@ -4939,16 +4851,6 @@ function sizeOf(ctx: EncounterContext, c: EncounterCombatant): string | null | u
 }
 
 const SIZES = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
-/** Transmuted Spell's types: "Acid, Cold, Fire, Lightning, Poison, Thunder". */
-const TRANSMUTABLE: readonly DamageType[] = [
-  "acid",
-  "cold",
-  "fire",
-  "lightning",
-  "poison",
-  "thunder",
-];
-
 /** Its creature type (`Undead`): a monster's stat block, a character's species. */
 function creatureTypeOf(ctx: EncounterContext, c: EncounterCombatant): string {
   if (c.monster !== null) return monsterDef(ctx, c).creature_type;
