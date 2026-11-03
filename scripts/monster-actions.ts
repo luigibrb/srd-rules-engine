@@ -173,3 +173,109 @@ export function parseAction(name: string, text: string, where: string): Action {
   }
   return action;
 }
+
+/**
+ * Traits that act in combat, read from their exact SRD sentences: Magic Resistance, Pack Tactics,
+ * Death Burst ("explodes when it dies", with its parsed save), damage auras ("At the end of each of the azer's turns, each
+ * creature … in a 5-foot Emanation … takes 5 (1d10) Fire damage"), Regeneration, and Aura of
+ * Authority's Advantage. Anything worded otherwise stays text.
+ */
+export function traitMechanics(monster: Record<string, unknown>): number {
+  let read = 0;
+  for (const trait of (monster.traits as Action[] | undefined) ?? []) {
+    const text = trait.text;
+    if (/explodes when it dies/.test(text) && trait.save) {
+      trait.trigger = "death";
+      read++;
+    }
+    const aura =
+      /^At the end of each of the [\w' -]+?'s turns, each creature (of the [\w' -]+?'s choice )?in a (\d+)-foot Emanation originating from the [\w' -]+? takes (\d+) \((\d+d\d+(?: [+−-] \d+)?)\) (\w+) damage( unless the [\w' -]+? has the Incapacitated condition)?\./.exec(
+        text,
+      );
+    if (aura) {
+      trait.aura = {
+        size: Number(aura[2]),
+        damage: damageParts(`${aura[3]} (${aura[4]}) ${aura[5]} damage`),
+        choice: !!aura[1],
+        not_incapacitated: !!aura[6],
+      };
+      read++;
+    }
+    const regen =
+      /regains (\d+) Hit Points at the start of each of its turns\. If the [\w' -]+? takes ([\w ]+?) damage, this trait doesn't function on the [\w' -]+?'s next turn\. The [\w' -]+? dies only if it starts its turn with 0 Hit Points/.exec(
+        text,
+      );
+    if (regen) {
+      trait.regeneration = {
+        amount: Number(regen[1]),
+        stopped_by: (regen[2] as string).toLowerCase().split(/ or |, /),
+      };
+      read++;
+    }
+    // Magic Resistance: "has Advantage on saving throws against spells and other magical effects."
+    if (/has Advantage on saving throws against spells and other magical effects\.$/.test(text)) {
+      trait.save_advantage = "magic";
+      read++;
+    }
+    // Pack Tactics: "has Advantage on (?:an attack roll|attack rolls) against a creature if at least one of the
+    // …'s allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
+    // condition."
+    if (
+      /has Advantage on (?:an attack roll|attack rolls) against a creature if at least one of the [\w' -]+?'s allies is within 5 feet of the creature and the ally doesn't have the Incapacitated condition\.$/.test(
+        text,
+      )
+    ) {
+      trait.pack_tactics = true;
+      read++;
+    }
+    // Bloodied Fury, Blood Frenzy.
+    if (/^While Bloodied, the [\w' -]+? has Advantage on attack rolls\.$/.test(text)) {
+      trait.attack_advantage = "bloodied";
+      read++;
+    } else if (/has Advantage on melee attack rolls while it is Bloodied\.$/.test(text)) {
+      trait.attack_advantage = "bloodied_melee";
+      read++;
+    } else if (
+      /has Advantage on attack rolls against any creature that doesn't have all its Hit Points\.$/.test(
+        text,
+      )
+    ) {
+      trait.attack_advantage = "target_damaged";
+      read++;
+    }
+    // Agile, Flyby: "doesn't provoke an Opportunity Attack when it moves (flies) out of an enemy's
+    // reach."
+    const noOa =
+      /doesn't provoke an Opportunity Attack when it (moves|flies) out of an enemy's reach\.$/.exec(
+        text,
+      );
+    if (noOa) {
+      trait.no_opportunity_attacks = noOa[1] === "flies" ? "flying" : "always";
+      read++;
+    }
+    // Absorption: "Whenever the golem is subjected to Lightning damage, it (takes no damage and
+    // instead) regains a number of Hit Points equal to the Lightning damage dealt."
+    const absorb =
+      /^Whenever the [\w' -]+? is subjected to (\w+) damage, it (takes no damage and instead )?regains a number of Hit Points equal to the \1 damage dealt\.$/.exec(
+        text,
+      );
+    if (absorb) {
+      trait.absorbs = (absorb[1] as string).toLowerCase();
+      read++;
+    }
+    // Swarm: "The swarm can't regain Hit Points or gain Temporary Hit Points."
+    if (/The swarm can't regain Hit Points or gain Temporary Hit Points\.$/.test(text)) {
+      trait.no_healing = true;
+      read++;
+    }
+    const authority =
+      /^While in a (\d+)-foot Emanation originating from the [\w' -]+?, the [\w' -]+? and its allies have Advantage on attack rolls and saving throws/.exec(
+        text,
+      );
+    if (authority) {
+      trait.advantage_aura = { size: Number(authority[1]) };
+      read++;
+    }
+  }
+  return read;
+}
