@@ -705,6 +705,12 @@ export interface ChoiceDef {
   subset_of: string | null;
   /** `kind: weapon_mastery`: only melee or ranged weapons. */
   weapon_kind: "melee" | "ranged" | null;
+  /**
+   * `kind: tool`: this tool, unless the character already has it from elsewhere; then a tool of
+   * the choice's category ("If you already have this proficiency, you gain proficiency with one
+   * other type of Artisan's Tools of your choice").
+   */
+  unless_proficient: string | null;
 }
 
 /** A feature you switch on in play (Rage). Its key is like a resource's: `barbarian:rage`. */
@@ -745,6 +751,12 @@ export interface Grants {
   cantrips: string[];
   /** Spells you always have prepared (Hunter's Mark, Speak with Animals…). */
   spells: string[];
+  /**
+   * Spells added to the spell list of each Spellcasting or Pact Magic feature you have ("the
+   * spells on the table are added to that feature's spell list"): you can then pick them like the
+   * list's own.
+   */
+  expanded_spells: string[];
   spellcasting: Spellcasting | null;
   ac_calculations: AcCalculation[];
   ability_bonuses: AbilityBonus[];
@@ -842,6 +854,7 @@ export const ChoiceDefSchema: z.ZodType<ChoiceDef, unknown> = z
         same_level: z.boolean().default(false),
         rest_change: z.enum(["short", "long"]).nullable().default(null),
         weapon_kind: z.enum(["melee", "ranged"]).nullable().default(null),
+        unless_proficient: z.string().nullable().default(null),
       })
       .refine((c) => c.swap === null || c.tag !== null, {
         error: (issue) =>
@@ -884,6 +897,7 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       resistances: z.array(z.string()).default([]),
       cantrips: z.array(z.string()).default([]),
       spells: z.array(z.string()).default([]),
+      expanded_spells: z.array(z.string()).default([]),
       spellcasting: SpellcastingSchema.nullable().default(null),
       ac_calculations: z.array(AcCalculationSchema).default([]),
       ability_bonuses: z.array(AbilityBonusSchema).default([]),
@@ -1245,6 +1259,13 @@ export const SpellMechanicsSchema = z
      */
     /** Cast right after hitting the target with a melee attack this turn (Divine Smite). */
     after_hit: z.boolean().default(false),
+    /** The hit `after_hit` follows: a melee attack (the smites), a ranged one, or either. */
+    after_hit_with: z.enum(["melee", "ranged", "any"]).default("melee"),
+    /**
+     * Its save also falls on each creature within this many feet of the target (after a hit:
+     * "the target of the attack and each creature within 5 feet of it").
+     */
+    around_target: z.int().min(5).nullable().default(null),
     /** More dice against these creature types (Divine Smite: Fiends and Undead). */
     bonus_vs: z
       .strictObject({ creature_types: z.array(z.string()).min(1), dice: Dice })

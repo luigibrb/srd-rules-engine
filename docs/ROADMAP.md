@@ -53,6 +53,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P38 | Content schema gaps: grants at a character level (the SRD lineages' level 3 and 5 spells), an attunement limit from content, feats exclusive to their category, a one-third caster progression, dice in spell damage bonuses | A one-third caster rounds up (flagged) |
 | P39 | Reactions to another creature's d20 roll (`modifies_roll`): offered after the roll as a decision, the reaction and use spent; the College of Lore's Cutting Words | Offered only in the reactor's interest (flagged); Cutting Words on damage rolls is by hand |
 | P40 | Spell hit riders as marks: Shocking Grasp (no Opportunity Attacks), Ray of Frost (−10 ft Speed), Chill Touch (no healing); Chromatic Orb's chosen damage type | Chromatic Orb's leap and Starry Wisp's light stay text (flagged) |
+| P41 | The content gaps left: spells added to a character's spell lists, a tool or another when already proficient, a save around the creature a ranged or melee hit struck | Homebrew tests (no SRD example) |
 
 ## Decisions
 
@@ -97,9 +98,6 @@ or invented homebrew in its tests.
 
 ### Priority 2: next
 
-- **Content schema gaps, what's left (S–M each).** Spells a feat or feature adds to its owner's
-  class spell lists; a tool proficiency that becomes another of your choice when you already have
-  it; a saving throw by the creature hit and those around it, after a weapon hit.
 - **Spell riders, what's left (S).** Starry Wisp's light and "can't benefit from the Invisible
   condition"; Chromatic Orb's leap on doubles.
 - **Spells left as text (L, ongoing).** 49 spells have effects the parser doesn't read

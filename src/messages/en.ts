@@ -452,6 +452,7 @@ export const MESSAGES_EN = {
     "Action Surge's additional action can't be the Magic action (casting a spell)",
   "refusal.cast_right_after_hits": "{spell} is cast right after {name} hits a creature",
   "refusal.follows_hit_melee_attack": "{spell} follows a hit with a melee attack",
+  "refusal.follows_hit_ranged_attack": "{spell} follows a hit with a ranged attack",
   "refusal.character_wasnt_given": "{name}: the character '{character}' wasn't given",
   "refusal.no_one_left_take": "No one is left to take a turn",
   "refusal.already_defeated": "{name} is already defeated",
