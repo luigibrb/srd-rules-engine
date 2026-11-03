@@ -129,6 +129,8 @@ export interface FeatureActionLine {
   readonly also: readonly ("dash" | "disengage" | "dodge")[];
   readonly attacks: { readonly attack: string; readonly count: number } | null;
   readonly after_hit: boolean;
+  /** Right after its user's reaction took an attack's damage to 0 (Deflect Attacks' redirect). */
+  readonly after_damage_reduced: boolean;
   readonly once_per_turn: boolean;
   readonly save: {
     readonly ability: Ability;
@@ -808,6 +810,7 @@ export function computeSheet(
           also: a.also,
           attacks: a.attacks,
           after_hit: a.after_hit,
+          after_damage_reduced: a.after_damage_reduced,
           once_per_turn: a.once_per_turn,
           save: a.save && {
             ability: a.save.ability,

@@ -321,6 +321,8 @@ export const MESSAGES_EN = {
   "refusal.doesnt_cunning_strike": "{name} doesn't have Cunning Strike",
   "refusal.devious_strikes":
     "Daze, Knock Out and Obscure need Devious Strikes, which {name} doesn't have",
+  "refusal.redirect_after_zero":
+    "{feature} is used right after {name}'s reaction reduces an attack's damage to 0",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":

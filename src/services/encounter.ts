@@ -1711,6 +1711,15 @@ function run(
             cut -= off;
             return { ...d, amount: d.amount - off };
           });
+          // "If you reduce the damage to 0, you can expend 1 Focus Point to redirect": until the
+          // next action, with the attack's (first) damage type.
+          if (instances.every((d) => d.amount === 0)) {
+            t.deflected = {
+              type: instances[0]?.type ?? null,
+              melee: line?.kind === "melee" && !options.thrown,
+              attacker: c.id,
+            };
+          }
         }
       }
       applyTo(t, [{ type: "damage", instances, critical: hit.critical_hit }]);
@@ -2764,6 +2773,7 @@ function run(
   const dazedNow = (x: EncounterCombatant) =>
     e.marks.some((m) => m.kind === "dazed" && m.on === x.id && !m.ends?.skip_current);
   const turnOf = current()?.id ?? null;
+  const windows = e.combatants.filter((x) => x.deflected !== null).map((x) => x.id);
   const usesBefore = turnOf ? turnUses(find(turnOf)) : 0;
   switch (action.type) {
     case "add_monster": {
@@ -3868,9 +3878,15 @@ function run(
       if (action.summon && !f.summon && !f.cast) {
         fail(message("refusal.summon_choice", { spell: f.name, detail: "it summons nothing" }));
       }
+      // Deflect Attacks' redirect: right after the reaction took an attack's damage to 0.
+      const deflected = f.after_damage_reduced
+        ? (c.deflected ??
+          fail(message("refusal.redirect_after_zero", { feature: f.name, name: c.name })))
+        : null;
       const damageType =
         f.save?.damage &&
-        (action.damage_type ??
+        ((deflected?.type as DamageType | null | undefined) ??
+          action.damage_type ??
           (f.save.damage.types.length === 1
             ? f.save.damage.types[0]
             : fail(
@@ -3897,14 +3913,17 @@ function run(
       for (const x of targets) {
         if (f.many && x === c)
           fail(message("refusal.doesnt_affect", { feature: f.name, name: c.name }));
-        const d = f.range === null ? null : checkedFeet(c, x);
-        if (f.range !== null && d !== null && d > f.range) {
+        // A redirect: "within 5 feet of yourself if the attack was a melee attack or … within 60
+        // feet of yourself … if the attack was a ranged attack".
+        const range = deflected ? (deflected.melee ? 5 : 60) : f.range;
+        const d = range === null ? null : checkedFeet(c, x);
+        if (range !== null && d !== null && d > range) {
           refuse(
             message("refusal.feet_away_out_range_3", {
               other: x.name,
               d,
               feature: f.name,
-              range: f.range,
+              range,
             }),
           );
         }
@@ -3927,7 +3946,8 @@ function run(
         if (c.used.reaction) refuse(message("refusal.already_used_reaction", { name: c.name }));
         c.used.reaction = true;
       } else if (f.economy === "free") {
-        onTurn(c, `use ${f.name}`);
+        // A redirect follows the reaction, on the attacker's turn.
+        if (!f.after_damage_reduced) onTurn(c, `use ${f.name}`);
         canAct(c);
       } else takeAction(c, f.name, f.economy === "bonus_action");
       if (f.once_per_turn && c.features_used.includes(f.key)) {
@@ -3935,6 +3955,7 @@ function run(
       }
       if (f.after_hit && !c.hits.includes(t.id))
         fail(message("refusal.hasnt_hit_turn", { name: c.name, target: t.name }));
+      if (f.after_damage_reduced) c.deflected = null;
       if (f.extra_action && !c.used.action) {
         fail(message("refusal.take_your_action_gives", { feature: f.name }));
       }
@@ -4222,6 +4243,11 @@ function run(
     const c = find(releasing.id);
     c.used.reaction = true;
     c.readied = null;
+  }
+  // A redirect's window (Deflect Attacks) lasts until the next action.
+  for (const id of windows) {
+    const x = e.combatants.find((y) => y.id === id);
+    if (x) x.deflected = null;
   }
   // Daze: on its turn, only one of moving, an action and a Bonus Action.
   const turnNow = turnOf ? e.combatants.find((x) => x.id === turnOf) : undefined;

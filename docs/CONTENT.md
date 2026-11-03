@@ -232,6 +232,8 @@ actions:
   uses: focus-points
   target: other                # self (default) | creature | other
   after_hit: true              # needs a hit on the target this turn
+                               # (after_damage_reduced: right after your reaction took an attack's
+                               # damage to 0, the attack's damage type: Deflect Attacks' redirect)
   once_per_turn: true
   save: {ability: con, dc_ability: wis, conditions: [stunned],   # until the start of your next turn
          on_success: [speed_halved, advantage_against]}

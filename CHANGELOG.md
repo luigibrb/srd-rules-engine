@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Deflect Attacks' redirect ("Deflect Attacks: Redirect", a Focus Point): a feature action's
+  `after_damage_reduced`, usable right after its user's reaction took an attack's damage to 0
+  (until the next action, the combatant's `deflected`), with the attack's damage type, within 5
+  feet after a melee attack or 60 after a ranged one.
 - Devious Strikes (Rogue level 14): the Cunning Strike effects `daze`, `knock_out` and `obscure`,
   each paid with its dice of Sneak Attack (`CUNNING_STRIKE_DICE`; an attack option's
   `sneak_attack_dice` gives the cost). A Dazed creature's second use of moving, its action and its

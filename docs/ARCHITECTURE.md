@@ -1082,8 +1082,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Sacred Weapon's bonus applies to every weapon attack while it's on (the SRD: the one Melee
   weapon imbued), and its Radiant damage option isn't tracked. Agonizing Blast's
   Charisma goes to the chosen cantrip's damage like Potent Spellcasting (once per damage roll).
-- Deflect Attacks reduces the damage; redirecting it (a Focus Point when it reaches 0) and Deflect
-  Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
+- Deflect Attacks' redirect can follow until the next action (`deflected` on the monk, cleared by
+  any other action): its damage type is the attack's first damage type (a weapon's, not a rider's),
+  and "isn't behind Total Cover" isn't checked. Deflect Energy's other damage types are text. Turn Undead's "it tries to move as far from you as it
   can" is the GM's to play.
 - Indomitable is offered on any failed save while a use is left (recommended only when the
   reroll can succeed); a Bardic Inspiration die can still be added after it.

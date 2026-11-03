@@ -111,6 +111,14 @@ export const EncounterCombatantSchema = z.object({
     .object({ attack: z.string(), count: z.int().min(0) })
     .nullable()
     .default(null),
+  /**
+   * Its reaction just took an attack's damage to 0 (Deflect Attacks): the attack's damage type and
+   * whether it was a melee attack, until the next action (the redirect).
+   */
+  deflected: z
+    .object({ type: z.string().nullable(), melee: z.boolean(), attacker: z.string() })
+    .nullable()
+    .default(null),
   /** Creatures it hit this turn (Stunning Strike needs a hit). */
   hits: z.array(z.string()).default([]),
   /** Its last hit this turn: a melee attack, a Critical Hit (Divine Smite rides it). */
