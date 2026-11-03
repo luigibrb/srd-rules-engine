@@ -69,6 +69,19 @@ export const EncounterCombatantSchema = z.object({
   attacks_left: z.int().min(0).default(0),
   /** Once-per-turn riders already used this turn (Sneak Attack), reset at every turn's start. */
   riders_used: z.array(z.string()).default([]),
+  /**
+   * Spells it cast on the current turn (anyone's), reset at every turn's start: with a spell slot
+   * ("On a turn, you can expend only one spell slot to cast a spell"), of level 1+, Quickened.
+   */
+  cast_this_turn: z
+    .object({
+      slot: z.boolean().default(false),
+      leveled: z.boolean().default(false),
+      quickened: z.boolean().default(false),
+    })
+    .prefault({}),
+  /** The spell cast with Extended Spell that it concentrates on: Advantage on its saves. */
+  extended_spell: z.string().nullable().default(null),
   /** Abilities with a Recharge that were used and haven't recharged (`Fire Breath`). */
   expended: z.array(z.string()).default([]),
   /**
@@ -226,6 +239,32 @@ export const MasteryMarkSchema = z.object({
   ends: EffectEndSchema,
 });
 export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
+
+/**
+ * Metamagic options used when casting (SRD Sorcerer), with their cost in Sorcery Points; the
+ * feature options are `<option>-spell`. Empowered and Seeking Spell come after a roll.
+ */
+export const METAMAGIC_OPTIONS = [
+  "careful",
+  "distant",
+  "extended",
+  "heightened",
+  "quickened",
+  "subtle",
+  "transmuted",
+  "twinned",
+] as const;
+export type MetamagicOption = (typeof METAMAGIC_OPTIONS)[number];
+export const METAMAGIC_COST: Readonly<Record<MetamagicOption, number>> = {
+  careful: 1,
+  distant: 1,
+  extended: 1,
+  heightened: 2,
+  quickened: 2,
+  subtle: 1,
+  transmuted: 1,
+  twinned: 1,
+};
 
 /**
  * Cunning Strike effects (SRD Rogue), with Devious Strikes' (`daze`, `knock_out`, `obscure`), and
@@ -720,6 +759,18 @@ const CastActionSchema = z.object({
   nearby: z.array(z.string()).optional(),
   /** The damage type, for a spell that offers a choice (Spirit Guardians). */
   damage_type: z.enum(DAMAGE_TYPES).optional(),
+  /**
+   * A Metamagic option (Sorcerer), its Sorcery Points spent: `targets` are Careful Spell's
+   * protected creatures or Heightened Spell's one target; `damage_type`, Transmuted Spell's new
+   * type.
+   */
+  metamagic: z
+    .object({
+      option: z.enum(METAMAGIC_OPTIONS),
+      targets: z.array(z.string()).optional(),
+      damage_type: z.enum(DAMAGE_TYPES).optional(),
+    })
+    .optional(),
   /** Creatures a zone doesn't affect, for a spell whose caster designates them. */
   unaffected: z.array(z.string()).optional(),
   /** A summoning spell's creatures (`mechanics.summon`). */

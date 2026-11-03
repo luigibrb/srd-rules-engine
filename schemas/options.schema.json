@@ -5559,6 +5559,52 @@
                         "thunder"
                       ]
                     },
+                    "metamagic": {
+                      "type": "object",
+                      "properties": {
+                        "option": {
+                          "type": "string",
+                          "enum": [
+                            "careful",
+                            "distant",
+                            "extended",
+                            "heightened",
+                            "quickened",
+                            "subtle",
+                            "transmuted",
+                            "twinned"
+                          ]
+                        },
+                        "targets": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "damage_type": {
+                          "type": "string",
+                          "enum": [
+                            "acid",
+                            "bludgeoning",
+                            "cold",
+                            "fire",
+                            "force",
+                            "lightning",
+                            "necrotic",
+                            "piercing",
+                            "poison",
+                            "psychic",
+                            "radiant",
+                            "slashing",
+                            "thunder"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "option"
+                      ],
+                      "additionalProperties": false
+                    },
                     "unaffected": {
                       "type": "array",
                       "items": {
@@ -6299,6 +6345,52 @@
                 "slashing",
                 "thunder"
               ]
+            },
+            "metamagic": {
+              "type": "object",
+              "properties": {
+                "option": {
+                  "type": "string",
+                  "enum": [
+                    "careful",
+                    "distant",
+                    "extended",
+                    "heightened",
+                    "quickened",
+                    "subtle",
+                    "transmuted",
+                    "twinned"
+                  ]
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "damage_type": {
+                  "type": "string",
+                  "enum": [
+                    "acid",
+                    "bludgeoning",
+                    "cold",
+                    "fire",
+                    "force",
+                    "lightning",
+                    "necrotic",
+                    "piercing",
+                    "poison",
+                    "psychic",
+                    "radiant",
+                    "slashing",
+                    "thunder"
+                  ]
+                }
+              },
+              "required": [
+                "option"
+              ],
+              "additionalProperties": false
             },
             "unaffected": {
               "type": "array",

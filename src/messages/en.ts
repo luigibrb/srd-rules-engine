@@ -31,6 +31,7 @@ export const MESSAGES_EN = {
   "skill.stealth": "Stealth",
   "skill.survival": "Survival",
   "save.automatic_failure": "fails automatically: {condition}",
+  "save.automatic_success": "succeeds automatically: {reason}",
   "save.total": "{total} vs DC {dc}{mode, select, normal {} other {, {mode}}}",
   "damage.amount": "{amount} {type}",
   "damage.untyped": "{amount}",
@@ -329,6 +330,35 @@ export const MESSAGES_EN = {
   "play.slot_to_uses":
     "{feature}: a level {level} spell slot becomes {gained} {uses}{lost, plural, =0 {} other { (# over the maximum lost)}}.",
   "play.uses_to_slot": "{feature}: {cost} {uses} become a level {level} spell slot.",
+  "refusal.one_slot_per_turn": "{name} has already used a spell slot to cast a spell this turn",
+  "refusal.quickened_action":
+    "Quickened Spell changes a casting time of an action, and {spell} doesn't have one",
+  "refusal.quickened_after_leveled":
+    "{name} has already used a level 1+ spell this turn: no Quickened Spell",
+  "refusal.leveled_after_quickened":
+    "{name} has already used Quickened Spell this turn: no other level 1+ spell",
+  "refusal.no_metamagic": "{name} doesn't have {option}",
+  "refusal.metamagic_spell": "{option} can't change {spell}: {detail}",
+  "refusal.metamagic_count":
+    "{option}: choose {most, plural, one {one creature} other {up to # creatures}} (`targets`)",
+  "refusal.metamagic_type":
+    "{option}: choose Acid, Cold, Fire, Lightning, Poison or Thunder (`damage_type`)",
+  "refusal.metamagic_target": "{name} isn't a target of {spell}",
+  "metamagic.used":
+    "{name} uses {option} ({cost} Sorcery {cost, plural, one {Point} other {Points}}).",
+  "metamagic.careful": "Careful Spell",
+  "metamagic.distant": "Distant Spell",
+  "metamagic.extended": "Extended Spell",
+  "metamagic.heightened": "Heightened Spell",
+  "metamagic.quickened": "Quickened Spell",
+  "metamagic.subtle": "Subtle Spell",
+  "metamagic.transmuted": "Transmuted Spell",
+  "metamagic.twinned": "Twinned Spell",
+  "metamagic.needs_save": "it forces no saving throw",
+  "metamagic.needs_range": "its range isn't 5 feet or more, or Touch",
+  "metamagic.needs_duration": "it doesn't last 1 minute or longer",
+  "metamagic.needs_type": "it deals none of the listed damage types",
+  "metamagic.needs_targets": "a higher-level slot doesn't give it more targets",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":
