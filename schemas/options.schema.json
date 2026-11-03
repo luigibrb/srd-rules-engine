@@ -5300,7 +5300,10 @@
                         "enum": [
                           "poison",
                           "trip",
-                          "withdraw"
+                          "withdraw",
+                          "daze",
+                          "knock_out",
+                          "obscure"
                         ]
                       }
                     },
@@ -5911,7 +5914,10 @@
                 "enum": [
                   "poison",
                   "trip",
-                  "withdraw"
+                  "withdraw",
+                  "daze",
+                  "knock_out",
+                  "obscure"
                 ]
               }
             },
@@ -7449,7 +7455,10 @@
                 "enum": [
                   "poison",
                   "trip",
-                  "withdraw"
+                  "withdraw",
+                  "daze",
+                  "knock_out",
+                  "obscure"
                 ]
               }
             },

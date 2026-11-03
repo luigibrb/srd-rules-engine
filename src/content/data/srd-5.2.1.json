@@ -13747,7 +13747,9 @@
                     "effects": [],
                     "damage_riders": [],
                     "advantages": [],
-                    "rules": [],
+                    "rules": [
+                        "devious_strikes"
+                    ],
                     "spell_damage": [],
                     "actions": [],
                     "toggles": [],

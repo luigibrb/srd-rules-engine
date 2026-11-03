@@ -198,6 +198,7 @@ features:
         _Knock Out (Cost: 6d6)._ The target must succeed on a Constitution saving throw, or it has the Unconscious condition for 1 minute or until it takes any damage. The Unconscious target repeats the save at the end of each of its turns, ending the effect on itself on a success.
 
         _Obscure (Cost: 3d6)._ The target must succeed on a Dexterity saving throw, or it has the Blinded condition until the end of its next turn.
+    rules: [devious_strikes]
   '15':
     traits:
     - name: Slippery Mind

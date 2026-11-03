@@ -399,6 +399,7 @@ OVERLAY = {
                          "halves_attack_damage": True}],
             "rules": ["cunning_strike"]},
         11: {"rules": ["improved_cunning_strike"]},
+        14: {"rules": ["devious_strikes"]},
         6: {"choices": [expertise(2, "Rogue Expertise")]},
         7: {"rules": ["evasion", "reliable_talent"]},
         15: {"saving_throws": ["wis", "cha"]},

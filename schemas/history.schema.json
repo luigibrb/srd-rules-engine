@@ -495,7 +495,10 @@
                                           "enum": [
                                             "poison",
                                             "trip",
-                                            "withdraw"
+                                            "withdraw",
+                                            "daze",
+                                            "knock_out",
+                                            "obscure"
                                           ]
                                         }
                                       },
@@ -1317,7 +1320,8 @@
                           "slowed",
                           "no_healing",
                           "revealed",
-                          "outlined"
+                          "outlined",
+                          "dazed"
                         ]
                       },
                       "label": {
@@ -3559,7 +3563,10 @@
                         "enum": [
                           "poison",
                           "trip",
-                          "withdraw"
+                          "withdraw",
+                          "daze",
+                          "knock_out",
+                          "obscure"
                         ]
                       }
                     },
@@ -4150,7 +4157,10 @@
                 "enum": [
                   "poison",
                   "trip",
-                  "withdraw"
+                  "withdraw",
+                  "daze",
+                  "knock_out",
+                  "obscure"
                 ]
               }
             },
@@ -5623,7 +5633,10 @@
                 "enum": [
                   "poison",
                   "trip",
-                  "withdraw"
+                  "withdraw",
+                  "daze",
+                  "knock_out",
+                  "obscure"
                 ]
               }
             },

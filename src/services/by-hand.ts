@@ -9,7 +9,12 @@
 import { type Catalog, lookup } from "../content/catalog";
 import type { CharacterBuild } from "../models/build";
 import type { Ability, MonsterDef, SpellDef } from "../models/content";
-import type { RollCost, RollWhat } from "../models/encounter";
+import {
+  CUNNING_STRIKE_DICE,
+  type CunningStrike,
+  type RollCost,
+  type RollWhat,
+} from "../models/encounter";
 import type { Message } from "../models/messages";
 import type { OptionReason } from "../models/options";
 import type { CharacterState, PlayAction } from "../models/state";
@@ -44,6 +49,9 @@ export interface DeclaredRolls {
 }
 
 export type { RollCost } from "../models/encounter";
+
+/** Devious Strikes' Cunning Strike effects (SRD Rogue level 14). */
+const DEVIOUS: readonly string[] = ["daze", "knock_out", "obscure"];
 
 /** A roll's cost, and whether it can be paid now (`reason` when it can't). */
 export type CheckedCost = RollCost & {
@@ -421,7 +429,13 @@ export function strikeDice(
     if (cunning.includes("poison") && !state.inventory.some((i) => i.item === "poisoners-kit")) {
       fail(message("refusal.cunning_strike_poison_needs", { name }));
     }
-    out.forgo.push({ rider: "sneak-attack", dice: cunning.length });
+    const devious = cunning.filter((x) => DEVIOUS.includes(x));
+    if (devious.length && !sheet.rules.includes("devious_strikes")) {
+      fail(message("refusal.devious_strikes", { name }));
+    }
+    // "the number of Sneak Attack damage dice you must forgo"
+    const dice = cunning.reduce((n, x) => n + (CUNNING_STRIKE_DICE[x as CunningStrike] ?? 1), 0);
+    out.forgo.push({ rider: "sneak-attack", dice });
   }
   if (brutal.length) {
     if (!sheet.rules.includes("brutal_strike"))
