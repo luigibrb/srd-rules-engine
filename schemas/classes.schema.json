@@ -985,6 +985,29 @@
             "additionalProperties": false
           }
         },
+        "condition_immunities": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": {
+                "type": "string"
+              },
+              "while_active": {
+                "default": [],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "condition"
+            ],
+            "additionalProperties": false
+          }
+        },
         "advantages": {
           "default": [],
           "type": "array",
@@ -1071,7 +1094,10 @@
               "heroic_rally",
               "sculpt_spells",
               "dark_ones_blessing",
-              "open_hand_technique"
+              "open_hand_technique",
+              "disciple_of_life",
+              "blessed_healer",
+              "supreme_healing"
             ]
           }
         },

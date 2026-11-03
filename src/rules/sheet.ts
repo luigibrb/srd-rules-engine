@@ -303,6 +303,8 @@ export interface DerivedSheet {
   /** Language id → source. */
   readonly languages: Readonly<Record<string, string>>;
   readonly resistances: readonly string[];
+  /** Conditions it can't have now (Mindless Rage, while raging). */
+  readonly condition_immunities: readonly string[];
   /** Advantage on saving throws or checks (`save.str`), with where it comes from. */
   readonly advantages: readonly { readonly target: AdvantageTarget; readonly source: string }[];
   /** Features used in turns (Second Wind, Action Surge), keyed like toggles (`fighter:second-wind`). */
@@ -773,6 +775,15 @@ export function computeSheet(
         ...res.granted("resistances"),
         ...itemSources.flatMap((s) => s.grants.resistances),
       ]),
+    ],
+    condition_immunities: [
+      ...new Set(
+        [...res.sources, ...itemSources].flatMap((src) =>
+          src.grants.condition_immunities
+            .filter((x) => x.while_active.every((id) => activeToggles.has(id)))
+            .map((x) => x.condition),
+        ),
+      ),
     ],
     advantages: [...res.sources, ...itemSources].flatMap((src) =>
       src.grants.advantages.flatMap((grant) => {

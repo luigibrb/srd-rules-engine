@@ -397,7 +397,7 @@ export function castSpell(
       save = { ability: m.follow_up.save.ability, dc };
       damage = rollDamage(followUpParts(m.follow_up, above), { rng });
     }
-    const healing = m.heal ? rollDamage(healParts(m, modifier, above), { rng }).total : null;
+    const healing = m.heal ? healRoll(healParts(m, modifier, above), caster, rng) : null;
     return {
       ...base,
       spellcasting: line?.source ?? null,
@@ -526,11 +526,24 @@ export function castSpell(
   }
 
   if (m.heal) {
-    const healing = rollDamage(healParts(m, modifier, above), { rng }).total;
+    const healing = healRoll(healParts(m, modifier, above), caster, rng);
+    // Disciple of Life: "that creature regains additional Hit Points … 2 plus the spell slot's
+    // level", for a spell cast with a spell slot.
+    const slotted = slot !== null && !no_slot;
+    const disciple = slotted && caster.rules.includes("disciple_of_life") ? 2 + slot : 0;
     for (const [i, target] of targets.entries()) {
       const current = results[i] ?? targetResult(i, target, {});
-      const actions: PlayAction[] = [...current.actions, { type: "heal", amount: healing }];
-      results[i] = { ...current, healing, actions };
+      const amount = healing + disciple;
+      const actions: PlayAction[] = [...current.actions, { type: "heal", amount }];
+      results[i] = { ...current, healing: amount, actions };
+    }
+    // Blessed Healer: "Immediately after you cast a spell with a spell slot that restores Hit
+    // Points to one or more creatures other than yourself, you regain … 2 plus the spell slot's
+    // level."
+    const self = caster.id ?? caster.name;
+    if (slotted && caster.rules.includes("blessed_healer")) {
+      if (targets.some((t) => (t.id ?? t.name) !== self))
+        casterActions.push({ type: "heal", amount: 2 + slot });
     }
   }
 
@@ -566,6 +579,17 @@ function followUpParts(f: NonNullable<SpellMechanics["follow_up"]>, above: numbe
     } else parts.push({ dice: `${count * above}d${sides}`, bonus: 0, type: more.type });
   }
   return parts;
+}
+
+/** Healing rolled, or every die at its highest with Supreme Healing. */
+function healRoll(parts: readonly DamagePart[], caster: Combatant, rng: Rng): number {
+  if (!caster.rules.includes("supreme_healing")) return rollDamage(parts, { rng }).total;
+  // "instead use the highest number possible for each die"
+  return parts.reduce((total, p) => {
+    if (!p.dice) return total + p.bonus;
+    const { count, sides } = parseDiceExpression(p.dice);
+    return total + count * sides + p.bonus;
+  }, 0);
 }
 
 /** A healing spell's parts, with the dice a higher slot adds. */

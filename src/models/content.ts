@@ -312,6 +312,9 @@ export const FEATURE_RULES = [
   "sculpt_spells",
   "dark_ones_blessing",
   "open_hand_technique",
+  "disciple_of_life",
+  "blessed_healer",
+  "supreme_healing",
 ] as const;
 export type FeatureRule = (typeof FEATURE_RULES)[number];
 
@@ -793,6 +796,8 @@ export interface Grants {
   effects: Effect[];
   /** Extra damage on some attacks. */
   damage_riders: DamageRider[];
+  /** Conditions it can't have, while these toggles are active (Mindless Rage: while raging). */
+  condition_immunities: { condition: string; while_active: string[] }[];
   /** Advantage on saving throws, ability checks, Initiative or attack rolls. */
   advantages: AdvantageGrant[];
   /** Rules in code it switches on (Evasion). */
@@ -931,6 +936,15 @@ export const GrantsSchema: z.ZodType<Grants, unknown> = z
       on_long_rest: z.array(z.enum(["heroic_inspiration"])).default([]),
       effects: z.array(EffectSchema).default([]),
       damage_riders: z.array(DamageRiderSchema).default([]),
+      condition_immunities: z
+        .array(
+          z.strictObject({
+            condition: z.string(),
+            /** Only while all these toggles (by id) are active (Mindless Rage: `rage`). */
+            while_active: z.array(z.string()).default([]),
+          }),
+        )
+        .default([]),
       advantages: z.array(AdvantageGrantSchema).default([]),
       rules: z.array(z.enum(FEATURE_RULES)).default([]),
       spell_damage: z.array(SpellDamageSchema).default([]),

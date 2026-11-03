@@ -370,6 +370,8 @@ export const MESSAGES_EN = {
     "Open Hand Technique ({technique, select, push {Push} other {Topple}}): {name} {success, select, true {succeeds} other {fails}} ({save}).",
   "technique.pushed": "{target} can be pushed up to 15 feet away from {name}.",
   "feature.dark_ones_blessing": "Dark One's Blessing: {name} gains {amount} Temporary Hit Points.",
+  "play.immune": "Immune: the {condition} condition has no effect.",
+  "play.condition_ends_immune": "The {condition} condition ends ({toggle}).",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":

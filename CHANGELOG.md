@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Grants `condition_immunities` (`{condition, while_active}`; the sheet's `condition_immunities`):
+  Mindless Rage. The Life Domain's Disciple of Life, Blessed Healer and Supreme Healing change a
+  spell's healing (`disciple_of_life`, `blessed_healer`, `supreme_healing`).
 - Subclass features in turns: Wholeness of Body (an action), Fiendish Resilience (a choice made
   again after a rest), and the rules `defy_death` and `heroic_rally` (Survivor), `sculpt_spells`
   (the `cast` option `sculpt`), `open_hand_technique` (the `attack` option `technique`: Addle,

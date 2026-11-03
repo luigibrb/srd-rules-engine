@@ -1086,6 +1086,10 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Deflect Attacks' redirect can follow until the next action (`deflected` on the monk, cleared by
   any other action): its damage type is the attack's first damage type (a weapon's, not a rider's),
   and "isn't behind Total Cover" isn't checked. Deflect Energy's other damage types are text.
+- Disciple of Life's "on the turn you cast the spell" and Blessed Healer apply to the healing a
+  spell gives when cast; Supreme Healing to spells' healing dice (Preserve Life, its Channel
+  Divinity, is text). A condition immunity (Mindless Rage) keeps the condition from being added
+  (`play.immune`); one the character already has ends when the toggle starts.
 - Dark One's Blessing's "you reduce an enemy to 0 Hit Points" is read as: the creature whose
   action it was is the warlock; otherwise the creature that dropped must be within 10 feet of the
   warlock (with positions). Open Hand Technique's Push is noted, not made (like Forceful Blow).
@@ -1243,7 +1247,8 @@ Most rules are data; these are code, by name:
   `improved_brutal_strike` (`brutal`), and `relentless_rage` (when raging damage would drop the
   character to 0 Hit Points); `heroic_rally` at the start of the character's turn, `sculpt_spells`
   (the `cast` option `sculpt`), `open_hand_technique` (the `attack` option `technique`) and
-  `dark_ones_blessing` (after every action); `defy_death` in the play action `death_save`. A
+  `dark_ones_blessing` (after every action); `defy_death` in the play action `death_save`;
+  `disciple_of_life`, `blessed_healer` and `supreme_healing` in `castSpell`'s healing. A
   monster's trait named "Evasion" (the Assassin) sets `evasion`.
 - `attackMode` reads the `attack.str` and `attacked` Advantages (Reckless Attack).
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to

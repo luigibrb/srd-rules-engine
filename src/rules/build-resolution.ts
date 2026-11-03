@@ -941,6 +941,7 @@ const EMPTY_GRANTS = Object.freeze({
   on_long_rest: [],
   effects: [],
   damage_riders: [],
+  condition_immunities: [],
   advantages: [],
   rules: [],
   spell_damage: [],
