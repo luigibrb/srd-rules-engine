@@ -59,6 +59,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P44 | Deflect Attacks' redirect: a feature action right after its user's reaction took an attack's damage to 0 (`after_damage_reduced`), with the attack's damage type and range | SRD Monk level 3 |
 | P45 | Font of Magic: spell slots and Sorcery Points exchanged (`slot_exchange`), created slots in the play state until a Long Rest | SRD Sorcerer level 2 |
 | P46 | Metamagic on `cast` (Careful, Distant, Extended, Heightened, Quickened, Subtle, Transmuted, Twinned) and "One Spell with a Spell Slot per Turn" | Empowered and Seeking Spell are by hand (flagged) |
+| P47 | Subclass features in turns: Wholeness of Body, Open Hand Technique, Survivor, Sculpt Spells, Dark One's Blessing, Fiendish Resilience | Data where it fits (an action, a rest-change choice); five named rules |
 
 ## Decisions
 
@@ -110,7 +111,12 @@ or invented homebrew in its tests.
   or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
   ongoing area effects, first.
 - **Class features used in turns, what's left (M).** Wild Shape, Empowered and Seeking Spell
-  (rerolls after the roll), the other subclass features.
+  (rerolls after the roll); subclass features still text: Mindless Rage, Retaliation,
+  Intimidating Presence, Peerless Skill, Preserve Life and the Life Domain's healing features,
+  Land's Aid, Nature's Ward and Sanctuary, Heroic Warrior, Fleet Step, Quivering Palm, Aura of
+  Devotion, Smite of Protection, Holy Nimbus, Horde Breaker, the Hunter's later features, the
+  Thief's features, Dragon Wings and Companion, Dark One's Own Luck, Hurl Through Hell,
+  Overchannel.
 
 ### Priority 3: later
 

@@ -553,6 +553,14 @@
                                 "sundering"
                               ]
                             }
+                          },
+                          "technique": {
+                            "type": "string",
+                            "enum": [
+                              "addle",
+                              "push",
+                              "topple"
+                            ]
                           }
                         },
                         "required": [
@@ -785,6 +793,12 @@
                               "slashing",
                               "thunder"
                             ]
+                          },
+                          "sculpt": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "metamagic": {
                             "type": "object",
@@ -3376,6 +3390,14 @@
                           "sundering"
                         ]
                       }
+                    },
+                    "technique": {
+                      "type": "string",
+                      "enum": [
+                        "addle",
+                        "push",
+                        "topple"
+                      ]
                     }
                   },
                   "required": [
@@ -3608,6 +3630,12 @@
                         "slashing",
                         "thunder"
                       ]
+                    },
+                    "sculpt": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "metamagic": {
                       "type": "object",
@@ -4015,6 +4043,14 @@
                   "sundering"
                 ]
               }
+            },
+            "technique": {
+              "type": "string",
+              "enum": [
+                "addle",
+                "push",
+                "topple"
+              ]
             }
           },
           "required": [
@@ -4369,6 +4405,12 @@
                 "slashing",
                 "thunder"
               ]
+            },
+            "sculpt": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "metamagic": {
               "type": "object",

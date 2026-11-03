@@ -359,6 +359,17 @@ export const MESSAGES_EN = {
   "metamagic.needs_duration": "it doesn't last 1 minute or longer",
   "metamagic.needs_type": "it deals none of the listed damage types",
   "metamagic.needs_targets": "a higher-level slot doesn't give it more targets",
+  "feature.heroic_rally": "Heroic Rally: {name} regains {amount} Hit Points.",
+  "refusal.no_sculpt_spells": "{name} doesn't have Sculpt Spells",
+  "refusal.sculpt_evocation": "Sculpt Spells works on Evocation spells, and {spell} isn't one",
+  "refusal.sculpt_count": "Sculpt Spells: up to {most} creatures for {spell}",
+  "refusal.technique_flurry":
+    "Open Hand Technique is used with a Flurry of Blows attack (`granted`)",
+  "refusal.no_open_hand_technique": "{name} doesn't have Open Hand Technique",
+  "technique.save":
+    "Open Hand Technique ({technique, select, push {Push} other {Topple}}): {name} {success, select, true {succeeds} other {fails}} ({save}).",
+  "technique.pushed": "{target} can be pushed up to 15 feet away from {name}.",
+  "feature.dark_ones_blessing": "Dark One's Blessing: {name} gains {amount} Temporary Hit Points.",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":

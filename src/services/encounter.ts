@@ -1158,7 +1158,16 @@ function run(
     // A dying character makes a Death Saving Throw at the start of its turn (SRD).
     if (c.character !== null) {
       const ref = characterRef(ctx, c);
-      const play = computePlaySheet(ref.build, ref.state, ctx.catalog).play;
+      const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+      const play = sheet.play;
+      // Heroic Rally (Survivor): "At the start of each of your turns, you regain Hit Points equal
+      // to 5 plus your Constitution modifier if you are Bloodied and have at least 1 Hit Point."
+      const hp = play.hp.current;
+      if (sheet.rules.includes("heroic_rally") && hp >= 1 && hp <= Math.floor(play.hp.max / 2)) {
+        const amount = 5 + sheet.modifiers.con;
+        applyTo(c, [{ type: "heal", amount }]);
+        notes.push(message("feature.heroic_rally", { name: c.name, amount }));
+      }
       if (play.dying && settings.auto_death_saves) applyTo(c, [{ type: "death_save" }]);
       else if (play.dying) notes.push(message("turn.death_save", { name: c.name }));
     }
@@ -1886,6 +1895,49 @@ function run(
         mark("sundered", message("brutal.sundering", { target: t.name }));
       }
     }
+  };
+  /** Open Hand Technique's Addle, Push or Topple on the creature a Flurry of Blows attack hit. */
+  const openHandTechnique = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    attacker: Combatant,
+    technique: "addle" | "push" | "topple",
+  ): void => {
+    if (outOfFight(ctx, t) || t.defeated) return;
+    if (technique === "addle") {
+      // "The target can't make Opportunity Attacks until the start of its next turn."
+      e.marks = e.marks.filter((m) => !(m.on === t.id && m.label === "Open Hand Technique"));
+      e.marks.push({
+        kind: "no_opportunity_attacks",
+        label: "Open Hand Technique",
+        by: c.id,
+        on: t.id,
+        ends: { at: "start", of: t.id, count: 1, skip_current: false },
+        damage: null,
+      });
+      notes.push(
+        message("mark.no_opportunity_attacks", { label: "Open Hand Technique", target: t.name }),
+      );
+      return;
+    }
+    // The Monk's Focus save DC: 8 + Wisdom modifier + Proficiency Bonus.
+    const dc = 8 + attacker.modifiers.wis + attacker.proficiency_bonus;
+    const ability = technique === "push" ? "str" : "dex";
+    const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), ability, dc, { rng, decide });
+    notes.push(
+      message("technique.save", {
+        technique,
+        name: t.name,
+        success: save.success,
+        save: saveText(save),
+      }),
+    );
+    spendLegendaryResistance(t, save);
+    if (save.success) return;
+    // "pushed up to 15 feet away from you": the table moves it.
+    if (technique === "push")
+      notes.push(message("technique.pushed", { target: t.name, name: c.name }));
+    else applyTo(t, [{ type: "add_condition", condition: "prone" }]);
   };
   /** The attack's weapon mastery property (SRD "Mastery Properties"), after the attack. */
   const applyMastery = (
@@ -2823,6 +2875,14 @@ function run(
   // Daze (Devious Strikes): moving, an action and a Bonus Action used on its turn, counted.
   const dazedNow = (x: EncounterCombatant) =>
     e.marks.some((m) => m.kind === "dazed" && m.on === x.id && !m.ends?.skip_current);
+  /** Above 0 Hit Points, from the documents as they are (no sheet computed). */
+  const standing = (x: EncounterCombatant): boolean => {
+    if (x.defeated) return false;
+    if (x.character === null) return (x.hp ?? 1) > 0;
+    const state = ctx.characters?.[x.character]?.state;
+    return !!state && !state.dead && state.hp.current !== 0;
+  };
+  const upBefore = new Set(e.combatants.filter(standing).map((x) => x.id));
   const turnOf = current()?.id ?? null;
   const windows = e.combatants.filter((x) => x.deflected !== null).map((x) => x.id);
   const usesBefore = turnOf ? turnUses(find(turnOf)) : 0;
@@ -3729,9 +3789,21 @@ function run(
         spendAttack(c, reaction);
         if (light && !reaction) c.light_attacks.push(action.attack);
       }
+      // Open Hand Technique: "Whenever you hit a creature with an attack granted by your Flurry
+      // of Blows, you can impose one of the following effects on that target."
+      if (action.technique) {
+        if (!action.granted) fail(message("refusal.technique_flurry"));
+        const ref = c.character !== null ? characterRef(ctx, c) : null;
+        const rules = ref ? computePlaySheet(ref.build, ref.state, ctx.catalog).rules : [];
+        if (!rules.includes("open_hand_technique"))
+          fail(message("refusal.no_open_hand_technique", { name: c.name }));
+      }
       if (c.monster !== null)
         spendDaily(c, action.attack, dailyUses(ctx, c, action.attack), action.attack);
       result = attackOn(c, t, action.attack, action);
+      if (action.technique && (result as AttackResult).hit) {
+        openHandTechnique(c, t, attacker, action.technique);
+      }
       break;
     }
     case "save_action": {
@@ -4276,8 +4348,26 @@ function run(
             : action.area
               ? spellArea(c, spell, action.area)
               : null;
+      // Sculpt Spells: "When you cast an Evocation spell that affects other creatures … choose a
+      // number of them equal to 1 plus the spell's level".
+      if (action.sculpt?.length) {
+        const sheet =
+          c.character !== null
+            ? computePlaySheet(characterRef(ctx, c).build, characterRef(ctx, c).state, ctx.catalog)
+            : null;
+        if (!sheet?.rules.includes("sculpt_spells"))
+          fail(message("refusal.no_sculpt_spells", { name: c.name }));
+        if (spell.school.toLowerCase() !== "evocation")
+          fail(message("refusal.sculpt_evocation", { spell: spell.name }));
+        if (action.sculpt.length > 1 + spell.level)
+          fail(message("refusal.sculpt_count", { spell: spell.name, most: 1 + spell.level }));
+      }
+      const protectedIds = [
+        ...(meta?.option === "careful" ? (meta.targets ?? []) : []),
+        ...(action.sculpt ?? []),
+      ];
       result = castBy(c, cast, area ?? action.targets ?? [], {
-        careful: meta?.option === "careful" ? meta.targets : undefined,
+        careful: protectedIds.length ? protectedIds : undefined,
         heightened: meta?.option === "heightened" ? meta.targets : undefined,
         effective_levels: meta?.option === "twinned" ? 1 : 0,
         wall: wall ?? undefined,
@@ -4295,10 +4385,11 @@ function run(
         unaffected: action.unaffected,
         held: released && releasing?.held,
       });
-      // Careful and Heightened Spell's creatures must be the spell's targets.
-      if (meta?.targets?.length) {
+      // Careful, Heightened and Sculpted creatures must be the spell's targets.
+      const chosen = [...(meta?.targets ?? []), ...(action.sculpt ?? [])];
+      if (chosen.length) {
         const hit = (result as SpellCastResult).targets.map((t) => t.id);
-        const stray = meta.targets.find((id) => !hit.includes(id));
+        const stray = chosen.find((id) => !hit.includes(id));
         if (stray)
           fail(message("refusal.metamagic_target", { name: find(stray).name, spell: spell.name }));
       }
@@ -4332,6 +4423,28 @@ function run(
     const c = find(releasing.id);
     c.used.reaction = true;
     c.readied = null;
+  }
+  // Dark One's Blessing: "When you reduce an enemy to 0 Hit Points … You also gain this benefit
+  // if someone else reduces an enemy within 10 feet of you to 0 Hit Points."
+  const dropped = e.combatants.filter((x) => upBefore.has(x.id) && !standing(x));
+  if (dropped.length) {
+    const actor = "id" in action ? action.id : null;
+    for (const w of e.combatants) {
+      if (w.character === null || !standing(w)) continue;
+      const ref = characterRef(ctx, w);
+      const sheet = computePlaySheet(ref.build, ref.state, ctx.catalog);
+      if (!sheet.rules.includes("dark_ones_blessing")) continue;
+      const near = dropped.some(
+        (x) =>
+          !alliesOf(e, w.id, x) &&
+          (actor === w.id || (feetApart(ctx, w, x) ?? Number.POSITIVE_INFINITY) <= 10),
+      );
+      if (!near) continue;
+      const level = sheet.classes.find((x) => x.class_id === "warlock")?.level ?? 0;
+      const amount = Math.max(1, sheet.modifiers.cha + level);
+      applyTo(w, [{ type: "set_temp_hp", amount }]);
+      notes.push(message("feature.dark_ones_blessing", { name: w.name, amount }));
+    }
   }
   // A redirect's window (Deflect Attacks) lasts until the next action.
   for (const id of windows) {

@@ -307,6 +307,11 @@ export const FEATURE_RULES = [
   "brutal_strike",
   "improved_brutal_strike",
   "relentless_rage",
+  "defy_death",
+  "heroic_rally",
+  "sculpt_spells",
+  "dark_ones_blessing",
+  "open_hand_technique",
 ] as const;
 export type FeatureRule = (typeof FEATURE_RULES)[number];
 

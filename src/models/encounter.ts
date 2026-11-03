@@ -694,6 +694,8 @@ const AttackActionSchema = z.object({
   cunning: z.array(z.enum(CUNNING_STRIKES)).optional(),
   /** Brutal Strike effects: Advantage forgone while Reckless, for 1d10 and an effect. */
   brutal: z.array(z.enum(["forceful", "hamstring", "staggering", "sundering"])).optional(),
+  /** Open Hand Technique, on a hit with a Flurry of Blows attack (`granted`). */
+  technique: z.enum(["addle", "push", "topple"]).optional(),
 });
 
 const UnarmedActionSchema = z.object({
@@ -764,6 +766,11 @@ const CastActionSchema = z.object({
    * protected creatures or Heightened Spell's one target; `damage_type`, Transmuted Spell's new
    * type.
    */
+  /**
+   * Sculpt Spells (Evoker): creatures that succeed on an Evocation spell's save automatically and
+   * take no damage, up to 1 plus the spell's level.
+   */
+  sculpt: z.array(z.string()).optional(),
   metamagic: z
     .object({
       option: z.enum(METAMAGIC_OPTIONS),
