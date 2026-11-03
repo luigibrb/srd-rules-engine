@@ -17,7 +17,6 @@ import {
   type CharacterState,
   CURRENCIES,
   type ItemInstance,
-  MAX_ATTUNED,
   type PlayAction,
   parseState,
   startingEquipmentTaken,

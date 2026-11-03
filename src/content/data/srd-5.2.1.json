@@ -28979,7 +28979,40 @@
             "components": "V",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "str",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "restrained",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": "athletics",
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": true,
+                "after_hit_with": "any",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "entangle",
@@ -32434,7 +32467,44 @@
             "components": "V, S, M (a white feather)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": null,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "frightened",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": {
+                    "shape": "cone",
+                    "size": 30,
+                    "width": 5
+                },
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "fireball",
@@ -33459,7 +33529,44 @@
             "components": "V, S, M (a pentacle)",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "cha",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "incapacitated",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "black-tentacles",
@@ -33927,7 +34034,40 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "fabricate",
@@ -34995,7 +35135,40 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 minute",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "dream",
@@ -37544,7 +37717,40 @@
             "components": "V, S",
             "duration": "Concentration, up to 1 hour",
             "concentration": true,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "wis",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": null,
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "charmed",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false
+                    }
+                ],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "earthquake",

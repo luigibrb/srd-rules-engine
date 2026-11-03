@@ -143,3 +143,53 @@ describe("Chromatic Orb", () => {
     expect(s.notes.some((n) => /\b9 thunder\b/i.test(n))).toBe(true);
   });
 });
+
+describe("Ensnaring Strike", () => {
+  // "immediately after hitting a creature with a weapon … On a failed save, the target has the
+  // Restrained condition until the spell ends."
+  it("restrains the creature a weapon hit, on a failed Strength save", () => {
+    let wren = autocomplete(classBuild("ranger", { name: "Wren" }));
+    const res = resolve(wren, catalog);
+    const prepared = res.choices.find((c) => c.key === "class:ranger#prepared");
+    if (!prepared) throw new Error("no prepared spells");
+    const others = res.selected(prepared).filter((x) => x !== "ensnaring-strike");
+    wren = svc.setChoice(wren, catalog, prepared.key, [
+      "ensnaring-strike",
+      ...others.slice(0, res.required(prepared) - 1),
+    ]).build;
+    wren = autocomplete(wren);
+    let state = createState(wren, catalog);
+    let e: Encounter = createEncounter();
+    const act = (rolls: number[], ...actions: EncounterAction[]) => {
+      for (const action of actions) {
+        const r = applyEncounterAction(e, action, {
+          catalog,
+          characters: { wren: { build: wren, state } },
+          rng: scriptedRng(rolls),
+        });
+        e = r.encounter;
+        state = r.states.wren ?? state;
+      }
+    };
+    act(
+      [],
+      { type: "add_character", character: "wren" },
+      { type: "add_monster", monster: "goblin-warrior", side: "enemies" },
+      { type: "set_initiative", id: "wren", value: 20 },
+      { type: "set_initiative", id: "goblin-warrior", value: 10 },
+      { type: "start" },
+    );
+    expect(() =>
+      act([2], {
+        type: "cast",
+        id: "wren",
+        spell: "ensnaring-strike",
+        targets: ["goblin-warrior"],
+      }),
+    ).toThrow("is cast right after Wren hits a creature");
+    act([18, 1], { type: "attack", id: "wren", target: "goblin-warrior", attack: "Longbow" });
+    act([2], { type: "cast", id: "wren", spell: "ensnaring-strike", targets: ["goblin-warrior"] });
+    const goblin = e.combatants.find((c) => c.id === "goblin-warrior");
+    expect(goblin?.conditions).toContain("restrained");
+  });
+});

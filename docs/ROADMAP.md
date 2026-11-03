@@ -100,7 +100,7 @@ or invented homebrew in its tests.
 
 - **Spell riders, what's left (S).** Starry Wisp's light and "can't benefit from the Invisible
   condition"; Chromatic Orb's leap on doubles.
-- **Spells left as text (L, ongoing).** 49 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 42 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
   ongoing area effects, first.

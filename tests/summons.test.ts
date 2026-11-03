@@ -18,7 +18,7 @@ import {
 import * as svc from "../src/services/builder";
 import { monsterDef } from "../src/services/encounter";
 import { srdPack } from "../src/srd";
-import { apply, autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
+import { autocomplete, catalog, classBuild, fighterBuild, levelUpIn } from "./helpers";
 
 // Creatures a spell brings (SRD 5.2.1 "Spells": Find Familiar, Find Steed, Giant Insect, Summon
 // Dragon, Animate Objects, Animate Dead, Create Undead): their stat blocks scale with the spell

@@ -171,6 +171,18 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     after_hit: true,
     upcast: { damage: [{ dice: "1d6", type: "radiant" }] },
   },
+  "ensnaring-strike": {
+    // "immediately after hitting a creature with a weapon": a melee or ranged hit. "On a failed
+    // save, the target has the Restrained condition until the spell ends"; "take an action to make
+    // a Strength (Athletics) check against your spell save DC". The 1d6 Piercing at the start of
+    // each of its turns (and its upcast), Advantage for a Large or larger creature, and a creature
+    // within reach making the check for it stay text.
+    save: { ability: "str", on_success: "none" },
+    targets: 1,
+    after_hit: true,
+    after_hit_with: "any",
+    conditions: [{ condition: "restrained", on: "failed_save", escape: "athletics" }],
+  },
   // Level 5
   "flame-strike": {
     save: { ability: "dex", on_success: "half" },
@@ -338,6 +350,42 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     targets: 1,
     upcast: { targets: 1 },
     conditions: [{ condition: "paralyzed", on: "failed_save" }],
+  },
+  // Level 3
+  fear: {
+    save: { ability: "wis", on_success: "none" },
+    // "drop whatever it is holding", the Dash away and the save out of line of sight stay text.
+    conditions: [{ condition: "frightened", on: "failed_save" }],
+    area: { shape: "cone", size: 30 },
+  },
+  // Level 4
+  banishment: {
+    save: { ability: "cha", on_success: "none" },
+    targets: 1,
+    upcast: { targets: 1 }, // "one additional creature for each spell slot level above 4"
+    // "While there, the target has the Incapacitated condition"; the demiplane (gone from the
+    // map) and not returning after 1 minute stay text.
+    conditions: [{ condition: "incapacitated", on: "failed_save" }],
+  },
+  // "One Beast" / "One Humanoid" / "One creature": the creature type is the caller's to check.
+  // The Advantage "if you or your allies are fighting it", the save repeated when it takes damage,
+  // the commands and the longer Concentration from a higher slot stay text.
+  "dominate-beast": {
+    save: { ability: "wis", on_success: "none" },
+    targets: 1,
+    conditions: [{ condition: "charmed", on: "failed_save" }],
+  },
+  // Level 5
+  "dominate-person": {
+    save: { ability: "wis", on_success: "none" },
+    targets: 1,
+    conditions: [{ condition: "charmed", on: "failed_save" }],
+  },
+  // Level 8
+  "dominate-monster": {
+    save: { ability: "wis", on_success: "none" },
+    targets: 1,
+    conditions: [{ condition: "charmed", on: "failed_save" }],
   },
   "scorching-ray": {
     attack: "ranged",

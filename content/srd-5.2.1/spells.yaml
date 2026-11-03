@@ -1317,6 +1317,17 @@
 
     _Using a Higher-Level Spell Slot._ The damage increases by 1d6 for each spell slot level above
     1.
+  mechanics:
+    save:
+      ability: str
+      on_success: none
+    targets: 1
+    after_hit: true
+    after_hit_with: any
+    conditions:
+      - condition: restrained
+        on: failed_save
+        escape: athletics
 - id: entangle
   name: Entangle
   level: 1
@@ -4396,6 +4407,16 @@
     of its turns unless there is nowhere to move. If the creature ends its turn in a space where it
     doesn't have line of sight to you, the creature makes a Wisdom saving throw. On a successful
     save, the spell ends on that creature.
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    conditions:
+      - condition: frightened
+        on: failed_save
+    area:
+      shape: cone
+      size: 30
 - id: fireball
   name: Fireball
   level: 3
@@ -5382,6 +5403,16 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 4.
+  mechanics:
+    save:
+      ability: cha
+      on_success: none
+    targets: 1
+    upcast:
+      targets: 1
+    conditions:
+      - condition: incapacitated
+        on: failed_save
 - id: black-tentacles
   name: Black Tentacles
   level: 4
@@ -5818,6 +5849,14 @@
 
     _Using a Higher-Level Spell Slot._ Your Concentration can last longer with a spell slot of level
     5 (up to 10 minutes), 6 (up to 1 hour), or 7+ (up to 8 hours).
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    targets: 1
+    conditions:
+      - condition: charmed
+        on: failed_save
 - id: fabricate
   name: Fabricate
   level: 4
@@ -7090,6 +7129,14 @@
 
     _Using a Higher-Level Spell Slot._ Your Concentration can last longer with a spell slot of level
     6 (up to 10 minutes), 7 (up to 1 hour), or 8+ (up to 8 hours).
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    targets: 1
+    conditions:
+      - condition: charmed
+        on: failed_save
 - id: dream
   name: Dream
   level: 5
@@ -10350,6 +10397,14 @@
 
     _Using a Higher-Level Spell Slot._ Your Concentration can last longer with a level 9 spell slot
     (up to 8 hours).
+  mechanics:
+    save:
+      ability: wis
+      on_success: none
+    targets: 1
+    conditions:
+      - condition: charmed
+        on: failed_save
 - id: earthquake
   name: Earthquake
   level: 8
