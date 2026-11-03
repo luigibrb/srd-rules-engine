@@ -119,6 +119,14 @@ export interface FeatureActionLine {
   readonly uses: string | null;
   readonly cost: number;
   readonly pool: boolean;
+  /**
+   * Spell slots and its uses exchanged (Font of Magic): `costs[level - 1]` uses for a slot of that
+   * level, `null` before the class level it needs.
+   */
+  readonly slot_exchange: {
+    readonly direction: "to_uses" | "to_slot";
+    readonly costs: readonly (number | null)[];
+  } | null;
   readonly target: "self" | "creature" | "other";
   readonly heal: {
     readonly dice: string | null;
@@ -804,6 +812,12 @@ export function computeSheet(
           uses: a.uses === null ? null : `${scope}:${a.uses}`,
           cost: a.cost,
           pool: a.pool,
+          slot_exchange: a.slot_exchange && {
+            direction: a.slot_exchange.direction,
+            costs: a.slot_exchange.costs.map((cost, i) =>
+              classLevel >= (a.slot_exchange?.min_levels[i] ?? 0) ? cost : null,
+            ),
+          },
           target: a.target,
           heal,
           extra_action: a.extra_action,

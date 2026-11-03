@@ -1818,6 +1818,11 @@
               "minimum": 1,
               "maximum": 9007199254740991
             },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9
+            },
             "damage_type": {
               "type": "string",
               "enum": [
@@ -2788,6 +2793,11 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9
             },
             "manual": {
               "type": "boolean"

@@ -266,7 +266,8 @@ changes at the table: HP (`current: null` = at the maximum, so it follows level-
 HP, spent Hit Dice, death saves, conditions, Exhaustion, Concentration, Heroic Inspiration, spent
 slots and uses, active toggles, the inventory, coins, and `choices`: today's picks for choices
 marked `rest_change` (prepared spells, Weapon Mastery…). The state stores only what's *spent* or
-*chosen*; maxima always come from the build, so they never go stale.
+*chosen*; maxima always come from the build, so they never go stale. The one addition is
+`spell_slots_created` (Font of Magic): slots on top of the build's per level, until a Long Rest.
 
 - **Actions** (`PlayActionSchema`, plain JSON) go through `applyAction(build, state, catalog,
   action, { rng })` → `{ state, notes }`, or throw `PlayError`. After every action the result is

@@ -59,6 +59,11 @@ export const CharacterStateSchema = z.object({
   heroic_inspiration: z.boolean().default(false),
   /** Spent spell slots per spell level: `[1, 0, 2]`. */
   spell_slots_spent: z.array(z.int().min(0)).default([]),
+  /**
+   * Spell slots created per spell level (Font of Magic), on top of the build's: they count as
+   * slots until a Long Rest, when they vanish.
+   */
+  spell_slots_created: z.array(z.int().min(0)).default([]),
   pact_slots_spent: z.int().min(0).default(0),
   /** Spent uses of limited features by key (`barbarian:rage`). */
   uses_spent: z.record(z.string(), z.int().min(0)).default({}),
@@ -157,6 +162,8 @@ export const PlayActionSchema = z
       type: z.literal("use_feature"),
       key: z.string(),
       amount: n.min(1).optional(),
+      /** The spell slot level a slot exchange expends or creates (Font of Magic). */
+      level: n.min(1).max(9).optional(),
       /** Spend its uses only: what it heals is the table's (manual play). */
       manual: z.boolean().optional(),
     }),

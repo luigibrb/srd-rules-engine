@@ -1031,6 +1031,8 @@ export const EncounterActionSchema = z
       /** The creatures a feature that affects several takes (Turn Undead). */
       targets: z.array(z.string()).optional(),
       amount: n.min(1).optional(),
+      /** The spell slot level a slot exchange expends or creates (Font of Magic). */
+      level: n.min(1).max(9).optional(),
       /** The damage type, for a feature that offers a choice (Divine Spark). */
       damage_type: z.enum(DAMAGE_TYPES).optional(),
       /** The creatures a feature brings, or the spell it casts brings (`SummonRequest`). */
