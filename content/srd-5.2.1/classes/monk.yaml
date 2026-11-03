@@ -148,6 +148,25 @@ features:
         abilities: [dex]
         class_level: true
         types: [bludgeoning, piercing, slashing]
+    - id: deflect-attacks-redirect
+      name: 'Deflect Attacks: Redirect'
+      economy: free
+      uses: focus-points
+      target: other
+      after_damage_reduced: true
+      save:
+        ability: dex
+        dc_ability: wis
+        damage:
+          dice: 2d6
+          scaling:
+          - {level: 5, dice: 2d8}
+          - {level: 11, dice: 2d10}
+          - {level: 17, dice: 2d12}
+          bonus: dex
+          types: [acid, bludgeoning, cold, fire, force, lightning, necrotic, piercing, poison, psychic,
+            radiant, slashing, thunder]
+          half: false
   '4':
     traits:
     - name: Ability Score Improvement

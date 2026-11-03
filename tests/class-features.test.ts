@@ -127,6 +127,41 @@ describe("Monk: Deflect Attacks and Stunning Strike", () => {
     );
   });
 
+  it("Deflect Attacks' redirect: a Focus Point, right after the damage is reduced to 0", () => {
+    const kai = level("monk", 3, "Kai");
+    const s = session({ kai }, [{ monster: "goblin-warrior" }, { monster: "goblin-warrior" }]);
+    s.act([], next);
+    const swing: EncounterAction = {
+      type: "attack",
+      id: "goblin-warrior",
+      target: "kai",
+      attack: "Scimitar",
+    };
+    const redirect = feature("kai", "Deflect Attacks: Redirect", { target: "goblin-warrior-2" });
+    // Not before a reaction took an attack's damage to 0.
+    expect(() => s.act([], redirect)).toThrow(
+      "Deflect Attacks: Redirect is used right after Kai's reaction reduces an attack's damage to 0",
+    );
+    // Hit for 1d6 + 2 = 6; Deflect: 1 + Dex 3 + 3 = 7, the damage is 0.
+    s.act([19, 4, 1], swing);
+    // 2d6 (3 + 4) + Dex 3, Slashing like the Scimitar; the other goblin's Dexterity save (4 + 2)
+    // fails.
+    s.act([3, 4, 4], redirect);
+    expect(s.notes).toContain("Goblin Warrior 2 fails (6 vs DC 12): 10 slashing.");
+    const sheet = computePlaySheet(kai, s.states.kai as CharacterState, catalog);
+    expect(sheet.play.uses.find((u) => u.key.endsWith(":focus-points"))?.spent).toBe(1);
+  });
+
+  it("the redirect's moment passes with the next action", () => {
+    const kai = level("monk", 3, "Kai");
+    const s = session({ kai }, [{ monster: "goblin-warrior" }]);
+    s.act([], next);
+    s.act([19, 4, 1], { type: "attack", id: "goblin-warrior", target: "kai", attack: "Scimitar" });
+    expect(s.get("kai")?.deflected).toMatchObject({ type: "slashing", melee: true });
+    s.act([], { type: "move", id: "goblin-warrior", feet: 5 });
+    expect(s.get("kai")?.deflected).toBeNull();
+  });
+
   it("Stunning Strike on a successful save: Speed halved and Advantage on the next attack", () => {
     const kai = level("monk", 5, "Kai");
     const s = session({ kai }, [{ monster: "goblin-warrior" }]);

@@ -346,10 +346,19 @@ OVERLAY = {
                  "also": ["disengage", "dodge"]},
                 {"id": "step-of-the-wind", "name": "Step of the Wind", "economy": "bonus_action",
                  "uses": "focus-points", "also": ["disengage", "dash"]}]},
-        # Deflect Attacks: the reduction; redirecting the force (1 Focus Point) stays text.
+        # Deflect Attacks: the reduction, and redirecting the force (1 Focus Point) when it takes
+        # the damage to 0: "two rolls of your Martial Arts die plus your Dexterity modifier", of
+        # the attack's type.
         3: {"actions": [{"id": "deflect-attacks", "name": "Deflect Attacks", "economy": "reaction",
                          "reduces_attack_damage": {"dice": "1d10", "abilities": ["dex"], "class_level": True,
-                                                   "types": ["bludgeoning", "piercing", "slashing"]}}]},
+                                                   "types": ["bludgeoning", "piercing", "slashing"]}},
+                        {"id": "deflect-attacks-redirect", "name": "Deflect Attacks: Redirect", "economy": "free",
+                         "uses": "focus-points", "target": "other", "after_damage_reduced": True,
+                         "save": {"ability": "dex", "dc_ability": "wis",
+                                  "damage": {"dice": "2d6", "scaling": [{"level": 5, "dice": "2d8"},
+                                                                        {"level": 11, "dice": "2d10"},
+                                                                        {"level": 17, "dice": "2d12"}],
+                                             "bonus": "dex", "types": ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"], "half": False}}}]},
         5: {"effects": [extra_attack(2), {"target": "martial_arts.die", "op": "max", "value": 8}],
             "actions": [{"id": "stunning-strike", "name": "Stunning Strike", "economy": "free", "uses": "focus-points",
                          "target": "other", "after_hit": True, "once_per_turn": True,

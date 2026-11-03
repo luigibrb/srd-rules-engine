@@ -461,6 +461,12 @@ export const FeatureActionSchema = z.strictObject({
     .default(null),
   /** Used after hitting the target this turn (Stunning Strike). */
   after_hit: z.boolean().default(false),
+  /**
+   * Used right after its user's `reduces_attack_damage` reaction took an attack's damage to 0
+   * (Deflect Attacks' redirect): its target within 5 feet after a melee attack, or 60 feet after a
+   * ranged one; its damage is the attack's type.
+   */
+  after_damage_reduced: z.boolean().default(false),
   once_per_turn: z.boolean().default(false),
   /**
    * The target's saving throw, DC 8 + `dc_ability` modifier + Proficiency Bonus (`spell`: the

@@ -1409,6 +1409,10 @@
                 "default": false,
                 "type": "boolean"
               },
+              "after_damage_reduced": {
+                "default": false,
+                "type": "boolean"
+              },
               "once_per_turn": {
                 "default": false,
                 "type": "boolean"
