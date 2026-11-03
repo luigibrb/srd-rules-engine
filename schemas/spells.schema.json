@@ -637,7 +637,10 @@
           "items": {
             "type": "string",
             "enum": [
-              "advantage_against"
+              "advantage_against",
+              "no_opportunity_attacks",
+              "slowed",
+              "no_healing"
             ]
           }
         },

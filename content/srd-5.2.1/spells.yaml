@@ -62,6 +62,8 @@
         type: necrotic
     targets: 1
     cantrip_scaling: dice
+    on_hit:
+      - no_healing
 - id: dancing-lights
   name: Dancing Lights
   level: 0
@@ -483,6 +485,8 @@
         type: cold
     targets: 1
     cantrip_scaling: dice
+    on_hit:
+      - slowed
 - id: resistance
   name: Resistance
   level: 0
@@ -580,6 +584,8 @@
         type: lightning
     targets: 1
     cantrip_scaling: dice
+    on_hit:
+      - no_opportunity_attacks
 - id: sorcerous-burst
   name: Sorcerous Burst
   level: 0
@@ -944,6 +950,23 @@
     _Using a Higher-Level Spell Slot._ The damage increases by 1d8 for each spell slot level above
     1. The orb can leap a maximum number of times equal to the level of the slot expended, and a
     creature can be targeted only once by each casting of this spell.
+  mechanics:
+    attack: ranged
+    damage:
+      - dice: 3d8
+        type: acid
+    damage_types:
+      - acid
+      - cold
+      - fire
+      - lightning
+      - poison
+      - thunder
+    targets: 1
+    upcast:
+      damage:
+        - dice: 1d8
+          type: acid
 - id: color-spray
   name: Color Spray
   level: 1

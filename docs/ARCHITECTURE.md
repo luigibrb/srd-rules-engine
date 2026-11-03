@@ -663,7 +663,11 @@ list of actions.
   reach spell attack rolls too.
 - **Spells in turns:** `cast` applies `castSpell`'s results. Guiding Bolt's hit is an
   `encounter.marks` entry (Advantage on the next attack roll against the target, by anyone,
-  until the end of the caster's next turn), used up by the roll it changes. A follow-up save's
+  until the end of the caster's next turn), used up by the roll it changes. The other hit
+  riders are marks too: Shocking Grasp's (no Opportunity Attacks until the start of the
+  target's next turn), Ray of Frost's (10 feet less Speed until the start of the caster's next
+  turn), Chill Touch's (healing refused, `mark.no_healing_blocks`, until the end of the caster's
+  next turn). A follow-up save's
   creatures are the positioned ones within its radius of the target, or `nearby` without
   positions. Conditions with a duration in the spell's text (Ray of Sickness, Color Spray,
   Sunbeam) are timed effects that end at the start or end of the caster's next turn; a
@@ -1080,6 +1084,11 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   Multiclass Spellcaster rules name full and half casters) counts a third of its class levels,
   rounded up, toward the Multiclass Spellcaster table: that gives a one-third caster's own slot
   table at every level, as half casters' rounding up does.
+
+**Spells**
+
+- Chromatic Orb's leap on doubles and Starry Wisp's Dim Light and "can't benefit from the
+  Invisible condition" are text.
 
 **Reactions to rolls**
 

@@ -1297,7 +1297,10 @@
               "hamstrung",
               "staggered",
               "sundered",
-              "quarry"
+              "quarry",
+              "no_opportunity_attacks",
+              "slowed",
+              "no_healing"
             ]
           },
           "label": {

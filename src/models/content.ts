@@ -1189,9 +1189,15 @@ export const SpellMechanicsSchema = z
       .default(null),
     /**
      * What a hit does besides damage and conditions: `advantage_against` gives the next attack
-     * roll against the target Advantage, until the end of the caster's next turn (Guiding Bolt).
+     * roll against the target Advantage, until the end of the caster's next turn (Guiding Bolt);
+     * `no_opportunity_attacks` until the start of the target's next turn (Shocking Grasp);
+     * `slowed`, its Speed 10 feet less until the start of the caster's next turn (Ray of Frost);
+     * `no_healing`, it can't regain Hit Points until the end of the caster's next turn (Chill
+     * Touch).
      */
-    on_hit: z.array(z.enum(["advantage_against"])).default([]),
+    on_hit: z
+      .array(z.enum(["advantage_against", "no_opportunity_attacks", "slowed", "no_healing"]))
+      .default([]),
     /**
      * Damage types the caster picks from when casting, for every damage part (Spirit Guardians:
      * Radiant or Necrotic); empty when the damage types are fixed.
