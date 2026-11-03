@@ -281,7 +281,8 @@ that misses or is saved against deals half damage), `indomitable` (a failed save
 with the Fighter level, a decision, spending the `indomitable` resource), `cunning_strike`,
 `improved_cunning_strike` and `devious_strikes`, `brutal_strike` and `improved_brutal_strike` (the encounter `attack`
 options `cunning` and `brutal`), `relentless_rage` (with the `relentless-rage` resource counting
-its uses). The effect target `attack.weapon` adds to every weapon attack roll (Sacred Weapon), and
+its uses), `defy_death` and `heroic_rally` (Survivor), `sculpt_spells` (the `cast` option `sculpt`),
+`open_hand_technique` (the `attack` option `technique`), `dark_ones_blessing`. The effect target `attack.weapon` adds to every weapon attack roll (Sacred Weapon), and
 a `spell_damage` grant's `spell` limits it to one spell (`$cantrip`: Agonizing Blast's choice).
 
 Anything effects, riders, Advantage and toggles can't express goes in a trait's text, or in a

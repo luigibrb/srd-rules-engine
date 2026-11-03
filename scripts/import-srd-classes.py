@@ -513,8 +513,21 @@ SUBCLASS_OVERLAY = {
         3: {"effects": [{"target": "attack.critical", "op": "min", "value": 19}]},
         7: {"choices": [dict(FIGHTING_STYLE_FEAT, label="Additional Fighting Style")]},
         15: {"effects": [{"target": "attack.critical", "op": "min", "value": 18}]},
+        # Survivor: Defy Death (Advantage on Death Saving Throws, 18-20 counts as a 20) and Heroic
+        # Rally (5 + Con at the start of each turn while Bloodied, with at least 1 HP).
+        18: {"rules": ["defy_death", "heroic_rally"]},
     },
-    "warrior-of-the-open-hand": {},
+    "warrior-of-the-open-hand": {
+        # Open Hand Technique: Addle, Push or Topple on a hit with a Flurry of Blows attack.
+        3: {"rules": ["open_hand_technique"]},
+        # Wholeness of Body: "As a Bonus Action, you can roll your Martial Arts die. You regain a
+        # number of Hit Points equal to the number rolled plus your Wisdom modifier".
+        6: {"actions": [{"id": "wholeness-of-body", "name": "Wholeness of Body", "economy": "bonus_action",
+                         "uses": "wholeness-of-body",
+                         "heal": {"dice": "1d8", "scaling": [{"level": 11, "dice": "1d10"},
+                                                             {"level": 17, "dice": "1d12"}],
+                                  "bonus": "wis"}}]},
+    },
     # Sacred Weapon: Channel Divinity, Charisma (min +1) to weapon attack rolls for 10 minutes
     # (the one weapon it imbues isn't tracked).
     "oath-of-devotion": {3: {**spell_grants(DEVOTION),
@@ -547,12 +560,22 @@ SUBCLASS_OVERLAY = {
                                           "one_roll": True}]}}
             for t in ["acid", "cold", "fire", "lightning", "poison"]]}]},
     },
-    "fiend-patron": {3: spell_grants(FIEND)},
+    # Dark One's Blessing: Temporary Hit Points when an enemy drops to 0 (a rule in code).
+    "fiend-patron": {3: {**spell_grants(FIEND), "rules": ["dark_ones_blessing"]},
+                     # Fiendish Resilience: "Choose one damage type, other than Force, whenever you
+                     # finish a Short or Long Rest."
+                     10: {"choices": [{"id": "fiendish_resilience", "label": "Fiendish Resilience",
+                                       "kind": "option", "rest_change": "short", "options": [
+                         {"id": t, "name": t.title(), "description": f"Resistance to {t.title()} damage.",
+                          "grants": {"resistances": [t]}}
+                         for t in ['acid', 'bludgeoning', 'cold', 'fire', 'lightning', 'necrotic', 'piercing', 'poison', 'psychic', 'radiant', 'slashing', 'thunder']]}]}},
     "evoker": {
         3: {"choices": [{"id": "evocation_savant", "label": "Evocation Savant (free evocation spells)", "kind": "spell",
                          "count": 2, "spell_list": "wizard", "school": "evocation", "max_spell_level": 2,
                          "tag": "wizard-spellbook"}],
             "rules": ["potent_cantrip"]},
+        # Sculpt Spells: the `cast` option `sculpt` (a rule in code).
+        6: {"rules": ["sculpt_spells"]},
         10: {"spell_damage": [{"name": "Empowered Evocation", "ability": "int", "list": "wizard",
                                "school": "evocation", "one_roll": True}]},
         **EVOCATION_SAVANT,

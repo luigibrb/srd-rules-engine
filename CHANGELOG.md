@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Subclass features in turns: Wholeness of Body (an action), Fiendish Resilience (a choice made
+  again after a rest), and the rules `defy_death` and `heroic_rally` (Survivor), `sculpt_spells`
+  (the `cast` option `sculpt`), `open_hand_technique` (the `attack` option `technique`: Addle,
+  Push, Topple) and `dark_ones_blessing`.
 - Metamagic: the encounter action `cast` takes `metamagic` (`{option, targets?, damage_type?}`)
   for Careful, Distant, Extended, Heightened, Quickened, Subtle, Transmuted and Twinned Spell,
   spending Sorcery Points (`METAMAGIC_OPTIONS`, `METAMAGIC_COST`); `castSpell` takes `careful`,

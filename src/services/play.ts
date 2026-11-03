@@ -863,8 +863,11 @@ export function applyAction(
     }
     case "death_save": {
       if (current !== 0 || s.stable || s.dead) fail(message("refusal.death_saving_throws_are"));
-      const d20 = action.roll ?? rng.int(1, 20);
-      if (d20 === 20) {
+      // Defy Death (Survivor): "Advantage on Death Saving Throws … when you roll 18–20 on a Death
+      // Saving Throw, you gain the benefit of rolling a 20 on it". A roll given by hand is final.
+      const defy = sheet.rules.includes("defy_death");
+      const d20 = action.roll ?? (defy ? Math.max(rng.int(1, 20), rng.int(1, 20)) : rng.int(1, 20));
+      if (d20 === 20 || (defy && d20 >= 18)) {
         s.hp.current = 1;
         regainConsciousness(s, notes);
         notes.push(message("death_save.natural_20"));

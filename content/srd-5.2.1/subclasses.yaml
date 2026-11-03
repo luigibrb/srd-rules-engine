@@ -485,6 +485,7 @@
           _Defy Death._ You have Advantage on Death Saving Throws. Moreover, when you roll 18–20 on a Death Saving Throw, you gain the benefit of rolling a 20 on it.
 
           _Heroic Rally._ At the start of each of your turns, you regain Hit Points equal to 5 plus your Constitution modifier if you are Bloodied and have at least 1 Hit Point.
+      rules: [defy_death, heroic_rally]
 - id: warrior-of-the-open-hand
   name: Warrior of the Open Hand
   class: monk
@@ -503,6 +504,7 @@
           **Push.** The target must succeed on a Strength saving throw or be pushed up to 15 feet away from you.
 
           **Topple.** The target must succeed on a Dexterity saving throw or have the Prone condition.
+      rules: [open_hand_technique]
     '6':
       traits:
       - name: Wholeness of Body
@@ -510,6 +512,17 @@
           You gain the ability to heal yourself. As a Bonus Action, you can roll your Martial Arts die. You regain a number of Hit Points equal to the number rolled plus your Wisdom modifier (minimum of 1 Hit Point regained).
 
           You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
+      actions:
+      - id: wholeness-of-body
+        name: Wholeness of Body
+        economy: bonus_action
+        uses: wholeness-of-body
+        heal:
+          dice: 1d8
+          scaling:
+          - {level: 11, dice: 1d10}
+          - {level: 17, dice: 1d12}
+          bonus: wis
       resources:
       - id: wholeness-of-body
         name: Wholeness of Body
@@ -937,6 +950,7 @@
       - level: 9
         grants:
           spells: [geas, insect-plague]
+      rules: [dark_ones_blessing]
     '6':
       traits:
       - name: Dark One's Own Luck
@@ -954,6 +968,72 @@
       - name: Fiendish Resilience
         text: Choose one damage type, other than Force, whenever you finish a Short or Long Rest. You
           have Resistance to that damage type until you choose a different one with this feature.
+      choices:
+      - id: fiendish_resilience
+        label: Fiendish Resilience
+        kind: option
+        rest_change: short
+        options:
+        - id: acid
+          name: Acid
+          description: Resistance to Acid damage.
+          grants:
+            resistances: [acid]
+        - id: bludgeoning
+          name: Bludgeoning
+          description: Resistance to Bludgeoning damage.
+          grants:
+            resistances: [bludgeoning]
+        - id: cold
+          name: Cold
+          description: Resistance to Cold damage.
+          grants:
+            resistances: [cold]
+        - id: fire
+          name: Fire
+          description: Resistance to Fire damage.
+          grants:
+            resistances: [fire]
+        - id: lightning
+          name: Lightning
+          description: Resistance to Lightning damage.
+          grants:
+            resistances: [lightning]
+        - id: necrotic
+          name: Necrotic
+          description: Resistance to Necrotic damage.
+          grants:
+            resistances: [necrotic]
+        - id: piercing
+          name: Piercing
+          description: Resistance to Piercing damage.
+          grants:
+            resistances: [piercing]
+        - id: poison
+          name: Poison
+          description: Resistance to Poison damage.
+          grants:
+            resistances: [poison]
+        - id: psychic
+          name: Psychic
+          description: Resistance to Psychic damage.
+          grants:
+            resistances: [psychic]
+        - id: radiant
+          name: Radiant
+          description: Resistance to Radiant damage.
+          grants:
+            resistances: [radiant]
+        - id: slashing
+          name: Slashing
+          description: Resistance to Slashing damage.
+          grants:
+            resistances: [slashing]
+        - id: thunder
+          name: Thunder
+          description: Resistance to Thunder damage.
+          grants:
+            resistances: [thunder]
     '14':
       traits:
       - name: Hurl Through Hell
@@ -1013,6 +1093,7 @@
           of them equal to 1 plus the spell's level. The chosen creatures automatically succeed on their
           saving throws against the spell, and they take no damage if they would normally take half damage
           on a successful save.
+      rules: [sculpt_spells]
     '7':
       choices:
       - id: evocation_savant

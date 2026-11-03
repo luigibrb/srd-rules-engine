@@ -1086,6 +1086,10 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 - Deflect Attacks' redirect can follow until the next action (`deflected` on the monk, cleared by
   any other action): its damage type is the attack's first damage type (a weapon's, not a rider's),
   and "isn't behind Total Cover" isn't checked. Deflect Energy's other damage types are text.
+- Dark One's Blessing's "you reduce an enemy to 0 Hit Points" is read as: the creature whose
+  action it was is the warlock; otherwise the creature that dropped must be within 10 feet of the
+  warlock (with positions). Open Hand Technique's Push is noted, not made (like Forceful Blow).
+  Sculpt Spells' "creatures that you can see" are the caller's to choose.
 - "One Spell with a Spell Slot per Turn" counts each creature's slot spells on every turn (its own
   and others'), reset when any turn starts: a reaction spell on another creature's turn is
   allowed; a readied spell's release doesn't count (its slot was spent when readied); a monster's
@@ -1237,7 +1241,10 @@ Most rules are data; these are code, by name:
   `combatantFromCharacter`); in `services/encounter.ts`, `cunning_strike` and
   `improved_cunning_strike` and `devious_strikes` (the `attack` option `cunning`), `brutal_strike` and
   `improved_brutal_strike` (`brutal`), and `relentless_rage` (when raging damage would drop the
-  character to 0 Hit Points). A monster's trait named "Evasion" (the Assassin) sets `evasion`.
+  character to 0 Hit Points); `heroic_rally` at the start of the character's turn, `sculpt_spells`
+  (the `cast` option `sculpt`), `open_hand_technique` (the `attack` option `technique`) and
+  `dark_ones_blessing` (after every action); `defy_death` in the play action `death_save`. A
+  monster's trait named "Evasion" (the Assassin) sets `evasion`.
 - `attackMode` reads the `attack.str` and `attacked` Advantages (Reckless Attack).
 - `services/play.ts` knows a few SRD condition ids: `petrified` halves all damage (Resistance to
   all damage), `unconscious` is added at 0 HP and removed when you regain Hit Points, and
