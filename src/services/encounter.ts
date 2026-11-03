@@ -878,7 +878,11 @@ function run(
     });
     if (!who.length) return;
     const views = who.map((t) => encounterCombatant(e, t.id, ctx));
-    const r = saveAgainst({ ...save, conditions: z.conditions }, z.damage, views, { rng, decide });
+    const r = saveAgainst({ ...save, conditions: z.conditions }, z.damage, views, {
+      rng,
+      decide,
+      magic: true,
+    });
     notes.push(
       message("zone.save", {
         label: z.label,
@@ -1608,6 +1612,14 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push(modeReason("advantage", markReason(mark)));
+    // Pack Tactics: "Advantage on an attack roll against a creature if at least one of the …'s
+    // allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
+    // condition".
+    if (c.monster !== null && spatial.ally_adjacent) {
+      const pack = monsterDef(ctx, c).traits.find((x) => x.pack_tactics);
+      if (pack)
+        modes.push(modeReason("advantage", message("reason.pack_tactics", { name: c.name })));
+    }
     // Faerie Fire: Advantage on every attack roll against t.
     for (const m of e.marks.filter((x) => x.on === t.id && x.kind === "outlined")) {
       modes.push(modeReason("advantage", outlinedReason(m)));

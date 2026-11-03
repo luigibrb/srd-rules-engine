@@ -607,6 +607,10 @@ list of actions.
   monster at 0 Hit Points is Unconscious, not dead, until it starts a turn there unable to
   regenerate; Aura of Authority (`advantage_aura`) gives the monster and its allies within it
   Advantage on attack rolls and saving throws. Without positions, auras and bursts are noted.
+  Magic Resistance (`save_advantage: magic`, the combatant's `magic_resistance`) gives Advantage
+  on the saves of spells (cast, follow-up and zone saves); Pack Tactics (`pack_tactics`) gives
+  Advantage on an attack roll when an ally of the attacker, not Incapacitated, is within 5 feet of
+  the target (with positions, or `ally_adjacent`).
 - **Wall spells.** A spell with `mechanics.wall` is placed with `cast` `wall: { from, to }`
   (straight, up to its length, both ends within range) and leaves a zone for its duration
   (Concentration). Wall of Force, Stone and Ice stand on grid lines between squares
@@ -1090,6 +1094,8 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   spell gives when cast; Supreme Healing to spells' healing dice (Preserve Life, its Channel
   Divinity, is text). A condition immunity (Mindless Rage) keeps the condition from being added
   (`play.immune`); one the character already has ends when the toggle starts.
+- Magic Resistance's "other magical effects" are left to the table: the engine marks only spells'
+  saves as magical (not magic items' or features' effects).
 - Dark One's Blessing's "you reduce an enemy to 0 Hit Points" is read as: the creature whose
   action it was is the warlock; otherwise the creature that dropped must be within 10 feet of the
   warlock (with positions). Open Hand Technique's Push is noted, not made (like Forceful Blow).

@@ -93,6 +93,8 @@ export interface Combatant {
   readonly no_spells: boolean;
   /** Conditions it can't have (a monster's Immunities). */
   readonly condition_immunities: readonly string[];
+  /** Advantage on saving throws against spells (Magic Resistance). */
+  readonly magic_resistance?: boolean;
   /** Saving throw effects it can use (a breath weapon), resolved by `useSaveAction`. */
   readonly save_actions: readonly SaveActionLine[];
   /** How its conditions change rolls (`conditionRolls`). */
@@ -845,7 +847,14 @@ export function rollSavingThrow(
     rng = mathRng,
     mode = "normal",
     decide = recommend,
-  }: { rng?: Rng; mode?: RollMode; decide?: Decide } = {},
+    modes = [],
+  }: {
+    rng?: Rng;
+    mode?: RollMode;
+    decide?: Decide;
+    /** More reasons for Advantage or Disadvantage (Magic Resistance, Heightened Spell). */
+    modes?: readonly ModeReason[];
+  } = {},
 ): SaveResult {
   const bonus = combatant.saving_throws[ability];
   const base = { name: combatant.name, ability, dc, bonus };
@@ -879,7 +888,7 @@ export function rollSavingThrow(
       inspiration: null,
     };
   }
-  const resolved = resolveMode(mode, saveModes(combatant, ability));
+  const resolved = resolveMode(mode, [...saveModes(combatant, ability), ...modes]);
   let roll = rollD20({ mode: resolved.mode, rng });
   let total = roll.d20 + bonus;
   const what = message("roll.save", { ability: message(`ability.${ability}`) });
@@ -1451,6 +1460,7 @@ export function combatantFromMonster(
     advantages: [],
     no_spells: false,
     condition_immunities: monster.condition_immunities,
+    magic_resistance: monster.traits.some((t) => t.save_advantage === "magic"),
     save_actions: saveActions,
     condition_rolls: table ? conditionRolls(state.conditions ?? [], table) : NO_CONDITION_ROLLS,
     legendary_actions: legendaryActions,

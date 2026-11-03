@@ -380,8 +380,8 @@ function spellItems(list: string, per_day: number | null): SpellEntry[] | null {
  * text too.
  */
 /**
- * Traits that act in combat, read from their exact SRD sentences: Death Burst ("explodes when it
- * dies", with its parsed save), damage auras ("At the end of each of the azer's turns, each
+ * Traits that act in combat, read from their exact SRD sentences: Magic Resistance, Pack Tactics,
+ * Death Burst ("explodes when it dies", with its parsed save), damage auras ("At the end of each of the azer's turns, each
  * creature … in a 5-foot Emanation … takes 5 (1d10) Fire damage"), Regeneration, and Aura of
  * Authority's Advantage. Anything worded otherwise stays text.
  */
@@ -414,6 +414,22 @@ function traitMechanics(monster: Record<string, unknown>): void {
         amount: Number(regen[1]),
         stopped_by: (regen[2] as string).toLowerCase().split(/ or |, /),
       };
+      stats.traits++;
+    }
+    // Magic Resistance: "has Advantage on saving throws against spells and other magical effects."
+    if (/has Advantage on saving throws against spells and other magical effects\.$/.test(text)) {
+      trait.save_advantage = "magic";
+      stats.traits++;
+    }
+    // Pack Tactics: "has Advantage on (?:an attack roll|attack rolls) against a creature if at least one of the
+    // …'s allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
+    // condition."
+    if (
+      /has Advantage on (?:an attack roll|attack rolls) against a creature if at least one of the [\w' -]+?'s allies is within 5 feet of the creature and the ally doesn't have the Incapacitated condition\.$/.test(
+        text,
+      )
+    ) {
+      trait.pack_tactics = true;
       stats.traits++;
     }
     const authority =

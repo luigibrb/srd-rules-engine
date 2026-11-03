@@ -1580,6 +1580,13 @@ export const MonsterActionSchema = z.strictObject({
     })
     .nullable()
     .default(null),
+  /** Advantage on saving throws against spells ("and other magical effects": Magic Resistance). */
+  save_advantage: z.enum(["magic"]).nullable().default(null),
+  /**
+   * Advantage on an attack roll against a creature when one of its allies, not Incapacitated, is
+   * within 5 feet of that creature (Pack Tactics).
+   */
+  pack_tactics: z.boolean().default(false),
   /** Advantage on attack rolls and saves for it and its allies within `size` feet (Aura of Authority). */
   advantage_aura: z
     .strictObject({ size: z.int().min(5) })

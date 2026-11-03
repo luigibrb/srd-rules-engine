@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Monster traits `save_advantage: magic` (Magic Resistance: Advantage on spells' saves; the
+  combatant's `magic_resistance`) and `pack_tactics`; `rollSavingThrow` takes `modes`, and
+  `saveAgainst` takes `magic`.
 - Grants `condition_immunities` (`{condition, while_active}`; the sheet's `condition_immunities`):
   Mindless Rage. The Life Domain's Disciple of Life, Blessed Healer and Supreme Healing change a
   spell's healing (`disciple_of_life`, `blessed_healer`, `supreme_healing`).
