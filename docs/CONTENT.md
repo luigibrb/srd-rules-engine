@@ -100,6 +100,7 @@ grants:
   weapon_proficiencies: [simple, martial, "martial:light"]   # category, category:property, or weapon id
   feats: [{feat: magic-initiate, params: {spell_list: cleric}}]   # params pre-answer the feat's choices
   resistances: [poison]
+  condition_immunities: [{condition: charmed, while_active: [rage]}]   # Mindless Rage
   cantrips: [prestidigitation]
   spells: [hunters-mark]                # always prepared
   spellcasting: {list: wizard, ability: int, slots: [2]}   # slots per spell level; pact: true for Warlocks
@@ -282,7 +283,8 @@ with the Fighter level, a decision, spending the `indomitable` resource), `cunni
 `improved_cunning_strike` and `devious_strikes`, `brutal_strike` and `improved_brutal_strike` (the encounter `attack`
 options `cunning` and `brutal`), `relentless_rage` (with the `relentless-rage` resource counting
 its uses), `defy_death` and `heroic_rally` (Survivor), `sculpt_spells` (the `cast` option `sculpt`),
-`open_hand_technique` (the `attack` option `technique`), `dark_ones_blessing`. The effect target `attack.weapon` adds to every weapon attack roll (Sacred Weapon), and
+`open_hand_technique` (the `attack` option `technique`), `dark_ones_blessing`, and the Life
+Domain's `disciple_of_life`, `blessed_healer` and `supreme_healing` (in `castSpell`'s healing). The effect target `attack.weapon` adds to every weapon attack roll (Sacred Weapon), and
 a `spell_damage` grant's `spell` limits it to one spell (`$cantrip`: Agonizing Blast's choice).
 
 Anything effects, riders, Advantage and toggles can't express goes in a trait's text, or in a

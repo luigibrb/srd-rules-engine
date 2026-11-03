@@ -26,6 +26,11 @@
       - name: Mindless Rage
         text: You have Immunity to the Charmed and Frightened conditions while your Rage is active. If
           you're Charmed or Frightened when you enter your Rage, the condition ends on you.
+      condition_immunities:
+      - condition: charmed
+        while_active: [rage]
+      - condition: frightened
+        while_active: [rage]
     '10':
       traits:
       - name: Retaliation
@@ -160,12 +165,14 @@
       - level: 9
         grants:
           spells: [greater-restoration, mass-cure-wounds]
+      rules: [disciple_of_life]
     '6':
       traits:
       - name: Blessed Healer
         text: The healing spells you cast on others heal you as well. Immediately after you cast a spell
           with a spell slot that restores Hit Points to one or more creatures other than yourself, you
           regain Hit Points equal to 2 plus the spell slot's level.
+      rules: [blessed_healer]
     '17':
       traits:
       - name: Supreme Healing
@@ -173,6 +180,7 @@
           spell or Channel Divinity, don't roll those dice for the healing; instead use the highest number
           possible for each die. For example, instead of restoring 2d6 Hit Points to a creature with a
           spell, you restore 12.
+      rules: [supreme_healing]
 - id: circle-of-the-land
   name: Circle of the Land
   class: druid

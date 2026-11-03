@@ -488,6 +488,9 @@ EVOCATION_SAVANT = {lvl: {"choices": [{"id": "evocation_savant", "label": "Evoca
 
 SUBCLASS_OVERLAY = {
     "path-of-the-berserker": {
+        # Mindless Rage: "Immunity to the Charmed and Frightened conditions while your Rage is active".
+        6: {"condition_immunities": [{"condition": "charmed", "while_active": ["rage"]},
+                                     {"condition": "frightened", "while_active": ["rage"]}]},
         # Frenzy: Reckless Attack while raging; "a number of d6s equal to your Rage Damage bonus".
         3: {"damage_riders": [{"id": "frenzy", "name": "Frenzy", "damage": {"progression": "Rage Damage", "die": 6},
                                "applies_to": {"ability": "str"}, "once_per_turn": True,
@@ -506,7 +509,12 @@ SUBCLASS_OVERLAY = {
                          "spell_list": ["cleric", "druid", "wizard"], "max_spell_level": 3, "always_prepared": True,
                          "hint": "Two spells from the Cleric, Druid, or Wizard list (cantrips or spells you have slots for)."}]},
     },
-    "life-domain": {3: spell_grants(LIFE)},
+    # Disciple of Life (+2 + the slot's level to a slot spell's healing), Blessed Healer (the
+    # caster regains as much after healing another), Supreme Healing (healing dice at their
+    # maximum): rules in `castSpell`.
+    "life-domain": {3: {**spell_grants(LIFE), "rules": ["disciple_of_life"]},
+                    6: {"rules": ["blessed_healer"]},
+                    17: {"rules": ["supreme_healing"]}},
     "circle-of-the-land": {3: {"choices": [{"id": "land", "label": "Circle of the Land: land type", "kind": "option",
                                              "options": land_options()}]}},
     "champion": {

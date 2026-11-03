@@ -197,3 +197,60 @@ describe("Fiend Patron", () => {
     expect(computePlaySheet(vex, createState(vex, catalog), catalog).resistances).toContain("fire");
   });
 });
+
+describe("Life Domain healing", () => {
+  // Cure Wounds is a Life Domain spell, always prepared.
+  const cleric = (n: number) => level("cleric", n, "Mira");
+  const heal = (n: number, rolls: number[]) => {
+    const mira = cleric(n);
+    const brakka = level("fighter", 1, "Brakka");
+    const s = session({ mira, brakka });
+    s.act([], hurt("brakka", 10), hurt("mira", 10));
+    s.act(rolls, {
+      type: "cast",
+      id: "mira",
+      spell: "cure-wounds",
+      targets: ["brakka"],
+      slot_level: 1,
+    });
+    const wis = computePlaySheet(mira, s.states.mira as CharacterState, catalog).modifiers.wis;
+    return { s, wis, healed: (s.result() as SpellCastResult).targets[0]?.healing };
+  };
+
+  it("Disciple of Life: +2 + the slot's level", () => {
+    const { healed, wis } = heal(3, [3, 4]);
+    expect(healed).toBe(3 + 4 + wis + 3);
+  });
+
+  it("Blessed Healer: healing another heals the cleric 2 + the slot's level", () => {
+    const { s } = heal(6, [3, 4]);
+    expect(s.play("mira").hp.current).toBe(s.play("mira").hp.max - 10 + 3);
+  });
+
+  it("Supreme Healing: the healing dice at their highest", () => {
+    const { healed, wis } = heal(17, []);
+    expect(healed).toBe(16 + wis + 3);
+  });
+});
+
+describe("Berserker: Mindless Rage", () => {
+  it("raging ends Frightened, and Charmed has no effect while it lasts", () => {
+    const grom = level("barbarian", 6, "Grom");
+    let state = createState(grom, catalog);
+    const play = (action: Parameters<typeof applyAction>[3]) => {
+      const r = applyAction(grom, state, catalog, action);
+      state = r.state;
+      return r.notes;
+    };
+    play({ type: "add_condition", condition: "frightened" });
+    expect(play({ type: "activate", key: "barbarian:rage" })).toContain(
+      "The Frightened condition ends (Rage).",
+    );
+    expect(state.conditions).toEqual([]);
+    play({ type: "add_condition", condition: "charmed" });
+    expect(state.conditions).toEqual([]);
+    play({ type: "deactivate", key: "barbarian:rage" });
+    play({ type: "add_condition", condition: "charmed" });
+    expect(state.conditions).toEqual(["charmed"]);
+  });
+});

@@ -427,7 +427,7 @@ export function combatantFromCharacter(
     attacks_per_action: sheet.attacks_per_action,
     advantages: sheet.advantages.map((a) => a.target),
     no_spells: sheet.toggles.some((t) => t.active && t.no_spells),
-    condition_immunities: [],
+    condition_immunities: sheet.condition_immunities,
     save_actions: [],
     condition_rolls: conditionRolls(conditions, catalog.conditions),
     legendary_actions: [],
@@ -1039,6 +1039,11 @@ export function applyAction(
         lookup(catalog.conditions, action.condition) ??
         fail(message("refusal.unknown_condition", { condition: action.condition }));
       if (def.levels) fail(message("refusal.use_set_exhaustion_exhaustion_levels"));
+      // Immunity (Mindless Rage while raging): it doesn't take hold.
+      if (sheet.condition_immunities.includes(def.id)) {
+        notes.push(message("play.immune", { condition: def.name }));
+        break;
+      }
       if (!s.conditions.includes(def.id)) s.conditions.push(def.id);
       const incapacitated = def.id === "incapacitated" || def.implies.includes("incapacitated");
       if (incapacitated) dropConcentration(message("why.condition", { condition: def.name }));
@@ -1092,6 +1097,13 @@ export function applyAction(
       }
       s.active.push(toggle.key);
       if (toggle.no_spells) dropConcentration(message("why.toggle", { toggle: toggle.name }));
+      // "If you're Charmed or Frightened when you enter your Rage, the condition ends on you."
+      const immune = computePlaySheet(build, s, catalog).condition_immunities;
+      for (const id of s.conditions.filter((c) => immune.includes(c))) {
+        s.conditions = s.conditions.filter((c) => c !== id);
+        const name = lookup(catalog.conditions, id)?.name ?? id;
+        notes.push(message("play.condition_ends_immune", { condition: name, toggle: toggle.name }));
+      }
       break;
     }
     case "deactivate": {
