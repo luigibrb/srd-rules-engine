@@ -826,6 +826,16 @@ function resolvePass(build: CharacterBuild, catalog: Catalog, prev: Resolution |
     }
   }
 
+  // "This tool, unless you already have it": fixed to the tool when the character doesn't have it
+  // from elsewhere, else open (another tool of the category). Tools add no sources, so this is
+  // settled once everything else is.
+  const draft = new Resolution(build, catalog, sources, choices, levels, new SwapLedger(events));
+  for (const [i, c] of choices.entries()) {
+    const tool = c.definition.unless_proficient;
+    if (tool && c.fixed === null && !draft.tools(c.key, c.level).has(tool)) {
+      choices[i] = { ...c, fixed: [tool] };
+    }
+  }
   return new Resolution(build, catalog, sources, choices, levels, new SwapLedger(events));
 }
 
@@ -923,6 +933,7 @@ const EMPTY_GRANTS = Object.freeze({
   resistances: [],
   cantrips: [],
   spells: [],
+  expanded_spells: [],
   spellcasting: null,
   ac_calculations: [],
   ability_bonuses: [],
@@ -1096,12 +1107,25 @@ function spellViews(res: Resolution, choice: ActiveChoice, ok: (id: string) => b
     }
   }
   const maxLevel = res.maxSpellLevelOf(choice);
+  // Spells a feat or feature adds to the lists of the character's spellcasting features, when
+  // this choice picks from one of those lists.
+  const castingLists = new Set(
+    res.sources.flatMap((s) => {
+      const sc = s.grants.spellcasting;
+      return sc?.progression && sc.list ? [res.resolveRef(s, sc.list) ?? sc.list] : [];
+    }),
+  );
+  const expanded = new Set(
+    lists?.some((l) => castingLists.has(l))
+      ? res.sources.filter((s) => s.level <= at(choice)).flatMap((s) => s.grants.expanded_spells)
+      : [],
+  );
   let spells = Object.values(res.catalog.spells).filter(
     (s) =>
       ok(s.id) &&
       (d.spell_level === null || s.level === d.spell_level) &&
       (maxLevel === null || (s.level >= 1 && s.level <= maxLevel)) &&
-      (lists === null || s.lists.some((l) => lists.includes(l))) &&
+      (lists === null || s.lists.some((l) => lists.includes(l)) || expanded.has(s.id)) &&
       (!d.ritual || s.ritual) &&
       (d.school === null || s.school === d.school),
   );

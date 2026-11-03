@@ -753,6 +753,28 @@
           "default": false,
           "type": "boolean"
         },
+        "after_hit_with": {
+          "default": "melee",
+          "type": "string",
+          "enum": [
+            "melee",
+            "ranged",
+            "any"
+          ]
+        },
+        "around_target": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 9007199254740991
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "bonus_vs": {
           "default": null,
           "anyOf": [

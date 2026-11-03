@@ -219,6 +219,13 @@
             "type": "string"
           }
         },
+        "expanded_spells": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "spellcasting": {
           "default": null,
           "anyOf": [
@@ -2225,6 +2232,13 @@
             {
               "type": "null"
             }
+          ]
+        },
+        "unless_proficient": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
           ]
         }
       },

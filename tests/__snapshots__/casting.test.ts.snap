@@ -4,11 +4,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
 {
   "acid-splash": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 5,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -39,7 +41,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "animal-friendship": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -75,7 +79,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "animate-dead": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -127,7 +133,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "animate-objects": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -222,7 +230,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "befuddlement": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -253,11 +263,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "black-tentacles": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cube",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -311,7 +323,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "blade-barrier": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -366,7 +380,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "blight": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -406,11 +422,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "burning-hands": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cone",
       "size": 15,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -450,7 +468,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "call-lightning": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -490,7 +510,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "chain-lightning": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -525,7 +547,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "charm-monster": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -561,7 +585,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "charm-person": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -597,7 +623,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "chill-touch": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "melee",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -627,7 +655,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "chromatic-orb": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -671,11 +701,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "circle-of-death": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 60,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -715,11 +747,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "cloudkill": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -774,11 +808,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "color-spray": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cone",
       "size": 15,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -810,7 +846,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "compulsion": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -842,11 +880,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "cone-of-cold": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cone",
       "size": 60,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -886,11 +926,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "conjure-animals": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "emanation",
       "size": 10,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -945,11 +987,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "conjure-woodland-beings": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "emanation",
       "size": 10,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1004,7 +1048,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "create-undead": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1089,7 +1135,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "cure-wounds": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1117,7 +1165,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "disintegrate": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1157,7 +1207,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "dissonant-whispers": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1197,7 +1249,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "divine-smite": {
     "after_hit": true,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": {
       "creature_types": [
@@ -1240,7 +1294,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "eldritch-blast": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "beams",
@@ -1268,7 +1324,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "entangle": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1300,7 +1358,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "find-familiar": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1448,7 +1508,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "find-steed": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1493,7 +1555,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "finger-of-death": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1524,7 +1588,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "fire-bolt": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -1552,7 +1618,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "fire-storm": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1583,11 +1651,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "fireball": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1627,11 +1697,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "flame-strike": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cylinder",
       "size": 10,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1681,11 +1753,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "flaming-sphere": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "emanation",
       "size": 5,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1739,7 +1813,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "flesh-to-stone": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1771,11 +1847,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "freezing-sphere": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 60,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1815,7 +1893,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "giant-insect": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1886,11 +1966,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "grease": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cube",
       "size": 10,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1937,7 +2019,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "guiding-bolt": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -1976,7 +2060,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "harm": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2007,7 +2093,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "healing-word": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2035,7 +2123,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hellish-rebuke": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2075,7 +2165,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hex": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2099,7 +2191,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hideous-laughter": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2142,7 +2236,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hold-monster": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2178,7 +2274,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hold-person": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2214,7 +2312,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hunters-mark": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2238,11 +2338,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "hypnotic-pattern": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cube",
       "size": 30,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2281,7 +2383,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "ice-knife": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2327,11 +2431,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "ice-storm": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cylinder",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2377,11 +2483,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "incendiary-cloud": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2427,7 +2535,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "inflict-wounds": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2467,11 +2577,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "insect-plague": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2526,11 +2638,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "lightning-bolt": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "line",
       "size": 100,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2570,7 +2684,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "magic-missile": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2601,11 +2717,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "mass-cure-wounds": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 30,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2633,7 +2751,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "mass-healing-word": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2661,7 +2781,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "mass-suggestion": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2693,11 +2815,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "meteor-swarm": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 40,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2734,7 +2858,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "mind-spike": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2774,11 +2900,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "moonbeam": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cylinder",
       "size": 5,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2833,7 +2961,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "phantasmal-killer": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2873,7 +3003,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "poison-spray": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -2901,7 +3033,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "ray-of-frost": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -2931,7 +3065,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "ray-of-sickness": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -2976,7 +3112,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "sacred-flame": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -3007,7 +3145,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "scorching-ray": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3038,7 +3178,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "searing-smite": {
     "after_hit": true,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3075,11 +3217,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "shatter": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 10,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3119,7 +3263,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "shining-smite": {
     "after_hit": true,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3156,7 +3302,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "shocking-grasp": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "melee",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -3186,11 +3334,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "sleep": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 5,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3222,11 +3372,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "sleet-storm": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cylinder",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3275,11 +3427,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "spike-growth": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3321,11 +3475,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "spirit-guardians": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "emanation",
       "size": 15,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3383,7 +3539,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "starry-wisp": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -3411,11 +3569,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "stinking-cloud": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3463,7 +3623,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "suggestion": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3495,7 +3657,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "summon-dragon": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3540,11 +3704,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "sunbeam": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "line",
       "size": 60,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3583,11 +3749,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "sunburst": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 60,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3626,11 +3794,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "thunderwave": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cube",
       "size": 15,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3670,7 +3840,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "vicious-mockery": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
@@ -3701,7 +3873,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wall-of-fire": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3765,7 +3939,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wall-of-force": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3795,7 +3971,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wall-of-ice": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3825,7 +4003,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wall-of-stone": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3855,7 +4035,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wall-of-thorns": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3919,11 +4101,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "web": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "cube",
       "size": 20,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -3970,11 +4154,13 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "weird": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": {
       "shape": "sphere",
       "size": 30,
       "width": 5,
     },
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
@@ -4013,7 +4199,9 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
   },
   "wind-wall": {
     "after_hit": false,
+    "after_hit_with": "melee",
     "area": null,
+    "around_target": null,
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,

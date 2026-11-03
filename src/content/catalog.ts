@@ -395,6 +395,7 @@ export function validateReferences(full: Catalog): void {
     );
     check(grants.cantrips, view.spells, "spell", where);
     check(grants.spells, view.spells, "spell", where);
+    check(grants.expanded_spells, view.spells, "spell", where);
     const siblings = new Set(grants.choices.map((c) => c.id));
     const ref = (value: string | null, what: string, known: (v: string) => boolean): void => {
       if (value === null) return;

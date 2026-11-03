@@ -362,7 +362,12 @@ at_level:
 ```
 
 A feat with `exclusive: true` can't be taken with another feat of its `category` (the option
-says which one the character has). A subclass that casts spells from a third of its class levels
+says which one the character has). `expanded_spells` adds spells to the lists of the character's
+spellcasting features (they're offered wherever those lists are). A `tool` choice with
+`unless_proficient: smiths-tools` is that tool, fixed, unless the character already has it from
+elsewhere; then it asks for another tool of the choice's `category`. A spell cast `after_hit`
+can follow a ranged hit (`after_hit_with: ranged` or `any`), and `around_target: 5` makes its
+save fall on each creature within 5 feet of the creature hit too. A subclass that casts spells from a third of its class levels
 uses `spellcasting: {progression: third}`.
 
 Spell choices grow with the class: `max_spell_level` (spells of level 1 up to it), `spell_list`

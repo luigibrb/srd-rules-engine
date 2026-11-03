@@ -8,6 +8,11 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- More content as data: `expanded_spells` (spells added to the lists of the character's
+  spellcasting features), a `tool` choice's `unless_proficient` (that tool, or another of its
+  category when the character already has it), and a spell's `after_hit_with` (melee, ranged or
+  any hit) and `around_target` (its save also on the creatures within that many feet of the
+  target). A Critical Hit no longer doubles the dice of a save cast after a hit.
 - Spell hit riders (`on_hit`: `no_opportunity_attacks`, `slowed`, `no_healing`, marks in an
   encounter): Shocking Grasp, Ray of Frost and Chill Touch; Chromatic Orb's mechanics (the damage
   type chosen when casting; its leap stays text).

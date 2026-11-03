@@ -4066,8 +4066,11 @@ function run(
         ? (c.last_hit ??
           fail(message("refusal.cast_right_after_hits", { spell: spell.name, name: c.name })))
         : null;
-      if (smite && !smite.melee)
+      const hitWith = spell.mechanics?.after_hit_with ?? "melee";
+      if (smite && hitWith === "melee" && !smite.melee)
         fail(message("refusal.follows_hit_melee_attack", { spell: spell.name }));
+      if (smite && hitWith === "ranged" && smite.melee)
+        fail(message("refusal.follows_hit_ranged_attack", { spell: spell.name }));
       if (smite && action.targets?.length && action.targets[0] !== smite.target) {
         fail(
           message("refusal.smite_target", {
@@ -4080,8 +4083,20 @@ function run(
       // A zone that makes no save when it appears (Spirit Guardians, Web) only takes its place.
       const placeOnly = action.area && spell.mechanics?.zone && !spell.mechanics.zone.on_cast;
       if (placeOnly) checkZonePoint(c, spell, action.area?.point);
+      // A save around the target too (`around_target`): the positioned creatures within that
+      // many feet of it, or `nearby` without positions.
+      const around = (id: string): string[] => {
+        const radius = spell.mechanics?.around_target;
+        if (!radius) return [];
+        const t = find(id);
+        if (!t.position) return action.nearby ?? [];
+        return e.combatants
+          .filter((x) => x.id !== id && !outOfFight(ctx, x) && x.position)
+          .filter((x) => (feetApart(ctx, x, t) ?? Number.POSITIVE_INFINITY) <= radius)
+          .map((x) => x.id);
+      };
       const area = smite
-        ? [smite.target]
+        ? [smite.target, ...around(smite.target)]
         : wall
           ? wall.targets
           : placeOnly
@@ -4091,7 +4106,8 @@ function run(
               : null;
       result = castBy(c, spell, area ?? action.targets ?? [], {
         wall: wall ?? undefined,
-        critical: smite?.critical,
+        // A Critical Hit doubles a smite's extra damage, not a saving throw's.
+        critical: spell.mechanics?.save ? undefined : smite?.critical,
         slot_level,
         pact: action.pact,
         mode: action.mode,
