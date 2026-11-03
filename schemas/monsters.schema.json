@@ -809,6 +809,24 @@
                   }
                 ]
               },
+              "save_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "magic"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pack_tactics": {
+                "default": false,
+                "type": "boolean"
+              },
               "advantage_aura": {
                 "default": null,
                 "anyOf": [
@@ -1395,6 +1413,24 @@
                     "type": "null"
                   }
                 ]
+              },
+              "save_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "magic"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pack_tactics": {
+                "default": false,
+                "type": "boolean"
               },
               "advantage_aura": {
                 "default": null,
@@ -1983,6 +2019,24 @@
                   }
                 ]
               },
+              "save_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "magic"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pack_tactics": {
+                "default": false,
+                "type": "boolean"
+              },
               "advantage_aura": {
                 "default": null,
                 "anyOf": [
@@ -2569,6 +2623,24 @@
                     "type": "null"
                   }
                 ]
+              },
+              "save_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "magic"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pack_tactics": {
+                "default": false,
+                "type": "boolean"
               },
               "advantage_aura": {
                 "default": null,
@@ -3230,6 +3302,24 @@
                     "type": "null"
                   }
                 ]
+              },
+              "save_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "magic"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pack_tactics": {
+                "default": false,
+                "type": "boolean"
               },
               "advantage_aura": {
                 "default": null,
@@ -4135,6 +4225,24 @@
                     }
                   ]
                 },
+                "save_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "magic"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
+                },
                 "advantage_aura": {
                   "default": null,
                   "anyOf": [
@@ -4721,6 +4829,24 @@
                       "type": "null"
                     }
                   ]
+                },
+                "save_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "magic"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
                 },
                 "advantage_aura": {
                   "default": null,
@@ -5309,6 +5435,24 @@
                     }
                   ]
                 },
+                "save_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "magic"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
+                },
                 "advantage_aura": {
                   "default": null,
                   "anyOf": [
@@ -5895,6 +6039,24 @@
                       "type": "null"
                     }
                   ]
+                },
+                "save_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "magic"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
                 },
                 "advantage_aura": {
                   "default": null,
@@ -6556,6 +6718,24 @@
                       "type": "null"
                     }
                   ]
+                },
+                "save_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "magic"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
                 },
                 "advantage_aura": {
                   "default": null,

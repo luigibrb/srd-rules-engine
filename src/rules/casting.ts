@@ -18,6 +18,7 @@ import {
   type Decide,
   inspire,
   type ModeReason,
+  modeReason,
   othersReact,
   type RollMode,
   rollD20,
@@ -482,6 +483,7 @@ export function castSpell(
     const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent, {
       careful,
       heightened,
+      magic: true,
     });
     shared = resolved.damage;
     // Faerie Fire: "Each creature in the Cube is also outlined if it fails".
@@ -521,7 +523,9 @@ export function castSpell(
     const followParts = followUpParts(f, above);
     const dc = line?.save_dc ?? 0;
     const effect = { ...f.save, dc, conditions: [] };
-    const resolved = resolveSave(effect, followParts, [...targets, ...nearby], rng, decide);
+    const resolved = resolveSave(effect, followParts, [...targets, ...nearby], rng, decide, false, {
+      magic: true,
+    });
     follow_up = { ability: f.save.ability, dc, damage: resolved.damage, targets: resolved.targets };
   }
 
@@ -699,7 +703,12 @@ function resolveSave(
   rng: Rng,
   decide: Decide,
   potent = false,
-  metamagic: { careful?: readonly number[]; heightened?: readonly number[] } = {},
+  metamagic: {
+    careful?: readonly number[];
+    heightened?: readonly number[];
+    /** A spell's save (Magic Resistance applies). */
+    magic?: boolean;
+  } = {},
 ): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
   const saves = targets.map((t, i): SaveResult => {
     // Careful Spell: "A chosen creature automatically succeeds on its saving throw".
@@ -720,9 +729,16 @@ function resolveSave(
         inspiration: null,
       };
     }
+    const modes: ModeReason[] = [];
     // Heightened Spell: "Disadvantage on saves against the spell".
-    const mode = metamagic.heightened?.includes(i) ? "disadvantage" : "normal";
-    return rollSavingThrow(t, effect.ability, effect.dc, { rng, decide, mode });
+    if (metamagic.heightened?.includes(i)) {
+      modes.push(modeReason("disadvantage", message("reason.heightened")));
+    }
+    // Magic Resistance: "Advantage on saving throws against spells".
+    if (metamagic.magic && t.magic_resistance) {
+      modes.push(modeReason("advantage", message("reason.magic_resistance", { name: t.name })));
+    }
+    return rollSavingThrow(t, effect.ability, effect.dc, { rng, decide, modes });
   });
   const damage = parts.length && targets.length ? rollDamage(parts, { rng }) : null;
   const results = targets.map((target, i) => {
@@ -753,9 +769,13 @@ export function saveAgainst(
   effect: SaveEffect,
   parts: readonly DamagePart[],
   targets: readonly Combatant[],
-  { rng = mathRng, decide = (d) => d.recommended }: { rng?: Rng; decide?: Decide } = {},
+  {
+    rng = mathRng,
+    decide = (d) => d.recommended,
+    magic = false,
+  }: { rng?: Rng; decide?: Decide; magic?: boolean } = {},
 ): { damage: RolledDamage | null; targets: SpellTargetResult[] } {
-  return resolveSave(effect, parts, targets, rng, decide);
+  return resolveSave(effect, parts, targets, rng, decide, false, { magic });
 }
 
 export interface SaveActionResult {

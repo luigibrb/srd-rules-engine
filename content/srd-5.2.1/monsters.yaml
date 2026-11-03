@@ -4388,6 +4388,7 @@
   traits:
     - name: Magic Resistance
       text: The archmage has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The archmage makes four Arcane Burst attacks.
@@ -4892,6 +4893,7 @@
       text: The baboon has Advantage on an attack roll against a creature if at least one of the baboon's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +1, reach 5 ft. _Hit:_ 1 (1d4 − 1) Piercing damage.
@@ -5054,6 +5056,7 @@
       text: If the balor fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The balor has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The balor makes one Flame Whip attack and one Lightning Blade attack.
@@ -5300,6 +5303,7 @@
         a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes one Claws attack and one Tail attack, or it makes two Hurl Flame attacks.
@@ -5524,6 +5528,7 @@
   traits:
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes one Beard attack and one Infernal Glaive attack.
@@ -6083,6 +6088,7 @@
       text: The hawk has Advantage on an attack roll against a creature if at least one of the hawk's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Beak
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 4 (1d4 + 2) Piercing damage, or 6 (1d8 + 2)
@@ -6297,6 +6303,7 @@
         a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes two Claw attacks and one Infernal Sting attack.
@@ -7098,6 +7105,7 @@
         a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes two Chain attacks and uses Conjure Infernal Chain.
@@ -7395,6 +7403,7 @@
       text: The golem can't shape-shift.
     - name: Magic Resistance
       text: The golem has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The golem makes two Slam attacks, or it makes three Slam attacks if it used Hasten this turn.
@@ -8610,6 +8619,7 @@
         instantly, reviving with all its Hit Points somewhere in Mount Celestia.
     - name: Magic Resistance
       text: The deva has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The deva makes two Holy Mace attacks.
@@ -8732,6 +8742,7 @@
       text: The wolf has Advantage on an attack roll against a creature if at least one of the wolf's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 8 (1d10 + 3) Piercing damage. If the target is a
@@ -8798,6 +8809,7 @@
         Air.
     - name: Magic Resistance
       text: The djinni has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Wishes
       text: The djinni has a 30 percent chance of knowing the _Wish_ spell. If the djinni knows it, the
         djinni can cast it only on behalf of a non-genie creature who communicates a wish in a way
@@ -9509,6 +9521,7 @@
   traits:
     - name: Magic Resistance
       text: The dryad has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Speak with Beasts and Plants
       text: The dryad can communicate with Beasts and Plants as if they shared a language.
   actions:
@@ -9868,6 +9881,7 @@
         Fire.
     - name: Magic Resistance
       text: The efreeti has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Wishes
       text: The efreeti has a 30 percent chance of knowing the _Wish_ spell. If the efreeti knows it, the
         efreeti can cast it only on behalf of a non-genie creature who communicates a wish in a way
@@ -10139,6 +10153,7 @@
         gains a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The erinyes has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Magic Rope
       text: The erinyes has a magic rope. While bearing it, the erinyes can use the Entangling Rope
         action. The rope has AC 20, HP 90, and Immunity to Poison and Psychic damage. The rope turns
@@ -10618,6 +10633,7 @@
         to the Lightning damage dealt.
     - name: Magic Resistance
       text: The golem has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The golem makes two Slam attacks.
@@ -12493,6 +12509,7 @@
     - name: Pack Tactics
       text: The rat has Advantage on an attack roll against a creature if at least one of the rat's allies
         is within 5 feet of the creature and the ally doesn't have the Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +5, reach 5 feet. _Hit:_ 5 (1d4 + 3) Piercing damage.
@@ -12979,6 +12996,7 @@
       text: The vulture has Advantage on an attack roll against a creature if at least one of the
         vulture's allies is within 5 feet of the creature and the ally doesn't have the
         Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Gouge
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 9 (2d6 + 2) Piercing damage, and the target has
@@ -13331,6 +13349,7 @@
         instantly, reviving with all its Hit Points somewhere in the Abyss.
     - name: Magic Resistance
       text: The glabrezu has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The glabrezu makes two Pincer attacks and uses Pummel or Spellcasting.
@@ -14995,6 +15014,7 @@
       text: The hound has Advantage on an attack roll against a creature if at least one of the hound's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Multiattack
       text: The hound makes two Bite attacks.
@@ -15086,6 +15106,7 @@
         instantly, reviving with all its Hit Points somewhere in the Abyss.
     - name: Magic Resistance
       text: The hezrou has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Stench
       text: _Constitution Saving Throw:_ DC 16, any creature that starts its turn in a 10-foot Emanation
         originating from the hezrou. _Failure:_ The target has the Poisoned condition until the
@@ -15452,6 +15473,7 @@
       text: The hobgoblin has Advantage on an attack roll against a creature if at least one of the
         hobgoblin's allies is within 5 feet of the creature and the ally doesn't have the
         Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Longsword
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 12 (2d10 + 1) Slashing damage.
@@ -15601,6 +15623,7 @@
         a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes three attacks, using Searing Fork or Hurl Flame in any combination. It can
@@ -15838,6 +15861,7 @@
       text: The hyena has Advantage on an attack roll against a creature if at least one of the hyena's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 3 (1d6) Piercing damage.
@@ -15906,6 +15930,7 @@
         a new body instantly, reviving with all its Hit Points somewhere in the Nine Hells.
     - name: Magic Resistance
       text: The devil has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The devil makes three Ice Spear attacks. It can replace one attack with a Tail attack.
@@ -16129,6 +16154,7 @@
   traits:
     - name: Magic Resistance
       text: The imp has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Sting
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 6 (1d6 + 3) Piercing damage plus 7 (2d6) Poison
@@ -16428,6 +16454,7 @@
       text: The golem can't shape-shift.
     - name: Magic Resistance
       text: The golem has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The golem makes two attacks, using Bladed Arm or Fiery Bolt in any combination.
@@ -16724,6 +16751,7 @@
       text: The kobold has Advantage on an attack roll against a creature if at least one of the kobold's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
     - name: Sunlight Sensitivity
       text: While in sunlight, the kobold has Disadvantage on ability checks and attack rolls.
   actions:
@@ -17366,6 +17394,7 @@
       text: The lion has Advantage on an attack roll against a creature if at least one of the lion's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
     - name: Running Leap
       text: With a 10-foot running start, the lion can Long Jump up to 25 feet.
   actions:
@@ -17982,6 +18011,7 @@
         instantly, reviving with all its Hit Points somewhere in the Abyss.
     - name: Magic Resistance
       text: The marilith has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Reactive
       text: The marilith can take one Reaction on every turn of combat.
   actions:
@@ -18789,6 +18819,7 @@
       text: If the mummy fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The mummy has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Undead Restoration
       text: If destroyed, the mummy gains a new body in 24 hours if its heart is intact, reviving with all
         its Hit Points. The new body appears in an unoccupied space within the mummy's lair. The
@@ -18974,6 +19005,7 @@
         body instantly, reviving with all its Hit Points somewhere in the Abyss.
     - name: Magic Resistance
       text: The nalfeshnee has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The nalfeshnee makes three Rend attacks.
@@ -19084,6 +19116,7 @@
         before using this trait to cast that spell again."
     - name: Magic Resistance
       text: The hag has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Soul Bag
       text: >-
         The hag has a soul bag. While holding or carrying the bag, the hag can use its Nightmare
@@ -20404,6 +20437,7 @@
       text: If the pit fiend fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The pit fiend has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The pit fiend makes one Bite attack, two Devilish Claw attacks, and one Fiery Mace attack.
@@ -20517,6 +20551,7 @@
         instantly, reviving with all its Hit Points somewhere in Mount Celestia.
     - name: Magic Resistance
       text: The planetar has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The planetar makes three Radiant Sword attacks or uses Holy Burst twice.
@@ -21077,6 +21112,7 @@
   traits:
     - name: Magic Resistance
       text: The pseudodragon has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The pseudodragon makes two Bite attacks.
@@ -21315,6 +21351,7 @@
   traits:
     - name: Magic Resistance
       text: The quasit has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Rend
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 5 (1d4 + 3) Slashing damage, and the target has
@@ -21759,6 +21796,7 @@
       text: The shark has Advantage on an attack roll against a creature if at least one of the shark's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
     - name: Water Breathing
       text: The shark can breathe only underwater.
   actions:
@@ -22497,6 +22535,7 @@
   traits:
     - name: Magic Resistance
       text: The satyr has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Hooves
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 5 (1d4 + 3) Bludgeoning damage. If the target is a
@@ -23346,6 +23385,7 @@
       text: If the solar fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The solar has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The solar makes two Flying Sword attacks. It can replace one attack with a use of Slaying Bow.
@@ -23963,6 +24003,7 @@
   traits:
     - name: Magic Resistance
       text: The sphinx has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Rend
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 5 (1d4 + 3) Slashing damage plus 7 (2d6) Radiant
@@ -24668,6 +24709,7 @@
       text: The golem can't shape-shift.
     - name: Magic Resistance
       text: The golem has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The golem makes two attacks, using Slam or Force Bolt in any combination.
@@ -25523,6 +25565,7 @@
       text: If the tarrasque fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The tarrasque has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
     - name: Reflective Carapace
       text: If the tarrasque is targeted by a Magic Missile spell or a spell that requires a ranged attack
         roll, roll 1d6. On a **1–5**, the tarrasque is unaffected. On a **6**, the tarrasque is
@@ -25737,6 +25780,7 @@
       text: The tough has Advantage on an attack roll against a creature if at least one of the tough's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Mace
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 5 (1d6 + 2) Bludgeoning damage.
@@ -25809,6 +25853,7 @@
       text: The tough has Advantage on an attack roll against a creature if at least one of the tough's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Multiattack
       text: The tough makes two attacks, using Warhammer or Heavy Crossbow in any combination.
@@ -26249,6 +26294,7 @@
       text: If the unicorn fails a saving throw, it can choose to succeed instead.
     - name: Magic Resistance
       text: The unicorn has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The unicorn makes one Hooves attack and one Radiant Horn attack.
@@ -26876,6 +26922,7 @@
         instantly, reviving with all its Hit Points somewhere in the Abyss.
     - name: Magic Resistance
       text: The vrock has Advantage on saving throws against spells and other magical effects.
+      save_advantage: magic
   actions:
     - name: Multiattack
       text: The vrock makes two Shred attacks.
@@ -26982,6 +27029,7 @@
       text: The vulture has Advantage on an attack roll against a creature if at least one of the
         vulture's allies is within 5 feet of the creature and the ally doesn't have the
         Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Beak
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 2 (1d4) Piercing damage.
@@ -27157,6 +27205,7 @@
       text: The warrior has Advantage on an attack roll against a creature if at least one of the
         warrior's allies is within 5 feet of the creature and the ally doesn't have the
         Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Spear
       text: _Melee or Ranged Attack Roll:_ +3, reach 5 ft. or range 20/60 ft. _Hit:_ 4 (1d6 + 1) Piercing
@@ -27831,6 +27880,7 @@
       text: The werewolf has Advantage on an attack roll against a creature if at least one of the
         werewolf's allies is within 5 feet of the creature and the ally doesn't have the
         Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Multiattack
       text: The werewolf makes two attacks, using Scratch or Longbow in any combination. It can replace
@@ -28217,6 +28267,7 @@
       text: The wolf has Advantage on an attack roll against a creature if at least one of the wolf's
         allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
         condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +6, reach 5 ft. _Hit:_ 11 (2d6 + 4) Piercing damage. If the target is a
@@ -28296,6 +28347,7 @@
     - name: Pack Tactics
       text: The wolf has Advantage on attack rolls against a creature if at least one of the wolf's allies
         is within 5 feet of the creature and the ally doesn't have the Incapacitated condition.
+      pack_tactics: true
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 5 (1d6 + 2) Piercing damage. If the target is a

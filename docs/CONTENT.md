@@ -573,7 +573,8 @@ ammunition magic item is made from). Entries it doesn't list (starting-equipment
 
 `import-srd-monsters.ts` reads a few trait sentences into data: `trigger: death` (Death Burst,
 with its `save` and Emanation), `aura: {size, damage, choice, not_incapacitated}` (Fire Aura),
-`regeneration: {amount, stopped_by}` (Troll) and `advantage_aura: {size}` (Aura of Authority).
+`regeneration: {amount, stopped_by}` (Troll), `advantage_aura: {size}` (Aura of Authority),
+`save_advantage: magic` (Magic Resistance) and `pack_tactics: true` (Pack Tactics).
 `--report` counts them.
 
 ### Magic items and conditions
