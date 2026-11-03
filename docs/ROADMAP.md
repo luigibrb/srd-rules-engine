@@ -54,6 +54,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P39 | Reactions to another creature's d20 roll (`modifies_roll`): offered after the roll as a decision, the reaction and use spent; the College of Lore's Cutting Words | Offered only in the reactor's interest (flagged); Cutting Words on damage rolls is by hand |
 | P40 | Spell hit riders as marks: Shocking Grasp (no Opportunity Attacks), Ray of Frost (−10 ft Speed), Chill Touch (no healing); Chromatic Orb's chosen damage type | Chromatic Orb's leap and Starry Wisp's light stay text (flagged) |
 | P41 | The content gaps left: spells added to a character's spell lists, a tool or another when already proficient, a save around the creature a ranged or melee hit struck | Homebrew tests (no SRD example) |
+| P42 | Light riders: a failed save's marks (`on_failed_save`), `outlined` (Advantage against) and `revealed` (no benefit from the Invisible condition) | Faerie Fire, Starry Wisp |
 
 ## Decisions
 
@@ -98,9 +99,8 @@ or invented homebrew in its tests.
 
 ### Priority 2: next
 
-- **Spell riders, what's left (S).** Starry Wisp's light and "can't benefit from the Invisible
-  condition"; Chromatic Orb's leap on doubles.
-- **Spells left as text (L, ongoing).** 42 spells have effects the parser doesn't read
+- **Spell riders, what's left (S).** Chromatic Orb's leap on doubles.
+- **Spells left as text (L, ongoing).** 41 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
   ongoing area effects, first.

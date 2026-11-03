@@ -660,6 +660,8 @@
         type: radiant
     targets: 1
     cantrip_scaling: dice
+    on_hit:
+      - revealed
 - id: thaumaturgy
   name: Thaumaturgy
   level: 0
@@ -1394,6 +1396,16 @@
 
 
     Attack rolls against an affected creature or object have Advantage if the attacker can see it.
+  mechanics:
+    save:
+      ability: dex
+      on_success: none
+    area:
+      shape: cube
+      size: 20
+    on_failed_save:
+      - outlined
+      - revealed
 - id: false-life
   name: False Life
   level: 1

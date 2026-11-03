@@ -640,7 +640,24 @@
               "advantage_against",
               "no_opportunity_attacks",
               "slowed",
-              "no_healing"
+              "no_healing",
+              "revealed",
+              "outlined"
+            ]
+          }
+        },
+        "on_failed_save": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "advantage_against",
+              "no_opportunity_attacks",
+              "slowed",
+              "no_healing",
+              "revealed",
+              "outlined"
             ]
           }
         },

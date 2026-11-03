@@ -243,6 +243,15 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     cantrip_scaling: "dice",
     on_hit: ["slowed"],
   },
+  "starry-wisp": {
+    // "until the end of your next turn, it emits Dim Light in a 10-foot radius and can't benefit
+    // from the Invisible condition". The light stays text.
+    attack: "ranged",
+    damage: [{ dice: "1d8", type: "radiant" }],
+    targets: 1,
+    cantrip_scaling: "dice",
+    on_hit: ["revealed"],
+  },
   "chill-touch": {
     // "it can't regain Hit Points until the end of your next turn"
     attack: "melee",
@@ -350,6 +359,16 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     targets: 1,
     upcast: { targets: 1 },
     conditions: [{ condition: "paralyzed", on: "failed_save" }],
+  },
+  // Level 1
+  "faerie-fire": {
+    // "Each creature in the Cube is also outlined if it fails a Dexterity saving throw … can't
+    // benefit from the Invisible condition. Attack rolls against an affected creature or object
+    // have Advantage if the attacker can see it" (whether it can is the caller's). The Dim Light
+    // and the outlined objects stay text.
+    save: { ability: "dex", on_success: "none" },
+    area: { shape: "cube", size: 20 },
+    on_failed_save: ["outlined", "revealed"],
   },
   // Level 3
   fear: {
@@ -600,7 +619,6 @@ const REVIEWED = new Set<string>([
   "sacred-flame",
   "shatter",
   "sleep", // Incapacitated; Unconscious after a second failed save stays text
-  "starry-wisp",
   "suggestion",
   "sunbeam", // the first Line; new Lines with a Magic action stay text
   "sunburst",

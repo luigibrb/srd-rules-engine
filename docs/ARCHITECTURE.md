@@ -393,7 +393,7 @@ save with the damage rolled once for all targets; darts that hit automatically (
 healing; conditions on a hit or a failed save (not for a target immune to them). Beams, rays
 and darts go at one target or one `targets` entry each, so a target given twice takes two. A
 follow-up save (Ice Knife) comes after the attack, hit or miss, for the target and `nearby`
-(`follow_up`); a hit's riders are in `targets[i].on_hit`. `modesFor(target, shot)` gives
+(`follow_up`); a hit's riders, or a failed save's (`on_failed_save`), are in `targets[i].on_hit`. `modesFor(target, shot)` gives
 Advantage or Disadvantage to one spell attack roll. It returns each target's result (`target`:
 its index in `targets`, `id`: its combatant id in an encounter, `name`) with the play actions that apply it (`targets[i].actions`) and the caster's (`spend_slot` or
 `spend_pact_slot`, `set_concentration`). `POST /v1/state/cast` checks
@@ -667,7 +667,10 @@ list of actions.
   riders are marks too: Shocking Grasp's (no Opportunity Attacks until the start of the
   target's next turn), Ray of Frost's (10 feet less Speed until the start of the caster's next
   turn), Chill Touch's (healing refused, `mark.no_healing_blocks`, until the end of the caster's
-  next turn). A follow-up save's
+  next turn), Starry Wisp's (`revealed`: the Invisible condition's roll effects are dropped from
+  the target's view, until the end of the caster's next turn). A failed save's marks (Faerie
+  Fire's `outlined`, Advantage on every attack roll against it, and `revealed`) have no `ends`:
+  they last while the caster concentrates on the spell, like Hunter's Mark. A follow-up save's
   creatures are the positioned ones within its radius of the target, or `nearby` without
   positions. Conditions with a duration in the spell's text (Ray of Sickness, Color Spray,
   Sunbeam) are timed effects that end at the start or end of the caster's next turn; a
@@ -1087,8 +1090,11 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 
 **Spells**
 
-- Chromatic Orb's leap on doubles and Starry Wisp's Dim Light and "can't benefit from the
-  Invisible condition" are text.
+- Chromatic Orb's leap on doubles and Starry Wisp's and Faerie Fire's Dim Light are text.
+- "Can't benefit from the Invisible condition" (Starry Wisp, Faerie Fire) drops the Invisible
+  condition's effects on rolls (attack rolls by and against the creature, Initiative), including
+  the Invisible condition a Hide check gives; the creature still has the condition. Faerie Fire's
+  Advantage "if the attacker can see it" applies to every attacker: sight is the caller's.
 
 **Reactions to rolls**
 

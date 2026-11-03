@@ -6,7 +6,7 @@
  * `caster_actions` (spend the slot, start Concentration) and each target's `actions`.
  */
 
-import type { Ability, DamageType, SpellDef, SpellMechanics } from "../models/content";
+import type { Ability, DamageType, SPELL_MARKS, SpellDef, SpellMechanics } from "../models/content";
 import type { Message } from "../models/messages";
 import type { PlayAction } from "../models/state";
 import {
@@ -37,7 +37,7 @@ import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
 /** What a spell's hit does besides damage (`mechanics.on_hit`). */
-export type SpellOnHit = "advantage_against" | "no_opportunity_attacks" | "slowed" | "no_healing";
+export type SpellOnHit = (typeof SPELL_MARKS)[number];
 
 export interface CastOptions {
   /** Damage that rides an attack's Critical Hit: its dice are doubled (Divine Smite). */
@@ -104,7 +104,10 @@ export interface SpellTargetResult {
   readonly outcome: DamageResult | null;
   readonly healing: number;
   readonly conditions: readonly string[];
-  /** What the hit does besides damage and conditions (`advantage_against`: Guiding Bolt). */
+  /**
+   * What the hit or failed save does besides damage and conditions (`advantage_against`: Guiding
+   * Bolt; `outlined`: Faerie Fire).
+   */
   readonly on_hit: readonly SpellOnHit[];
   /** Play actions that apply all this to a character target's state. */
   readonly actions: readonly PlayAction[];
@@ -466,7 +469,13 @@ export function castSpell(
     };
     const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent);
     shared = resolved.damage;
-    results.push(...resolved.targets);
+    // Faerie Fire: "Each creature in the Cube is also outlined if it fails".
+    const marks = m.on_failed_save;
+    results.push(
+      ...resolved.targets.map((t) =>
+        marks.length && t.save && !t.save.success ? { ...t, on_hit: marks } : t,
+      ),
+    );
   } else if (projectiles) {
     // Darts that hit automatically: one roll for all of them, a feature's `one_roll` bonus on
     // the first dart only.

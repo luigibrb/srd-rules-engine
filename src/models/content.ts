@@ -1102,6 +1102,16 @@ export const SpellAreaSchema = z.strictObject({
 });
 export type SpellArea = z.infer<typeof SpellAreaSchema>;
 
+/** What a spell's hit or failed save leaves on a creature (`on_hit`, `on_failed_save`). */
+export const SPELL_MARKS = [
+  "advantage_against",
+  "no_opportunity_attacks",
+  "slowed",
+  "no_healing",
+  "revealed",
+  "outlined",
+] as const;
+
 /**
  * What a spell does, as data (`castSpell` uses it). Anything not listed here stays in the
  * spell's text: durations, movement, repeated saves, choices made while casting.
@@ -1207,11 +1217,15 @@ export const SpellMechanicsSchema = z
      * `no_opportunity_attacks` until the start of the target's next turn (Shocking Grasp);
      * `slowed`, its Speed 10 feet less until the start of the caster's next turn (Ray of Frost);
      * `no_healing`, it can't regain Hit Points until the end of the caster's next turn (Chill
-     * Touch).
+     * Touch); `revealed`, it can't benefit from the Invisible condition until the end of the
+     * caster's next turn (Starry Wisp); `outlined`, attack rolls against it have Advantage.
      */
-    on_hit: z
-      .array(z.enum(["advantage_against", "no_opportunity_attacks", "slowed", "no_healing"]))
-      .default([]),
+    on_hit: z.array(z.enum(SPELL_MARKS)).default([]),
+    /**
+     * The same marks on each creature that fails the spell's save, for as long as the caster
+     * concentrates on it (Faerie Fire: `outlined` and `revealed`).
+     */
+    on_failed_save: z.array(z.enum(SPELL_MARKS)).default([]),
     /**
      * Damage types the caster picks from when casting, for every damage part (Spirit Guardians:
      * Radiant or Necrotic); empty when the damage types are fixed.
