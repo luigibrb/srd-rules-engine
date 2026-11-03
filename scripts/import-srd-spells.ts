@@ -214,6 +214,39 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     targets: 1,
     cantrip_scaling: "beams",
   },
+  // Hit riders: what a hit does besides damage (`on_hit`, marks in an encounter).
+  "shocking-grasp": {
+    // "it can't make Opportunity Attacks until the start of its next turn"
+    attack: "melee",
+    damage: [{ dice: "1d8", type: "lightning" }],
+    targets: 1,
+    cantrip_scaling: "dice",
+    on_hit: ["no_opportunity_attacks"],
+  },
+  "ray-of-frost": {
+    // "its Speed is reduced by 10 feet until the start of your next turn"
+    attack: "ranged",
+    damage: [{ dice: "1d8", type: "cold" }],
+    targets: 1,
+    cantrip_scaling: "dice",
+    on_hit: ["slowed"],
+  },
+  "chill-touch": {
+    // "it can't regain Hit Points until the end of your next turn"
+    attack: "melee",
+    damage: [{ dice: "1d10", type: "necrotic" }],
+    targets: 1,
+    cantrip_scaling: "dice",
+    on_hit: ["no_healing"],
+  },
+  "chromatic-orb": {
+    // "Choose Acid, Cold, Fire, Lightning, Poison, or Thunder"; its leap on doubles stays text.
+    attack: "ranged",
+    damage: [{ dice: "3d8", type: "acid" }],
+    damage_types: ["acid", "cold", "fire", "lightning", "poison", "thunder"],
+    targets: 1,
+    upcast: { damage: [{ dice: "1d8", type: "acid" }] },
+  },
   "fire-bolt": {
     attack: "ranged",
     damage: [{ dice: "1d10", type: "fire" }],
@@ -495,7 +528,6 @@ const REVIEWED = new Set<string>([
   "call-lightning", // the first bolt; calling more with a Magic action stays text
   "charm-monster",
   "charm-person",
-  "chill-touch",
   "circle-of-death",
   "color-spray",
   "compulsion",
@@ -516,11 +548,9 @@ const REVIEWED = new Set<string>([
   "mind-spike",
   "phantasmal-killer", // the damage again on a failed repeated save stays text
   "poison-spray",
-  "ray-of-frost",
   "ray-of-sickness",
   "sacred-flame",
   "shatter",
-  "shocking-grasp",
   "sleep", // Incapacitated; Unconscious after a second failed save stays text
   "starry-wisp",
   "suggestion",

@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Spell hit riders (`on_hit`: `no_opportunity_attacks`, `slowed`, `no_healing`, marks in an
+  encounter): Shocking Grasp, Ray of Frost and Chill Touch; Chromatic Orb's mechanics (the damage
+  type chosen when casting; its leap stays text).
 - Reactions to another creature's d20 roll: a feature action's `modifies_roll` (rolls, on a
   success or failure, add or subtract a die and/or bonus, whose rolls), offered after the roll as
   a `roll_reaction` decision (`Decide.reactions`, `othersReact`); the reaction and the use are spent.

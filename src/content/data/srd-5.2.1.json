@@ -26898,7 +26898,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": [],
+                "on_hit": [
+                    "no_healing"
+                ],
                 "damage_types": [],
                 "zone": null,
                 "after_hit": false,
@@ -27305,7 +27307,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": [],
+                "on_hit": [
+                    "slowed"
+                ],
                 "damage_types": [],
                 "zone": null,
                 "after_hit": false,
@@ -27436,7 +27440,9 @@
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
-                "on_hit": [],
+                "on_hit": [
+                    "no_opportunity_attacks"
+                ],
                 "damage_types": [],
                 "zone": null,
                 "after_hit": false,
@@ -27865,7 +27871,50 @@
             "components": "V, S, M (a diamond worth 50+ GP)",
             "duration": "Instantaneous",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": "ranged",
+                "save": null,
+                "damage": [
+                    {
+                        "dice": "3d8",
+                        "type": "acid",
+                        "add_modifier": false,
+                        "bonus": 0
+                    }
+                ],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [
+                        {
+                            "dice": "1d8",
+                            "type": "acid"
+                        }
+                    ],
+                    "heal": null,
+                    "targets": 0
+                },
+                "cantrip_scaling": null,
+                "conditions": [],
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "damage_types": [
+                    "acid",
+                    "cold",
+                    "fire",
+                    "lightning",
+                    "poison",
+                    "thunder"
+                ],
+                "zone": null,
+                "after_hit": false,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "color-spray",

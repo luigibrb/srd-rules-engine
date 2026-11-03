@@ -239,6 +239,9 @@ export const SpellMarkSchema = z.object({
     "staggered",
     "sundered",
     "quarry",
+    "no_opportunity_attacks",
+    "slowed",
+    "no_healing",
   ]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),

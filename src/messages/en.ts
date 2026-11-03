@@ -133,6 +133,13 @@ export const MESSAGES_EN = {
   "spell.follow_up":
     "{spell}'s saving throw ({ability} DC {dc}){count, plural, =0 {: no creature is in it} other {}}.",
   "mark.advantage_against": "{label}: the next attack roll against {target} has Advantage.",
+  "mark.no_opportunity_attacks":
+    "{target} can't make Opportunity Attacks until the start of its next turn ({label}).",
+  "mark.slowed":
+    "{target}'s Speed is 10 feet lower until the start of the caster's next turn ({label}).",
+  "mark.no_healing":
+    "{target} can't regain Hit Points until the end of the caster's next turn ({label}).",
+  "mark.no_healing_blocks": "{name} can't regain Hit Points ({label}).",
   "zone.lasts":
     "{spell} lasts ({id}){count, plural, =0 {} other {: creatures {damage, select, true {take its damage} other {save}} when they {when, list, or}}}.",
   "zone.when.enter": "enter it",

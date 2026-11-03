@@ -610,6 +610,12 @@ function run(
   /** Apply play actions to a combatant; a concentrating one saves against damage. */
   const applyTo = (c: EncounterCombatant, actions: readonly PlayAction[]): void => {
     for (const a of actions) {
+      // Chill Touch: "it can't regain Hit Points" while its mark lasts.
+      const noHealing = e.marks.find((m) => m.kind === "no_healing" && m.on === c.id);
+      if (a.type === "heal" && noHealing) {
+        notes.push(message("mark.no_healing_blocks", { name: c.name, label: noHealing.label }));
+        continue;
+      }
       let dc: number | null = null;
       let dealt = 0;
       if (a.type === "damage") {
@@ -2118,17 +2124,20 @@ function run(
       spendLegendaryResistance(t, hit.save);
       notes.push(targetNote(t.name, hit, views[hit.target]?.armor_class));
       applyTo(t, hit.actions);
-      if (hit.on_hit.includes("advantage_against") && !outOfFight(ctx, t)) {
+      if (hit.on_hit.length && !outOfFight(ctx, t)) {
         e.marks = e.marks.filter((m) => !(m.on === t.id && m.label === spell.name));
-        e.marks.push({
-          kind: "advantage_against",
-          label: spell.name,
-          by: c.id,
-          on: t.id,
-          ends: until("end"),
-          damage: null,
-        });
-        notes.push(message("mark.advantage_against", { label: spell.name, target: t.name }));
+        for (const kind of hit.on_hit) {
+          // When each ends: Guiding Bolt and Chill Touch at the end of the caster's next turn,
+          // Ray of Frost at the start of it, Shocking Grasp at the start of the target's.
+          const ends =
+            kind === "no_opportunity_attacks"
+              ? { at: "start" as const, of: t.id, count: 1, skip_current: false }
+              : kind === "slowed"
+                ? { at: "start" as const, of: c.id, count: 1, skip_current: false }
+                : until("end");
+          e.marks.push({ kind, label: spell.name, by: c.id, on: t.id, ends, damage: null });
+          notes.push(message(`mark.${kind}`, { label: spell.name, target: t.name }));
+        }
       }
     }
     // Divine Smite's extra die against a Fiend or an Undead (doubled on a Critical Hit).
@@ -3564,7 +3573,12 @@ function run(
         if (action.opportunity) {
           if (line && line.kind !== "melee")
             fail(message("refusal.opportunity_attack_melee_attack"));
-          if (e.marks.some((m) => m.kind === "staggered" && m.on === c.id)) {
+          if (
+            e.marks.some(
+              (m) =>
+                (m.kind === "staggered" || m.kind === "no_opportunity_attacks") && m.on === c.id,
+            )
+          ) {
             fail(message("refusal.cant_make_opportunity_attacks", { name: c.name }));
           }
           if (t.disengaged)
@@ -4234,9 +4248,10 @@ export function speedOf(ctx: EncounterContext, c: EncounterCombatant, e: Encount
     );
     speed = stopped ? 0 : (monsterDef(ctx, c).speed.walk ?? 0);
   }
-  // Slow: −10 feet, however many times it was hit by Slow weapons.
+  // Slow: −10 feet, however many times it was hit by Slow weapons; Ray of Frost: −10 feet too.
   const slowed = e.masteries.some((m) => m.mastery === "slow" && m.on === c.id);
-  const after = slowed ? Math.max(0, speed - 10) : speed;
+  const frosted = e.marks.some((m) => m.kind === "slowed" && m.on === c.id);
+  const after = Math.max(0, speed - (slowed ? 10 : 0) - (frosted ? 10 : 0));
   // Halved (Stunning Strike's successful save), however many times.
   // Hamstring Blow: −15 feet (only the most recent counts).
   const hamstrung = e.marks.some((m) => m.kind === "hamstrung" && m.on === c.id);

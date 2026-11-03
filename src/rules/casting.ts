@@ -36,6 +36,9 @@ import { parseDiceExpression } from "./dice";
 import { message, RuleError } from "./messages";
 import { mathRng, type Rng } from "./rng";
 
+/** What a spell's hit does besides damage (`mechanics.on_hit`). */
+export type SpellOnHit = "advantage_against" | "no_opportunity_attacks" | "slowed" | "no_healing";
+
 export interface CastOptions {
   /** Damage that rides an attack's Critical Hit: its dice are doubled (Divine Smite). */
   critical?: boolean;
@@ -102,7 +105,7 @@ export interface SpellTargetResult {
   readonly healing: number;
   readonly conditions: readonly string[];
   /** What the hit does besides damage and conditions (`advantage_against`: Guiding Bolt). */
-  readonly on_hit: readonly "advantage_against"[];
+  readonly on_hit: readonly SpellOnHit[];
   /** Play actions that apply all this to a character target's state. */
   readonly actions: readonly PlayAction[];
 }
@@ -595,7 +598,7 @@ function targetResult(
     instances?: DamageInstance[];
     critical?: boolean;
     conditions?: string[];
-    on_hit?: readonly "advantage_against"[];
+    on_hit?: readonly SpellOnHit[];
   },
 ): SpellTargetResult {
   const instances = r.instances ?? [];

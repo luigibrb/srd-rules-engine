@@ -436,7 +436,8 @@ mechanics:
 #         projectiles: {count: 3, upcast: 1}    # darts (no attack) or rays (attack), +1 per slot
 #         follow_up: {save: {ability: dex}, damage: [{dice: 2d6, type: cold}],
 #                     upcast: [{dice: 1d6, type: cold}], radius: 5}   # after the attack (Ice Knife)
-#         on_hit: [advantage_against]           # Guiding Bolt
+#         on_hit: [advantage_against]           # Guiding Bolt; also no_opportunity_attacks,
+#                                               # slowed (−10 ft), no_healing
 #         damage_types: [radiant, necrotic]     # the caster picks one (Spirit Guardians)
 #         conditions: [{condition: restrained, on: failed_save, escape: athletics}]
 #         zone: {triggers: [enter, end_turn], once_per_turn: true, on_cast: true, designate: false}
