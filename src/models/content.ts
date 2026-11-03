@@ -1587,6 +1587,20 @@ export const MonsterActionSchema = z.strictObject({
    * within 5 feet of that creature (Pack Tactics).
    */
   pack_tactics: z.boolean().default(false),
+  /**
+   * Advantage on its attack rolls while it's Bloodied (Bloodied Fury; `bloodied_melee`: melee
+   * ones), or against a creature that doesn't have all its Hit Points (Blood Frenzy).
+   */
+  attack_advantage: z
+    .enum(["bloodied", "bloodied_melee", "target_damaged"])
+    .nullable()
+    .default(null),
+  /** It doesn't provoke Opportunity Attacks when it moves (Agile) or flies (Flyby) out of reach. */
+  no_opportunity_attacks: z.enum(["always", "flying"]).nullable().default(null),
+  /** Damage of this type heals it instead (Lightning Absorption, Acid Absorption). */
+  absorbs: z.enum(DAMAGE_TYPES).nullable().default(null),
+  /** It can't regain Hit Points or gain Temporary Hit Points (Swarm). */
+  no_healing: z.boolean().default(false),
   /** Advantage on attack rolls and saves for it and its allies within `size` feet (Aura of Authority). */
   advantage_aura: z
     .strictObject({ size: z.int().min(5) })

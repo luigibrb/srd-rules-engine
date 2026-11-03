@@ -827,6 +827,67 @@
                 "default": false,
                 "type": "boolean"
               },
+              "attack_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "bloodied",
+                      "bloodied_melee",
+                      "target_damaged"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_opportunity_attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "flying"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "absorbs": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_healing": {
+                "default": false,
+                "type": "boolean"
+              },
               "advantage_aura": {
                 "default": null,
                 "anyOf": [
@@ -1429,6 +1490,67 @@
                 ]
               },
               "pack_tactics": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attack_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "bloodied",
+                      "bloodied_melee",
+                      "target_damaged"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_opportunity_attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "flying"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "absorbs": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_healing": {
                 "default": false,
                 "type": "boolean"
               },
@@ -2037,6 +2159,67 @@
                 "default": false,
                 "type": "boolean"
               },
+              "attack_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "bloodied",
+                      "bloodied_melee",
+                      "target_damaged"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_opportunity_attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "flying"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "absorbs": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_healing": {
+                "default": false,
+                "type": "boolean"
+              },
               "advantage_aura": {
                 "default": null,
                 "anyOf": [
@@ -2639,6 +2822,67 @@
                 ]
               },
               "pack_tactics": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attack_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "bloodied",
+                      "bloodied_melee",
+                      "target_damaged"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_opportunity_attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "flying"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "absorbs": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_healing": {
                 "default": false,
                 "type": "boolean"
               },
@@ -3318,6 +3562,67 @@
                 ]
               },
               "pack_tactics": {
+                "default": false,
+                "type": "boolean"
+              },
+              "attack_advantage": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "bloodied",
+                      "bloodied_melee",
+                      "target_damaged"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_opportunity_attacks": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "always",
+                      "flying"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "absorbs": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "acid",
+                      "bludgeoning",
+                      "cold",
+                      "fire",
+                      "force",
+                      "lightning",
+                      "necrotic",
+                      "piercing",
+                      "poison",
+                      "psychic",
+                      "radiant",
+                      "slashing",
+                      "thunder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "no_healing": {
                 "default": false,
                 "type": "boolean"
               },
@@ -4243,6 +4548,67 @@
                   "default": false,
                   "type": "boolean"
                 },
+                "attack_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "bloodied",
+                        "bloodied_melee",
+                        "target_damaged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_opportunity_attacks": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "always",
+                        "flying"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "absorbs": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_healing": {
+                  "default": false,
+                  "type": "boolean"
+                },
                 "advantage_aura": {
                   "default": null,
                   "anyOf": [
@@ -4845,6 +5211,67 @@
                   ]
                 },
                 "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attack_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "bloodied",
+                        "bloodied_melee",
+                        "target_damaged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_opportunity_attacks": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "always",
+                        "flying"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "absorbs": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_healing": {
                   "default": false,
                   "type": "boolean"
                 },
@@ -5453,6 +5880,67 @@
                   "default": false,
                   "type": "boolean"
                 },
+                "attack_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "bloodied",
+                        "bloodied_melee",
+                        "target_damaged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_opportunity_attacks": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "always",
+                        "flying"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "absorbs": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_healing": {
+                  "default": false,
+                  "type": "boolean"
+                },
                 "advantage_aura": {
                   "default": null,
                   "anyOf": [
@@ -6055,6 +6543,67 @@
                   ]
                 },
                 "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attack_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "bloodied",
+                        "bloodied_melee",
+                        "target_damaged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_opportunity_attacks": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "always",
+                        "flying"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "absorbs": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_healing": {
                   "default": false,
                   "type": "boolean"
                 },
@@ -6734,6 +7283,67 @@
                   ]
                 },
                 "pack_tactics": {
+                  "default": false,
+                  "type": "boolean"
+                },
+                "attack_advantage": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "bloodied",
+                        "bloodied_melee",
+                        "target_damaged"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_opportunity_attacks": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "always",
+                        "flying"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "absorbs": {
+                  "default": null,
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "acid",
+                        "bludgeoning",
+                        "cold",
+                        "fire",
+                        "force",
+                        "lightning",
+                        "necrotic",
+                        "piercing",
+                        "poison",
+                        "psychic",
+                        "radiant",
+                        "slashing",
+                        "thunder"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "no_healing": {
                   "default": false,
                   "type": "boolean"
                 },

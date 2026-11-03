@@ -15,8 +15,9 @@ import {
 import * as svc from "../src/services/builder";
 import { autocomplete, catalog, classBuild, fighterBuild } from "./helpers";
 
-// SRD 5.2.1 monster traits read as data: Magic Resistance ("Advantage on saving throws against
-// spells and other magical effects") and Pack Tactics ("Advantage on an attack roll against a
+// SRD 5.2.1 monster traits read as data: Bloodied Fury, Agile, Lightning Absorption, Swarm,
+// Magic Resistance ("Advantage on saving throws against spells and other magical effects") and
+// Pack Tactics ("Advantage on an attack roll against a
 // creature if at least one of the …'s allies is within 5 feet of the creature and the ally doesn't
 // have the Incapacitated condition").
 
@@ -51,7 +52,16 @@ function session(builds: Record<string, CharacterBuild>, monsters: string[]) {
     ...Object.keys(builds).map((id, i) => ({ type: "set_initiative", id, value: 5 - i }) as const),
     { type: "start" },
   );
-  return { act, result: () => last?.result };
+  const notes: string[] = [];
+  return {
+    act: (rolls: number[], ...actions: EncounterAction[]) => {
+      act(rolls, ...actions);
+      notes.push(...(last?.notes ?? []));
+    },
+    result: () => last?.result,
+    notes: () => notes,
+    get: (id: string) => e.combatants.find((c) => c.id === id),
+  };
 }
 
 describe("Magic Resistance", () => {
@@ -103,5 +113,61 @@ describe("Pack Tactics", () => {
     );
     s.act([10, 3, 3], bite);
     expect((s.result() as AttackResult).roll.mode).toBe("normal");
+  });
+});
+
+describe("more traits", () => {
+  const brakka = () => fighterBuild();
+  it("Bloodied Fury: a Bloodied boar has Advantage", () => {
+    const s = session({ brakka: brakka() }, ["boar"]);
+    s.act([], {
+      type: "effects",
+      id: "boar",
+      actions: [{ type: "damage", amount: 7, damage_type: "slashing" }],
+    });
+    s.act([10, 12, 3], { type: "attack", id: "boar", target: "brakka", attack: "Gore" });
+    expect((s.result() as AttackResult).reasons).toContain("Advantage: Boar's Bloodied Fury");
+  });
+
+  it("Agile: leaving a deer's reach provokes no Opportunity Attack", () => {
+    const s = session({ brakka: brakka() }, ["deer"]);
+    expect(() =>
+      s.act([10, 3], {
+        type: "attack",
+        id: "brakka",
+        target: "deer",
+        attack: "Greatsword",
+        opportunity: true,
+      }),
+    ).toThrow("Deer doesn't provoke Opportunity Attacks (its traits)");
+  });
+
+  it("Lightning Absorption: lightning heals a flesh golem instead", () => {
+    const s = session({ brakka: brakka() }, ["flesh-golem"]);
+    s.act([], {
+      type: "effects",
+      id: "flesh-golem",
+      actions: [{ type: "damage", amount: 20, damage_type: "slashing" }],
+    });
+    s.act([], {
+      type: "effects",
+      id: "flesh-golem",
+      actions: [{ type: "damage", amount: 12, damage_type: "lightning" }],
+    });
+    expect(s.notes()).toContain(
+      "Flesh Golem absorbs the lightning damage: it regains 12 Hit Points.",
+    );
+    expect(s.get("flesh-golem")?.hp).toBe(127 - 8);
+  });
+
+  it("Swarm: no healing and no Temporary Hit Points", () => {
+    const s = session({ brakka: brakka() }, ["swarm-of-rats"]);
+    s.act([], {
+      type: "effects",
+      id: "swarm-of-rats",
+      actions: [{ type: "damage", amount: 5, damage_type: "fire" }],
+    });
+    s.act([], { type: "effects", id: "swarm-of-rats", actions: [{ type: "heal", amount: 5 }] });
+    expect(s.get("swarm-of-rats")?.hp).toBe(9);
   });
 });

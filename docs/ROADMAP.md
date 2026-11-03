@@ -62,6 +62,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P47 | Subclass features in turns: Wholeness of Body, Open Hand Technique, Survivor, Sculpt Spells, Dark One's Blessing, Fiendish Resilience | Data where it fits (an action, a rest-change choice); five named rules |
 | P48 | Life Domain healing (Disciple of Life, Blessed Healer, Supreme Healing) and Mindless Rage (`condition_immunities` while a toggle is active) | Named rules in `castSpell`; immunities as data |
 | P49 | Monster traits: Magic Resistance (Advantage on spells' saves) and Pack Tactics | 34 and 18 SRD stat blocks; "other magical effects" left to the table (flagged) |
+| P50 | More monster traits: Bloodied Fury, Blood Frenzy, Agile, Flyby, Absorption, Swarm's healing | Absorption read as no damage; Flyby for a creature with a Fly Speed (flagged) |
 
 ## Decisions
 
@@ -126,8 +127,8 @@ or invented homebrew in its tests.
   berries): in the inventory with their duration, gone when it ends.
 - **Magic items' active powers (L).** Wands, staffs and items with actions are text; charges are
   tracked, their effects aren't.
-- **Monster traits, what's left (M).** Traits worded differently from the six read so far
-  (Sunlight Sensitivity, Engulf, Flyby, Amorphous…).
+- **Monster traits, what's left (M).** Traits worded differently from the ones read so far
+  (Sunlight Sensitivity, Corrosive Form, Amorphous, Spider Climb…).
 - **Legendary actions, what's left (M).** Legendary actions, their spells and Legendary
   Resistance are resolved (P9, P13); still text: the movement, teleports or healing that come with
   some of them.

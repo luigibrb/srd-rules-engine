@@ -610,7 +610,10 @@ list of actions.
   Magic Resistance (`save_advantage: magic`, the combatant's `magic_resistance`) gives Advantage
   on the saves of spells (cast, follow-up and zone saves); Pack Tactics (`pack_tactics`) gives
   Advantage on an attack roll when an ally of the attacker, not Incapacitated, is within 5 feet of
-  the target (with positions, or `ally_adjacent`).
+  the target (with positions, or `ally_adjacent`); Bloodied Fury and Blood Frenzy
+  (`attack_advantage`) too; Agile and Flyby (`no_opportunity_attacks`) keep its movement from
+  provoking; Absorption (`absorbs`) heals it by that damage instead; Swarm (`no_healing`) refuses
+  healing and Temporary Hit Points with a note.
 - **Wall spells.** A spell with `mechanics.wall` is placed with `cast` `wall: { from, to }`
   (straight, up to its length, both ends within range) and leaves a zone for its duration
   (Concentration). Wall of Force, Stone and Ice stand on grid lines between squares
@@ -1094,6 +1097,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
   spell gives when cast; Supreme Healing to spells' healing dice (Preserve Life, its Channel
   Divinity, is text). A condition immunity (Mindless Rage) keeps the condition from being added
   (`play.immune`); one the character already has ends when the toggle starts.
+- Lightning and Fire Absorption ("it regains a number of Hit Points equal to the Lightning damage
+  dealt") are read like Acid Absorption ("takes no damage and instead regains"): the damage heals
+  it and isn't taken. Flyby counts for a monster with a Fly Speed (how it moves isn't tracked).
 - Magic Resistance's "other magical effects" are left to the table: the engine marks only spells'
   saves as magical (not magic items' or features' effects).
 - Dark One's Blessing's "you reduce an enemy to 0 Hit Points" is read as: the creature whose

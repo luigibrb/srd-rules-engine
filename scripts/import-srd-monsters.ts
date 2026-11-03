@@ -432,6 +432,46 @@ function traitMechanics(monster: Record<string, unknown>): void {
       trait.pack_tactics = true;
       stats.traits++;
     }
+    // Bloodied Fury, Blood Frenzy.
+    if (/^While Bloodied, the [\w' -]+? has Advantage on attack rolls\.$/.test(text)) {
+      trait.attack_advantage = "bloodied";
+      stats.traits++;
+    } else if (/has Advantage on melee attack rolls while it is Bloodied\.$/.test(text)) {
+      trait.attack_advantage = "bloodied_melee";
+      stats.traits++;
+    } else if (
+      /has Advantage on attack rolls against any creature that doesn't have all its Hit Points\.$/.test(
+        text,
+      )
+    ) {
+      trait.attack_advantage = "target_damaged";
+      stats.traits++;
+    }
+    // Agile, Flyby: "doesn't provoke an Opportunity Attack when it moves (flies) out of an enemy's
+    // reach."
+    const noOa =
+      /doesn't provoke an Opportunity Attack when it (moves|flies) out of an enemy's reach\.$/.exec(
+        text,
+      );
+    if (noOa) {
+      trait.no_opportunity_attacks = noOa[1] === "flies" ? "flying" : "always";
+      stats.traits++;
+    }
+    // Absorption: "Whenever the golem is subjected to Lightning damage, it (takes no damage and
+    // instead) regains a number of Hit Points equal to the Lightning damage dealt."
+    const absorb =
+      /^Whenever the [\w' -]+? is subjected to (\w+) damage, it (takes no damage and instead )?regains a number of Hit Points equal to the \1 damage dealt\.$/.exec(
+        text,
+      );
+    if (absorb) {
+      trait.absorbs = (absorb[1] as string).toLowerCase();
+      stats.traits++;
+    }
+    // Swarm: "The swarm can't regain Hit Points or gain Temporary Hit Points."
+    if (/The swarm can't regain Hit Points or gain Temporary Hit Points\.$/.test(text)) {
+      trait.no_healing = true;
+      stats.traits++;
+    }
     const authority =
       /^While in a (\d+)-foot Emanation originating from the [\w' -]+?, the [\w' -]+? and its allies have Advantage on attack rolls and saving throws/.exec(
         text,
