@@ -456,6 +456,10 @@ mechanics:
 #                                               # caster concentrates (Faerie Fire)
 #         damage_types: [radiant, necrotic]     # the caster picks one (Spirit Guardians)
 #         conditions: [{condition: restrained, on: failed_save, escape: athletics}]
+#         conditions: [{condition: blinded, on: failed_save, repeat_save: true, rounds: 10}]
+#                                               # saved again at the end of each of its turns
+#                                               # (Hold Person); rounds: its own duration (Sunburst)
+#         choose_condition: true                # the caster picks one of `conditions` (`condition`)
 #         zone: {triggers: [enter, end_turn], once_per_turn: true, on_cast: true, designate: false}
 #                                               # an area that lasts (needs save and area)
 #         zone: {triggers: [move]}              # damage per 5 feet moved in it, no save

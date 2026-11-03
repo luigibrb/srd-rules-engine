@@ -766,6 +766,8 @@ const CastActionSchema = z.object({
    * protected creatures or Heightened Spell's one target; `damage_type`, Transmuted Spell's new
    * type.
    */
+  /** The condition picked, for a spell whose caster chooses one (Blindness/Deafness). */
+  condition: z.string().optional(),
   /**
    * Sculpt Spells (Evoker): creatures that succeed on an Evocation spell's save automatically and
    * take no damage, up to 1 plus the spell's level.

@@ -14,6 +14,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -48,12 +49,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -87,6 +91,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -142,6 +147,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -240,12 +246,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "incapacitated",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -279,6 +288,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -317,12 +327,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "restrained",
         "ends_on_damage": false,
         "escape": "athletics",
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -374,6 +387,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -432,6 +446,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -467,6 +482,57 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "wall": null,
     "zone": null,
   },
+  "blindness-deafness": {
+    "after_hit": false,
+    "after_hit_with": "melee",
+    "area": null,
+    "around_target": null,
+    "attack": null,
+    "bonus_vs": null,
+    "cantrip_scaling": null,
+    "choose_condition": true,
+    "conditions": [
+      {
+        "condition": "blinded",
+        "ends_on_damage": false,
+        "escape": null,
+        "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
+        "until": null,
+      },
+      {
+        "condition": "deafened",
+        "ends_on_damage": false,
+        "escape": null,
+        "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
+        "until": null,
+      },
+    ],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "mark": null,
+    "on_failed_save": [],
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "con",
+      "on_success": "none",
+    },
+    "summon": null,
+    "targets": 1,
+    "upcast": {
+      "damage": [],
+      "heal": null,
+      "targets": 1,
+    },
+    "wall": null,
+    "zone": null,
+  },
   "burning-hands": {
     "after_hit": false,
     "after_hit_with": "melee",
@@ -479,6 +545,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -522,6 +589,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -565,6 +633,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -603,12 +672,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -642,12 +714,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -681,6 +756,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "melee",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -714,6 +790,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -765,6 +842,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -812,6 +890,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -874,12 +953,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "blinded",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": "end_of_your_next_turn",
       },
     ],
@@ -909,12 +991,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -948,6 +1033,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -995,6 +1081,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1057,6 +1144,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1115,6 +1203,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -1203,6 +1292,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -1234,6 +1324,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1277,6 +1368,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1326,6 +1418,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "1d8",
     },
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1366,12 +1459,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1401,12 +1497,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1436,12 +1535,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1471,6 +1573,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "beams",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1502,12 +1605,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "restrained",
         "ends_on_damage": false,
         "escape": "athletics",
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1537,12 +1643,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "restrained",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1576,6 +1685,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -1610,12 +1720,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "frightened",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -1645,6 +1758,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -1796,6 +1910,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -1844,6 +1959,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1878,6 +1994,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1909,6 +2026,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1947,6 +2065,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -1994,6 +2113,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2051,6 +2171,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2108,12 +2229,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "restrained",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2147,6 +2271,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2190,6 +2315,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -2268,12 +2394,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "prone",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2318,6 +2447,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2360,6 +2490,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2394,6 +2525,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -2425,6 +2557,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2468,6 +2601,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -2495,12 +2629,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "prone",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
         "until": null,
       },
       {
@@ -2508,6 +2645,8 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2541,12 +2680,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "paralyzed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2580,12 +2722,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "paralyzed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2619,6 +2764,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -2650,12 +2796,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
       {
@@ -2663,6 +2812,8 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -2692,6 +2843,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2745,6 +2897,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2798,6 +2951,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2847,6 +3001,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2894,6 +3049,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2956,6 +3112,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -2999,6 +3156,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3037,6 +3195,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -3068,6 +3227,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -3099,12 +3259,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": true,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -3138,6 +3301,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3178,6 +3342,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3225,6 +3390,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3283,6 +3449,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3326,6 +3493,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3357,6 +3525,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3390,12 +3559,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "poisoned",
         "ends_on_damage": false,
         "escape": null,
         "on": "hit",
+        "repeat_save": false,
+        "rounds": null,
         "until": "end_of_your_next_turn",
       },
     ],
@@ -3438,6 +3610,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3472,6 +3645,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3506,6 +3680,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3550,6 +3725,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3593,6 +3769,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3633,6 +3810,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "melee",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3670,12 +3848,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "incapacitated",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -3709,12 +3890,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "prone",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -3765,6 +3949,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3814,6 +3999,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3875,6 +4061,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": "ranged",
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -3912,12 +4099,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "poisoned",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": "end_of_its_turn",
       },
     ],
@@ -3963,12 +4153,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "charmed",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -3998,6 +4191,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -4050,12 +4244,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "blinded",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": "start_of_your_next_turn",
       },
     ],
@@ -4096,12 +4293,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "blinded",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": 10,
         "until": null,
       },
     ],
@@ -4142,6 +4342,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -4185,6 +4386,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": "dice",
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -4219,6 +4421,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -4286,6 +4489,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -4319,6 +4523,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -4352,6 +4557,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [],
     "damage_types": [],
@@ -4385,6 +4591,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {
@@ -4456,12 +4663,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "restrained",
         "ends_on_damage": false,
         "escape": "athletics",
         "on": "failed_save",
+        "repeat_save": false,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -4510,12 +4720,15 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [
       {
         "condition": "frightened",
         "ends_on_damage": false,
         "escape": null,
         "on": "failed_save",
+        "repeat_save": true,
+        "rounds": null,
         "until": null,
       },
     ],
@@ -4552,6 +4765,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "attack": null,
     "bonus_vs": null,
     "cantrip_scaling": null,
+    "choose_condition": false,
     "conditions": [],
     "damage": [
       {

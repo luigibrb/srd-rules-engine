@@ -63,6 +63,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P48 | Life Domain healing (Disciple of Life, Blessed Healer, Supreme Healing) and Mindless Rage (`condition_immunities` while a toggle is active) | Named rules in `castSpell`; immunities as data |
 | P49 | Monster traits: Magic Resistance (Advantage on spells' saves) and Pack Tactics | 34 and 18 SRD stat blocks; "other magical effects" left to the table (flagged) |
 | P50 | More monster traits: Bloodied Fury, Blood Frenzy, Agile, Flyby, Absorption, Swarm's healing | Absorption read as no damage; Flyby for a creature with a Fly Speed (flagged) |
+| P51 | Spell conditions saved again at the end of each turn (`repeat_save`), with their own duration (`rounds`), or chosen by the caster (`choose_condition`) | Hold Person, Hold Monster, Hideous Laughter, Weird, Sunburst, Blindness/Deafness |
 
 ## Decisions
 
@@ -109,7 +110,7 @@ or invented homebrew in its tests.
 ### Priority 2: next
 
 - **Spell riders, what's left (S).** Chromatic Orb's leap on doubles.
-- **Spells left as text (L, ongoing).** 41 spells have effects the parser doesn't read
+- **Spells left as text (L, ongoing).** 40 spells have effects the parser doesn't read
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
   ongoing area effects, first.

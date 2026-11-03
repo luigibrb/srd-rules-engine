@@ -1221,9 +1221,18 @@ export const SpellMechanicsSchema = z
           escape: z.enum(["athletics"]).nullable().default(null),
           /** The condition ends when the target takes damage (Mass Suggestion). */
           ends_on_damage: z.boolean().default(false),
+          /**
+           * The target repeats the spell's save at the end of each of its turns, ending the
+           * condition on a success (Hold Person).
+           */
+          repeat_save: z.boolean().default(false),
+          /** Its own duration in rounds, when the spell's isn't it (Sunburst: "for 1 minute"). */
+          rounds: z.int().min(1).nullable().default(null),
         }),
       )
       .default([]),
+    /** The caster picks one of `conditions` when casting (Blindness/Deafness). */
+    choose_condition: z.boolean().default(false),
     area: SpellAreaSchema.nullable().default(null),
     /**
      * Darts or rays (Magic Missile, Scorching Ray): `count`, plus `upcast` per slot level above

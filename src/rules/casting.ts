@@ -83,6 +83,8 @@ export interface CastOptions {
   careful?: readonly number[];
   /** Targets (by index) with Disadvantage on the spell's save (Heightened Spell). */
   heightened?: readonly number[];
+  /** The condition picked, for a spell whose caster chooses one (`mechanics.choose_condition`). */
+  condition?: string;
 }
 
 export interface SpellAttackRoll {
@@ -217,6 +219,7 @@ export function castSpell(
     effective_levels = 0,
     careful = [],
     heightened = [],
+    condition,
   }: CastOptions = {},
 ): SpellCastResult {
   if (caster.no_spells)
@@ -278,6 +281,19 @@ export function castSpell(
     };
   }
 
+  // Blindness/Deafness: "the Blinded or Deafened condition (your choice)".
+  if (m.choose_condition && !by_hand) {
+    const listed = m.conditions.map((x) => x.condition);
+    if (!condition || !listed.includes(condition)) {
+      throw new RuleError(
+        message("rule.choose_condition", { spell: spell.name, conditions: listed.join(", ") }),
+      );
+    }
+  }
+  const conditionsOn = (on: "hit" | "failed_save"): string[] =>
+    m.conditions
+      .filter((x) => x.on === on && (!m.choose_condition || x.condition === condition))
+      .map((x) => x.condition);
   const line = pickSpellcasting(caster, spell, spellcasting);
   const needsLine = m.attack !== null || m.save !== null || m.follow_up !== null;
   const modifierUsed = m.damage.some((d) => d.add_modifier) || m.heal?.add_modifier === true;
@@ -469,7 +485,7 @@ export function castSpell(
           : null;
       let instances = rolled ? toInstances(rolled) : [];
       if (!hit) instances = instances.map((d) => ({ ...d, amount: Math.floor(d.amount / 2) }));
-      const conditions = hit ? conditionsOn(m, "hit") : [];
+      const conditions = hit ? conditionsOn("hit") : [];
       const on_hit = hit ? m.on_hit : [];
       const r = { attack, instances, critical: critical_hit, conditions, on_hit };
       results.push(targetResult(index, target, r));
@@ -478,7 +494,7 @@ export function castSpell(
     const effect = {
       ...m.save,
       dc: line?.save_dc ?? 0,
-      conditions: conditionsOn(m, "failed_save"),
+      conditions: conditionsOn("failed_save"),
     };
     const resolved = resolveSave(effect, partsFor(true), targets, rng, decide, potent, {
       careful,
@@ -630,10 +646,6 @@ function pickSpellcasting(
     );
   const onList = caster.spellcasting.filter((s) => s.list !== null && spell.lists.includes(s.list));
   return best(onList) ?? best(caster.spellcasting);
-}
-
-function conditionsOn(m: NonNullable<SpellDef["mechanics"]>, on: "hit" | "failed_save"): string[] {
-  return m.conditions.filter((c) => c.on === on).map((c) => c.condition);
 }
 
 function toInstances(rolled: RolledDamage): DamageInstance[] {
