@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Devious Strikes (Rogue level 14): the Cunning Strike effects `daze`, `knock_out` and `obscure`,
+  each paid with its dice of Sneak Attack (`CUNNING_STRIKE_DICE`; an attack option's
+  `sneak_attack_dice` gives the cost). A Dazed creature's second use of moving, its action and its
+  Bonus Action on its turn is refused.
 - Spell marks `outlined` (Advantage on attack rolls against the creature) and `revealed` (it
   can't benefit from the Invisible condition), and `on_failed_save` (marks on each creature that
   fails the save, while the caster concentrates): Faerie Fire casts with mechanics, and Starry

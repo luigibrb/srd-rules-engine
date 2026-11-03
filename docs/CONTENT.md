@@ -273,8 +273,8 @@ takes automatically (the table's setting `decisions`). The effect target `spell.
 halve damage: none on a success, half on a failure, not while Incapacitated), `reliable_talent`
 (a d20 of 9 or lower counts as 10 on checks with a proficient skill), `potent_cantrip` (a cantrip
 that misses or is saved against deals half damage), `indomitable` (a failed save can be rerolled
-with the Fighter level, a decision, spending the `indomitable` resource), `cunning_strike` and
-`improved_cunning_strike`, `brutal_strike` and `improved_brutal_strike` (the encounter `attack`
+with the Fighter level, a decision, spending the `indomitable` resource), `cunning_strike`,
+`improved_cunning_strike` and `devious_strikes`, `brutal_strike` and `improved_brutal_strike` (the encounter `attack`
 options `cunning` and `brutal`), `relentless_rage` (with the `relentless-rage` resource counting
 its uses). The effect target `attack.weapon` adds to every weapon attack roll (Sacred Weapon), and
 a `spell_damage` grant's `spell` limits it to one spell (`$cantrip`: Agonizing Blast's choice).

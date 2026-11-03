@@ -172,6 +172,9 @@ export {
 export {
   type BattleMap,
   BattleMapSchema,
+  CUNNING_STRIKE_DICE,
+  CUNNING_STRIKES,
+  type CunningStrike,
   ECONOMY,
   type EffectEnd,
   EffectEndSchema,

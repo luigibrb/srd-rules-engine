@@ -303,6 +303,7 @@ export const FEATURE_RULES = [
   "indomitable",
   "cunning_strike",
   "improved_cunning_strike",
+  "devious_strikes",
   "brutal_strike",
   "improved_brutal_strike",
   "relentless_rage",

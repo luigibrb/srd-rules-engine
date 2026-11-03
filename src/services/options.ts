@@ -8,6 +8,7 @@
 import { lookup } from "../content/catalog";
 import type { SpellDef } from "../models/content";
 import {
+  CUNNING_STRIKE_DICE,
   type Encounter,
   type EncounterAction,
   EncounterActionSchema,
@@ -199,6 +200,10 @@ const CUNNING = [
   { send: "cunning", id: "poison", name: "Poison", improved: false },
   { send: "cunning", id: "trip", name: "Trip", improved: false },
   { send: "cunning", id: "withdraw", name: "Withdraw", improved: false },
+  // Devious Strikes (Rogue level 14).
+  { send: "cunning", id: "daze", name: "Daze", improved: true },
+  { send: "cunning", id: "knock_out", name: "Knock Out", improved: true },
+  { send: "cunning", id: "obscure", name: "Obscure", improved: true },
 ] as const;
 /** SRD Barbarian "Brutal Strike" (Staggering and Sundering Blow: Improved Brutal Strike). */
 const BRUTAL = [
@@ -418,7 +423,7 @@ export function combatantOptions(
   // Cunning Strike and Brutal Strike effects on each attack (a character's).
   const has = (rule: string) => view.rules.some((r) => r === rule);
   const strikeDefs = [
-    ...(has("cunning_strike") ? CUNNING : []),
+    ...(has("cunning_strike") ? CUNNING.filter((d) => !d.improved || has("devious_strikes")) : []),
     ...(has("brutal_strike")
       ? BRUTAL.filter((b) => !b.improved || has("improved_brutal_strike"))
       : []),
@@ -432,9 +437,11 @@ export function combatantOptions(
       option.strikes = strikeDefs
         .filter((d) => d.send === "brutal" || sneak)
         .map((d): StrikeOption => {
-          const strikeCost = message(
-            d.send === "cunning" ? "label.cost_sneak_die" : "label.cost_reckless",
-          );
+          const dice = d.send === "cunning" ? CUNNING_STRIKE_DICE[d.id] : 0;
+          const strikeCost =
+            d.send === "cunning"
+              ? message("label.cost_sneak_die", { count: dice })
+              : message("label.cost_reckless");
           const action: EncounterAction =
             d.send === "cunning"
               ? { ...a, riders: [...(a.riders ?? []), { rider: "sneak-attack" }], cunning: [d.id] }
@@ -457,7 +464,7 @@ export function combatantOptions(
             name: d.name,
             cost: strikeCost.text,
             cost_message: strikeCost,
-            sneak_attack_dice: d.send === "cunning" ? 1 : 0,
+            sneak_attack_dice: dice,
             action,
             available: reason === null,
             reason: reason?.text ?? null,

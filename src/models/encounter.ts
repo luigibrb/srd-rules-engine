@@ -220,10 +220,33 @@ export const MasteryMarkSchema = z.object({
 export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
 
 /**
+ * Cunning Strike effects (SRD Rogue), with Devious Strikes' (`daze`, `knock_out`, `obscure`), and
+ * what each costs in Sneak Attack dice.
+ */
+export const CUNNING_STRIKES = [
+  "poison",
+  "trip",
+  "withdraw",
+  "daze",
+  "knock_out",
+  "obscure",
+] as const;
+export type CunningStrike = (typeof CUNNING_STRIKES)[number];
+export const CUNNING_STRIKE_DICE: Readonly<Record<CunningStrike, number>> = {
+  poison: 1,
+  trip: 1,
+  withdraw: 1,
+  daze: 2,
+  knock_out: 6,
+  obscure: 3,
+};
+
+/**
  * A spell's lasting effect on `on`, until used or `ends`: `advantage_against` gives the next
  * attack roll against it Advantage, whoever makes it (Guiding Bolt); `outlined`, every attack
  * roll against it (Faerie Fire); `revealed`: it can't benefit from the Invisible condition
- * (Starry Wisp, Faerie Fire).
+ * (Starry Wisp, Faerie Fire). `dazed` (Devious Strikes' Daze): on its next turn, `on` can only
+ * move, or take an action, or take a Bonus Action.
  */
 export const SpellMarkSchema = z.object({
   // `quarry`: `by`'s attack hits on `on` deal `damage` more, while `by` concentrates on `label`
@@ -246,6 +269,7 @@ export const SpellMarkSchema = z.object({
     "no_healing",
     "revealed",
     "outlined",
+    "dazed",
   ]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),
@@ -537,7 +561,7 @@ export const RollWhatSchema = z
       light_extra: z.boolean().optional(),
       cleave: z.boolean().optional(),
       /** Cunning Strike effects, paid with Sneak Attack dice (needs the `sneak-attack` rider). */
-      cunning: z.array(z.enum(["poison", "trip", "withdraw"])).optional(),
+      cunning: z.array(z.enum(CUNNING_STRIKES)).optional(),
       /** Brutal Strike effects: Advantage forgone while Reckless, for 1d10 and an effect. */
       brutal: z.array(z.enum(["forceful", "hamstring", "staggering", "sundering"])).optional(),
     }),
@@ -620,7 +644,7 @@ const AttackActionSchema = z.object({
   /** The target's cover from this attack: +2 or +5 AC; Total Cover can't be targeted. */
   cover: z.enum(["half", "three_quarters", "total"]).optional(),
   /** Cunning Strike effects, paid with Sneak Attack dice (needs the `sneak-attack` rider). */
-  cunning: z.array(z.enum(["poison", "trip", "withdraw"])).optional(),
+  cunning: z.array(z.enum(CUNNING_STRIKES)).optional(),
   /** Brutal Strike effects: Advantage forgone while Reckless, for 1d10 and an effect. */
   brutal: z.array(z.enum(["forceful", "hamstring", "staggering", "sundering"])).optional(),
 });

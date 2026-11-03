@@ -20,6 +20,7 @@ import type {
   SummonSpec,
 } from "../models/content";
 import {
+  type CunningStrike,
   type EffectEnd,
   type Encounter,
   type EncounterAction,
@@ -1543,7 +1544,7 @@ function run(
       thrown?: boolean;
       cover?: Cover;
       opportunity?: boolean;
-      cunning?: readonly ("poison" | "trip" | "withdraw")[];
+      cunning?: readonly CunningStrike[];
       brutal?: readonly ("forceful" | "hamstring" | "staggering" | "sundering")[];
     },
   ): AttackResult => {
@@ -1774,7 +1775,8 @@ function run(
         notes.push(message("cunning.too_large", { name: t.name }));
         continue;
       }
-      const ability = effect === "poison" ? "con" : "dex";
+      // Poison, Daze and Knock Out: a Constitution save; Trip and Obscure: Dexterity.
+      const ability = ["poison", "daze", "knock_out"].includes(effect) ? "con" : "dex";
       const save = rollSavingThrow(encounterCombatant(e, t.id, ctx), ability, dc, { rng, decide });
       notes.push(
         message("cunning.save", {
@@ -1786,8 +1788,49 @@ function run(
       );
       spendLegendaryResistance(t, save);
       if (save.success) continue;
+      // "until the end of its next turn": during its own turn, that turn doesn't count.
+      const itsNext = {
+        at: "end" as const,
+        of: t.id,
+        count: 1,
+        skip_current: current()?.id === t.id,
+      };
       if (effect === "trip") applyTo(t, [{ type: "add_condition", condition: "prone" }]);
-      else {
+      else if (effect === "daze") {
+        // "on its next turn, it can do only one of the following: move or take an action or a
+        // Bonus Action"
+        e.marks = e.marks.filter((m) => !(m.on === t.id && m.kind === "dazed"));
+        e.marks.push({
+          kind: "dazed",
+          label: "Cunning Strike",
+          by: c.id,
+          on: t.id,
+          ends: itsNext,
+          damage: null,
+        });
+        notes.push(message("cunning.dazed", { name: t.name }));
+      } else if (effect === "knock_out") {
+        // "the Unconscious condition for 1 minute or until it takes any damage. The Unconscious
+        // target repeats the save at the end of each of its turns"
+        applyTo(t, [{ type: "add_condition", condition: "unconscious" }]);
+        addEffects(t, ["unconscious"], {
+          source: c.id,
+          label: "Cunning Strike",
+          concentration: false,
+          ends: { at: "start", of: c.id, count: 10, skip_current: false },
+          ends_on: ["damage"],
+          repeat_save: { ability: "con", dc },
+        });
+      } else if (effect === "obscure") {
+        // "the Blinded condition until the end of its next turn"
+        applyTo(t, [{ type: "add_condition", condition: "blinded" }]);
+        addEffects(t, ["blinded"], {
+          source: c.id,
+          label: "Cunning Strike",
+          concentration: false,
+          ends: itsNext,
+        });
+      } else {
         applyTo(t, [{ type: "add_condition", condition: "poisoned" }]);
         // "for 1 minute. At the end of each of its turns, the Poisoned target repeats the save"
         addEffects(t, ["poisoned"], {
@@ -2715,6 +2758,13 @@ function run(
     return [modeReason("advantage", message("reason.help", { name: find(help.by).name }))];
   };
 
+  // Daze (Devious Strikes): moving, an action and a Bonus Action used on its turn, counted.
+  const turnUses = (x: EncounterCombatant) =>
+    Number(x.used.action) + Number(x.used.bonus_action) + Number(x.moved > 0);
+  const dazedNow = (x: EncounterCombatant) =>
+    e.marks.some((m) => m.kind === "dazed" && m.on === x.id && !m.ends?.skip_current);
+  const turnOf = current()?.id ?? null;
+  const usesBefore = turnOf ? turnUses(find(turnOf)) : 0;
   switch (action.type) {
     case "add_monster": {
       const def =
@@ -4172,6 +4222,12 @@ function run(
     const c = find(releasing.id);
     c.used.reaction = true;
     c.readied = null;
+  }
+  // Daze: on its turn, only one of moving, an action and a Bonus Action.
+  const turnNow = turnOf ? e.combatants.find((x) => x.id === turnOf) : undefined;
+  if (turnNow && current()?.id === turnNow.id && dazedNow(turnNow)) {
+    const n = turnUses(turnNow);
+    if (n > 1 && n > usesBefore) refuse(message("refusal.dazed", { name: turnNow.name }));
   }
   for (const r of reacted) {
     const x = find(r.by);

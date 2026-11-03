@@ -105,6 +105,82 @@ describe("Cunning Strike", () => {
   });
 });
 
+describe("Devious Strikes", () => {
+  // SRD Rogue level 14: Daze (2d6), Knock Out (6d6), Obscure (3d6) among the Cunning Strike options.
+  const stab = (cunning: string[]): EncounterAction =>
+    ({
+      type: "attack",
+      id: "rook",
+      target: "ogre",
+      attack: "Dagger",
+      ally_adjacent: true,
+      riders: [{ rider: "sneak-attack" }],
+      cunning,
+    }) as EncounterAction;
+
+  it("needs level 14; costs its dice of Sneak Attack", () => {
+    expect(() => session({ rook: level("rogue", 13, "Rook") }).act([], stab(["daze"]))).toThrow(
+      "Daze, Knock Out and Obscure need Devious Strikes, which Rook doesn't have",
+    );
+    const s = session({ rook: level("rogue", 14, "Rook") });
+    // Sneak Attack 7d6, less 2d6 for Daze and 1d6 for Trip (two effects: Improved Cunning Strike).
+    s.act([18, 4, 1, 1, 1, 1, 2, 2], stab(["daze", "trip"]));
+    const hit = s.result() as AttackResult;
+    expect(hit.damage?.parts.map((p) => p.dice)).toEqual(["1d4", "4d6"]);
+    const options = s.options("rook").attacks.find((a) => a.label.startsWith("Dagger"));
+    expect(options?.strikes.map((x) => [x.id, x.cost, x.sneak_attack_dice])).toEqual([
+      ["poison", "1d6 of Sneak Attack", 1],
+      ["trip", "1d6 of Sneak Attack", 1],
+      ["withdraw", "1d6 of Sneak Attack", 1],
+      ["daze", "2d6 of Sneak Attack", 2],
+      ["knock_out", "6d6 of Sneak Attack", 6],
+      ["obscure", "3d6 of Sneak Attack", 3],
+    ]);
+  });
+
+  it("Daze: on its next turn, the creature can only move, or take an action, or a Bonus Action", () => {
+    const s = session({ rook: level("rogue", 14, "Rook") });
+    // Hit, 1d4, 5d6, then the ogre's Constitution save: 2, a failure.
+    s.act([18, 4, 1, 1, 1, 1, 1, 2], stab(["daze"]));
+    expect(s.notes).toContain(
+      "Ogre is Dazed: on its next turn, it can only move, or take an action, or take a Bonus Action.",
+    );
+    s.act([], { type: "next_turn" }, { type: "move", id: "ogre", feet: 10 });
+    expect(() =>
+      s.act([15, 3, 3], { type: "attack", id: "ogre", target: "rook", attack: "Greatclub" }),
+    ).toThrow("Ogre has already used its action, Bonus Action or movement this turn");
+    s.act([], { type: "move", id: "ogre", feet: 10 }); // more movement is fine
+    s.act([], { type: "next_turn" });
+    expect(s.encounter().marks).toEqual([]);
+  });
+
+  it("Knock Out: Unconscious for 1 minute or until it takes damage, with a save each turn", () => {
+    const s = session({ rook: level("rogue", 14, "Rook") });
+    // Hit, 1d4, 1d6, then the ogre's Constitution save: 2.
+    s.act([18, 4, 1, 2], stab(["knock_out"]));
+    expect(s.get("ogre")?.conditions).toContain("unconscious");
+    expect(s.encounter().effects).toEqual([
+      expect.objectContaining({
+        target: "ogre",
+        condition: "unconscious",
+        ends_on: ["damage"],
+        repeat_save: { ability: "con", dc: expect.any(Number) },
+      }),
+    ]);
+  });
+
+  it("Obscure: Blinded until the end of its next turn", () => {
+    const s = session({ rook: level("rogue", 14, "Rook") });
+    // Hit, 1d4, 4d6, then the ogre's Dexterity save: 2.
+    s.act([18, 4, 1, 1, 1, 1, 2], stab(["obscure"]));
+    expect(s.get("ogre")?.conditions).toContain("blinded");
+    s.act([], { type: "next_turn" });
+    expect(s.get("ogre")?.conditions).toContain("blinded");
+    s.act([], { type: "next_turn" });
+    expect(s.get("ogre")?.conditions ?? []).not.toContain("blinded");
+  });
+});
+
 describe("Brutal Strike", () => {
   it("needs Reckless Attack; forgoes Advantage for 1d10 and Hamstring Blow (−15 feet)", () => {
     const grom = level("barbarian", 9, "Grom");

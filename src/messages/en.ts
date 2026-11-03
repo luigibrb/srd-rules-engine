@@ -96,7 +96,9 @@ export const MESSAGES_EN = {
     "Cunning Strike (Withdraw): {name} can move {feet} feet without provoking Opportunity Attacks.",
   "cunning.too_large": "Cunning Strike (Trip): {name} is too large to trip.",
   "cunning.save":
-    "Cunning Strike ({effect, select, poison {Poison} other {Trip}}): {name} {success, select, true {succeeds} other {fails}} ({save}).",
+    "Cunning Strike ({effect, select, poison {Poison} daze {Daze} knock_out {Knock Out} obscure {Obscure} other {Trip}}): {name} {success, select, true {succeeds} other {fails}} ({save}).",
+  "cunning.dazed":
+    "{name} is Dazed: on its next turn, it can only move, or take an action, or take a Bonus Action.",
   "brutal.sundered_bonus": "Sundering Blow: +5 to {name}'s attack roll against {target}.",
   "brutal.forceful":
     "Forceful Blow: {target} is pushed 15 feet straight away; {name} can move up to half its Speed toward it without provoking Opportunity Attacks.",
@@ -317,6 +319,10 @@ export const MESSAGES_EN = {
   "refusal.no_class_features": "{name} has no class features",
   "refusal.each_effect_used_once": "Each effect can be used once per attack",
   "refusal.doesnt_cunning_strike": "{name} doesn't have Cunning Strike",
+  "refusal.devious_strikes":
+    "Daze, Knock Out and Obscure need Devious Strikes, which {name} doesn't have",
+  "refusal.dazed":
+    "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":
     "Cunning Strike is used when you deal Sneak Attack damage: add the sneak-attack rider",
   "refusal.cunning_strike_poison_needs":
@@ -748,7 +754,7 @@ export const MESSAGES_EN = {
   "label.attack_light": "{attack} (Light extra attack)",
   "label.attack_cleave": "{attack} (Cleave)",
   "label.attack_granted": "{attack} (granted)",
-  "label.cost_sneak_die": "1d6 of Sneak Attack",
+  "label.cost_sneak_die": "{count}d6 of Sneak Attack",
   "label.cost_reckless": "Reckless Attack's Advantage",
   "label.spell": "{spell} ({level, plural, =0 {cantrip} other {level #}})",
   "label.spell_via": "{spell} via {via}",
