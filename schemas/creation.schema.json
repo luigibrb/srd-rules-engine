@@ -1580,6 +1580,48 @@
                 "default": false,
                 "type": "boolean"
               },
+              "slot_exchange": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "to_uses",
+                          "to_slot"
+                        ]
+                      },
+                      "costs": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "min_levels": {
+                        "default": [],
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        }
+                      }
+                    },
+                    "required": [
+                      "direction"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "cast": {
                 "default": null,
                 "anyOf": [

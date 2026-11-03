@@ -2066,6 +2066,7 @@
                             },
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -4241,6 +4242,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -4298,6 +4300,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -4341,6 +4344,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -5844,6 +5848,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": {
                                 "spell": "find-familiar",
                                 "summon": {
@@ -7147,6 +7152,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -7316,6 +7322,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -8618,6 +8625,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -8648,6 +8656,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -8678,6 +8687,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -8762,6 +8772,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -8830,6 +8841,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -9024,6 +9036,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -10172,6 +10185,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         },
@@ -10201,6 +10215,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -13465,6 +13480,7 @@
                             "inspiration": null,
                             "modifies_roll": null,
                             "halves_attack_damage": true,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }
@@ -14589,7 +14605,84 @@
                     "advantages": [],
                     "rules": [],
                     "spell_damage": [],
-                    "actions": [],
+                    "actions": [
+                        {
+                            "id": "convert-spell-slot",
+                            "name": "Font of Magic: Convert Spell Slot",
+                            "economy": "free",
+                            "uses": "sorcery-points",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "after_damage_reduced": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "modifies_roll": null,
+                            "halves_attack_damage": false,
+                            "slot_exchange": {
+                                "direction": "to_uses",
+                                "costs": [],
+                                "min_levels": []
+                            },
+                            "cast": null,
+                            "summon": null
+                        },
+                        {
+                            "id": "create-spell-slot",
+                            "name": "Font of Magic: Create Spell Slot",
+                            "economy": "bonus_action",
+                            "uses": "sorcery-points",
+                            "cost": 1,
+                            "pool": false,
+                            "target": "self",
+                            "heal": null,
+                            "extra_action": false,
+                            "also": [],
+                            "attacks": null,
+                            "after_hit": false,
+                            "after_damage_reduced": false,
+                            "once_per_turn": false,
+                            "save": null,
+                            "range": null,
+                            "many": false,
+                            "creature_types": [],
+                            "removes": [],
+                            "reduces_attack_damage": null,
+                            "inspiration": null,
+                            "modifies_roll": null,
+                            "halves_attack_damage": false,
+                            "slot_exchange": {
+                                "direction": "to_slot",
+                                "costs": [
+                                    2,
+                                    3,
+                                    5,
+                                    6,
+                                    7
+                                ],
+                                "min_levels": [
+                                    2,
+                                    3,
+                                    5,
+                                    7,
+                                    9
+                                ]
+                            },
+                            "cast": null,
+                            "summon": null
+                        }
+                    ],
                     "toggles": [],
                     "items": [],
                     "gp": 0,
@@ -38887,6 +38980,7 @@
                                 "who": "any"
                             },
                             "halves_attack_damage": false,
+                            "slot_exchange": null,
                             "cast": null,
                             "summon": null
                         }

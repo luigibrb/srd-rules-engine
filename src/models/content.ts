@@ -546,6 +546,20 @@ export const FeatureActionSchema = z.strictObject({
   /** Your reaction when an attack hits you: halve its damage (Uncanny Dodge). */
   halves_attack_damage: z.boolean().default(false),
   /**
+   * Spell slots and its `uses` exchanged (Font of Magic), at a slot `level` the user gives:
+   * `to_uses` expends a slot to regain as many uses as its level (no more than the maximum);
+   * `to_slot` spends `costs[level - 1]` uses to create a slot of that level, from the class
+   * level `min_levels[level - 1]`. A created slot vanishes on a Long Rest.
+   */
+  slot_exchange: z
+    .strictObject({
+      direction: z.enum(["to_uses", "to_slot"]),
+      costs: z.array(z.int().min(1)).default([]),
+      min_levels: z.array(z.int().min(1)).default([]),
+    })
+    .nullable()
+    .default(null),
+  /**
    * It casts a spell without a spell slot, spending its `uses` instead (Wild Companion: Find
    * Familiar with a use of Wild Shape), at the spell's level; `summon` changes what the spell
    * brings (the familiar is Fey).

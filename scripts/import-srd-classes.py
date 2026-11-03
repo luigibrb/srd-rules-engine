@@ -414,7 +414,15 @@ OVERLAY = {
         15: {"saving_throws": ["wis", "cha"]},
     },
     "sorcerer": {
-        2: {"choices": [{"id": "metamagic", "label": "Metamagic options", "kind": "feature", "count": 2, "category": "metamagic"}]},
+        # Font of Magic: "Converting Spell Slots to Sorcery Points … (no action required)";
+        # "Creating Spell Slots. As a Bonus Action", with the Creating Spell Slots table.
+        2: {"choices": [{"id": "metamagic", "label": "Metamagic options", "kind": "feature", "count": 2, "category": "metamagic"}],
+            "actions": [
+                {"id": "convert-spell-slot", "name": "Font of Magic: Convert Spell Slot", "economy": "free",
+                 "uses": "sorcery-points", "slot_exchange": {"direction": "to_uses"}},
+                {"id": "create-spell-slot", "name": "Font of Magic: Create Spell Slot", "economy": "bonus_action",
+                 "uses": "sorcery-points",
+                 "slot_exchange": {"direction": "to_slot", "costs": [2, 3, 5, 6, 7], "min_levels": [2, 3, 5, 7, 9]}}]},
         10: {"choices": [{"id": "metamagic", "label": "Metamagic options", "kind": "feature", "count": 2, "category": "metamagic"}]},
         17: {"choices": [{"id": "metamagic", "label": "Metamagic options", "kind": "feature", "count": 2, "category": "metamagic"}]},
     },

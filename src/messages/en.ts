@@ -323,6 +323,12 @@ export const MESSAGES_EN = {
     "Daze, Knock Out and Obscure need Devious Strikes, which {name} doesn't have",
   "refusal.redirect_after_zero":
     "{feature} is used right after {name}'s reaction reduces an attack's damage to 0",
+  "refusal.slot_level_needed": "{feature}: give the spell slot level (`level`)",
+  "refusal.slot_level_too_high": "{feature} makes spell slots up to level {level}",
+  "refusal.slot_level_class_level": "{feature} can't create a level {level} spell slot yet",
+  "play.slot_to_uses":
+    "{feature}: a level {level} spell slot becomes {gained} {uses}{lost, plural, =0 {} other { (# over the maximum lost)}}.",
+  "play.uses_to_slot": "{feature}: {cost} {uses} become a level {level} spell slot.",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":
@@ -757,6 +763,7 @@ export const MESSAGES_EN = {
   "label.attack_cleave": "{attack} (Cleave)",
   "label.attack_granted": "{attack} (granted)",
   "label.cost_sneak_die": "{count}d6 of Sneak Attack",
+  "label.slot_exchange": "{name} (level {level})",
   "label.cost_reckless": "Reckless Attack's Advantage",
   "label.spell": "{spell} ({level, plural, =0 {cantrip} other {level #}})",
   "label.spell_via": "{spell} via {via}",

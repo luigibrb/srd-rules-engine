@@ -3946,8 +3946,11 @@ function run(
         if (c.used.reaction) refuse(message("refusal.already_used_reaction", { name: c.name }));
         c.used.reaction = true;
       } else if (f.economy === "free") {
-        // A redirect follows the reaction, on the attacker's turn.
-        if (!f.after_damage_reduced) onTurn(c, `use ${f.name}`);
+        // A redirect follows the reaction, on the attacker's turn; converting a spell slot needs
+        // no action at all (Font of Magic).
+        if (!f.after_damage_reduced && f.slot_exchange?.direction !== "to_uses") {
+          onTurn(c, `use ${f.name}`);
+        }
         canAct(c);
       } else takeAction(c, f.name, f.economy === "bonus_action");
       if (f.once_per_turn && c.features_used.includes(f.key)) {
@@ -3963,7 +3966,7 @@ function run(
       notes.push(
         message("feature.used", { name: c.name, feature: f.name, count: on.length, targets: on }),
       );
-      play(c, { type: "use_feature", key: f.key, amount: action.amount });
+      play(c, { type: "use_feature", key: f.key, amount: action.amount, level: action.level });
       if (f.once_per_turn) c.features_used.push(f.key);
       // A spell cast through the feature, its uses spent instead of a slot (Wild Companion).
       if (f.cast) {

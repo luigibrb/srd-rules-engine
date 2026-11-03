@@ -166,6 +166,20 @@ features:
       category: metamagic
       tag: sorcerer-metamagic
       swap: class_level
+    actions:
+    - id: convert-spell-slot
+      name: 'Font of Magic: Convert Spell Slot'
+      economy: free
+      uses: sorcery-points
+      slot_exchange: {direction: to_uses}
+    - id: create-spell-slot
+      name: 'Font of Magic: Create Spell Slot'
+      economy: bonus_action
+      uses: sorcery-points
+      slot_exchange:
+        direction: to_slot
+        costs: [2, 3, 5, 6, 7]
+        min_levels: [2, 3, 5, 7, 9]
     resources:
     - id: sorcery-points
       name: Sorcery Points

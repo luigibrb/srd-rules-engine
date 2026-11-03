@@ -39,6 +39,9 @@ function vitals(
   state.spell_slots_spent.forEach((n, i) => {
     resources[`spell_slot:${i + 1}`] = n;
   });
+  (state.spell_slots_created ?? []).forEach((n, i) => {
+    resources[`spell_slot_created:${i + 1}`] = n;
+  });
   resources.pact_slot = state.pact_slots_spent;
   for (const [k, n] of Object.entries(state.uses_spent)) resources[`uses:${k}`] = n;
   return {

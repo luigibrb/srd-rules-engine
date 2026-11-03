@@ -267,7 +267,10 @@ actions:
 `inspiration: {progression: Bardic Die}` gives the target a die for its next failed D20 Test, and
 `halves_attack_damage: true` is a reaction to being hit (Uncanny Dodge, offered when an attack
 hits), as is `reduces_attack_damage: {dice: 1d10, abilities: [dex], class_level: true, types:
-[bludgeoning, piercing, slashing]}` (Deflect Attacks). They're decisions the encounter asks for or
+[bludgeoning, piercing, slashing]}` (Deflect Attacks). `slot_exchange` trades spell slots and the
+action's `uses` at a slot `level` the user gives (Font of Magic): `{direction: to_uses}` expends a
+slot for as many uses as its level, up to the maximum; `{direction: to_slot, costs: [2, 3, 5, 6, 7],
+min_levels: [2, 3, 5, 7, 9]}` spends uses to create a slot that vanishes on a Long Rest. They're decisions the encounter asks for or
 takes automatically (the table's setting `decisions`). The effect target `spell.save_dc` and the Advantage target
 `attack.spell` change spells (Innate Sorcery, a toggle).
 

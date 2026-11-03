@@ -8,6 +8,11 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Font of Magic: a feature action's `slot_exchange` (a spell slot for Sorcery Points, no action;
+  Sorcery Points for a slot, a Bonus Action, by the Creating Spell Slots table), with `level` on
+  the play action `use_feature` and the encounter action `feature`. The play state's
+  `spell_slots_created` holds created slots until a Long Rest; resource events report them
+  (`spell_slot_created:<level>`). Options list one entry per slot level.
 - Deflect Attacks' redirect ("Deflect Attacks: Redirect", a Focus Point): a feature action's
   `after_damage_reduced`, usable right after its user's reaction took an attack's damage to 0
   (until the next action, the combatant's `deflected`), with the attack's damage type, within 5

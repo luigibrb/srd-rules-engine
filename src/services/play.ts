@@ -41,6 +41,7 @@ import {
   type CarriedItem,
   computeSheet,
   type DerivedSheet,
+  type FeatureActionLine,
   type PlayContext,
   type SpellLine,
 } from "../rules/sheet";
@@ -289,7 +290,8 @@ export function computePlaySheet(
     }),
     concentration: state.concentration,
     heroic_inspiration: state.heroic_inspiration,
-    spell_slots: sheet.spell_slots.map((total, i) => ({
+    // Created slots (Font of Magic) count on top of the build's.
+    spell_slots: slotTotals(sheet.spell_slots, state).map((total, i) => ({
       level: i + 1,
       total,
       spent: state.spell_slots_spent[i] ?? 0,
@@ -570,8 +572,9 @@ export function validateState(
     if (spent && !p.hit_dice.some((d) => String(d.die) === die))
       error(message("state.no_hit_dice_spend", { die }));
   }
+  const totals = slotTotals(sheet.spell_slots, state);
   state.spell_slots_spent.forEach((spent, i) => {
-    const total = sheet.spell_slots[i] ?? 0;
+    const total = totals[i] ?? 0;
     if (spent > total) error(message("state.slots_spent", { spent, level: i + 1, total }));
   });
   if (state.pact_slots_spent > (sheet.pact_magic?.slots ?? 0))
@@ -683,7 +686,7 @@ export function reconcileState(
   const dice: Record<string, number> = {};
   for (const d of p.hit_dice) if (d.spent) dice[d.die] = Math.min(d.spent, d.total);
   s.hit_dice_spent = dice;
-  s.spell_slots_spent = sheet.spell_slots.map((total, i) =>
+  s.spell_slots_spent = slotTotals(sheet.spell_slots, s).map((total, i) =>
     Math.min(s.spell_slots_spent[i] ?? 0, total),
   );
   while (s.spell_slots_spent.length && s.spell_slots_spent.at(-1) === 0) s.spell_slots_spent.pop();
@@ -929,6 +932,7 @@ export function applyAction(
       s.death_saves = { successes: 0, failures: 0 };
       s.stable = false;
       s.spell_slots_spent = [];
+      s.spell_slots_created = []; // "Any spell slot you create … vanishes when you finish a Long Rest"
       s.pact_slots_spent = 0;
       s.uses_spent = {};
       if (s.exhaustion > 0) {
@@ -985,6 +989,10 @@ export function applyAction(
       if (feature.pool && action.amount === undefined)
         fail(message("refusal.how_much_amount", { feature: feature.name }));
       const amount = feature.pool ? (action.amount as number) : feature.cost;
+      if (feature.slot_exchange) {
+        exchangeSlot(feature, action.level, s, p, notes);
+        break;
+      }
       if (feature.uses) {
         const use =
           p.uses.find((u) => u.key === feature.uses) ??
@@ -1326,6 +1334,74 @@ export function applyAction(
   const repaired = reconcileState(build, parseState(s), catalog);
   const all = [...notes, ...repaired.messages];
   return { state: repaired.state, notes: texts(all), messages: all };
+}
+
+/** Spell slots per level: the build's, and the ones created (Font of Magic) on top. */
+function slotTotals(build: readonly number[], state: CharacterState): number[] {
+  const created = state.spell_slots_created ?? [];
+  const n = Math.max(build.length, created.length);
+  return Array.from({ length: n }, (_, i) => (build[i] ?? 0) + (created[i] ?? 0));
+}
+
+/**
+ * Font of Magic: "expend a spell slot to gain a number of Sorcery Points equal to the slot's
+ * level", or "transform unexpended Sorcery Points into one spell slot".
+ */
+function exchangeSlot(
+  feature: FeatureActionLine,
+  level: number | undefined,
+  s: CharacterState,
+  p: PlaySheet["play"],
+  notes: Message[],
+): void {
+  const fail = (reason: Message): never => {
+    throw new PlayError([reason]);
+  };
+  const exchange = feature.slot_exchange as NonNullable<FeatureActionLine["slot_exchange"]>;
+  if (level === undefined) {
+    fail(message("refusal.slot_level_needed", { feature: feature.name }));
+    return;
+  }
+  const use =
+    p.uses.find((u) => u.key === feature.uses) ??
+    fail(message("refusal.no_uses", { feature: feature.name }));
+  const i = level - 1;
+  if (exchange.direction === "to_uses") {
+    const slot = p.spell_slots.find((x) => x.level === level);
+    if (!slot || slot.spent >= slot.total) fail(message("refusal.no_level_spell_slots", { level }));
+    s.spell_slots_spent[i] = (s.spell_slots_spent[i] ?? 0) + 1;
+    for (let k = 0; k < s.spell_slots_spent.length; k++) s.spell_slots_spent[k] ??= 0;
+    // "You can't have more Sorcery Points than the number shown in the table for your level."
+    const gained = Math.min(level, use.spent);
+    s.uses_spent[use.key] = use.spent - gained;
+    notes.push(
+      message("play.slot_to_uses", {
+        feature: feature.name,
+        level,
+        uses: use.name,
+        gained,
+        lost: level - gained,
+      }),
+    );
+    return;
+  }
+  const listed = exchange.costs[i];
+  if (listed === undefined)
+    fail(
+      message("refusal.slot_level_too_high", {
+        feature: feature.name,
+        level: exchange.costs.length,
+      }),
+    );
+  const cost =
+    listed ?? fail(message("refusal.slot_level_class_level", { feature: feature.name, level }));
+  if (use.spent + cost > use.max)
+    fail(message("refusal.uses_left_count", { name: feature.name, left: use.max - use.spent }));
+  s.uses_spent[use.key] = use.spent + cost;
+  s.spell_slots_created = [...(s.spell_slots_created ?? [])];
+  s.spell_slots_created[i] = (s.spell_slots_created[i] ?? 0) + 1;
+  for (let k = 0; k < s.spell_slots_created.length; k++) s.spell_slots_created[k] ??= 0;
+  notes.push(message("play.uses_to_slot", { feature: feature.name, level, uses: use.name, cost }));
 }
 
 /** Every active toggle ends (a rest lasts longer than Rage's 10 minutes). */

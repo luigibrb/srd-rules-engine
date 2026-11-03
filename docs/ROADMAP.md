@@ -57,6 +57,7 @@ was a branch merged into `main`. Details are in the CHANGELOG and the commits.
 | P42 | Light riders: a failed save's marks (`on_failed_save`), `outlined` (Advantage against) and `revealed` (no benefit from the Invisible condition) | Faerie Fire, Starry Wisp |
 | P43 | Devious Strikes: Daze, Knock Out and Obscure as Cunning Strike effects, each paid with its dice of Sneak Attack | SRD Rogue level 14 |
 | P44 | Deflect Attacks' redirect: a feature action right after its user's reaction took an attack's damage to 0 (`after_damage_reduced`), with the attack's damage type and range | SRD Monk level 3 |
+| P45 | Font of Magic: spell slots and Sorcery Points exchanged (`slot_exchange`), created slots in the play state until a Long Rest | SRD Sorcerer level 2 |
 
 ## Decisions
 
@@ -106,7 +107,8 @@ or invented homebrew in its tests.
   (listed by `npx tsx scripts/import-srd-spells.ts --report`): hand-written `MECHANICS` entries,
   or new parser patterns, each reviewed against the SRD text. Many need the riders above, or
   ongoing area effects, first.
-- **Class features used in turns, what's left (M).** Wild Shape, Metamagic and Sorcery Points in turns, the other subclass features.
+- **Class features used in turns, what's left (M).** Wild Shape, Metamagic, the other subclass
+  features.
 
 ### Priority 3: later
 

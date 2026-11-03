@@ -604,6 +604,19 @@ export function combatantOptions(
       } else if (f.target === "creature") {
         targets = creature(null, candidates(null, { self: true }));
       } else targets = { kind: "self", count: null, range: null, ids: [c.id], area: null };
+      // Font of Magic: one entry per spell slot level it expends or creates.
+      if (f.slot_exchange) {
+        const levels =
+          f.slot_exchange.direction === "to_uses"
+            ? sheet.play.spell_slots.map((x) => x.level)
+            : f.slot_exchange.costs.map((_, i) => i + 1);
+        for (const level of levels) {
+          const action: EncounterAction = { type: "feature", id: c.id, feature: f.key, level };
+          const label = message("label.slot_exchange", { name: f.name, level });
+          features.push(entry(action, label, cost, targets, { uses }));
+        }
+        continue;
+      }
       const action: EncounterAction = {
         type: "feature",
         id: c.id,

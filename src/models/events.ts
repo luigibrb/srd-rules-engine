@@ -54,7 +54,10 @@ export const EncounterEventSchema = z
       id: z.string(),
       what: z.enum(["action", "bonus_action", "reaction"]),
     }),
-    /** A character's resources spent or regained: spell slots (by level), Pact Magic, uses. */
+    /**
+     * A character's resources spent or regained: spell slots (`spell_slot:<level>`), Pact Magic,
+     * uses; and spell slots created (`spell_slot_created:<level>`, Font of Magic), counted.
+     */
     z.object({
       type: z.literal("resource"),
       id: z.string(),
