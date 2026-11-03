@@ -794,6 +794,9 @@
                               "thunder"
                             ]
                           },
+                          "condition": {
+                            "type": "string"
+                          },
                           "sculpt": {
                             "type": "array",
                             "items": {
@@ -3631,6 +3634,9 @@
                         "thunder"
                       ]
                     },
+                    "condition": {
+                      "type": "string"
+                    },
                     "sculpt": {
                       "type": "array",
                       "items": {
@@ -4405,6 +4411,9 @@
                 "slashing",
                 "thunder"
               ]
+            },
+            "condition": {
+              "type": "string"
             },
             "sculpt": {
               "type": "array",

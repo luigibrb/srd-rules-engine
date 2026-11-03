@@ -28003,6 +28003,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 5,
@@ -28057,6 +28058,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28145,6 +28147,7 @@
                 "upcast": null,
                 "cantrip_scaling": "beams",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28214,6 +28217,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28390,6 +28394,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28478,6 +28483,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28550,6 +28556,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28617,6 +28624,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28705,6 +28713,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28797,6 +28806,7 @@
                 "upcast": null,
                 "cantrip_scaling": "dice",
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28871,9 +28881,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -28974,6 +28987,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cone",
                     "size": 15,
@@ -29035,9 +29049,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29096,6 +29113,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29154,9 +29172,12 @@
                         "on": "failed_save",
                         "until": "end_of_your_next_turn",
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cone",
                     "size": 15,
@@ -29273,6 +29294,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29418,6 +29440,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29493,6 +29516,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29548,9 +29572,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": "athletics",
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29601,9 +29628,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29669,6 +29699,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 20,
@@ -29756,6 +29787,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -29991,9 +30023,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 10,
@@ -30070,6 +30105,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30122,6 +30158,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30182,6 +30219,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30242,6 +30280,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30300,16 +30339,21 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30351,6 +30395,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30404,6 +30449,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": {
@@ -30521,6 +30567,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30631,6 +30678,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": {
                     "count": 3,
@@ -30739,9 +30787,12 @@
                         "on": "hit",
                         "until": "end_of_your_next_turn",
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30817,6 +30868,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -30926,9 +30978,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 5,
@@ -31017,6 +31072,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 15,
@@ -31230,7 +31286,57 @@
             "components": "V",
             "duration": "1 minute",
             "concentration": false,
-            "mechanics": null
+            "mechanics": {
+                "attack": null,
+                "save": {
+                    "ability": "con",
+                    "on_success": "none"
+                },
+                "damage": [],
+                "heal": null,
+                "targets": 1,
+                "upcast": {
+                    "damage": [],
+                    "heal": null,
+                    "targets": 1
+                },
+                "cantrip_scaling": null,
+                "conditions": [
+                    {
+                        "condition": "blinded",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
+                    },
+                    {
+                        "condition": "deafened",
+                        "on": "failed_save",
+                        "until": null,
+                        "escape": null,
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
+                    }
+                ],
+                "choose_condition": true,
+                "area": null,
+                "projectiles": null,
+                "follow_up": null,
+                "on_hit": [],
+                "on_failed_save": [],
+                "damage_types": [],
+                "zone": null,
+                "after_hit": false,
+                "after_hit_with": "melee",
+                "around_target": null,
+                "bonus_vs": null,
+                "mark": null,
+                "wall": null,
+                "summon": null
+            }
         },
         {
             "id": "blur",
@@ -31458,6 +31564,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -31583,6 +31690,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "emanation",
                     "size": 5,
@@ -31719,9 +31827,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -31949,6 +32060,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -32050,6 +32162,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cylinder",
                     "size": 5,
@@ -32234,6 +32347,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": {
                     "count": 3,
@@ -32319,6 +32433,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 10,
@@ -32380,6 +32495,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -32469,6 +32585,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -32557,9 +32674,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -32629,9 +32749,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": "athletics",
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 20,
@@ -32713,6 +32836,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -32861,6 +32985,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -32943,6 +33068,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "emanation",
                     "size": 10,
@@ -33100,9 +33226,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cone",
                     "size": 30,
@@ -33168,6 +33297,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -33303,16 +33433,21 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     },
                     {
                         "condition": "incapacitated",
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 30,
@@ -33378,6 +33513,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "line",
                     "size": 100,
@@ -33473,6 +33609,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -33686,9 +33823,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cylinder",
                     "size": 20,
@@ -33830,6 +33970,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "emanation",
                     "size": 15,
@@ -33903,9 +34044,12 @@
                         "on": "failed_save",
                         "until": "end_of_its_turn",
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -34081,6 +34225,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34175,9 +34320,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34234,9 +34382,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": "athletics",
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "cube",
                     "size": 20,
@@ -34319,6 +34470,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34376,9 +34528,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34428,9 +34583,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34532,6 +34690,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "emanation",
                     "size": 10,
@@ -34682,9 +34841,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34803,6 +34965,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -34980,6 +35143,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cylinder",
                     "size": 20,
@@ -35068,6 +35232,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -35265,6 +35430,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -35332,6 +35498,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -35523,6 +35690,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -35641,6 +35809,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cone",
                     "size": 60,
@@ -35791,9 +35960,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -35884,6 +36056,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "cylinder",
                     "size": 10,
@@ -36006,9 +36179,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36071,6 +36247,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -36160,6 +36337,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 30,
@@ -36364,6 +36542,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36507,6 +36686,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36559,6 +36739,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36619,6 +36800,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36699,6 +36881,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36761,6 +36944,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 60,
@@ -36844,6 +37028,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -36969,6 +37154,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37061,9 +37247,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37143,6 +37332,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 60,
@@ -37236,6 +37426,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37381,9 +37572,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": true
+                        "ends_on_damage": true,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37500,9 +37694,12 @@
                         "on": "failed_save",
                         "until": "start_of_your_next_turn",
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "line",
                     "size": 60,
@@ -37588,6 +37785,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37657,6 +37855,7 @@
                 },
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37866,6 +38065,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -37919,6 +38119,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -38286,6 +38487,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -38396,9 +38598,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": false,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": null,
                 "projectiles": null,
                 "follow_up": null,
@@ -38509,6 +38714,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 20,
@@ -38645,9 +38851,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": 10
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 60,
@@ -38827,6 +39036,7 @@
                 "upcast": null,
                 "cantrip_scaling": null,
                 "conditions": [],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 40,
@@ -39042,9 +39252,12 @@
                         "on": "failed_save",
                         "until": null,
                         "escape": null,
-                        "ends_on_damage": false
+                        "ends_on_damage": false,
+                        "repeat_save": true,
+                        "rounds": null
                     }
                 ],
+                "choose_condition": false,
                 "area": {
                     "shape": "sphere",
                     "size": 30,

@@ -348,9 +348,10 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
   // Level 9
   weird: {
     save: { ability: "wis", on_success: "half" },
-    // The 5d10 on a failed repeated save at the end of each turn stays text.
+    // "A Frightened target makes a Wisdom saving throw at the end of each of its turns … On a
+    // successful save, the spell ends on that target." The 5d10 on a failed one stays text.
     damage: [{ dice: "10d10", type: "psychic" }],
-    conditions: [{ condition: "frightened", on: "failed_save" }],
+    conditions: [{ condition: "frightened", on: "failed_save", repeat_save: true }],
     area: { shape: "sphere", size: 30 },
   },
   // Level 2
@@ -358,7 +359,21 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     save: { ability: "wis", on_success: "none" },
     targets: 1,
     upcast: { targets: 1 },
-    conditions: [{ condition: "paralyzed", on: "failed_save" }],
+    // "At the end of each of its turns, the target repeats the save, ending the spell on itself on
+    // a success."
+    conditions: [{ condition: "paralyzed", on: "failed_save", repeat_save: true }],
+  },
+  "blindness-deafness": {
+    // "the Blinded or Deafened condition (your choice) for the duration. At the end of each of
+    // its turns, the target repeats the save, ending the spell on itself on a success."
+    save: { ability: "con", on_success: "none" },
+    targets: 1,
+    upcast: { targets: 1 },
+    conditions: [
+      { condition: "blinded", on: "failed_save", repeat_save: true },
+      { condition: "deafened", on: "failed_save", repeat_save: true },
+    ],
+    choose_condition: true,
   },
   // Level 1
   "faerie-fire": {
@@ -369,6 +384,18 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     save: { ability: "dex", on_success: "none" },
     area: { shape: "cube", size: 20 },
     on_failed_save: ["outlined", "revealed"],
+  },
+  "hideous-laughter": {
+    save: { ability: "wis", on_success: "none" },
+    targets: 1,
+    upcast: { targets: 1 },
+    // "At the end of each of its turns and each time it takes damage, it makes another Wisdom
+    // saving throw … On a successful save, the spell ends." The save on damage (with Advantage)
+    // stays text.
+    conditions: [
+      { condition: "prone", on: "failed_save", repeat_save: true },
+      { condition: "incapacitated", on: "failed_save", repeat_save: true },
+    ],
   },
   // Level 3
   fear: {
@@ -400,7 +427,25 @@ const MECHANICS: Record<string, Record<string, unknown>> = {
     targets: 1,
     conditions: [{ condition: "charmed", on: "failed_save" }],
   },
+  // Level 5
+  "hold-monster": {
+    save: { ability: "wis", on_success: "none" },
+    targets: 1,
+    upcast: { targets: 1 },
+    // "At the end of each of its turns, the target repeats the save, ending the spell on itself on
+    // a success."
+    conditions: [{ condition: "paralyzed", on: "failed_save", repeat_save: true }],
+  },
   // Level 8
+  sunburst: {
+    // "has the Blinded condition for 1 minute … makes another Constitution saving throw at the
+    // end of each of its turns, ending the effect on itself on a success." Dispelling Darkness
+    // stays text.
+    save: { ability: "con", on_success: "half" },
+    damage: [{ dice: "12d6", type: "radiant" }],
+    area: { shape: "sphere", size: 60 },
+    conditions: [{ condition: "blinded", on: "failed_save", repeat_save: true, rounds: 10 }],
+  },
   "dominate-monster": {
     save: { ability: "wis", on_success: "none" },
     targets: 1,
@@ -608,8 +653,6 @@ const REVIEWED = new Set<string>([
   "freezing-sphere",
   "harm",
   "hellish-rebuke",
-  "hideous-laughter",
-  "hold-monster",
   "lightning-bolt",
   "meteor-swarm",
   "mind-spike",
@@ -621,7 +664,6 @@ const REVIEWED = new Set<string>([
   "sleep", // Incapacitated; Unconscious after a second failed save stays text
   "suggestion",
   "sunbeam", // the first Line; new Lines with a Magic action stay text
-  "sunburst",
   "thunderwave",
   "vicious-mockery",
   "wind-wall",

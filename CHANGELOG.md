@@ -8,6 +8,9 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Spell conditions `repeat_save` and `rounds`, and mechanics `choose_condition` (the cast option
+  `condition`): Hold Person, Hold Monster, Hideous Laughter, Weird and Sunburst repeat their saves;
+  Blindness/Deafness casts with mechanics.
 - Monster traits `attack_advantage` (Bloodied Fury, Blood Frenzy), `no_opportunity_attacks`
   (Agile, Flyby), `absorbs` (Absorption) and `no_healing` (Swarm).
 - Monster traits `save_advantage: magic` (Magic Resistance: Advantage on spells' saves; the

@@ -643,6 +643,7 @@ export const MESSAGES_EN = {
     "{rider} needs Advantage, or an ally next to the target and no Disadvantage",
   "rule.unknown_damage_type": "{rider}: unknown damage type '{type}'",
   "rule.dice_forgo": "{rider} has only {count} dice to forgo",
+  "rule.choose_condition": "{spell}: choose the condition (`condition`): {conditions}",
   "rule.no_attack": "{combatant} has no attack '{attack}' ({known})",
   "rule.unknown_ability": "Unknown ability '{ability}'",
   "rule.invalid_dice_expression": "Invalid dice expression: '{expression}'",

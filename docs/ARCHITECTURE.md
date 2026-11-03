@@ -1131,6 +1131,9 @@ Where the SRD is silent or ambiguous, the engine picks a reading and lists it he
 **Spells**
 
 - Chromatic Orb's leap on doubles and Starry Wisp's and Faerie Fire's Dim Light are text.
+- A spell condition's `repeat_save` uses the spell's save ability and DC at the end of each of the
+  target's turns. Without Concentration, only a condition with a repeated save or its own
+  `rounds` becomes a timed effect; others (Grease's Prone) stay until removed.
 - "Can't benefit from the Invisible condition" (Starry Wisp, Faerie Fire) drops the Invisible
   condition's effects on rolls (attack rolls by and against the creature, Initiative), including
   the Invisible condition a Hide check gives; the creature still has the condition. Faerie Fire's

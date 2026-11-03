@@ -2234,6 +2234,7 @@ function run(
       careful?: readonly string[];
       heightened?: readonly string[];
       effective_levels?: number;
+      condition?: string;
     },
   ): SpellCastResult => {
     const zone = spell.mechanics?.zone ?? null;
@@ -2490,15 +2491,43 @@ function run(
           },
         );
       }
+      // Saves repeated at the end of each of its turns (Hold Person), and conditions with their
+      // own duration (Sunburst's "for 1 minute").
+      const defs = new Map((spell.mechanics?.conditions ?? []).map((x) => [x.condition, x]));
+      const save = spell.mechanics?.save;
+      const repeat = (x: string) =>
+        defs.get(x)?.repeat_save && save && r.save_dc !== null
+          ? { ability: save.ability, dc: r.save_dc }
+          : null;
+      const span = (x: string) => defs.get(x)?.rounds ?? rounds;
       if (spell.concentration && lasting.length) {
-        addEffects(t, lasting, {
-          source: c.id,
-          label: spell.name,
-          concentration: true,
-          ends: rounds ? { at: "start", of: c.id, count: rounds, skip_current: false } : null,
-          escape_dc: escapeDc,
-          escape_skill: hold,
-        });
+        for (const x of lasting) {
+          const count = span(x);
+          addEffects(t, [x], {
+            source: c.id,
+            label: spell.name,
+            concentration: true,
+            ends: count ? { at: "start", of: c.id, count, skip_current: false } : null,
+            escape_dc: escapeDc,
+            escape_skill: hold,
+            repeat_save: repeat(x),
+          });
+        }
+      }
+      // A spell without Concentration: a condition with its own duration or a repeated save lasts
+      // that long (Sunburst, Blindness/Deafness); others (Grease's Prone) stay until removed.
+      if (!spell.concentration) {
+        for (const x of lasting.filter((y) => !fragile.has(y))) {
+          if (!defs.get(x)?.rounds && !repeat(x)) continue;
+          const count = defs.get(x)?.rounds ?? rounds;
+          addEffects(t, [x], {
+            source: c.id,
+            label: spell.name,
+            concentration: false,
+            ends: count ? { at: "start", of: c.id, count, skip_current: false } : null,
+            repeat_save: repeat(x),
+          });
+        }
       }
     }
     if ((zone && spell.mechanics?.area) || placedWall) {
@@ -4437,6 +4466,7 @@ function run(
         area: area !== null,
         nearby: action.nearby,
         damage_type: metamagic?.damage_type ?? action.damage_type,
+        condition: action.condition,
         point: action.area?.point,
         unaffected: action.unaffected,
         held: released && releasing?.held,

@@ -1815,14 +1815,16 @@
     save:
       ability: wis
       on_success: none
-    conditions:
-      - condition: prone
-        on: failed_save
-      - condition: incapacitated
-        on: failed_save
     targets: 1
     upcast:
       targets: 1
+    conditions:
+      - condition: prone
+        on: failed_save
+        repeat_save: true
+      - condition: incapacitated
+        on: failed_save
+        repeat_save: true
 - id: hunters-mark
   name: Hunter's Mark
   level: 1
@@ -2627,6 +2629,21 @@
 
     _Using a Higher-Level Spell Slot._ You can target one additional creature for each spell slot
     level above 2.
+  mechanics:
+    save:
+      ability: con
+      on_success: none
+    targets: 1
+    upcast:
+      targets: 1
+    conditions:
+      - condition: blinded
+        on: failed_save
+        repeat_save: true
+      - condition: deafened
+        on: failed_save
+        repeat_save: true
+    choose_condition: true
 - id: blur
   name: Blur
   level: 2
@@ -3238,6 +3255,7 @@
     conditions:
       - condition: paralyzed
         on: failed_save
+        repeat_save: true
 - id: invisibility
   name: Invisibility
   level: 2
@@ -7373,12 +7391,13 @@
     save:
       ability: wis
       on_success: none
-    conditions:
-      - condition: paralyzed
-        on: failed_save
     targets: 1
     upcast:
       targets: 1
+    conditions:
+      - condition: paralyzed
+        on: failed_save
+        repeat_save: true
 - id: insect-plague
   name: Insect Plague
   level: 5
@@ -10632,12 +10651,14 @@
     damage:
       - dice: 12d6
         type: radiant
-    conditions:
-      - condition: blinded
-        on: failed_save
     area:
       shape: sphere
       size: 60
+    conditions:
+      - condition: blinded
+        on: failed_save
+        repeat_save: true
+        rounds: 10
 - id: tsunami
   name: Tsunami
   level: 8
@@ -11191,6 +11212,7 @@
     conditions:
       - condition: frightened
         on: failed_save
+        repeat_save: true
     area:
       shape: sphere
       size: 30
