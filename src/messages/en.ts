@@ -294,7 +294,8 @@ export const MESSAGES_EN = {
   "reason.outlined": "{label} on {target}",
   "reason.heightened": "Heightened Spell",
   "reason.magic_resistance": "{name}'s Magic Resistance",
-  "reason.pack_tactics": "{name}'s Pack Tactics",
+  "reason.trait": "{name}'s {trait}",
+  "refusal.doesnt_provoke": "{target} doesn't provoke Opportunity Attacks (its traits)",
   "reason.aura_of_authority": "{name}'s Aura of Authority",
   "reason.surprised": "surprised",
   "reason.pace_fast": "a Fast travel pace",
@@ -375,6 +376,8 @@ export const MESSAGES_EN = {
   "feature.dark_ones_blessing": "Dark One's Blessing: {name} gains {amount} Temporary Hit Points.",
   "play.immune": "Immune: the {condition} condition has no effect.",
   "play.condition_ends_immune": "The {condition} condition ends ({toggle}).",
+  "monster.absorbs": "{name} absorbs the {type} damage: it regains {amount} Hit Points.",
+  "monster.no_healing": "{name} can't regain Hit Points or gain Temporary Hit Points.",
   "refusal.dazed":
     "{name} has already used its action, Bonus Action or movement this turn: Dazed, it can do only one",
   "refusal.cunning_strike_used_when":

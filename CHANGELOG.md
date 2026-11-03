@@ -8,6 +8,8 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Monster traits `attack_advantage` (Bloodied Fury, Blood Frenzy), `no_opportunity_attacks`
+  (Agile, Flyby), `absorbs` (Absorption) and `no_healing` (Swarm).
 - Monster traits `save_advantage: magic` (Magic Resistance: Advantage on spells' saves; the
   combatant's `magic_resistance`) and `pack_tactics`; `rollSavingThrow` takes `modes`, and
   `saveAgainst` takes `magic`.

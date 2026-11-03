@@ -6233,6 +6233,7 @@
   traits:
     - name: Bloodied Fury
       text: While Bloodied, the boar has Advantage on attack rolls.
+      attack_advantage: bloodied
   actions:
     - name: Gore
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 4 (1d6 + 1) Piercing damage. If the target is a
@@ -7394,6 +7395,7 @@
     - name: Acid Absorption
       text: Whenever the golem is subjected to Acid damage, it takes no damage and instead regains a
         number of Hit Points equal to the Acid damage dealt.
+      absorbs: acid
     - name: Berserk
       text: Whenever the golem starts its turn Bloodied, roll 1d6. On a 6, the golem goes berserk. On each
         of its turns while berserk, the golem attacks the nearest creature it can see. If no
@@ -8551,6 +8553,7 @@
   traits:
     - name: Agile
       text: The deer doesn't provoke an Opportunity Attack when it moves out of an enemy's reach.
+      no_opportunity_attacks: always
   actions:
     - name: Ram
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 2 (1d4) Bludgeoning damage.
@@ -10631,6 +10634,7 @@
     - name: Lightning Absorption
       text: Whenever the golem is subjected to Lightning damage, it regains a number of Hit Points equal
         to the Lightning damage dealt.
+      absorbs: lightning
     - name: Magic Resistance
       text: The golem has Advantage on saving throws against spells and other magical effects.
       save_advantage: magic
@@ -10700,6 +10704,7 @@
   traits:
     - name: Flyby
       text: The snake doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 1 Piercing damage plus 5 (2d4) Poison damage.
@@ -10918,6 +10923,7 @@
   traits:
     - name: Flyby
       text: The gargoyle doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Multiattack
       text: The gargoyle makes two Claw attacks.
@@ -11581,6 +11587,7 @@
   traits:
     - name: Bloodied Fury
       text: The boar has Advantage on melee attack rolls while it is Bloodied.
+      attack_advantage: bloodied_melee
   actions:
     - name: Gore
       text: _Melee Attack Roll:_ +5, reach 5 ft. _Hit:_ 10 (2d6 + 3) Piercing damage. If the target is a
@@ -12424,6 +12431,7 @@
   traits:
     - name: Flyby
       text: The owl doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Talons
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 7 (1d10 + 2) Slashing damage.
@@ -13056,6 +13064,7 @@
   traits:
     - name: Flyby
       text: The wasp doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Sting
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 5 (1d6 + 2) Piercing damage plus 5 (2d4) Poison
@@ -15264,6 +15273,7 @@
   traits:
     - name: Flyby
       text: The hippogriff doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Multiattack
       text: The hippogriff makes two Rend attacks.
@@ -16450,6 +16460,7 @@
     - name: Fire Absorption
       text: Whenever the golem is subjected to Fire damage, it regains a number of Hit Points equal to the
         Fire damage dealt.
+      absorbs: fire
     - name: Immutable Form
       text: The golem can't shape-shift.
     - name: Magic Resistance
@@ -19875,6 +19886,7 @@
   traits:
     - name: Flyby
       text: The owl doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Talons
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 1 Slashing damage.
@@ -21193,6 +21205,7 @@
   traits:
     - name: Flyby
       text: The pteranodon doesn't provoke an Opportunity Attack when it flies out of an enemy's reach.
+      no_opportunity_attacks: flying
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 6 (1d8 + 2) Piercing damage.
@@ -21590,6 +21603,7 @@
   traits:
     - name: Agile
       text: The rat doesn't provoke an Opportunity Attack when it moves out of an enemy's reach.
+      no_opportunity_attacks: always
   actions:
     - name: Bite
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 1 Piercing damage.
@@ -22361,6 +22375,7 @@
     - name: Blood Frenzy
       text: The sahuagin has Advantage on attack rolls against any creature that doesn't have all its Hit
         Points.
+      attack_advantage: target_damaged
     - name: Limited Amphibiousness
       text: The sahuagin can breathe air and water, but it must be submerged at least once every 4 hours
         to avoid suffocating outside water.
@@ -22979,6 +22994,7 @@
     - name: Lightning Absorption
       text: Whenever the shambling mound is subjected to Lightning damage, it regains a number of Hit
         Points equal to the Lightning damage dealt.
+      absorbs: lightning
   actions:
     - name: Multiattack
       text: The shambling mound makes three Charged Tendril attacks. It can replace one attack with a use
@@ -25029,6 +25045,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny bat. The swarm can't regain Hit Points or gain Temporary
         Hit Points.
+      no_healing: true
   actions:
     - name: Bites
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 5 (2d4) Piercing damage, or 2 (1d4) Piercing
@@ -25106,6 +25123,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny creature. The swarm can't regain Hit Points or gain
         Temporary Hit Points.
+      no_healing: true
   actions:
     - name: Swarm of Grasping Hands
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 20 (4d8 + 2) Necrotic damage, or 11 (2d8 + 2)
@@ -25181,6 +25199,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny insect. The swarm can't regain Hit Points or gain
         Temporary Hit Points.
+      no_healing: true
   actions:
     - name: Bites
       text: _Melee Attack Roll:_ +3, reach 5 ft. _Hit:_ 6 (2d4 + 1) Poison damage, or 3 (1d4 + 1) Poison
@@ -25253,6 +25272,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny piranha. The swarm can't regain Hit Points or gain
         Temporary Hit Points.
+      no_healing: true
     - name: Water Breathing
       text: The swarm can breathe only underwater.
   actions:
@@ -25328,6 +25348,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny rat. The swarm can't regain Hit Points or gain Temporary
         Hit Points.
+      no_healing: true
   actions:
     - name: Bites
       text: _Melee Attack Roll:_ +2, reach 5 ft. _Hit:_ 5 (2d4) Piercing damage, or 2 (1d4) Piercing
@@ -25401,6 +25422,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny raven. The swarm can't regain Hit Points or gain
         Temporary Hit Points.
+      no_healing: true
   actions:
     - name: Beaks
       text: _Melee Attack Roll:_ +4, reach 5 ft. _Hit:_ 5 (1d6 + 2) Piercing damage, or 2 (1d4) Piercing
@@ -25487,6 +25509,7 @@
       text: The swarm can occupy another creature's space and vice versa, and the swarm can move through
         any opening large enough for a Tiny snake. The swarm can't regain Hit Points or gain
         Temporary Hit Points.
+      no_healing: true
   actions:
     - name: Bites
       text: _Melee Attack Roll:_ +6, reach 5 ft. _Hit:_ 8 (1d8 + 4) Piercing damage—or 6 (1d4 + 4)

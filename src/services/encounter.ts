@@ -1553,6 +1553,55 @@ function run(
     return f?.reduces_attack_damage ? { name: f.name, ...f.reduces_attack_damage } : null;
   };
   /** One attack by `c` on `t`, applied: riders once per turn, notes, damage. */
+  /** An ally of `c`, not Incapacitated, within 5 feet of `t` (Sneak Attack, Pack Tactics). */
+  const allyNextTo = (c: EncounterCombatant, t: EncounterCombatant): boolean =>
+    e.combatants.some((x) => {
+      if (x.id === c.id || x.id === t.id || x.defeated || !alliesOf(e, x.id, c)) return false;
+      const d = feetBetween(x, t);
+      return d !== null && d <= 5 && !conditionsOf(ctx, x).has("incapacitated");
+    });
+  /**
+   * A monster's traits that give its attack rolls Advantage: Pack Tactics ("if at least one of the
+   * …'s allies is within 5 feet of the creature"), Bloodied Fury ("While Bloodied"), Blood Frenzy
+   * ("against any creature that doesn't have all its Hit Points").
+   */
+  const traitModes = (
+    c: EncounterCombatant,
+    t: EncounterCombatant,
+    allyAdjacent: boolean,
+    melee: boolean,
+  ): ModeReason[] => {
+    if (c.monster === null) return [];
+    const traits = monsterDef(ctx, c).traits;
+    const out: ModeReason[] = [];
+    const why = (name: string) =>
+      modeReason("advantage", message("reason.trait", { name: c.name, trait: name }));
+    if (allyAdjacent) {
+      const pack = traits.find((x) => x.pack_tactics);
+      if (pack) out.push(why(pack.name));
+    }
+    const self = encounterCombatant(e, c.id, ctx);
+    const bloodied = self.hp <= Math.floor(self.max_hp / 2);
+    for (const trait of traits) {
+      const when = trait.attack_advantage;
+      if (!when) continue;
+      if (when === "bloodied" && bloodied) out.push(why(trait.name));
+      if (when === "bloodied_melee" && bloodied && melee) out.push(why(trait.name));
+      if (when === "target_damaged") {
+        const target = encounterCombatant(e, t.id, ctx);
+        if (target.hp < target.max_hp) out.push(why(trait.name));
+      }
+    }
+    return out;
+  };
+  /** Whether leaving an enemy's reach provokes: not for Agile, nor for Flyby with a Fly Speed. */
+  const provokes = (c: EncounterCombatant): boolean => {
+    if (c.monster === null) return true;
+    const def = monsterDef(ctx, c);
+    const trait = def.traits.find((x) => x.no_opportunity_attacks)?.no_opportunity_attacks;
+    if (trait === "always") return false;
+    return !(trait === "flying" && (def.speed.fly ?? 0) > 0);
+  };
   const attackOn = (
     c: EncounterCombatant,
     t: EncounterCombatant,
@@ -1612,14 +1661,7 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push(modeReason("advantage", markReason(mark)));
-    // Pack Tactics: "Advantage on an attack roll against a creature if at least one of the …'s
-    // allies is within 5 feet of the creature and the ally doesn't have the Incapacitated
-    // condition".
-    if (c.monster !== null && spatial.ally_adjacent) {
-      const pack = monsterDef(ctx, c).traits.find((x) => x.pack_tactics);
-      if (pack)
-        modes.push(modeReason("advantage", message("reason.pack_tactics", { name: c.name })));
-    }
+    modes.push(...traitModes(c, t, !!spatial.ally_adjacent, line?.kind === "melee"));
     // Faerie Fire: Advantage on every attack roll against t.
     for (const m of e.marks.filter((x) => x.on === t.id && x.kind === "outlined")) {
       modes.push(modeReason("advantage", outlinedReason(m)));
@@ -2274,6 +2316,7 @@ function run(
         used.marks.push(mark);
         out.push(modeReason("advantage", markReason(mark)));
       }
+      out.push(...traitModes(c, t, allyNextTo(c, t), spell.mechanics?.attack === "melee"));
       for (const m of e.marks.filter((x) => x.on === t.id && x.kind === "outlined")) {
         out.push(modeReason("advantage", outlinedReason(m)));
       }
@@ -3170,7 +3213,7 @@ function run(
       zoneMoveDamage(c, zoneSteps);
       // Enemies whose reach it left can make an Opportunity Attack (not after Disengage).
       for (const x of reachOf.keys()) {
-        if (leftReach.includes(x) && !c.disengaged && !x.used.reaction) {
+        if (leftReach.includes(x) && !c.disengaged && provokes(c) && !x.used.reaction) {
           notes.push(message("move.leaves_reach", { name: c.name, enemy: x.name }));
         }
       }
@@ -3797,6 +3840,7 @@ function run(
           }
           if (t.disengaged)
             fail(message("refusal.disengaged_movement_doesnt_provoke", { target: t.name }));
+          if (!provokes(t)) fail(message("refusal.doesnt_provoke", { target: t.name }));
         }
         spendAttack(c, reaction);
         if (light && !reaction) c.light_attacks.push(action.attack);
@@ -4705,9 +4749,16 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
     case "damage": {
       if (c.defeated) fail(message("refusal.already_defeated", { name: c.name }));
       const petrified = conditionsOf(ctx, c).has("petrified");
+      // Absorption (Lightning, Acid…): that damage heals it instead.
+      const absorbs = def.traits.find((t) => t.absorbs)?.absorbs ?? null;
+      const all = a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }];
+      const absorbed = absorbs
+        ? all.filter((d) => d.type === absorbs).reduce((n, d) => n + d.amount, 0)
+        : 0;
+      const taken = absorbed ? all.filter((d) => d.type !== absorbs) : all;
       const result = takeDamage(
         { hp, temp: c.temp_hp, max: def.hit_points },
-        a.instances ?? [{ amount: a.amount ?? 0, type: a.damage_type ?? null }],
+        taken,
         {
           resistances: petrified ? [...def.resistances, "all"] : def.resistances,
           vulnerabilities: def.vulnerabilities,
@@ -4739,14 +4790,28 @@ function monsterEffect(ctx: EncounterContext, c: EncounterCombatant, a: PlayActi
         c.defeated = true;
         notes.push(message("monster.dies", { name: c.name }));
       }
+      if (absorbed > 0 && !c.defeated) {
+        const before = c.hp ?? def.hit_points;
+        c.hp = Math.min(def.hit_points, before + absorbed);
+        notes.push(
+          message("monster.absorbs", { name: c.name, amount: c.hp - before, type: absorbs ?? "" }),
+        );
+      }
       return notes;
     }
     case "heal": {
       if (c.defeated) fail(message("refusal.dead_healing_cant_help", { name: c.name }));
+      // Swarm: "can't regain Hit Points or gain Temporary Hit Points".
+      if (def.traits.some((t) => t.no_healing)) {
+        return [message("monster.no_healing", { name: c.name })];
+      }
       c.hp = Math.min(def.hit_points, hp + Math.max(0, a.amount));
       return [];
     }
     case "set_temp_hp": {
+      if (def.traits.some((t) => t.no_healing)) {
+        return [message("monster.no_healing", { name: c.name })];
+      }
       c.temp_hp = a.replace === false ? Math.max(c.temp_hp, a.amount) : a.amount;
       return [];
     }
