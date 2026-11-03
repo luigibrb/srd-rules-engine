@@ -221,7 +221,9 @@ export type MasteryMark = z.infer<typeof MasteryMarkSchema>;
 
 /**
  * A spell's lasting effect on `on`, until used or `ends`: `advantage_against` gives the next
- * attack roll against it Advantage, whoever makes it (Guiding Bolt).
+ * attack roll against it Advantage, whoever makes it (Guiding Bolt); `outlined`, every attack
+ * roll against it (Faerie Fire); `revealed`: it can't benefit from the Invisible condition
+ * (Starry Wisp, Faerie Fire).
  */
 export const SpellMarkSchema = z.object({
   // `quarry`: `by`'s attack hits on `on` deal `damage` more, while `by` concentrates on `label`
@@ -242,6 +244,8 @@ export const SpellMarkSchema = z.object({
     "no_opportunity_attacks",
     "slowed",
     "no_healing",
+    "revealed",
+    "outlined",
   ]),
   /** The spell's name: `Guiding Bolt`. */
   label: z.string(),

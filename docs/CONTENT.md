@@ -442,7 +442,10 @@ mechanics:
 #         follow_up: {save: {ability: dex}, damage: [{dice: 2d6, type: cold}],
 #                     upcast: [{dice: 1d6, type: cold}], radius: 5}   # after the attack (Ice Knife)
 #         on_hit: [advantage_against]           # Guiding Bolt; also no_opportunity_attacks,
-#                                               # slowed (−10 ft), no_healing
+#                                               # slowed (−10 ft), no_healing, revealed (no
+#                                               # benefit from Invisible: Starry Wisp), outlined
+#         on_failed_save: [outlined, revealed]  # the same marks on a failed save, while the
+#                                               # caster concentrates (Faerie Fire)
 #         damage_types: [radiant, necrotic]     # the caster picks one (Spirit Guardians)
 #         conditions: [{condition: restrained, on: failed_save, escape: athletics}]
 #         zone: {triggers: [enter, end_turn], once_per_turn: true, on_cast: true, designate: false}

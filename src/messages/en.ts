@@ -140,6 +140,8 @@ export const MESSAGES_EN = {
   "mark.no_healing":
     "{target} can't regain Hit Points until the end of the caster's next turn ({label}).",
   "mark.no_healing_blocks": "{name} can't regain Hit Points ({label}).",
+  "mark.revealed": "{target} can't benefit from the Invisible condition ({label}).",
+  "mark.outlined": "{label}: attack rolls against {target} have Advantage.",
   "zone.lasts":
     "{spell} lasts ({id}){count, plural, =0 {} other {: creatures {damage, select, true {take its damage} other {save}} when they {when, list, or}}}.",
   "zone.when.enter": "enter it",
@@ -286,6 +288,7 @@ export const MESSAGES_EN = {
   "reason.vex": "Vex ({name}'s last hit on {target})",
   "reason.sap": "Sap ({name}'s hit)",
   "reason.mark": "{label} ({name}'s hit on {target})",
+  "reason.outlined": "{label} on {target}",
   "reason.aura_of_authority": "{name}'s Aura of Authority",
   "reason.surprised": "surprised",
   "reason.pace_fast": "a Fast travel pace",

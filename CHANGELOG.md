@@ -8,6 +8,10 @@ migrated when it's loaded.
 ## [Unreleased]
 
 ### Added
+- Spell marks `outlined` (Advantage on attack rolls against the creature) and `revealed` (it
+  can't benefit from the Invisible condition), and `on_failed_save` (marks on each creature that
+  fails the save, while the caster concentrates): Faerie Fire casts with mechanics, and Starry
+  Wisp's hit reveals its target.
 - Fear, Banishment, Dominate Beast, Dominate Person, Dominate Monster and Ensnaring Strike cast
   with mechanics (their conditions on a failed save; repeated saves and commands stay text).
 - More content as data: `expanded_spells` (spells added to the lists of the character's

@@ -230,9 +230,8 @@ const cast = castSpell(wizard, fireball, [goblin, orc], { slot_level: 5, rng: se
 
 Catalog spells carry their `mechanics`: attack or save (half damage on a success), damage by
 type, upcasting, Cantrip Upgrade, healing, conditions, darts and rays, a save after an attack,
-hit riders and areas that last (Moonbeam, Spirit Guardians, Spike Growth). 72 SRD spells have
-mechanics, each
-reviewed against the SRD text; the others are cast with their text (slot and Concentration
+hit and failed-save riders, areas that last (Moonbeam, Spirit Guardians, Spike Growth), walls and
+summoned creatures. 101 SRD spells have mechanics, each reviewed against the SRD text; the others are cast with their text (slot and Concentration
 only).
 
 ### Monsters

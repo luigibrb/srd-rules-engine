@@ -27,6 +27,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -61,6 +62,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -91,6 +93,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -145,6 +148,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -250,6 +254,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -287,6 +292,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -332,6 +338,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -380,6 +387,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -437,6 +445,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -483,6 +492,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -525,6 +535,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -567,6 +578,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -605,6 +617,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -643,6 +656,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -680,6 +694,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [
       "no_healing",
     ],
@@ -719,6 +734,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -762,6 +778,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -808,6 +825,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -870,6 +888,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -904,6 +923,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -941,6 +961,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -987,6 +1008,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1048,6 +1070,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1098,6 +1121,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1188,6 +1212,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "2d8",
     },
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1222,6 +1247,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1264,6 +1290,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1312,6 +1339,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1352,6 +1380,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1386,6 +1415,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1420,6 +1450,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1453,6 +1484,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1484,6 +1516,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1518,10 +1551,45 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
       "ability": "str",
+      "on_success": "none",
+    },
+    "summon": null,
+    "targets": null,
+    "upcast": null,
+    "wall": null,
+    "zone": null,
+  },
+  "faerie-fire": {
+    "after_hit": false,
+    "after_hit_with": "melee",
+    "area": {
+      "shape": "cube",
+      "size": 20,
+      "width": 5,
+    },
+    "around_target": null,
+    "attack": null,
+    "bonus_vs": null,
+    "cantrip_scaling": null,
+    "conditions": [],
+    "damage": [],
+    "damage_types": [],
+    "follow_up": null,
+    "heal": null,
+    "mark": null,
+    "on_failed_save": [
+      "outlined",
+      "revealed",
+    ],
+    "on_hit": [],
+    "projectiles": null,
+    "save": {
+      "ability": "dex",
       "on_success": "none",
     },
     "summon": null,
@@ -1556,6 +1624,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1582,6 +1651,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1732,6 +1802,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1786,6 +1857,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1819,6 +1891,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -1849,6 +1922,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1886,6 +1960,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1938,6 +2013,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -1988,6 +2064,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2045,6 +2122,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2082,6 +2160,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2117,6 +2196,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2202,6 +2282,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2250,6 +2331,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [
       "advantage_against",
     ],
@@ -2291,6 +2373,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2320,6 +2403,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "2d4",
     },
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2354,6 +2438,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2392,6 +2477,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "1d6",
       "type": "necrotic",
     },
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2430,6 +2516,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2468,6 +2555,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2506,6 +2594,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2539,6 +2628,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "1d6",
       "type": "force",
     },
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2581,6 +2671,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2632,6 +2723,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     },
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2672,6 +2764,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2718,6 +2811,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2766,6 +2860,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2812,6 +2907,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2873,6 +2969,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -2915,6 +3012,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": {
       "count": 3,
@@ -2948,6 +3046,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "5d8",
     },
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -2978,6 +3077,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
       "dice": "2d4",
     },
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3013,6 +3113,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3056,6 +3157,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3089,6 +3191,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3135,6 +3238,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3192,6 +3296,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3234,6 +3339,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3264,6 +3370,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [
       "slowed",
     ],
@@ -3304,6 +3411,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3343,6 +3451,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3376,6 +3485,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": {
       "count": 3,
@@ -3409,6 +3519,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3452,6 +3563,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3494,6 +3606,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3533,6 +3646,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [
       "no_opportunity_attacks",
     ],
@@ -3570,6 +3684,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3608,6 +3723,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3662,6 +3778,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3713,6 +3830,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3770,7 +3888,10 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
-    "on_hit": [],
+    "on_failed_save": [],
+    "on_hit": [
+      "revealed",
+    ],
     "projectiles": null,
     "save": null,
     "summon": null,
@@ -3805,6 +3926,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3855,6 +3977,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3881,6 +4004,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -3947,6 +4071,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -3992,6 +4117,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4029,6 +4155,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4071,6 +4198,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4104,6 +4232,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4163,6 +4292,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -4195,6 +4325,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -4227,6 +4358,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": null,
@@ -4266,6 +4398,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4337,6 +4470,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4397,6 +4531,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {
@@ -4430,6 +4565,7 @@ exports[`golden spells (mechanics checked against the SRD text) > every spell's 
     "follow_up": null,
     "heal": null,
     "mark": null,
+    "on_failed_save": [],
     "on_hit": [],
     "projectiles": null,
     "save": {

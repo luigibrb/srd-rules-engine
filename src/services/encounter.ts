@@ -60,6 +60,8 @@ import {
   type AttackResult,
   type CheckResult,
   type Combatant,
+  type ConditionMode,
+  type ConditionRolls,
   combatantFromMonster,
   type D20TestResult,
   type Decide,
@@ -292,6 +294,19 @@ export function authorityOver(
   return null;
 }
 
+/** Condition rolls without one condition's entries (a creature that can't benefit from it). */
+function withoutCondition(rolls: ConditionRolls, id: string): ConditionRolls {
+  const keep = (list: readonly ConditionMode[]) => list.filter((x) => x.id !== id);
+  return {
+    ...rolls,
+    attack_rolls: keep(rolls.attack_rolls),
+    attacked: keep(rolls.attacked),
+    attacked_beyond_5ft: keep(rolls.attacked_beyond_5ft),
+    initiative: keep(rolls.initiative),
+    ability_checks: keep(rolls.ability_checks),
+  };
+}
+
 function withDodge(
   ctx: EncounterContext,
   encounter: Encounter,
@@ -308,18 +323,23 @@ function withDodge(
         ],
       }
     : original;
+  // Starry Wisp, Faerie Fire: it "can't benefit from the Invisible condition" (its own attack
+  // rolls, the ones against it, and its Initiative).
+  const seen = encounter.marks.some((m) => m.kind === "revealed" && m.on === c.id)
+    ? { ...view, condition_rolls: withoutCondition(view.condition_rolls, "invisible") }
+    : view;
   // Staggering Blow: Disadvantage on its next saving throw.
   const base = encounter.marks.some((m) => m.kind === "staggered" && m.on === c.id)
     ? {
-        ...view,
+        ...seen,
         condition_rolls: {
-          ...view.condition_rolls,
+          ...seen.condition_rolls,
           save_disadvantage: Object.fromEntries(
             (["str", "dex", "con", "int", "wis", "cha"] as const).map((a) => [a, "staggered"]),
           ),
         },
       }
-    : view;
+    : seen;
   if (!c.dodging || base.conditions.includes("incapacitated") || speedOf(ctx, c, encounter) === 0) {
     return base;
   }
@@ -1566,6 +1586,10 @@ function run(
     // Guiding Bolt: Advantage on the next attack roll against t, whoever makes it.
     const mark = e.marks.find((m) => m.on === t.id && m.kind === "advantage_against");
     if (mark) modes.push(modeReason("advantage", markReason(mark)));
+    // Faerie Fire: Advantage on every attack roll against t.
+    for (const m of e.marks.filter((x) => x.on === t.id && x.kind === "outlined")) {
+      modes.push(modeReason("advantage", outlinedReason(m)));
+    }
     // Aura of Authority: Advantage on attack rolls.
     const authority = authorityOver(e, ctx, c);
     if (authority) {
@@ -2083,6 +2107,9 @@ function run(
         used.marks.push(mark);
         out.push(modeReason("advantage", markReason(mark)));
       }
+      for (const m of e.marks.filter((x) => x.on === t.id && x.kind === "outlined")) {
+        out.push(modeReason("advantage", outlinedReason(m)));
+      }
       return out;
     };
     let r: SpellCastResult;
@@ -2128,9 +2155,11 @@ function run(
         e.marks = e.marks.filter((m) => !(m.on === t.id && m.label === spell.name));
         for (const kind of hit.on_hit) {
           // When each ends: Guiding Bolt and Chill Touch at the end of the caster's next turn,
-          // Ray of Frost at the start of it, Shocking Grasp at the start of the target's.
-          const ends =
-            kind === "no_opportunity_attacks"
+          // Ray of Frost at the start of it, Shocking Grasp at the start of the target's; a
+          // failed save's (Faerie Fire) with the caster's Concentration.
+          const ends = !hit.attack
+            ? null
+            : kind === "no_opportunity_attacks"
               ? { at: "start" as const, of: t.id, count: 1, skip_current: false }
               : kind === "slowed"
                 ? { at: "start" as const, of: c.id, count: 1, skip_current: false }
@@ -2591,6 +2620,8 @@ function run(
     const by = e.combatants.find((x) => x.id === mark.by)?.name ?? mark.by;
     return message("reason.mark", { label: mark.label, name: by, target: find(mark.on).name });
   };
+  const outlinedReason = (mark: SpellMark): Message =>
+    message("reason.outlined", { label: mark.label, target: find(mark.on).name });
   const helpReason = (by: string, t: EncounterCombatant): Message =>
     message("reason.help_against", { name: find(by).name, target: t.name });
   const vexReason = (c: EncounterCombatant, t: EncounterCombatant): Message =>

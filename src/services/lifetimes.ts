@@ -99,6 +99,8 @@ export function sweepOutcome(facts: {
     readonly on: string;
     readonly kind: string;
     readonly label: string;
+    /** `null`: it lasts while `by` concentrates on `label` (Hunter's Mark, Faerie Fire). */
+    readonly ends?: unknown;
   }[];
   readonly zones: readonly {
     readonly id: string;
@@ -119,7 +121,7 @@ export function sweepOutcome(facts: {
   // Concentration (Hunter's Mark) ends with it.
   const marks = facts.marks.flatMap((m, i) => {
     if (!present(m.on)) return [];
-    if (m.kind !== "quarry") return [i];
+    if (m.kind !== "quarry" && m.ends !== null) return [i];
     return byId.get(m.by)?.concentration === m.label ? [i] : [];
   });
   const zones: { id: string; reason: SweepReason }[] = [];

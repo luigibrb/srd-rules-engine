@@ -1315,7 +1315,9 @@
                           "quarry",
                           "no_opportunity_attacks",
                           "slowed",
-                          "no_healing"
+                          "no_healing",
+                          "revealed",
+                          "outlined"
                         ]
                       },
                       "label": {
